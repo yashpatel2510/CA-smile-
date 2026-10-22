@@ -1,5 +1,41 @@
 [
   {
+    "id": "hl_1792670737059_pbbfl",
+    "database": "primary",
+    "status": "CONNECTED",
+    "response_time": 79,
+    "error_type": null,
+    "message": "Connection successful (79 ms)",
+    "checked_at": "2026-10-22T12:05:36.979Z"
+  },
+  {
+    "id": "hl_1792670736421_d5nuu",
+    "database": "primary",
+    "status": "CONNECTED",
+    "response_time": 282,
+    "error_type": null,
+    "message": "Connection successful (282 ms)",
+    "checked_at": "2026-10-22T12:05:36.137Z"
+  },
+  {
+    "id": "hl_1792670243512_8xa8s",
+    "database": "primary",
+    "status": "CONNECTED",
+    "response_time": 137,
+    "error_type": null,
+    "message": "Connection successful (137 ms)",
+    "checked_at": "2026-10-22T11:57:23.374Z"
+  },
+  {
+    "id": "hl_1792670243176_fwanf",
+    "database": "primary",
+    "status": "CONNECTED",
+    "response_time": 1053,
+    "error_type": null,
+    "message": "Connection successful (1053 ms)",
+    "checked_at": "2026-10-22T11:57:22.122Z"
+  },
+  {
     "id": "hl_1792663008181_mhbsy",
     "database": "primary",
     "status": "CONNECTED",

@@ -26,6 +26,7 @@ import { BookNowButton } from "@/components/ui/book-now-button";
 
 interface CalendarBookingExperienceProps {
   initialService?: string;
+  initialConfig?: BookingFormConfig;
   onSuccess?: (appointmentId: string) => void;
 }
 
@@ -54,13 +55,14 @@ const DEFAULT_TIME_RANGES = [
 
 export function CalendarBookingExperience({
   initialService,
+  initialConfig,
   onSuccess,
 }: CalendarBookingExperienceProps) {
   const { brandConfig } = useClinicTheme();
 
   // Dynamic booking form configuration from admin panel (Booking Form Builder & Field Settings)
   const [config, setConfig] = useState<BookingFormConfig>(
-    defaultBookingFormConfig
+    initialConfig || defaultBookingFormConfig
   );
 
   // Booking Flow Steps: 1 = Calendar & Slot, 2 = Image 2 Form Design, 3 = Confirmation
@@ -433,39 +435,74 @@ export function CalendarBookingExperience({
   const clinicPhone = brandConfig?.phone || "(800) 555-CLINIC";
   const clinicEmail = brandConfig?.email || "contact@pediodent.example.com";
 
+  // Dark Mode vs White / Light Mode
+  const isDark = (config.themeMode || "dark") === "dark";
+
+  // Reusable input styling for Step 2 based on active theme mode
+  const inputWrapperClass = `group relative rounded-xl border transition-all px-4 py-2.5 flex items-center justify-between ${
+    isDark
+      ? "bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border-white/10 focus-within:border-white/20"
+      : "bg-stone-50 hover:bg-stone-100/70 focus-within:bg-white border-stone-200 focus-within:border-stone-400"
+  }`;
+  const inputClass = `w-full bg-transparent text-xs sm:text-sm focus:outline-none ${
+    isDark
+      ? "text-white placeholder:text-zinc-500 [color-scheme:dark]"
+      : "text-stone-900 placeholder:text-stone-400 [color-scheme:light]"
+  }`;
+  const iconClass = `h-4 w-4 shrink-0 pointer-events-none transition-colors ${
+    isDark ? "text-zinc-500 group-hover:text-zinc-400" : "text-stone-400 group-hover:text-stone-600"
+  }`;
+  const selectOptionClass = isDark ? "bg-[#222227] text-white" : "bg-white text-stone-900";
+
   return (
-    <div className="relative w-full overflow-hidden text-white">
+    <div className={`relative w-full overflow-hidden transition-colors duration-200 ${isDark ? "text-white" : "text-stone-900"}`}>
       {/* Outer Card: Compact styling so the whole section fits inside one screen properly */}
-      <div className="overflow-hidden rounded-[24px] sm:rounded-[32px] border border-white/10 bg-[#111215] shadow-2xl">
+      <div className={`overflow-hidden rounded-[24px] sm:rounded-[32px] border shadow-2xl transition-colors duration-200 ${
+        isDark ? "border-white/10 bg-[#111215]" : "border-stone-200 bg-white"
+      }`}>
         <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch">
           
           {/* =================================================================== */}
-          {/* LEFT COLUMN: "Let's Make That Smile Shine!" + Contact Us + "brighter" */}
+          {/* LEFT COLUMN: Customizable Headline + Contact Us + Wordmark        */}
           {/* =================================================================== */}
-          <div className="flex flex-col justify-between border-b border-white/10 bg-[#0e0f12] p-5 sm:p-6 lg:p-8 lg:col-span-5 lg:border-b-0 lg:border-r lg:border-white/10">
+          <div className={`flex flex-col justify-between border-b p-5 sm:p-6 lg:p-8 lg:col-span-5 lg:border-b-0 lg:border-r transition-colors duration-200 ${
+            isDark
+              ? "border-white/10 bg-[#0e0f12] text-white"
+              : "border-stone-200 bg-[#fbf9f6] text-stone-900"
+          }`}>
             <div>
-              {/* Main Headline */}
-              <h2 className="font-heading text-2xl sm:text-3xl lg:text-[2.35rem] font-bold text-white tracking-tight leading-[1.1]">
-                Let&apos;s Make That<br />
-                <span className="text-white">Smile Shine!</span>
+              {/* Main Headline (Configurable via Admin) */}
+              <h2 className={`font-heading text-2xl sm:text-3xl lg:text-[2.35rem] font-bold tracking-tight leading-[1.1] ${
+                isDark ? "text-white" : "text-stone-900"
+              }`}>
+                {config.sideHeadingLine1 || "Let's Make That"}<br />
+                <span className={isDark ? "text-white" : "text-stone-900"}>
+                  {config.sideHeadingLine2 || "Smile Shine!"}
+                </span>
               </h2>
 
-              {/* Contact Us Block */}
-              <div className="mt-4 sm:mt-5 space-y-1.5 text-xs text-zinc-400">
-                <p className="font-semibold text-white/90 text-xs tracking-wider uppercase">
+              {/* Contact Us Block (Configurable via Admin) */}
+              <div className={`mt-4 sm:mt-5 space-y-1.5 text-xs ${isDark ? "text-zinc-400" : "text-stone-600"}`}>
+                <p className={`font-semibold text-xs tracking-wider uppercase ${isDark ? "text-white/90" : "text-stone-900"}`}>
                   Contact Us
                 </p>
-                <p className="leading-relaxed max-w-xs text-zinc-400">
-                  {clinicAddress}
+                <p className={`leading-relaxed max-w-xs ${isDark ? "text-zinc-400" : "text-stone-600"}`}>
+                  {config.sideContactAddress || clinicAddress}
                 </p>
-                <p className="pt-0.5 font-mono text-zinc-300">
-                  <a href={`tel:${clinicPhone.replace(/\D/g, "")}`} className="hover:text-white transition-colors">
-                    {clinicPhone}
+                <p className={`pt-0.5 font-mono ${isDark ? "text-zinc-300" : "text-stone-800"}`}>
+                  <a
+                    href={`tel:${(config.sideContactPhone || clinicPhone).replace(/\D/g, "")}`}
+                    className={`transition-colors ${isDark ? "hover:text-white" : "hover:text-black font-semibold"}`}
+                  >
+                    {config.sideContactPhone || clinicPhone}
                   </a>
                 </p>
-                <p className="text-zinc-400">
-                  <a href={`mailto:${clinicEmail}`} className="hover:text-white transition-colors">
-                    {clinicEmail}
+                <p className={isDark ? "text-zinc-400" : "text-stone-600"}>
+                  <a
+                    href={`mailto:${config.sideContactEmail || clinicEmail}`}
+                    className={`transition-colors ${isDark ? "hover:text-white" : "hover:text-black font-semibold"}`}
+                  >
+                    {config.sideContactEmail || clinicEmail}
                   </a>
                 </p>
               </div>
@@ -475,16 +512,20 @@ export function CalendarBookingExperience({
                 {/* DATE PILL */}
                 <div
                   className={`rounded-xl border p-2.5 sm:p-3 transition-all ${
-                    selectedDate
-                      ? "border-white/20 bg-[#1c1d22]"
-                      : "border-white/5 bg-[#151619]"
+                    isDark
+                      ? selectedDate
+                        ? "border-white/20 bg-[#1c1d22]"
+                        : "border-white/5 bg-[#151619]"
+                      : selectedDate
+                      ? "border-stone-300 bg-white shadow-xs"
+                      : "border-stone-200 bg-stone-100/70"
                   }`}
                 >
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                  <div className={`text-[10px] font-bold uppercase tracking-wider ${isDark ? "text-zinc-500" : "text-stone-500"}`}>
                     SELECTED DATE
                   </div>
-                  <div className="mt-0.5 flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-white">
-                    <CalendarIcon className="h-3.5 w-3.5 text-zinc-300" />
+                  <div className={`mt-0.5 flex items-center gap-1.5 text-xs sm:text-sm font-semibold ${isDark ? "text-white" : "text-stone-900"}`}>
+                    <CalendarIcon className={`h-3.5 w-3.5 ${isDark ? "text-zinc-300" : "text-stone-500"}`} />
                     <span>{selectedDateShortString}</span>
                   </div>
                 </div>
@@ -492,53 +533,61 @@ export function CalendarBookingExperience({
                 {/* TIME SLOT PILL */}
                 <div
                   className={`rounded-xl border p-2.5 sm:p-3 transition-all ${
-                    selectedSlot
-                      ? "border-white/20 bg-[#1c1d22]"
-                      : "border-white/5 bg-[#151619]"
+                    isDark
+                      ? selectedSlot
+                        ? "border-white/20 bg-[#1c1d22]"
+                        : "border-white/5 bg-[#151619]"
+                      : selectedSlot
+                      ? "border-stone-300 bg-white shadow-xs"
+                      : "border-stone-200 bg-stone-100/70"
                   }`}
                 >
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                  <div className={`text-[10px] font-bold uppercase tracking-wider ${isDark ? "text-zinc-500" : "text-stone-500"}`}>
                     TIME SLOT
                   </div>
-                  <div className="mt-0.5 flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-white">
-                    <Clock className="h-3.5 w-3.5 text-zinc-300" />
+                  <div className={`mt-0.5 flex items-center gap-1.5 text-xs sm:text-sm font-semibold ${isDark ? "text-white" : "text-stone-900"}`}>
+                    <Clock className={`h-3.5 w-3.5 ${isDark ? "text-zinc-300" : "text-stone-500"}`} />
                     <span className="truncate">{selectedSlot || "Select a time"}</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Bottom: "brighter" typography + Follow Us */}
+            {/* Bottom: Wordmark typography + Follow Us */}
             <div className="mt-5 sm:mt-6 pt-2">
-              <div className="select-none font-sans text-5xl sm:text-6xl lg:text-[4.75rem] font-black tracking-tight text-white/95 leading-none mb-3">
-                brighter
+              <div className={`select-none font-sans text-5xl sm:text-6xl lg:text-[4.75rem] font-black tracking-tight leading-none mb-3 ${
+                isDark ? "text-white/95" : "text-stone-900/90"
+              }`}>
+                {config.sideWordmark || "brighter"}
               </div>
 
-              <div className="flex flex-wrap items-center gap-2 text-[11px] text-zinc-400 font-medium">
-                <span className="text-zinc-300 font-semibold">Follow Us:</span>
+              <div className={`flex flex-wrap items-center gap-2 text-[11px] font-medium ${isDark ? "text-zinc-400" : "text-stone-600"}`}>
+                <span className={`font-semibold ${isDark ? "text-zinc-300" : "text-stone-900"}`}>
+                  {config.sideFollowText || "Follow Us:"}
+                </span>
                 <a
-                  href="https://facebook.com"
+                  href={config.facebookUrl || "https://facebook.com"}
                   target="_blank"
                   rel="noreferrer"
-                  className="hover:text-white transition-colors"
+                  className={`transition-colors ${isDark ? "hover:text-white" : "hover:text-black font-semibold"}`}
                 >
                   Facebook
                 </a>
-                <span className="text-zinc-600">•</span>
+                <span className={isDark ? "text-zinc-600" : "text-stone-400"}>•</span>
                 <a
-                  href="https://linkedin.com"
+                  href={config.linkedinUrl || "https://linkedin.com"}
                   target="_blank"
                   rel="noreferrer"
-                  className="hover:text-white transition-colors"
+                  className={`transition-colors ${isDark ? "hover:text-white" : "hover:text-black font-semibold"}`}
                 >
                   LinkedIn
                 </a>
-                <span className="text-zinc-600">•</span>
+                <span className={isDark ? "text-zinc-600" : "text-stone-400"}>•</span>
                 <a
-                  href="https://instagram.com"
+                  href={config.instagramUrl || "https://instagram.com"}
                   target="_blank"
                   rel="noreferrer"
-                  className="hover:text-white transition-colors"
+                  className={`transition-colors ${isDark ? "hover:text-white" : "hover:text-black font-semibold"}`}
                 >
                   Instagram
                 </a>
@@ -549,11 +598,13 @@ export function CalendarBookingExperience({
           {/* =================================================================== */}
           {/* RIGHT COLUMN: STEP 1 (Calendar) or STEP 2 (Image 2 Form Design)     */}
           {/* =================================================================== */}
-          <div className="bg-[#18181c] p-5 sm:p-6 lg:p-8 lg:col-span-7 flex flex-col justify-between">
+          <div className={`p-5 sm:p-6 lg:p-8 lg:col-span-7 flex flex-col justify-between transition-colors duration-200 ${
+            isDark ? "bg-[#18181c] text-white" : "bg-white text-stone-900"
+          }`}>
             <div>
               {/* Error Alert */}
               {errorMsg && (
-                <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 p-2.5 text-xs text-red-300">
+                <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 p-2.5 text-xs text-red-400">
                   <AlertCircle className="h-4 w-4 shrink-0 text-red-400" />
                   <span>{errorMsg}</span>
                 </div>
@@ -564,13 +615,13 @@ export function CalendarBookingExperience({
               {/* ----------------------------------------------------------------- */}
               {step === 1 && (
                 <div className="space-y-4">
-                  <h3 className="font-heading text-lg sm:text-xl font-bold tracking-tight text-white">
+                  <h3 className={`font-heading text-lg sm:text-xl font-bold tracking-tight ${isDark ? "text-white" : "text-stone-900"}`}>
                     {config.title || "Book Your Appointment"}
                   </h3>
 
                   {/* Month & Year Navigation Header */}
-                  <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                    <h4 className="font-heading text-sm sm:text-base font-bold text-white">
+                  <div className={`flex items-center justify-between border-b pb-2 ${isDark ? "border-white/10" : "border-stone-200"}`}>
+                    <h4 className={`font-heading text-sm sm:text-base font-bold ${isDark ? "text-white" : "text-stone-900"}`}>
                       {MONTH_NAMES[month]} {year}
                     </h4>
                     <div className="flex items-center gap-1.5">
@@ -580,8 +631,12 @@ export function CalendarBookingExperience({
                         disabled={!isCanPrevMonth}
                         className={`flex h-7 w-7 items-center justify-center rounded-lg border transition-colors ${
                           !isCanPrevMonth
-                            ? "border-white/5 text-zinc-600 opacity-40 cursor-not-allowed select-none"
-                            : "border-white/10 bg-[#222227] text-white hover:bg-[#2c2c34] active:scale-95 cursor-pointer"
+                            ? isDark
+                              ? "border-white/5 text-zinc-600 opacity-40 cursor-not-allowed select-none"
+                              : "border-stone-200 text-stone-300 opacity-40 cursor-not-allowed select-none"
+                            : isDark
+                            ? "border-white/10 bg-[#222227] text-white hover:bg-[#2c2c34] active:scale-95 cursor-pointer"
+                            : "border-stone-300 bg-stone-100 text-stone-800 hover:bg-stone-200 active:scale-95 cursor-pointer"
                         }`}
                         aria-label="Previous Month"
                         title={!isCanPrevMonth ? "Cannot view past months" : "Previous Month"}
@@ -591,7 +646,11 @@ export function CalendarBookingExperience({
                       <button
                         type="button"
                         onClick={handleNextMonth}
-                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-[#222227] text-white hover:bg-[#2c2c34] active:scale-95 cursor-pointer transition-colors"
+                        className={`flex h-7 w-7 items-center justify-center rounded-lg border transition-colors cursor-pointer active:scale-95 ${
+                          isDark
+                            ? "border-white/10 bg-[#222227] text-white hover:bg-[#2c2c34]"
+                            : "border-stone-300 bg-stone-100 text-stone-800 hover:bg-stone-200"
+                        }`}
                         aria-label="Next Month"
                       >
                         <ChevronRight className="h-3.5 w-3.5" />
@@ -600,7 +659,7 @@ export function CalendarBookingExperience({
                   </div>
 
                   {/* Days of week header */}
-                  <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold tracking-wider text-zinc-500">
+                  <div className={`grid grid-cols-7 gap-1 text-center text-[10px] font-bold tracking-wider ${isDark ? "text-zinc-500" : "text-stone-400"}`}>
                     {DAY_NAMES.map((d) => (
                       <div key={d} className="py-0.5">
                         {d}
@@ -636,17 +695,25 @@ export function CalendarBookingExperience({
                           onClick={() => handleSelectDate(day)}
                           className={`group relative flex h-8 sm:h-8.5 items-center justify-center rounded-lg text-xs font-semibold transition-all ${
                             isPast
-                              ? "cursor-not-allowed text-zinc-600 bg-transparent select-none opacity-30"
+                              ? isDark
+                                ? "cursor-not-allowed text-zinc-600 bg-transparent select-none opacity-30"
+                                : "cursor-not-allowed text-stone-300 bg-transparent select-none opacity-40"
                               : isSelected
-                              ? "border-2 border-white bg-white text-black font-extrabold shadow-md scale-[1.04]"
+                              ? isDark
+                                ? "border-2 border-white bg-white text-black font-extrabold shadow-md scale-[1.04]"
+                                : "border-2 border-stone-900 bg-stone-900 text-white font-extrabold shadow-md scale-[1.04]"
                               : isToday
-                              ? "border border-white/20 bg-[#25252c] text-white hover:bg-[#2d2d36]"
-                              : "border border-white/5 bg-[#202025] text-zinc-300 hover:border-white/15 hover:bg-[#27272f]"
+                              ? isDark
+                                ? "border border-white/20 bg-[#25252c] text-white hover:bg-[#2d2d36]"
+                                : "border border-stone-400 bg-stone-100 text-stone-900 hover:bg-stone-200"
+                              : isDark
+                              ? "border border-white/5 bg-[#202025] text-zinc-300 hover:border-white/15 hover:bg-[#27272f]"
+                              : "border border-stone-200 bg-stone-50 text-stone-800 hover:border-stone-300 hover:bg-stone-100"
                           }`}
                         >
                           <span>{day}</span>
                           {isToday && !isSelected && (
-                            <span className="absolute bottom-1 h-1 w-1 rounded-full bg-white" />
+                            <span className={`absolute bottom-1 h-1 w-1 rounded-full ${isDark ? "bg-white" : "bg-stone-900"}`} />
                           )}
                         </button>
                       );
@@ -656,12 +723,12 @@ export function CalendarBookingExperience({
                   {/* Available Time Slots Header & Grid (From Admin Panel Config) */}
                   <div className="space-y-2 pt-1">
                     <div className="flex items-center justify-between text-[11px]">
-                      <span className="font-semibold tracking-wider text-zinc-400 uppercase">
+                      <span className={`font-semibold tracking-wider uppercase ${isDark ? "text-zinc-400" : "text-stone-500"}`}>
                         Available Time Slots
                       </span>
                       {selectedDate && (
-                        <span className="text-zinc-400">
-                          For <strong className="text-white">{selectedDateShortString}</strong>
+                        <span className={isDark ? "text-zinc-400" : "text-stone-500"}>
+                          For <strong className={isDark ? "text-white" : "text-stone-900"}>{selectedDateShortString}</strong>
                         </span>
                       )}
                     </div>
@@ -679,8 +746,12 @@ export function CalendarBookingExperience({
                             }}
                             className={`rounded-lg border py-2 px-2 text-center text-xs transition-all cursor-pointer truncate ${
                               isSlotSelected
-                                ? "border-2 border-white bg-white font-bold text-black shadow-sm"
-                                : "border-white/5 bg-[#202025] text-zinc-300 hover:border-white/15 hover:bg-[#26262d]"
+                                ? isDark
+                                  ? "border-2 border-white bg-white font-bold text-black shadow-sm"
+                                  : "border-2 border-stone-900 bg-stone-900 font-bold text-white shadow-sm"
+                                : isDark
+                                ? "border-white/5 bg-[#202025] text-zinc-300 hover:border-white/15 hover:bg-[#26262d]"
+                                : "border-stone-200 bg-stone-50 text-stone-800 hover:border-stone-300 hover:bg-stone-100"
                             }`}
                           >
                             {slot}
@@ -697,13 +768,13 @@ export function CalendarBookingExperience({
               {/* ----------------------------------------------------------------- */}
               {step === 2 && (
                 <form onSubmit={handleConfirmBooking} className="space-y-3">
-                  <h3 className="font-heading text-lg sm:text-xl font-bold tracking-tight text-white mb-3">
+                  <h3 className={`font-heading text-lg sm:text-xl font-bold tracking-tight mb-3 ${isDark ? "text-white" : "text-stone-900"}`}>
                     {config.title || "Book Your Appointment"}
                   </h3>
 
                   {/* Field 1: Your Full Name (Editable via Admin) */}
                   {isFieldEnabled("fullName") && (
-                    <div className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-2.5 flex items-center justify-between">
+                    <div className={inputWrapperClass}>
                       <input
                         type="text"
                         name="fullName"
@@ -711,15 +782,15 @@ export function CalendarBookingExperience({
                         placeholder={getField("fullName")?.placeholder || getField("fullName")?.label || "Your Full Name"}
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
-                        className="w-full bg-transparent text-xs sm:text-sm text-white placeholder:text-zinc-500 focus:outline-none"
+                        className={inputClass}
                       />
-                      <ChevronDown className="h-4 w-4 text-zinc-500 shrink-0 pointer-events-none group-hover:text-zinc-400" />
+                      <ChevronDown className={iconClass} />
                     </div>
                   )}
 
                   {/* Field 2: Phone Number (Editable via Admin) */}
                   {isFieldEnabled("mobileNumber") && (
-                    <div className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-2.5 flex items-center justify-between">
+                    <div className={inputWrapperClass}>
                       <input
                         type="tel"
                         name="phone"
@@ -727,15 +798,15 @@ export function CalendarBookingExperience({
                         placeholder={getField("mobileNumber")?.placeholder || getField("mobileNumber")?.label || "Phone Number"}
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        className="w-full bg-transparent text-xs sm:text-sm text-white placeholder:text-zinc-500 focus:outline-none"
+                        className={inputClass}
                       />
-                      <ChevronDown className="h-4 w-4 text-zinc-500 shrink-0 pointer-events-none group-hover:text-zinc-400" />
+                      <ChevronDown className={iconClass} />
                     </div>
                   )}
 
                   {/* Field 3: Email Address (Editable via Admin) */}
                   {isFieldEnabled("email") && (
-                    <div className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-2.5 flex items-center justify-between">
+                    <div className={inputWrapperClass}>
                       <input
                         type="email"
                         name="email"
@@ -743,89 +814,105 @@ export function CalendarBookingExperience({
                         placeholder={getField("email")?.placeholder || getField("email")?.label || "Email Address"}
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-transparent text-xs sm:text-sm text-white placeholder:text-zinc-500 focus:outline-none"
+                        className={inputClass}
                       />
-                      <ChevronDown className="h-4 w-4 text-zinc-500 shrink-0 pointer-events-none group-hover:text-zinc-400" />
+                      <ChevronDown className={iconClass} />
                     </div>
                   )}
 
                   {/* Field 4: Selected Date (with calendar icon on right matching Image 2) */}
-                  <div
-                    onClick={() => setStep(1)}
-                    className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] border border-white/10 transition-all px-4 py-2.5 flex items-center justify-between cursor-pointer"
-                    title="Click to change date on calendar"
-                  >
-                    <span className="text-xs sm:text-sm text-white font-medium">
-                      {dateFormattedSlash || "Select Date"}
-                    </span>
-                    <CalendarIcon className="h-4 w-4 text-zinc-400 shrink-0 pointer-events-none group-hover:text-white transition-colors" />
-                  </div>
+                  {isFieldEnabled("preferredDate") && (
+                    <div
+                      onClick={() => setStep(1)}
+                      className={`group relative rounded-xl border transition-all px-4 py-2.5 flex items-center justify-between cursor-pointer ${
+                        isDark
+                          ? "bg-[#222227] hover:bg-[#26262d] border-white/10"
+                          : "bg-stone-50 hover:bg-stone-100/70 border-stone-200"
+                      }`}
+                      title="Click to change date on calendar"
+                    >
+                      <span className={`text-xs sm:text-sm font-medium ${isDark ? "text-white" : "text-stone-900"}`}>
+                        {dateFormattedSlash || "Select Date"}
+                      </span>
+                      <CalendarIcon className={`h-4 w-4 shrink-0 pointer-events-none transition-colors ${
+                        isDark ? "text-zinc-400 group-hover:text-white" : "text-stone-400 group-hover:text-stone-800"
+                      }`} />
+                    </div>
+                  )}
 
                   {/* Field 5: Preferred Time (Select dropdown matching Image 2 & Admin slots) */}
-                  <div className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-2.5 flex items-center justify-between">
-                    <select
-                      value={preferredTime}
-                      onChange={(e) => setPreferredTime(e.target.value)}
-                      aria-label="Preferred Time"
-                      className="w-full bg-transparent text-xs sm:text-sm text-white appearance-none focus:outline-none cursor-pointer [color-scheme:dark]"
-                    >
-                      {availableSlots.map((slot, i) => (
-                        <option key={i} value={slot} className="bg-[#222227] text-white">
-                          Preferred Time: {slot}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="h-4 w-4 text-zinc-500 shrink-0 pointer-events-none group-hover:text-zinc-400" />
-                  </div>
+                  {isFieldEnabled("timeRange") && (
+                    <div className={inputWrapperClass}>
+                      <select
+                        value={preferredTime}
+                        onChange={(e) => setPreferredTime(e.target.value)}
+                        aria-label="Preferred Time"
+                        className={`w-full bg-transparent text-xs sm:text-sm appearance-none focus:outline-none cursor-pointer ${
+                          isDark ? "text-white [color-scheme:dark]" : "text-stone-900 [color-scheme:light]"
+                        }`}
+                      >
+                        {availableSlots.map((slot, i) => (
+                          <option key={i} value={slot} className={selectOptionClass}>
+                            {getField("timeRange")?.label || "Preferred Time"}: {slot}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className={iconClass} />
+                    </div>
+                  )}
 
                   {/* Field 6: Doctor Preference (Select dropdown populated from Admin doctors) */}
                   {isFieldEnabled("preferredDoctor") && (
-                    <div className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-2.5 flex items-center justify-between">
+                    <div className={inputWrapperClass}>
                       <select
                         value={doctorPreference}
                         onChange={(e) => setDoctorPreference(e.target.value)}
                         aria-label="Doctor Preference"
-                        className="w-full bg-transparent text-xs sm:text-sm text-white appearance-none focus:outline-none cursor-pointer [color-scheme:dark]"
+                        className={`w-full bg-transparent text-xs sm:text-sm appearance-none focus:outline-none cursor-pointer ${
+                          isDark ? "text-white [color-scheme:dark]" : "text-stone-900 [color-scheme:light]"
+                        }`}
                       >
                         {doctorsList.map((doc, i) => (
-                          <option key={i} value={doc} className="bg-[#222227] text-white">
-                            Doctor Preference: {doc}
+                          <option key={i} value={doc} className={selectOptionClass}>
+                            {getField("preferredDoctor")?.label || "Doctor Preference"}: {doc}
                           </option>
                         ))}
                       </select>
-                      <ChevronDown className="h-4 w-4 text-zinc-500 shrink-0 pointer-events-none group-hover:text-zinc-400" />
+                      <ChevronDown className={iconClass} />
                     </div>
                   )}
 
-                  {/* Optional Treatment Field (If enabled in Admin) */}
+                  {/* Field 7: Treatment Field (If enabled in Admin) */}
                   {isFieldEnabled("treatment") && (
-                    <div className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-2.5 flex items-center justify-between">
+                    <div className={inputWrapperClass}>
                       <select
                         value={treatment}
                         onChange={(e) => setTreatment(e.target.value)}
                         aria-label="Treatment Category"
-                        className="w-full bg-transparent text-xs sm:text-sm text-white appearance-none focus:outline-none cursor-pointer [color-scheme:dark]"
+                        className={`w-full bg-transparent text-xs sm:text-sm appearance-none focus:outline-none cursor-pointer ${
+                          isDark ? "text-white [color-scheme:dark]" : "text-stone-900 [color-scheme:light]"
+                        }`}
                       >
                         {treatmentsList.map((t, idx) => (
-                          <option key={idx} value={t} className="bg-[#222227] text-white">
-                            Treatment: {t}
+                          <option key={idx} value={t} className={selectOptionClass}>
+                            {getField("treatment")?.label || "Treatment"}: {t}
                           </option>
                         ))}
                       </select>
-                      <ChevronDown className="h-4 w-4 text-zinc-500 shrink-0 pointer-events-none group-hover:text-zinc-400" />
+                      <ChevronDown className={iconClass} />
                     </div>
                   )}
 
-                  {/* Optional Symptoms / Clinical Notes (If enabled in Admin) */}
+                  {/* Field 8: Optional Symptoms / Clinical Notes (If enabled in Admin) */}
                   {isFieldEnabled("notes") && (
-                    <div className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-2.5 flex items-center justify-between">
+                    <div className={inputWrapperClass}>
                       <input
                         type="text"
                         name="notes"
                         placeholder={getField("notes")?.placeholder || "Describe your symptoms or questions (Optional)..."}
                         value={notes}
                         onChange={(e) => setNotes(e.target.value)}
-                        className="w-full bg-transparent text-xs sm:text-sm text-white placeholder:text-zinc-500 focus:outline-none"
+                        className={inputClass}
                       />
                     </div>
                   )}
@@ -836,7 +923,7 @@ export function CalendarBookingExperience({
                     .map((field) => (
                       <div
                         key={field.id}
-                        className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-2.5 flex items-center justify-between"
+                        className={inputWrapperClass}
                       >
                         {field.type === "select" && field.options?.length ? (
                           <select
@@ -848,13 +935,15 @@ export function CalendarBookingExperience({
                                 [field.id]: e.target.value,
                               }))
                             }
-                            className="w-full bg-transparent text-xs sm:text-sm text-white appearance-none focus:outline-none cursor-pointer [color-scheme:dark]"
+                            className={`w-full bg-transparent text-xs sm:text-sm appearance-none focus:outline-none cursor-pointer ${
+                              isDark ? "text-white [color-scheme:dark]" : "text-stone-900 [color-scheme:light]"
+                            }`}
                           >
-                            <option value="" className="bg-[#222227] text-white">
+                            <option value="" className={selectOptionClass}>
                               {field.placeholder || `Select ${field.label}`}
                             </option>
                             {field.options.map((opt, i) => (
-                              <option key={i} value={opt} className="bg-[#222227] text-white">
+                              <option key={i} value={opt} className={selectOptionClass}>
                                 {opt}
                               </option>
                             ))}
@@ -871,25 +960,29 @@ export function CalendarBookingExperience({
                                 [field.id]: e.target.value,
                               }))
                             }
-                            className="w-full bg-transparent text-xs sm:text-sm text-white placeholder:text-zinc-500 focus:outline-none"
+                            className={inputClass}
                           />
                         )}
-                        <ChevronDown className="h-4 w-4 text-zinc-500 shrink-0 pointer-events-none group-hover:text-zinc-400" />
+                        <ChevronDown className={iconClass} />
                       </div>
                     ))}
 
                   {/* Checkbox: Agreement matching Image 2 & Admin */}
                   {isFieldEnabled("consentAgreed") && (
                     <div className="pt-0.5">
-                      <label className="flex items-center gap-2.5 cursor-pointer text-xs text-zinc-400 select-none group">
+                      <label className={`flex items-center gap-2.5 cursor-pointer text-xs select-none group ${
+                        isDark ? "text-zinc-400" : "text-stone-600"
+                      }`}>
                         <input
                           type="checkbox"
                           checked={consentAgreed}
                           onChange={(e) => setConsentAgreed(e.target.checked)}
-                          className="h-4 w-4 rounded border-zinc-700 bg-zinc-800 text-red-600 focus:ring-0 focus:ring-offset-0 cursor-pointer accent-[#881318]"
+                          className={`h-4 w-4 rounded cursor-pointer accent-[#881318] ${
+                            isDark ? "border-zinc-700 bg-zinc-800 text-red-600" : "border-stone-300 bg-white text-red-600"
+                          }`}
                         />
-                        <span className="group-hover:text-zinc-300 transition-colors">
-                          {getField("consentAgreed")?.label || "I agree to be contacted to confirm my appointment."}
+                        <span className={`transition-colors ${isDark ? "group-hover:text-zinc-300" : "group-hover:text-stone-900"}`}>
+                          {getField("consentAgreed")?.label || getField("consentAgreed")?.helpText || "I agree to be contacted to confirm my appointment."}
                         </span>
                       </label>
                     </div>
@@ -907,9 +1000,11 @@ export function CalendarBookingExperience({
                     <button
                       type="button"
                       onClick={() => setStep(1)}
-                      className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                      className={`inline-flex items-center gap-1.5 text-xs transition-colors cursor-pointer ${
+                        isDark ? "text-zinc-400 hover:text-white" : "text-stone-500 hover:text-stone-900"
+                      }`}
                     >
-                      <CalendarIcon className="h-3.5 w-3.5 text-zinc-400" />
+                      <CalendarIcon className={`h-3.5 w-3.5 ${isDark ? "text-zinc-400" : "text-stone-500"}`} />
                       <span>View Full Calendar</span>
                     </button>
                   </div>
@@ -921,37 +1016,39 @@ export function CalendarBookingExperience({
               {/* ----------------------------------------------------------------- */}
               {step === 3 && confirmedData && (
                 <div className="space-y-4 py-2">
-                  <div className="rounded-2xl border border-white/10 bg-[#202025] p-5 text-white space-y-3">
+                  <div className={`rounded-2xl border p-5 space-y-3 ${
+                    isDark ? "border-white/10 bg-[#202025] text-white" : "border-stone-200 bg-stone-50 text-stone-900 shadow-sm"
+                  }`}>
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-500 border border-emerald-500/30">
                         <CheckCircle2 className="h-5 w-5" />
                       </div>
                       <div>
-                        <h4 className="font-heading text-base sm:text-lg font-bold text-white">
+                        <h4 className={`font-heading text-base sm:text-lg font-bold ${isDark ? "text-white" : "text-stone-900"}`}>
                           Appointment Confirmed!
                         </h4>
-                        <p className="text-xs text-zinc-400">
-                          Reference: <span className="font-mono font-bold text-white">{confirmedData.id}</span>
+                        <p className={`text-xs ${isDark ? "text-zinc-400" : "text-stone-500"}`}>
+                          Reference: <span className={`font-mono font-bold ${isDark ? "text-white" : "text-stone-900"}`}>{confirmedData.id}</span>
                         </p>
                       </div>
                     </div>
 
-                    <div className="space-y-1.5 border-t border-white/10 pt-3 text-xs text-zinc-300">
-                      <div className="flex justify-between py-0.5 border-b border-white/5">
-                        <span className="text-zinc-400">Patient:</span>
-                        <span className="font-medium text-white">{confirmedData.patientName}</span>
+                    <div className={`space-y-1.5 border-t pt-3 text-xs ${isDark ? "border-white/10 text-zinc-300" : "border-stone-200 text-stone-700"}`}>
+                      <div className={`flex justify-between py-0.5 border-b ${isDark ? "border-white/5" : "border-stone-200/60"}`}>
+                        <span className={isDark ? "text-zinc-400" : "text-stone-500"}>Patient:</span>
+                        <span className={`font-medium ${isDark ? "text-white" : "text-stone-900"}`}>{confirmedData.patientName}</span>
                       </div>
-                      <div className="flex justify-between py-0.5 border-b border-white/5">
-                        <span className="text-zinc-400">Scheduled Date:</span>
-                        <span className="font-medium text-white">{confirmedData.dateFormatted}</span>
+                      <div className={`flex justify-between py-0.5 border-b ${isDark ? "border-white/5" : "border-stone-200/60"}`}>
+                        <span className={isDark ? "text-zinc-400" : "text-stone-500"}>Scheduled Date:</span>
+                        <span className={`font-medium ${isDark ? "text-white" : "text-stone-900"}`}>{confirmedData.dateFormatted}</span>
                       </div>
-                      <div className="flex justify-between py-0.5 border-b border-white/5">
-                        <span className="text-zinc-400">Time Window:</span>
-                        <span className="font-medium text-white">{confirmedData.slot}</span>
+                      <div className={`flex justify-between py-0.5 border-b ${isDark ? "border-white/5" : "border-stone-200/60"}`}>
+                        <span className={isDark ? "text-zinc-400" : "text-stone-500"}>Time Window:</span>
+                        <span className={`font-medium ${isDark ? "text-white" : "text-stone-900"}`}>{confirmedData.slot}</span>
                       </div>
                       <div className="flex justify-between py-0.5">
-                        <span className="text-zinc-400">Specialist:</span>
-                        <span className="font-medium text-white">{confirmedData.doctor}</span>
+                        <span className={isDark ? "text-zinc-400" : "text-stone-500"}>Specialist:</span>
+                        <span className={`font-medium ${isDark ? "text-white" : "text-stone-900"}`}>{confirmedData.doctor}</span>
                       </div>
                     </div>
                   </div>
@@ -960,7 +1057,9 @@ export function CalendarBookingExperience({
                     <button
                       type="button"
                       onClick={handleReset}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 hover:bg-white/15 px-4 py-2 text-xs font-semibold text-white transition-all cursor-pointer"
+                      className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold transition-all cursor-pointer ${
+                        isDark ? "bg-white/10 hover:bg-white/15 text-white" : "bg-stone-200 hover:bg-stone-300 text-stone-900"
+                      }`}
                     >
                       <RefreshCw className="h-3.5 w-3.5" />
                       <span>Book Another Appointment</span>
@@ -968,7 +1067,11 @@ export function CalendarBookingExperience({
 
                     <Link
                       href="/"
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-[#222227] px-4 py-2 text-xs font-semibold text-zinc-300 hover:text-white hover:bg-[#282830] transition-all"
+                      className={`inline-flex items-center gap-1.5 rounded-xl border px-4 py-2 text-xs font-semibold transition-all ${
+                        isDark
+                          ? "border-white/10 bg-[#222227] text-zinc-300 hover:text-white hover:bg-[#282830]"
+                          : "border-stone-300 bg-white text-stone-700 hover:text-stone-900 hover:bg-stone-100"
+                      }`}
                     >
                       <span>Back to Home</span>
                     </Link>
@@ -979,11 +1082,13 @@ export function CalendarBookingExperience({
 
             {/* Bottom Row in Step 1: Continue Button with Selection Guidance */}
             {step === 1 && (
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 mt-3 border-t border-white/10">
-                <div className="text-[11px] text-zinc-400">
+              <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 mt-3 border-t ${
+                isDark ? "border-white/10" : "border-stone-200"
+              }`}>
+                <div className={`text-[11px] ${isDark ? "text-zinc-400" : "text-stone-500"}`}>
                   {selectedDate && selectedSlot ? (
-                    <span className="inline-flex items-center gap-1 text-emerald-400 font-semibold">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                    <span className="inline-flex items-center gap-1 text-emerald-500 font-semibold">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
                       Selected: {selectedDateShortString} ({selectedSlot})
                     </span>
                   ) : (
@@ -1009,15 +1114,17 @@ export function CalendarBookingExperience({
       {/* Floating Action Buttons Matching Reference Mock */}
       <div className="fixed bottom-6 right-6 z-40 flex flex-col gap-2.5">
         <a
-          href={`tel:${clinicPhone.replace(/\D/g, "")}`}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-[#18181c] text-white border border-white/20 shadow-xl transition-transform hover:scale-110 active:scale-95"
+          href={`tel:${(config.sideContactPhone || clinicPhone).replace(/\D/g, "")}`}
+          className={`flex h-10 w-10 items-center justify-center rounded-full border shadow-xl transition-transform hover:scale-110 active:scale-95 ${
+            isDark ? "bg-[#18181c] text-white border-white/20" : "bg-white text-stone-900 border-stone-300"
+          }`}
           aria-label="Call clinic"
         >
           <PhoneCall className="h-4 w-4" />
         </a>
 
         <a
-          href={`https://wa.me/${clinicPhone.replace(/\D/g, "")}?text=Hello%20there,%20I%20would%20like%20to%20book%20an%20appointment.`}
+          href={`https://wa.me/${(config.sideContactPhone || clinicPhone).replace(/\D/g, "")}?text=Hello%20there,%20I%20would%20like%20to%20book%20an%20appointment.`}
           target="_blank"
           rel="noopener noreferrer"
           className="flex h-10 w-10 items-center justify-center rounded-full bg-[#25D366] text-white shadow-xl transition-transform hover:scale-110 active:scale-95"
@@ -1031,7 +1138,9 @@ export function CalendarBookingExperience({
         <button
           type="button"
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-[#18181c] text-white border border-white/20 shadow-xl transition-transform hover:scale-110 active:scale-95 cursor-pointer"
+          className={`flex h-10 w-10 items-center justify-center rounded-full border shadow-xl transition-transform hover:scale-110 active:scale-95 cursor-pointer ${
+            isDark ? "bg-[#18181c] text-white border-white/20" : "bg-white text-stone-900 border-stone-300"
+          }`}
           aria-label="Scroll to top"
         >
           <ArrowUp className="h-4 w-4" />

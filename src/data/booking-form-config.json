@@ -1,11 +1,22 @@
 {
   "headerBadge": "Quick Appointment Request",
-  "title": "Select Date & Time",
-  "submitButtonText": "Submit Appointment Request",
+  "title": "Book Your Appointment",
+  "submitButtonText": "Book Now",
   "clinicName": "VS Multispeciality Dental Clinic",
+  "themeMode": "dark",
+  "sideHeadingLine1": "Let's Make That",
+  "sideHeadingLine2": "Smile Shine!",
+  "sideWordmark": "brighter",
+  "sideContactAddress": "",
+  "sideContactPhone": "",
+  "sideContactEmail": "",
+  "sideFollowText": "Follow Us:",
+  "facebookUrl": "https://facebook.com",
+  "linkedinUrl": "https://linkedin.com",
+  "instagramUrl": "https://instagram.com",
   "formBgColor": "#ffffff",
   "formTextColor": "#1c1917",
-  "buttonBgColor": "#f2583e",
+  "buttonBgColor": "#881318",
   "buttonTextColor": "#ffffff",
   "fields": [
     {
@@ -14,7 +25,7 @@
       "type": "text",
       "required": true,
       "enabled": true,
-      "placeholder": "e.g. Anish Kumar"
+      "placeholder": "Your Full Name"
     },
     {
       "id": "mobileNumber",
@@ -22,8 +33,8 @@
       "type": "tel",
       "required": true,
       "enabled": true,
-      "placeholder": "10-digit mobile number",
-      "helpText": "Primary contact phone number for verification"
+      "placeholder": "Phone Number",
+      "helpText": "Primary contact phone number for confirmation"
     },
     {
       "id": "email",
@@ -31,7 +42,31 @@
       "type": "email",
       "required": false,
       "enabled": true,
-      "placeholder": "name@example.com"
+      "placeholder": "Email Address (Optional)"
+    },
+    {
+      "id": "preferredDate",
+      "label": "Selected Date",
+      "type": "date",
+      "required": true,
+      "enabled": true,
+      "helpText": "Appointment date picked from calendar"
+    },
+    {
+      "id": "timeRange",
+      "label": "Preferred Time Slot",
+      "type": "select",
+      "required": true,
+      "enabled": true,
+      "helpText": "Time slot selected by patient"
+    },
+    {
+      "id": "preferredDoctor",
+      "label": "Doctor Preference",
+      "type": "select",
+      "required": false,
+      "enabled": true,
+      "helpText": "Allow patient to request a specific clinical specialist"
     },
     {
       "id": "treatment",
@@ -47,7 +82,15 @@
       "type": "textarea",
       "required": false,
       "enabled": true,
-      "placeholder": "Describe your symptoms, tooth sensitivity, or clinical background..."
+      "placeholder": "Describe your symptoms or questions (Optional)..."
+    },
+    {
+      "id": "consentAgreed",
+      "label": "Consent Agreement",
+      "type": "checkbox",
+      "required": true,
+      "enabled": true,
+      "helpText": "I agree to be contacted to confirm my appointment."
     }
   ],
   "treatments": [

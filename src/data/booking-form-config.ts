@@ -26,6 +26,17 @@ export interface BookingFormConfig {
   title: string;
   submitButtonText: string;
   clinicName: string;
+  themeMode?: "dark" | "light"; // "dark" (Black & White Dribbble) vs "light" (White luxury mode)
+  sideHeadingLine1?: string; // Left headline line 1, e.g. "Let's Make That"
+  sideHeadingLine2?: string; // Left headline line 2, e.g. "Smile Shine!"
+  sideWordmark?: string; // Left huge wordmark, e.g. "brighter"
+  sideContactAddress?: string; // Custom address override (blank uses clinic address)
+  sideContactPhone?: string; // Custom phone override (blank uses clinic phone)
+  sideContactEmail?: string; // Custom email override (blank uses clinic email)
+  sideFollowText?: string; // e.g. "Follow Us:"
+  facebookUrl?: string;
+  linkedinUrl?: string;
+  instagramUrl?: string;
   formBgColor?: string;
   formTextColor?: string;
   buttonBgColor?: string;
@@ -38,12 +49,23 @@ export interface BookingFormConfig {
 
 export const defaultBookingFormConfig: BookingFormConfig = {
   headerBadge: "Quick Appointment Request",
-  title: "Select Date & Time",
-  submitButtonText: "Submit Appointment Request",
+  title: "Book Your Appointment",
+  submitButtonText: "Book Now",
   clinicName: "VS Multispeciality Dental Clinic",
+  themeMode: "dark",
+  sideHeadingLine1: "Let's Make That",
+  sideHeadingLine2: "Smile Shine!",
+  sideWordmark: "brighter",
+  sideContactAddress: "",
+  sideContactPhone: "",
+  sideContactEmail: "",
+  sideFollowText: "Follow Us:",
+  facebookUrl: "https://facebook.com",
+  linkedinUrl: "https://linkedin.com",
+  instagramUrl: "https://instagram.com",
   formBgColor: "#ffffff",
   formTextColor: "#1c1917",
-  buttonBgColor: "#f2583e",
+  buttonBgColor: "#881318",
   buttonTextColor: "#ffffff",
   fields: [
     {

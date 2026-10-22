@@ -20,6 +20,14 @@ import {
   Edit3,
   X,
   Copy,
+  Moon,
+  Sun,
+  Type,
+  MapPin,
+  Share2,
+  Phone,
+  Mail,
+  Calendar,
 } from "lucide-react";
 import {
   Card,
@@ -80,8 +88,9 @@ export default function AdminBookingFormBuilderPage() {
     defaultBookingFormConfig
   );
   const [activeTab, setActiveTab] = useState<
-    "fields" | "styling" | "treatments" | "slots" | "doctors" | "preview"
+    "fields" | "theme" | "styling" | "treatments" | "slots" | "doctors" | "preview"
   >("fields");
+  const [previewStep, setPreviewStep] = useState<1 | 2>(1);
 
   // New item input states
   const [newTreatment, setNewTreatment] = useState("");
@@ -525,14 +534,20 @@ export default function AdminBookingFormBuilderPage() {
 
         <Card className="border-brand-border bg-brand-surface p-3.5">
           <div className="text-[11px] font-bold uppercase tracking-wider text-brand-muted">
-            Form Theme &amp; Style
+            Theme Mode
           </div>
           <div className="mt-1 flex items-center gap-2">
-            <span
-              className="h-4 w-4 rounded-full border border-stone-300"
-              style={{ backgroundColor: config.buttonBgColor || "#f2583e" }}
-            />
-            <span className="text-xs font-bold text-brand-text">Custom Palette</span>
+            {config.themeMode === "light" ? (
+              <span className="flex items-center gap-1.5 text-xs font-bold text-amber-600">
+                <Sun className="h-4 w-4" />
+                White / Light Mode
+              </span>
+            ) : (
+              <span className="flex items-center gap-1.5 text-xs font-bold text-stone-900">
+                <Moon className="h-4 w-4" />
+                Dark Mode (B&amp;W)
+              </span>
+            )}
           </div>
         </Card>
       </div>
@@ -550,6 +565,23 @@ export default function AdminBookingFormBuilderPage() {
         >
           <Sliders className="h-3.5 w-3.5" />
           <span>Form Fields &amp; Settings ({config.fields.length})</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("theme")}
+          className={`flex items-center gap-1.5 rounded-clinic px-3.5 py-2 text-xs font-bold transition-all ${
+            activeTab === "theme"
+              ? "shadow-xs bg-brand-primary text-white"
+              : "border border-brand-border bg-brand-surface text-brand-muted hover:text-brand-text"
+          }`}
+        >
+          {config.themeMode === "light" ? (
+            <Sun className="h-3.5 w-3.5" />
+          ) : (
+            <Moon className="h-3.5 w-3.5" />
+          )}
+          <span>Theme &amp; Left-Side Content</span>
         </button>
 
         <button
@@ -784,7 +816,418 @@ export default function AdminBookingFormBuilderPage() {
         </div>
       )}
 
-      {/* TAB 2: COLORS & FORM STYLING */}
+      {/* TAB 2: THEME MODE & LEFT-SIDE BRANDING */}
+      {activeTab === "theme" && (
+        <Card className="border-brand-border p-6">
+          <div className="space-y-6">
+            <div>
+              <span className="rounded bg-brand-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-brand-primary">
+                Theme &amp; Branding Controls
+              </span>
+              <h2 className="mt-1 font-heading text-lg font-bold text-brand-text">
+                Dark Mode / White Mode &amp; Left-Side Content Settings
+              </h2>
+              <p className="text-xs text-brand-muted">
+                Switch between the sleek Black &amp; White Dribbble Theme or the pristine White Luxury Clinic Theme, and edit all left column text, headlines, contact information, and social links.
+              </p>
+            </div>
+
+            {/* THEME MODE SELECTOR (DARK vs LIGHT) */}
+            <div className="space-y-3">
+              <label className="text-xs font-bold uppercase tracking-wider text-brand-text">
+                Select Contact Form Theme Mode
+              </label>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {/* DARK MODE CARD */}
+                <div
+                  onClick={() => setConfig((prev) => ({ ...prev, themeMode: "dark" }))}
+                  className={`group relative cursor-pointer rounded-2xl border p-4 transition-all ${
+                    (config.themeMode || "dark") === "dark"
+                      ? "border-brand-primary bg-stone-900 text-white shadow-md ring-2 ring-brand-primary/30"
+                      : "border-brand-border bg-stone-900/60 text-stone-300 hover:border-stone-500 opacity-75"
+                  }`}
+                >
+                  <div className="flex items-center justify-between pb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-black border border-white/10 text-white">
+                        <Moon className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <div className="font-heading text-sm font-bold text-white">
+                          Dark Mode
+                        </div>
+                        <div className="text-[10px] text-zinc-400">
+                          Black &amp; White Dribbble Design
+                        </div>
+                      </div>
+                    </div>
+                    {(config.themeMode || "dark") === "dark" ? (
+                      <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-400 border border-emerald-500/30">
+                        Active Mode
+                      </span>
+                    ) : (
+                      <span className="text-[11px] font-medium text-zinc-400 group-hover:text-white">
+                        Click to Select
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="mt-2 text-xs text-zinc-400 leading-relaxed">
+                    Jet black backdrop with high-contrast white typography, dark calendar grid, and obsidian inputs. Sleek and modern aesthetic.
+                  </p>
+
+                  <div className="mt-3 flex items-center gap-2 rounded-lg bg-black/60 p-2 text-[10px] text-zinc-300 border border-white/5">
+                    <span className="h-3 w-3 rounded-full bg-[#111215] border border-white/20" />
+                    <span>Background: Jet Black (#111215)</span>
+                    <span className="h-3 w-3 rounded-full bg-white ml-auto" />
+                    <span>Text: Crisp White</span>
+                  </div>
+                </div>
+
+                {/* LIGHT / WHITE MODE CARD */}
+                <div
+                  onClick={() => setConfig((prev) => ({ ...prev, themeMode: "light" }))}
+                  className={`group relative cursor-pointer rounded-2xl border p-4 transition-all ${
+                    config.themeMode === "light"
+                      ? "border-brand-primary bg-white text-stone-900 shadow-md ring-2 ring-brand-primary/30"
+                      : "border-brand-border bg-stone-50 text-stone-700 hover:border-stone-400 opacity-75"
+                  }`}
+                >
+                  <div className="flex items-center justify-between pb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-50 border border-amber-200 text-amber-600">
+                        <Sun className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <div className="font-heading text-sm font-bold text-stone-900">
+                          White / Light Mode
+                        </div>
+                        <div className="text-[10px] text-stone-500">
+                          Clean Luxury Clinic Theme
+                        </div>
+                      </div>
+                    </div>
+                    {config.themeMode === "light" ? (
+                      <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-300">
+                        Active Mode
+                      </span>
+                    ) : (
+                      <span className="text-[11px] font-medium text-stone-500 group-hover:text-stone-900">
+                        Click to Select
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="mt-2 text-xs text-stone-600 leading-relaxed">
+                    Pure white backdrop with soft warm surfaces, slate charcoal typography, and crisp light calendar days. Airy and medical-grade clean.
+                  </p>
+
+                  <div className="mt-3 flex items-center gap-2 rounded-lg bg-stone-100 p-2 text-[10px] text-stone-700 border border-stone-200">
+                    <span className="h-3 w-3 rounded-full bg-white border border-stone-300" />
+                    <span>Background: Pure White (#ffffff)</span>
+                    <span className="h-3 w-3 rounded-full bg-[#1c1917] ml-auto" />
+                    <span>Text: Deep Slate Charcoal</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* LEFT-SIDE HEADLINES & WORDMARK SETTINGS */}
+            <div className="space-y-4 rounded-xl border border-brand-border bg-brand-surface p-4">
+              <div className="flex items-center gap-2">
+                <Type className="h-4 w-4 text-brand-primary" />
+                <h3 className="font-heading text-sm font-bold text-brand-text">
+                  Left-Side Headlines &amp; Typography
+                </h3>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-brand-text">
+                    Headline Line 1
+                  </label>
+                  <Input
+                    type="text"
+                    value={config.sideHeadingLine1 ?? "Let's Make That"}
+                    onChange={(e) =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        sideHeadingLine1: e.target.value,
+                      }))
+                    }
+                    placeholder="e.g. Let's Make That"
+                    className="h-9 text-xs"
+                  />
+                  <p className="text-[10px] text-brand-muted">
+                    First line of the big left-side headline
+                  </p>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-brand-text">
+                    Headline Line 2
+                  </label>
+                  <Input
+                    type="text"
+                    value={config.sideHeadingLine2 ?? "Smile Shine!"}
+                    onChange={(e) =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        sideHeadingLine2: e.target.value,
+                      }))
+                    }
+                    placeholder="e.g. Smile Shine!"
+                    className="h-9 text-xs"
+                  />
+                  <p className="text-[10px] text-brand-muted">
+                    Second line of the big left-side headline
+                  </p>
+                </div>
+
+                <div className="space-y-1 sm:col-span-2">
+                  <label className="text-xs font-semibold text-brand-text">
+                    Large Bottom Wordmark Text
+                  </label>
+                  <Input
+                    type="text"
+                    value={config.sideWordmark ?? "brighter"}
+                    onChange={(e) =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        sideWordmark: e.target.value,
+                      }))
+                    }
+                    placeholder="e.g. brighter"
+                    className="h-9 font-sans text-sm font-bold"
+                  />
+                  <p className="text-[10px] text-brand-muted">
+                    Massive artistic wordmark displayed at the bottom of the left column (e.g. brighter, smile, radiance)
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* LEFT-SIDE CONTACT INFORMATION OVERRIDES */}
+            <div className="space-y-4 rounded-xl border border-brand-border bg-brand-surface p-4">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-brand-primary" />
+                <h3 className="font-heading text-sm font-bold text-brand-text">
+                  Contact Info Shown on Form (Optional Overrides)
+                </h3>
+              </div>
+              <p className="text-xs text-brand-muted">
+                Leave any field empty to automatically display your default clinic settings.
+              </p>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-brand-text">
+                    Custom Address
+                  </label>
+                  <Input
+                    type="text"
+                    value={config.sideContactAddress ?? ""}
+                    onChange={(e) =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        sideContactAddress: e.target.value,
+                      }))
+                    }
+                    placeholder="Leave empty for default address"
+                    className="h-9 text-xs"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-brand-text">
+                    Custom Phone Number
+                  </label>
+                  <Input
+                    type="text"
+                    value={config.sideContactPhone ?? ""}
+                    onChange={(e) =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        sideContactPhone: e.target.value,
+                      }))
+                    }
+                    placeholder="Leave empty for default phone"
+                    className="h-9 text-xs"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-brand-text">
+                    Custom Email Address
+                  </label>
+                  <Input
+                    type="email"
+                    value={config.sideContactEmail ?? ""}
+                    onChange={(e) =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        sideContactEmail: e.target.value,
+                      }))
+                    }
+                    placeholder="Leave empty for default email"
+                    className="h-9 text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* SOCIAL MEDIA LINKS & FOLLOW US LABEL */}
+            <div className="space-y-4 rounded-xl border border-brand-border bg-brand-surface p-4">
+              <div className="flex items-center gap-2">
+                <Share2 className="h-4 w-4 text-brand-primary" />
+                <h3 className="font-heading text-sm font-bold text-brand-text">
+                  Social Media Links &amp; Follow Label
+                </h3>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-brand-text">
+                    Follow Label Text
+                  </label>
+                  <Input
+                    type="text"
+                    value={config.sideFollowText ?? "Follow Us:"}
+                    onChange={(e) =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        sideFollowText: e.target.value,
+                      }))
+                    }
+                    placeholder="e.g. Follow Us:"
+                    className="h-9 text-xs"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-brand-text">
+                    Facebook URL
+                  </label>
+                  <Input
+                    type="url"
+                    value={config.facebookUrl ?? "https://facebook.com"}
+                    onChange={(e) =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        facebookUrl: e.target.value,
+                      }))
+                    }
+                    placeholder="https://facebook.com/..."
+                    className="h-9 text-xs"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-brand-text">
+                    LinkedIn URL
+                  </label>
+                  <Input
+                    type="url"
+                    value={config.linkedinUrl ?? "https://linkedin.com"}
+                    onChange={(e) =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        linkedinUrl: e.target.value,
+                      }))
+                    }
+                    placeholder="https://linkedin.com/in/..."
+                    className="h-9 text-xs"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-brand-text">
+                    Instagram URL
+                  </label>
+                  <Input
+                    type="url"
+                    value={config.instagramUrl ?? "https://instagram.com"}
+                    onChange={(e) =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        instagramUrl: e.target.value,
+                      }))
+                    }
+                    placeholder="https://instagram.com/..."
+                    className="h-9 text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* FORM BADGE & HEADLINE TITLES */}
+            <div className="space-y-4 rounded-xl border border-brand-border bg-brand-surface p-4">
+              <h3 className="font-heading text-sm font-bold text-brand-text">
+                Form Header Badge &amp; Action Button Labels
+              </h3>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-brand-text">
+                    Header Badge Text
+                  </label>
+                  <Input
+                    type="text"
+                    value={config.headerBadge}
+                    onChange={(e) =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        headerBadge: e.target.value,
+                      }))
+                    }
+                    placeholder="e.g. Quick Appointment Request"
+                    className="h-9 text-xs"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-brand-text">
+                    Form Main Headline
+                  </label>
+                  <Input
+                    type="text"
+                    value={config.title}
+                    onChange={(e) =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        title: e.target.value,
+                      }))
+                    }
+                    placeholder="e.g. Book Your Appointment"
+                    className="h-9 text-xs"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-brand-text">
+                    Submit Button Text
+                  </label>
+                  <Input
+                    type="text"
+                    value={config.submitButtonText || "Book Now"}
+                    onChange={(e) =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        submitButtonText: e.target.value,
+                      }))
+                    }
+                    placeholder="e.g. Book Now"
+                    className="h-9 text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </Card>
+      )}
+
+      {/* TAB 3: COLORS & FORM STYLING */}
       {activeTab === "styling" && (
         <Card className="border-brand-border p-6">
           <div className="space-y-6">
@@ -1291,178 +1734,410 @@ export default function AdminBookingFormBuilderPage() {
         </Card>
       )}
 
-      {/* TAB 6: LIVE PREVIEW */}
+      {/* TAB 7: LIVE PREVIEW */}
       {activeTab === "preview" && (
         <Card className="border-brand-border p-6">
-          <div className="space-y-4">
-            <div>
-              <span className="rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-800">
-                Real-Time Public Preview
-              </span>
-              <h2 className="mt-1 font-heading text-lg font-bold text-brand-text">
-                Live Preview of Patient Booking Form
-              </h2>
-              <p className="text-xs text-brand-muted">
-                This shows exactly how the contact &amp; appointment form
-                renders with your custom field styling, placeholders, and
-                colors.
-              </p>
-            </div>
-
-            {/* Mock Booking Form rendering current state */}
-            <div
-              className="mx-auto max-w-xl space-y-4 rounded-2xl border p-6 text-xs shadow-md transition-colors"
-              style={{
-                backgroundColor: config.formBgColor || "#ffffff",
-                color: config.formTextColor || "#1c1917",
-                borderColor: "#e2e8f0",
-              }}
-            >
-              <div className="flex items-start justify-between border-b border-stone-200/60 pb-3">
-                <div>
-                  <span className="text-[10px] font-bold uppercase text-[#e0533c]">
-                    {config.headerBadge}
-                  </span>
-                  <h3 className="font-heading text-base font-bold">
-                    {config.title}
-                  </h3>
-                </div>
-                <div className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
-                  {config.clinicName}
-                </div>
+          <div className="space-y-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <span className="rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-800">
+                  Real-Time Public Preview
+                </span>
+                <h2 className="mt-1 font-heading text-lg font-bold text-brand-text">
+                  Live Preview of Patient Booking Experience
+                </h2>
+                <p className="text-xs text-brand-muted">
+                  Interactive preview matching the live /contact and /book pages. Updates instantly as you adjust fields, texts, and theme settings.
+                </p>
               </div>
 
-              {/* Render enabled fields with dynamic styling */}
-              <div className="space-y-3">
-                {config.fields
-                  .filter((f) => f.enabled)
-                  .map((f) => (
-                    <div key={f.id} className="space-y-1">
-                      <label className="block text-[11px] font-bold uppercase tracking-wider opacity-90">
-                        {f.label}{" "}
-                        {f.required ? (
-                          <span className="text-red-500">*</span>
-                        ) : (
-                          <span className="font-normal opacity-60">
-                            (Optional)
-                          </span>
-                        )}
-                      </label>
-
-                      {f.id === "patientType" ? (
-                        <div className="grid grid-cols-2 gap-2">
-                          <div className="rounded-xl border-2 border-emerald-500 bg-emerald-50 p-2 text-center font-bold text-emerald-800">
-                            Adult Patient
-                          </div>
-                          <div className="rounded-xl border border-slate-200 bg-slate-50 p-2 text-center text-slate-600">
-                            Child Patient
-                          </div>
-                        </div>
-                      ) : f.id === "treatment" ? (
-                        <select
-                          className="h-9 w-full rounded-xl border border-slate-200 px-3 text-xs"
-                          style={{
-                            backgroundColor: f.bgColor || "#ffffff",
-                            color: f.textColor || "#1e293b",
-                          }}
-                        >
-                          {config.treatments.map((t, i) => (
-                            <option key={i}>{t}</option>
-                          ))}
-                        </select>
-                      ) : f.id === "preferredDoctor" ? (
-                        <select
-                          className="h-9 w-full rounded-xl border border-slate-200 px-3 text-xs"
-                          style={{
-                            backgroundColor: f.bgColor || "#ffffff",
-                            color: f.textColor || "#1e293b",
-                          }}
-                        >
-                          {config.doctors.map((d, i) => (
-                            <option key={i}>{d}</option>
-                          ))}
-                        </select>
-                      ) : f.id === "timeRange" ? (
-                        <select
-                          className="h-9 w-full rounded-xl border border-slate-200 px-3 text-xs"
-                          style={{
-                            backgroundColor: f.bgColor || "#ffffff",
-                            color: f.textColor || "#1e293b",
-                          }}
-                        >
-                          {config.timeSlots.map((s, i) => (
-                            <option key={i}>{s}</option>
-                          ))}
-                        </select>
-                      ) : f.id === "contactMethod" ? (
-                        <div className="flex gap-4 pt-1">
-                          <label className="flex items-center gap-1.5">
-                            <input type="radio" checked readOnly />
-                            <span>Phone Call</span>
-                          </label>
-                          <label className="flex items-center gap-1.5">
-                            <input type="radio" readOnly />
-                            <span>Email</span>
-                          </label>
-                        </div>
-                      ) : f.type === "textarea" ? (
-                        <textarea
-                          rows={2}
-                          placeholder={f.placeholder}
-                          className="w-full rounded-xl border border-slate-200 p-2 text-xs"
-                          style={{
-                            backgroundColor: f.bgColor || "#ffffff",
-                            color: f.textColor || "#1e293b",
-                          }}
-                          readOnly
-                        />
-                      ) : f.type === "checkbox" ? (
-                        <label className="flex items-center gap-2 pt-1">
-                          <input type="checkbox" checked readOnly />
-                          <span className="text-[11px] opacity-80">
-                            {f.helpText || "I agree to clinic communication."}
-                          </span>
-                        </label>
-                      ) : f.type === "select" && f.options ? (
-                        <select
-                          className="h-9 w-full rounded-xl border border-slate-200 px-3 text-xs"
-                          style={{
-                            backgroundColor: f.bgColor || "#ffffff",
-                            color: f.textColor || "#1e293b",
-                          }}
-                        >
-                          {f.options.map((opt, i) => (
-                            <option key={i}>{opt}</option>
-                          ))}
-                        </select>
-                      ) : (
-                        <input
-                          type={f.type}
-                          placeholder={f.placeholder}
-                          className="h-9 w-full rounded-xl border border-slate-200 px-3 text-xs"
-                          style={{
-                            backgroundColor: f.bgColor || "#ffffff",
-                            color: f.textColor || "#1e293b",
-                          }}
-                          readOnly
-                        />
-                      )}
-                    </div>
-                  ))}
-              </div>
-
-              <div className="pt-2">
+              {/* Quick Preview Controls: Toggle Dark/White mode + Step 1/Step 2 */}
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
-                  className="shadow-md flex h-11 w-full items-center justify-center gap-2 rounded-xl font-bold transition-all"
-                  style={{
-                    backgroundColor: config.buttonBgColor || "#f2583e",
-                    color: config.buttonTextColor || "#ffffff",
-                  }}
+                  onClick={() =>
+                    setConfig((prev) => ({
+                      ...prev,
+                      themeMode: prev.themeMode === "light" ? "dark" : "light",
+                    }))
+                  }
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-brand-border bg-brand-surface px-3 py-1.5 text-xs font-bold text-brand-text shadow-xs hover:bg-brand-background transition-all"
+                  title="Toggle theme mode in preview"
                 >
-                  <span>{config.submitButtonText || "Confirm Booking"}</span>
-                  <ArrowRight className="h-4 w-4" />
+                  {config.themeMode === "light" ? (
+                    <>
+                      <Moon className="h-3.5 w-3.5 text-slate-700" />
+                      <span>Switch to Dark Theme</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sun className="h-3.5 w-3.5 text-amber-500" />
+                      <span>Switch to Light Theme</span>
+                    </>
+                  )}
                 </button>
+
+                <div className="flex rounded-lg border border-brand-border bg-brand-surface p-0.5 text-xs font-bold">
+                  <button
+                    type="button"
+                    onClick={() => setPreviewStep(1)}
+                    className={`rounded-md px-2.5 py-1 transition-all ${
+                      previewStep === 1
+                        ? "bg-brand-primary text-white shadow-xs"
+                        : "text-brand-muted hover:text-brand-text"
+                    }`}
+                  >
+                    Step 1: Calendar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewStep(2)}
+                    className={`rounded-md px-2.5 py-1 transition-all ${
+                      previewStep === 2
+                        ? "bg-brand-primary text-white shadow-xs"
+                        : "text-brand-muted hover:text-brand-text"
+                    }`}
+                  >
+                    Step 2: Details Form
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Realistic Preview Container matching /contact page */}
+            <div
+              className={`rounded-2xl p-4 sm:p-6 transition-colors duration-200 ${
+                config.themeMode === "light" ? "bg-[#f4f2ee]" : "bg-[#0c0d0f]"
+              }`}
+            >
+              {/* Dual-Column Card */}
+              <div
+                className={`overflow-hidden rounded-[24px] border shadow-2xl transition-colors duration-200 ${
+                  config.themeMode === "light"
+                    ? "border-stone-200 bg-white text-stone-900"
+                    : "border-white/10 bg-[#111215] text-white"
+                }`}
+              >
+                <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch">
+                  
+                  {/* LEFT COLUMN: Headlines, Contact details, Wordmark, Social links */}
+                  <div
+                    className={`flex flex-col justify-between border-b p-5 sm:p-6 lg:p-7 lg:col-span-5 lg:border-b-0 lg:border-r transition-colors duration-200 ${
+                      config.themeMode === "light"
+                        ? "border-stone-200 bg-[#fbf9f6] text-stone-900"
+                        : "border-white/10 bg-[#0e0f12] text-white"
+                    }`}
+                  >
+                    <div>
+                      {/* Main Headline */}
+                      <h3
+                        className={`font-heading text-xl sm:text-2xl font-bold tracking-tight leading-[1.1] ${
+                          config.themeMode === "light"
+                            ? "text-stone-900"
+                            : "text-white"
+                        }`}
+                      >
+                        {config.sideHeadingLine1 || "Let's Make That"}<br />
+                        <span
+                          className={
+                            config.themeMode === "light"
+                              ? "text-stone-900"
+                              : "text-white"
+                          }
+                        >
+                          {config.sideHeadingLine2 || "Smile Shine!"}
+                        </span>
+                      </h3>
+
+                      {/* Contact Us Block */}
+                      <div
+                        className={`mt-4 space-y-1 text-xs ${
+                          config.themeMode === "light"
+                            ? "text-stone-600"
+                            : "text-zinc-400"
+                        }`}
+                      >
+                        <p
+                          className={`font-semibold text-[11px] tracking-wider uppercase ${
+                            config.themeMode === "light"
+                              ? "text-stone-900"
+                              : "text-white/90"
+                          }`}
+                        >
+                          Contact Us
+                        </p>
+                        <p className="leading-relaxed max-w-xs text-[11px]">
+                          {config.sideContactAddress ||
+                            "742 Evergreen Medical Way, Suite 400, Springfield 97477"}
+                        </p>
+                        <p className="font-mono text-[11px]">
+                          {config.sideContactPhone || "(800) 555-CLINIC"}
+                        </p>
+                        <p className="text-[11px]">
+                          {config.sideContactEmail ||
+                            "contact@pediodent.example.com"}
+                        </p>
+                      </div>
+
+                      {/* Summary Pills */}
+                      <div className="space-y-1.5 pt-3">
+                        <div
+                          className={`rounded-lg border p-2 text-[11px] ${
+                            config.themeMode === "light"
+                              ? "border-stone-300 bg-white text-stone-900"
+                              : "border-white/20 bg-[#1c1d22] text-white"
+                          }`}
+                        >
+                          <div className="text-[9px] font-bold uppercase tracking-wider opacity-60">
+                            SELECTED DATE
+                          </div>
+                          <div className="font-semibold">Thu, Oct 23, 2026</div>
+                        </div>
+
+                        <div
+                          className={`rounded-lg border p-2 text-[11px] ${
+                            config.themeMode === "light"
+                              ? "border-stone-300 bg-white text-stone-900"
+                              : "border-white/20 bg-[#1c1d22] text-white"
+                          }`}
+                        >
+                          <div className="text-[9px] font-bold uppercase tracking-wider opacity-60">
+                            TIME SLOT
+                          </div>
+                          <div className="font-semibold truncate">
+                            {config.timeSlots[0] || "Morning (9:30 AM - 1:00 PM)"}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Bottom: Wordmark & Follow Us */}
+                    <div className="mt-5 pt-1">
+                      <div
+                        className={`select-none font-sans text-4xl sm:text-5xl font-black tracking-tight leading-none mb-2 ${
+                          config.themeMode === "light"
+                            ? "text-stone-900/90"
+                            : "text-white/95"
+                        }`}
+                      >
+                        {config.sideWordmark || "brighter"}
+                      </div>
+
+                      <div
+                        className={`flex flex-wrap items-center gap-1.5 text-[10px] font-medium ${
+                          config.themeMode === "light"
+                            ? "text-stone-600"
+                            : "text-zinc-400"
+                        }`}
+                      >
+                        <span className="font-semibold">
+                          {config.sideFollowText || "Follow Us:"}
+                        </span>
+                        <span>Facebook</span>
+                        <span>•</span>
+                        <span>LinkedIn</span>
+                        <span>•</span>
+                        <span>Instagram</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* RIGHT COLUMN: Step 1 Calendar OR Step 2 Form */}
+                  <div
+                    className={`p-5 sm:p-6 lg:p-7 lg:col-span-7 flex flex-col justify-between transition-colors duration-200 ${
+                      config.themeMode === "light"
+                        ? "bg-white text-stone-900"
+                        : "bg-[#18181c] text-white"
+                    }`}
+                  >
+                    {previewStep === 1 ? (
+                      /* STEP 1 PREVIEW: Calendar & Slots */
+                      <div className="space-y-3.5">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-heading text-base font-bold">
+                            {config.title || "Book Your Appointment"}
+                          </h4>
+                          <span className="rounded bg-brand-primary/10 px-2 py-0.5 text-[9px] font-bold text-brand-primary">
+                            Step 1 Preview
+                          </span>
+                        </div>
+
+                        {/* Month navigation */}
+                        <div
+                          className={`flex items-center justify-between border-b pb-2 ${
+                            config.themeMode === "light"
+                              ? "border-stone-200"
+                              : "border-white/10"
+                          }`}
+                        >
+                          <span className="font-heading text-xs font-bold">
+                            October 2026
+                          </span>
+                          <div className="flex gap-1">
+                            <span
+                              className={`flex h-6 w-6 items-center justify-center rounded border text-xs ${
+                                config.themeMode === "light"
+                                  ? "border-stone-300 bg-stone-100"
+                                  : "border-white/10 bg-[#222227]"
+                              }`}
+                            >
+                              ‹
+                            </span>
+                            <span
+                              className={`flex h-6 w-6 items-center justify-center rounded border text-xs ${
+                                config.themeMode === "light"
+                                  ? "border-stone-300 bg-stone-100"
+                                  : "border-white/10 bg-[#222227]"
+                              }`}
+                            >
+                              ›
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Days Grid preview */}
+                        <div className="grid grid-cols-7 gap-1 text-center text-[10px]">
+                          {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
+                            <span key={i} className="font-bold opacity-50">
+                              {d}
+                            </span>
+                          ))}
+                          {Array.from({ length: 14 }).map((_, i) => {
+                            const isSel = i === 4;
+                            return (
+                              <div
+                                key={i}
+                                className={`flex h-7 items-center justify-center rounded-lg font-medium text-xs ${
+                                  isSel
+                                    ? config.themeMode === "light"
+                                      ? "bg-stone-900 text-white font-bold"
+                                      : "bg-white text-black font-bold"
+                                    : config.themeMode === "light"
+                                    ? "bg-stone-50 border border-stone-200 text-stone-700"
+                                    : "bg-[#202025] border border-white/5 text-zinc-300"
+                                }`}
+                              >
+                                {i + 15}
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* Time Slots Preview */}
+                        <div className="space-y-1.5 pt-1">
+                          <div className="text-[10px] font-bold uppercase tracking-wider opacity-60">
+                            Available Time Slots ({config.timeSlots.length})
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+                            {config.timeSlots.slice(0, 3).map((slot, idx) => (
+                              <div
+                                key={idx}
+                                className={`rounded-lg border px-2 py-1.5 text-center text-[11px] truncate ${
+                                  idx === 0
+                                    ? config.themeMode === "light"
+                                      ? "bg-stone-900 text-white font-bold border-stone-900"
+                                      : "bg-white text-black font-bold border-white"
+                                    : config.themeMode === "light"
+                                    ? "bg-stone-50 border-stone-200 text-stone-700"
+                                    : "bg-[#202025] border-white/5 text-zinc-300"
+                                }`}
+                              >
+                                {slot}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Continue Button preview */}
+                        <div
+                          className={`flex items-center justify-between pt-2 border-t ${
+                            config.themeMode === "light"
+                              ? "border-stone-200"
+                              : "border-white/10"
+                          }`}
+                        >
+                          <span className="text-[10px] text-emerald-500 font-semibold">
+                            ✓ Slot selected
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setPreviewStep(2)}
+                            className="inline-flex items-center gap-1.5 rounded-full bg-[#881318] px-3.5 py-1.5 text-xs font-bold text-white shadow-md"
+                          >
+                            <span>Continue</span>
+                            <span className="flex h-4 w-4 items-center justify-center rounded-sm bg-white text-[#881318]">
+                              →
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      /* STEP 2 PREVIEW: Enabled Patient Details Form */
+                      <div className="space-y-2.5">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-heading text-base font-bold">
+                            {config.title || "Book Your Appointment"}
+                          </h4>
+                          <span className="rounded bg-brand-primary/10 px-2 py-0.5 text-[9px] font-bold text-brand-primary">
+                            Step 2 Preview
+                          </span>
+                        </div>
+
+                        {/* Fields List */}
+                        <div className="space-y-2">
+                          {config.fields
+                            .filter((f) => f.enabled)
+                            .map((f) => (
+                              <div
+                                key={f.id}
+                                className={`rounded-xl border px-3 py-2 flex items-center justify-between text-xs ${
+                                  config.themeMode === "light"
+                                    ? "bg-stone-50 border-stone-200 text-stone-800"
+                                    : "bg-[#222227] border-white/10 text-white"
+                                }`}
+                              >
+                                <span className="opacity-90 truncate">
+                                  {f.placeholder || f.label}{" "}
+                                  {f.required && (
+                                    <span className="text-red-500">*</span>
+                                  )}
+                                </span>
+                                <span className="text-[10px] opacity-40">▼</span>
+                              </div>
+                            ))}
+                        </div>
+
+                        {/* Submit Button preview */}
+                        <div
+                          className={`flex items-center justify-between pt-2 border-t ${
+                            config.themeMode === "light"
+                              ? "border-stone-200"
+                              : "border-white/10"
+                          }`}
+                        >
+                          <button
+                            type="button"
+                            className="inline-flex items-center gap-1.5 rounded-full bg-[#881318] px-4 py-2 text-xs font-bold text-white shadow-md"
+                          >
+                            <span>{config.submitButtonText || "Book Now"}</span>
+                            <span className="flex h-4 w-4 items-center justify-center rounded-sm bg-white text-[#881318]">
+                              →
+                            </span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setPreviewStep(1)}
+                            className="text-xs opacity-60 hover:opacity-100"
+                          >
+                            View Calendar
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                </div>
               </div>
             </div>
           </div>
