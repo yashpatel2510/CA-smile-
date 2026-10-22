@@ -1015,18 +1015,9 @@ export function CalendarBookingExperience({
                     </div>
                   )}
 
-                  {/* Bottom Row: Submit on LEFT side, Calendar on RIGHT side matching Image 2 */}
+                  {/* Bottom Row: Calendar on LEFT side, Submit on RIGHT side */}
                   <div className="pt-3 flex items-center justify-between w-full gap-3 border-t border-white/10 dark:border-white/10">
                     <div className="shrink-0 flex items-center justify-start">
-                      <BookNowButton
-                        type="submit"
-                        size="sm"
-                        text={isSubmitting ? "Submitting..." : (config.submitButtonText || "Submit Appointment Request")}
-                        disabled={isSubmitting}
-                      />
-                    </div>
-
-                    <div className="shrink-0 flex items-center justify-end ml-auto">
                       <button
                         type="button"
                         onClick={() => setStep(1)}
@@ -1037,6 +1028,15 @@ export function CalendarBookingExperience({
                         <CalendarIcon className={`h-4 w-4 ${isDark ? "text-zinc-400" : "text-slate-600"}`} />
                         <span>View Full Calendar</span>
                       </button>
+                    </div>
+
+                    <div className="shrink-0 flex items-center justify-end ml-auto">
+                      <BookNowButton
+                        type="submit"
+                        size="sm"
+                        text={isSubmitting ? "Submitting..." : (config.submitButtonText || "Submit Appointment Request")}
+                        disabled={isSubmitting}
+                      />
                     </div>
                   </div>
                 </form>
