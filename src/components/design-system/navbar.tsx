@@ -133,11 +133,21 @@ export function Navbar({
     brandConfig?.headerContactBtnTextColor || "#ffffff";
   const customLogoUrl = brandConfig?.logo?.imageUrl;
 
+  const isDarkBelt = pathname === "/contact" || pathname === "/book";
+
   return (
-    <header className="sticky top-0 z-50 relative w-full px-3 py-2.5 sm:px-6 sm:py-3.5 transition-all">
+    <header
+      className={`sticky top-0 z-50 relative w-full px-3 py-2.5 sm:px-6 sm:py-3.5 transition-all ${
+        isDarkBelt ? "bg-[#0c0d0f]" : ""
+      }`}
+    >
       {/* Floating Pill Container (Matching Sample Design) */}
       <div
-        className="mx-auto flex h-14 sm:h-16 max-w-6xl items-center justify-between rounded-2xl border border-zinc-200/90 px-3.5 sm:px-6 shadow-xs backdrop-blur-md transition-all duration-300 dark:border-zinc-800"
+        className={`mx-auto flex h-14 sm:h-16 max-w-6xl items-center justify-between rounded-2xl px-3.5 sm:px-6 shadow-xs backdrop-blur-md transition-all duration-300 ${
+          isDarkBelt
+            ? "border border-white/10"
+            : "border border-zinc-200/90 dark:border-zinc-800"
+        }`}
         style={{
           backgroundColor: headerBgColor,
         }}
