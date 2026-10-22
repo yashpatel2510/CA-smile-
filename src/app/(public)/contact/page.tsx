@@ -1,31 +1,49 @@
 import type { Metadata } from "next";
+import { DarkContactSection } from "@/components/public/dark-contact-section";
 import { CalendarBookingExperience } from "@/components/public/calendar-booking-experience";
-import { SectionWrapper } from "@/components/design-system/section-wrapper";
 
 export const metadata: Metadata = {
-  title: "Book Appointment & Contact | PedioDent Dental Clinic",
+  title: "Contact Us & Book Appointment | PedioDent Dental Clinic",
   description:
-    "Schedule your dental consultation online from our real-time medical calendar or get in touch with PedioDent Clinic coordinators for inquiries, operating hours, and location details.",
+    "Schedule your dental consultation or get in touch with our clinical coordinators. Black & white modern dental booking experience with instant confirmation.",
   alternates: {
     canonical: "/contact",
   },
   openGraph: {
-    title: "Book Appointment & Contact - PedioDent Dental Clinic",
+    title: "Contact Us & Book Appointment - PedioDent Dental Clinic",
     description:
-      "Craft your visit with our real-time dental calendar. Connect with clinic coordinators, review clinical hours, or call our direct reception line.",
+      "Modern dental consultation booking and clinical coordinator contacts. Let's make that smile shine!",
     url: "/contact",
   },
 };
 
 export default function ContactPage() {
   return (
-    <main className="min-h-screen bg-[#fbf9f5] py-8 sm:py-12">
-      <SectionWrapper containerSize="default" className="py-0 sm:py-0 lg:py-0">
-          {/* FULL-PAGE REAL-TIME CALENDAR APPOINTMENT BOOKING */}
-          <div id="booking-calendar" className="scroll-mt-24">
-            <CalendarBookingExperience />
+    <main className="min-h-screen bg-[#0c0d0f]">
+      {/* Primary Hero: Dribbble-inspired Black & White Theme Contact Form */}
+      <DarkContactSection showCalendarLink={true} />
+
+      {/* Secondary: Full Real-Time Interactive Calendar */}
+      <section
+        id="booking-calendar"
+        className="scroll-mt-16 bg-[#0c0d0f] border-t border-white/5 py-12 sm:py-16"
+      >
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-8 text-center sm:text-left">
+            <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+              Interactive Chair Schedule
+            </span>
+            <h2 className="mt-1 font-heading text-2xl sm:text-3xl font-bold tracking-tight text-white">
+              Prefer Specific Chair-Time Slots?
+            </h2>
+            <p className="mt-1 text-sm text-zinc-400">
+              Pick your exact 30-minute consultation window from our live doctor schedule below.
+            </p>
           </div>
-      </SectionWrapper>
+
+          <CalendarBookingExperience />
+        </div>
+      </section>
     </main>
   );
 }
