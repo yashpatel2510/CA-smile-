@@ -442,54 +442,55 @@ export function CalendarBookingExperience({
   const inputWrapperClass = `group relative rounded-xl border transition-all px-4 py-2.5 flex items-center justify-between ${
     isDark
       ? "bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border-white/10 focus-within:border-white/20"
-      : "bg-stone-50 hover:bg-stone-100/70 focus-within:bg-white border-stone-200 focus-within:border-stone-400"
+      : "bg-slate-50 hover:bg-slate-100/70 focus-within:bg-white border-slate-200 focus-within:border-slate-400"
   }`;
   const inputClass = `w-full bg-transparent text-xs sm:text-sm focus:outline-none ${
     isDark
       ? "text-white placeholder:text-zinc-500 [color-scheme:dark]"
-      : "text-stone-900 placeholder:text-stone-400 [color-scheme:light]"
+      : "text-slate-900 placeholder:text-slate-400 [color-scheme:light]"
   }`;
   const iconClass = `h-4 w-4 shrink-0 pointer-events-none transition-colors ${
-    isDark ? "text-zinc-500 group-hover:text-zinc-400" : "text-stone-400 group-hover:text-stone-600"
+    isDark ? "text-zinc-500 group-hover:text-zinc-400" : "text-slate-400 group-hover:text-slate-600"
   }`;
-  const selectOptionClass = isDark ? "bg-[#222227] text-white" : "bg-white text-stone-900";
+  const selectOptionClass = isDark ? "bg-[#222227] text-white" : "bg-white text-slate-900";
 
   return (
     <div className={`relative w-full overflow-hidden transition-colors duration-200 ${isDark ? "text-white" : "text-stone-900"}`}>
       {/* Outer Card: Compact styling so the whole section fits inside one screen properly */}
+      {/* Outer Card: Compact styling matching Image 3 with internal scrolling if needed */}
       <div className={`overflow-hidden rounded-[24px] sm:rounded-[32px] border shadow-2xl transition-colors duration-200 ${
-        isDark ? "border-white/10 bg-[#111215]" : "border-stone-200 bg-white"
+        isDark ? "border-white/10 bg-[#111215]" : "border-slate-300 bg-white"
       }`}>
         <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch">
           
           {/* =================================================================== */}
-          {/* LEFT COLUMN: Customizable Headline + Contact Us + Wordmark        */}
+          {/* LEFT COLUMN: Customizable Headline + Contact Us + Brand Logo        */}
           {/* =================================================================== */}
-          <div className={`flex flex-col justify-between border-b p-5 sm:p-6 lg:p-8 lg:col-span-5 lg:border-b-0 lg:border-r transition-colors duration-200 ${
+          <div className={`flex flex-col justify-between border-b p-5 sm:p-6 lg:p-8 lg:col-span-5 lg:border-b-0 lg:border-r lg:max-h-[640px] lg:overflow-y-auto custom-scrollbar transition-colors duration-200 ${
             isDark
               ? "border-white/10 bg-[#0e0f12] text-white"
-              : "border-stone-200 bg-[#fbf9f6] text-stone-900"
+              : "border-slate-200 bg-[#f8fafc] text-slate-900"
           }`}>
             <div>
               {/* Main Headline (Configurable via Admin) */}
               <h2 className={`font-heading text-2xl sm:text-3xl lg:text-[2.35rem] font-bold tracking-tight leading-[1.1] ${
-                isDark ? "text-white" : "text-stone-900"
+                isDark ? "text-white" : "text-slate-900"
               }`}>
                 {config.sideHeadingLine1 || "Let's Make That"}<br />
-                <span className={isDark ? "text-white" : "text-stone-900"}>
+                <span className={isDark ? "text-white" : "text-slate-900"}>
                   {config.sideHeadingLine2 || "Smile Shine!"}
                 </span>
               </h2>
 
               {/* Contact Us Block (Configurable via Admin) */}
-              <div className={`mt-4 sm:mt-5 space-y-1.5 text-xs ${isDark ? "text-zinc-400" : "text-stone-600"}`}>
-                <p className={`font-semibold text-xs tracking-wider uppercase ${isDark ? "text-white/90" : "text-stone-900"}`}>
+              <div className={`mt-4 sm:mt-5 space-y-1.5 text-xs ${isDark ? "text-zinc-400" : "text-slate-600"}`}>
+                <p className={`font-semibold text-xs tracking-wider uppercase ${isDark ? "text-white/90" : "text-slate-900"}`}>
                   Contact Us
                 </p>
-                <p className={`leading-relaxed max-w-xs ${isDark ? "text-zinc-400" : "text-stone-600"}`}>
+                <p className={`leading-relaxed max-w-xs ${isDark ? "text-zinc-400" : "text-slate-600"}`}>
                   {config.sideContactAddress || clinicAddress}
                 </p>
-                <p className={`pt-0.5 font-mono ${isDark ? "text-zinc-300" : "text-stone-800"}`}>
+                <p className={`pt-0.5 font-mono ${isDark ? "text-zinc-300" : "text-slate-800"}`}>
                   <a
                     href={`tel:${(config.sideContactPhone || clinicPhone).replace(/\D/g, "")}`}
                     className={`transition-colors ${isDark ? "hover:text-white" : "hover:text-black font-semibold"}`}
@@ -497,7 +498,7 @@ export function CalendarBookingExperience({
                     {config.sideContactPhone || clinicPhone}
                   </a>
                 </p>
-                <p className={isDark ? "text-zinc-400" : "text-stone-600"}>
+                <p className={isDark ? "text-zinc-400" : "text-slate-600"}>
                   <a
                     href={`mailto:${config.sideContactEmail || clinicEmail}`}
                     className={`transition-colors ${isDark ? "hover:text-white" : "hover:text-black font-semibold"}`}
@@ -517,15 +518,15 @@ export function CalendarBookingExperience({
                         ? "border-white/20 bg-[#1c1d22]"
                         : "border-white/5 bg-[#151619]"
                       : selectedDate
-                      ? "border-stone-300 bg-white shadow-xs"
-                      : "border-stone-200 bg-stone-100/70"
+                      ? "border-slate-300 bg-white shadow-xs"
+                      : "border-slate-200 bg-slate-100/70"
                   }`}
                 >
-                  <div className={`text-[10px] font-bold uppercase tracking-wider ${isDark ? "text-zinc-500" : "text-stone-500"}`}>
+                  <div className={`text-[10px] font-bold uppercase tracking-wider ${isDark ? "text-zinc-500" : "text-slate-500"}`}>
                     SELECTED DATE
                   </div>
-                  <div className={`mt-0.5 flex items-center gap-1.5 text-xs sm:text-sm font-semibold ${isDark ? "text-white" : "text-stone-900"}`}>
-                    <CalendarIcon className={`h-3.5 w-3.5 ${isDark ? "text-zinc-300" : "text-stone-500"}`} />
+                  <div className={`mt-0.5 flex items-center gap-1.5 text-xs sm:text-sm font-semibold ${isDark ? "text-white" : "text-slate-900"}`}>
+                    <CalendarIcon className={`h-3.5 w-3.5 ${isDark ? "text-zinc-300" : "text-slate-500"}`} />
                     <span>{selectedDateShortString}</span>
                   </div>
                 </div>
@@ -538,31 +539,37 @@ export function CalendarBookingExperience({
                         ? "border-white/20 bg-[#1c1d22]"
                         : "border-white/5 bg-[#151619]"
                       : selectedSlot
-                      ? "border-stone-300 bg-white shadow-xs"
-                      : "border-stone-200 bg-stone-100/70"
+                      ? "border-slate-300 bg-white shadow-xs"
+                      : "border-slate-200 bg-slate-100/70"
                   }`}
                 >
-                  <div className={`text-[10px] font-bold uppercase tracking-wider ${isDark ? "text-zinc-500" : "text-stone-500"}`}>
+                  <div className={`text-[10px] font-bold uppercase tracking-wider ${isDark ? "text-zinc-500" : "text-slate-500"}`}>
                     TIME SLOT
                   </div>
-                  <div className={`mt-0.5 flex items-center gap-1.5 text-xs sm:text-sm font-semibold ${isDark ? "text-white" : "text-stone-900"}`}>
-                    <Clock className={`h-3.5 w-3.5 ${isDark ? "text-zinc-300" : "text-stone-500"}`} />
+                  <div className={`mt-0.5 flex items-center gap-1.5 text-xs sm:text-sm font-semibold ${isDark ? "text-white" : "text-slate-900"}`}>
+                    <Clock className={`h-3.5 w-3.5 ${isDark ? "text-zinc-300" : "text-slate-500"}`} />
                     <span className="truncate">{selectedSlot || "Select a time"}</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Bottom: Wordmark typography + Follow Us */}
+            {/* Bottom: CA Smile Logo (Replaced 'brighter' wordmark) + Follow Us */}
             <div className="mt-5 sm:mt-6 pt-2">
-              <div className={`select-none font-sans text-5xl sm:text-6xl lg:text-[4.75rem] font-black tracking-tight leading-none mb-3 ${
-                isDark ? "text-white/95" : "text-stone-900/90"
-              }`}>
-                {config.sideWordmark || "brighter"}
+              <div className="mb-3 flex items-center">
+                <img
+                  src={
+                    isDark
+                      ? (config.logoDarkUrl || "/images/ca-smile-logo-dark.png")
+                      : (config.logoLightUrl || "/images/ca-smile-logo-light.png")
+                  }
+                  alt={config.clinicName || "CA Smile Dental Clinic"}
+                  className="h-12 sm:h-14 lg:h-16 w-auto max-w-[240px] object-contain select-none transition-opacity duration-200"
+                />
               </div>
 
-              <div className={`flex flex-wrap items-center gap-2 text-[11px] font-medium ${isDark ? "text-zinc-400" : "text-stone-600"}`}>
-                <span className={`font-semibold ${isDark ? "text-zinc-300" : "text-stone-900"}`}>
+              <div className={`flex flex-wrap items-center gap-2 text-[11px] font-medium ${isDark ? "text-zinc-400" : "text-slate-600"}`}>
+                <span className={`font-semibold ${isDark ? "text-zinc-300" : "text-slate-900"}`}>
                   {config.sideFollowText || "Follow Us:"}
                 </span>
                 <a
@@ -573,7 +580,7 @@ export function CalendarBookingExperience({
                 >
                   Facebook
                 </a>
-                <span className={isDark ? "text-zinc-600" : "text-stone-400"}>•</span>
+                <span className={isDark ? "text-zinc-600" : "text-slate-400"}>•</span>
                 <a
                   href={config.linkedinUrl || "https://linkedin.com"}
                   target="_blank"
@@ -582,7 +589,7 @@ export function CalendarBookingExperience({
                 >
                   LinkedIn
                 </a>
-                <span className={isDark ? "text-zinc-600" : "text-stone-400"}>•</span>
+                <span className={isDark ? "text-zinc-600" : "text-slate-400"}>•</span>
                 <a
                   href={config.instagramUrl || "https://instagram.com"}
                   target="_blank"
@@ -598,8 +605,8 @@ export function CalendarBookingExperience({
           {/* =================================================================== */}
           {/* RIGHT COLUMN: STEP 1 (Calendar) or STEP 2 (Image 2 Form Design)     */}
           {/* =================================================================== */}
-          <div className={`p-5 sm:p-6 lg:p-8 lg:col-span-7 flex flex-col justify-between transition-colors duration-200 ${
-            isDark ? "bg-[#18181c] text-white" : "bg-white text-stone-900"
+          <div className={`p-5 sm:p-6 lg:p-8 lg:col-span-7 flex flex-col justify-between lg:max-h-[640px] lg:overflow-y-auto custom-scrollbar transition-colors duration-200 ${
+            isDark ? "bg-[#18181c] text-white" : "bg-white text-slate-900"
           }`}>
             <div>
               {/* Error Alert */}
@@ -615,13 +622,13 @@ export function CalendarBookingExperience({
               {/* ----------------------------------------------------------------- */}
               {step === 1 && (
                 <div className="space-y-4">
-                  <h3 className={`font-heading text-lg sm:text-xl font-bold tracking-tight ${isDark ? "text-white" : "text-stone-900"}`}>
+                  <h3 className={`font-heading text-lg sm:text-xl font-bold tracking-tight ${isDark ? "text-white" : "text-slate-900"}`}>
                     {config.title || "Book Your Appointment"}
                   </h3>
 
                   {/* Month & Year Navigation Header */}
-                  <div className={`flex items-center justify-between border-b pb-2 ${isDark ? "border-white/10" : "border-stone-200"}`}>
-                    <h4 className={`font-heading text-sm sm:text-base font-bold ${isDark ? "text-white" : "text-stone-900"}`}>
+                  <div className={`flex items-center justify-between border-b pb-2 ${isDark ? "border-white/10" : "border-slate-200"}`}>
+                    <h4 className={`font-heading text-sm sm:text-base font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
                       {MONTH_NAMES[month]} {year}
                     </h4>
                     <div className="flex items-center gap-1.5">
@@ -633,10 +640,10 @@ export function CalendarBookingExperience({
                           !isCanPrevMonth
                             ? isDark
                               ? "border-white/5 text-zinc-600 opacity-40 cursor-not-allowed select-none"
-                              : "border-stone-200 text-stone-300 opacity-40 cursor-not-allowed select-none"
+                              : "border-slate-200 text-slate-300 opacity-40 cursor-not-allowed select-none"
                             : isDark
                             ? "border-white/10 bg-[#222227] text-white hover:bg-[#2c2c34] active:scale-95 cursor-pointer"
-                            : "border-stone-300 bg-stone-100 text-stone-800 hover:bg-stone-200 active:scale-95 cursor-pointer"
+                            : "border-slate-300 bg-slate-100 text-slate-800 hover:bg-slate-200 active:scale-95 cursor-pointer"
                         }`}
                         aria-label="Previous Month"
                         title={!isCanPrevMonth ? "Cannot view past months" : "Previous Month"}
@@ -649,7 +656,7 @@ export function CalendarBookingExperience({
                         className={`flex h-7 w-7 items-center justify-center rounded-lg border transition-colors cursor-pointer active:scale-95 ${
                           isDark
                             ? "border-white/10 bg-[#222227] text-white hover:bg-[#2c2c34]"
-                            : "border-stone-300 bg-stone-100 text-stone-800 hover:bg-stone-200"
+                            : "border-slate-300 bg-slate-100 text-slate-800 hover:bg-slate-200"
                         }`}
                         aria-label="Next Month"
                       >
@@ -659,7 +666,7 @@ export function CalendarBookingExperience({
                   </div>
 
                   {/* Days of week header */}
-                  <div className={`grid grid-cols-7 gap-1 text-center text-[10px] font-bold tracking-wider ${isDark ? "text-zinc-500" : "text-stone-400"}`}>
+                  <div className={`grid grid-cols-7 gap-1 text-center text-[10px] font-bold tracking-wider ${isDark ? "text-zinc-500" : "text-slate-400"}`}>
                     {DAY_NAMES.map((d) => (
                       <div key={d} className="py-0.5">
                         {d}
@@ -697,23 +704,23 @@ export function CalendarBookingExperience({
                             isPast
                               ? isDark
                                 ? "cursor-not-allowed text-zinc-600 bg-transparent select-none opacity-30"
-                                : "cursor-not-allowed text-stone-300 bg-transparent select-none opacity-40"
+                                : "cursor-not-allowed text-slate-300 bg-transparent select-none opacity-40"
                               : isSelected
                               ? isDark
                                 ? "border-2 border-white bg-white text-black font-extrabold shadow-md scale-[1.04]"
-                                : "border-2 border-stone-900 bg-stone-900 text-white font-extrabold shadow-md scale-[1.04]"
+                                : "border-2 border-slate-900 bg-slate-900 text-white font-extrabold shadow-md scale-[1.04]"
                               : isToday
                               ? isDark
                                 ? "border border-white/20 bg-[#25252c] text-white hover:bg-[#2d2d36]"
-                                : "border border-stone-400 bg-stone-100 text-stone-900 hover:bg-stone-200"
+                                : "border border-slate-400 bg-slate-100 text-slate-900 hover:bg-slate-200"
                               : isDark
                               ? "border border-white/5 bg-[#202025] text-zinc-300 hover:border-white/15 hover:bg-[#27272f]"
-                              : "border border-stone-200 bg-stone-50 text-stone-800 hover:border-stone-300 hover:bg-stone-100"
+                              : "border border-slate-200 bg-slate-50 text-slate-800 hover:border-slate-300 hover:bg-slate-100"
                           }`}
                         >
                           <span>{day}</span>
                           {isToday && !isSelected && (
-                            <span className={`absolute bottom-1 h-1 w-1 rounded-full ${isDark ? "bg-white" : "bg-stone-900"}`} />
+                            <span className={`absolute bottom-1 h-1 w-1 rounded-full ${isDark ? "bg-white" : "bg-slate-900"}`} />
                           )}
                         </button>
                       );
@@ -723,12 +730,12 @@ export function CalendarBookingExperience({
                   {/* Available Time Slots Header & Grid (From Admin Panel Config) */}
                   <div className="space-y-2 pt-1">
                     <div className="flex items-center justify-between text-[11px]">
-                      <span className={`font-semibold tracking-wider uppercase ${isDark ? "text-zinc-400" : "text-stone-500"}`}>
+                      <span className={`font-semibold tracking-wider uppercase ${isDark ? "text-zinc-400" : "text-slate-500"}`}>
                         Available Time Slots
                       </span>
                       {selectedDate && (
-                        <span className={isDark ? "text-zinc-400" : "text-stone-500"}>
-                          For <strong className={isDark ? "text-white" : "text-stone-900"}>{selectedDateShortString}</strong>
+                        <span className={isDark ? "text-zinc-400" : "text-slate-500"}>
+                          For <strong className={isDark ? "text-white" : "text-slate-900"}>{selectedDateShortString}</strong>
                         </span>
                       )}
                     </div>
@@ -748,10 +755,10 @@ export function CalendarBookingExperience({
                               isSlotSelected
                                 ? isDark
                                   ? "border-2 border-white bg-white font-bold text-black shadow-sm"
-                                  : "border-2 border-stone-900 bg-stone-900 font-bold text-white shadow-sm"
+                                  : "border-2 border-slate-900 bg-slate-900 font-bold text-white shadow-sm"
                                 : isDark
                                 ? "border-white/5 bg-[#202025] text-zinc-300 hover:border-white/15 hover:bg-[#26262d]"
-                                : "border-stone-200 bg-stone-50 text-stone-800 hover:border-stone-300 hover:bg-stone-100"
+                                : "border-slate-200 bg-slate-50 text-slate-800 hover:border-slate-300 hover:bg-slate-100"
                             }`}
                           >
                             {slot}
@@ -768,7 +775,7 @@ export function CalendarBookingExperience({
               {/* ----------------------------------------------------------------- */}
               {step === 2 && (
                 <form onSubmit={handleConfirmBooking} className="space-y-3">
-                  <h3 className={`font-heading text-lg sm:text-xl font-bold tracking-tight mb-3 ${isDark ? "text-white" : "text-stone-900"}`}>
+                  <h3 className={`font-heading text-lg sm:text-xl font-bold tracking-tight mb-3 ${isDark ? "text-white" : "text-slate-900"}`}>
                     {config.title || "Book Your Appointment"}
                   </h3>
 
@@ -779,7 +786,7 @@ export function CalendarBookingExperience({
                         type="text"
                         name="fullName"
                         required={isFieldRequired("fullName")}
-                        placeholder={getField("fullName")?.placeholder || getField("fullName")?.label || "Your Full Name"}
+                        placeholder={getField("fullName")?.placeholder || "e.g. Anish Kumar"}
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
                         className={inputClass}
@@ -795,7 +802,7 @@ export function CalendarBookingExperience({
                         type="tel"
                         name="phone"
                         required={isFieldRequired("mobileNumber")}
-                        placeholder={getField("mobileNumber")?.placeholder || getField("mobileNumber")?.label || "Phone Number"}
+                        placeholder={getField("mobileNumber")?.placeholder || "10-digit mobile number"}
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         className={inputClass}
@@ -811,7 +818,7 @@ export function CalendarBookingExperience({
                         type="email"
                         name="email"
                         required={isFieldRequired("email")}
-                        placeholder={getField("email")?.placeholder || getField("email")?.label || "Email Address"}
+                        placeholder={getField("email")?.placeholder || "Email Address (Optional)"}
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         className={inputClass}
@@ -827,15 +834,15 @@ export function CalendarBookingExperience({
                       className={`group relative rounded-xl border transition-all px-4 py-2.5 flex items-center justify-between cursor-pointer ${
                         isDark
                           ? "bg-[#222227] hover:bg-[#26262d] border-white/10"
-                          : "bg-stone-50 hover:bg-stone-100/70 border-stone-200"
+                          : "bg-slate-50 hover:bg-slate-100/70 border-slate-200"
                       }`}
                       title="Click to change date on calendar"
                     >
-                      <span className={`text-xs sm:text-sm font-medium ${isDark ? "text-white" : "text-stone-900"}`}>
+                      <span className={`text-xs sm:text-sm font-medium ${isDark ? "text-white" : "text-slate-900"}`}>
                         {dateFormattedSlash || "Select Date"}
                       </span>
                       <CalendarIcon className={`h-4 w-4 shrink-0 pointer-events-none transition-colors ${
-                        isDark ? "text-zinc-400 group-hover:text-white" : "text-stone-400 group-hover:text-stone-800"
+                        isDark ? "text-zinc-400 group-hover:text-white" : "text-slate-400 group-hover:text-slate-800"
                       }`} />
                     </div>
                   )}
@@ -848,7 +855,7 @@ export function CalendarBookingExperience({
                         onChange={(e) => setPreferredTime(e.target.value)}
                         aria-label="Preferred Time"
                         className={`w-full bg-transparent text-xs sm:text-sm appearance-none focus:outline-none cursor-pointer ${
-                          isDark ? "text-white [color-scheme:dark]" : "text-stone-900 [color-scheme:light]"
+                          isDark ? "text-white [color-scheme:dark]" : "text-slate-900 [color-scheme:light]"
                         }`}
                       >
                         {availableSlots.map((slot, i) => (
@@ -869,7 +876,7 @@ export function CalendarBookingExperience({
                         onChange={(e) => setDoctorPreference(e.target.value)}
                         aria-label="Doctor Preference"
                         className={`w-full bg-transparent text-xs sm:text-sm appearance-none focus:outline-none cursor-pointer ${
-                          isDark ? "text-white [color-scheme:dark]" : "text-stone-900 [color-scheme:light]"
+                          isDark ? "text-white [color-scheme:dark]" : "text-slate-900 [color-scheme:light]"
                         }`}
                       >
                         {doctorsList.map((doc, i) => (
@@ -890,7 +897,7 @@ export function CalendarBookingExperience({
                         onChange={(e) => setTreatment(e.target.value)}
                         aria-label="Treatment Category"
                         className={`w-full bg-transparent text-xs sm:text-sm appearance-none focus:outline-none cursor-pointer ${
-                          isDark ? "text-white [color-scheme:dark]" : "text-stone-900 [color-scheme:light]"
+                          isDark ? "text-white [color-scheme:dark]" : "text-slate-900 [color-scheme:light]"
                         }`}
                       >
                         {treatmentsList.map((t, idx) => (
@@ -903,16 +910,29 @@ export function CalendarBookingExperience({
                     </div>
                   )}
 
-                  {/* Field 8: Optional Symptoms / Clinical Notes (If enabled in Admin) */}
+                  {/* Field 8: Notes / Symptoms - Matching pill styling, bigger than other boxes */}
                   {isFieldEnabled("notes") && (
-                    <div className={inputWrapperClass}>
-                      <input
-                        type="text"
+                    <div
+                      className={`group relative rounded-xl border transition-all px-4 py-3 min-h-[84px] flex items-start ${
+                        isDark
+                          ? "bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border-white/10 focus-within:border-white/20"
+                          : "bg-slate-50 hover:bg-slate-100/70 focus-within:bg-white border-slate-200 focus-within:border-slate-400"
+                      }`}
+                    >
+                      <textarea
+                        rows={3}
                         name="notes"
-                        placeholder={getField("notes")?.placeholder || "Describe your symptoms or questions (Optional)..."}
+                        placeholder={
+                          getField("notes")?.placeholder ||
+                          "Describe your symptoms, tooth sensitivity, or clinical background..."
+                        }
                         value={notes}
                         onChange={(e) => setNotes(e.target.value)}
-                        className={inputClass}
+                        className={`w-full bg-transparent text-xs sm:text-sm focus:outline-none resize-none leading-relaxed ${
+                          isDark
+                            ? "text-white placeholder:text-zinc-500 [color-scheme:dark]"
+                            : "text-slate-900 placeholder:text-slate-400 [color-scheme:light]"
+                        }`}
                       />
                     </div>
                   )}
@@ -936,7 +956,7 @@ export function CalendarBookingExperience({
                               }))
                             }
                             className={`w-full bg-transparent text-xs sm:text-sm appearance-none focus:outline-none cursor-pointer ${
-                              isDark ? "text-white [color-scheme:dark]" : "text-stone-900 [color-scheme:light]"
+                              isDark ? "text-white [color-scheme:dark]" : "text-slate-900 [color-scheme:light]"
                             }`}
                           >
                             <option value="" className={selectOptionClass}>
@@ -971,17 +991,17 @@ export function CalendarBookingExperience({
                   {isFieldEnabled("consentAgreed") && (
                     <div className="pt-0.5">
                       <label className={`flex items-center gap-2.5 cursor-pointer text-xs select-none group ${
-                        isDark ? "text-zinc-400" : "text-stone-600"
+                        isDark ? "text-zinc-400" : "text-slate-600"
                       }`}>
                         <input
                           type="checkbox"
                           checked={consentAgreed}
                           onChange={(e) => setConsentAgreed(e.target.checked)}
                           className={`h-4 w-4 rounded cursor-pointer accent-[#881318] ${
-                            isDark ? "border-zinc-700 bg-zinc-800 text-red-600" : "border-stone-300 bg-white text-red-600"
+                            isDark ? "border-zinc-700 bg-zinc-800 text-red-600" : "border-slate-300 bg-white text-red-600"
                           }`}
                         />
-                        <span className={`transition-colors ${isDark ? "group-hover:text-zinc-300" : "group-hover:text-stone-900"}`}>
+                        <span className={`transition-colors ${isDark ? "group-hover:text-zinc-300" : "group-hover:text-slate-900"}`}>
                           {getField("consentAgreed")?.label || getField("consentAgreed")?.helpText || "I agree to be contacted to confirm my appointment."}
                         </span>
                       </label>
@@ -993,7 +1013,7 @@ export function CalendarBookingExperience({
                     <BookNowButton
                       type="submit"
                       size="sm"
-                      text={isSubmitting ? "Submitting..." : (config.submitButtonText || "Book Now")}
+                      text={isSubmitting ? "Submitting..." : (config.submitButtonText || "Submit Appointment Request")}
                       disabled={isSubmitting}
                     />
 
@@ -1001,10 +1021,10 @@ export function CalendarBookingExperience({
                       type="button"
                       onClick={() => setStep(1)}
                       className={`inline-flex items-center gap-1.5 text-xs transition-colors cursor-pointer ${
-                        isDark ? "text-zinc-400 hover:text-white" : "text-stone-500 hover:text-stone-900"
+                        isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900"
                       }`}
                     >
-                      <CalendarIcon className={`h-3.5 w-3.5 ${isDark ? "text-zinc-400" : "text-stone-500"}`} />
+                      <CalendarIcon className={`h-3.5 w-3.5 ${isDark ? "text-zinc-400" : "text-slate-500"}`} />
                       <span>View Full Calendar</span>
                     </button>
                   </div>
@@ -1017,38 +1037,38 @@ export function CalendarBookingExperience({
               {step === 3 && confirmedData && (
                 <div className="space-y-4 py-2">
                   <div className={`rounded-2xl border p-5 space-y-3 ${
-                    isDark ? "border-white/10 bg-[#202025] text-white" : "border-stone-200 bg-stone-50 text-stone-900 shadow-sm"
+                    isDark ? "border-white/10 bg-[#202025] text-white" : "border-slate-200 bg-slate-50 text-slate-900 shadow-sm"
                   }`}>
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-500 border border-emerald-500/30">
                         <CheckCircle2 className="h-5 w-5" />
                       </div>
                       <div>
-                        <h4 className={`font-heading text-base sm:text-lg font-bold ${isDark ? "text-white" : "text-stone-900"}`}>
+                        <h4 className={`font-heading text-base sm:text-lg font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
                           Appointment Confirmed!
                         </h4>
-                        <p className={`text-xs ${isDark ? "text-zinc-400" : "text-stone-500"}`}>
-                          Reference: <span className={`font-mono font-bold ${isDark ? "text-white" : "text-stone-900"}`}>{confirmedData.id}</span>
+                        <p className={`text-xs ${isDark ? "text-zinc-400" : "text-slate-500"}`}>
+                          Reference: <span className={`font-mono font-bold ${isDark ? "text-white" : "text-slate-900"}`}>{confirmedData.id}</span>
                         </p>
                       </div>
                     </div>
 
-                    <div className={`space-y-1.5 border-t pt-3 text-xs ${isDark ? "border-white/10 text-zinc-300" : "border-stone-200 text-stone-700"}`}>
-                      <div className={`flex justify-between py-0.5 border-b ${isDark ? "border-white/5" : "border-stone-200/60"}`}>
-                        <span className={isDark ? "text-zinc-400" : "text-stone-500"}>Patient:</span>
-                        <span className={`font-medium ${isDark ? "text-white" : "text-stone-900"}`}>{confirmedData.patientName}</span>
+                    <div className={`space-y-1.5 border-t pt-3 text-xs ${isDark ? "border-white/10 text-zinc-300" : "border-slate-200 text-slate-700"}`}>
+                      <div className={`flex justify-between py-0.5 border-b ${isDark ? "border-white/5" : "border-slate-200/60"}`}>
+                        <span className={isDark ? "text-zinc-400" : "text-slate-500"}>Patient:</span>
+                        <span className={`font-medium ${isDark ? "text-white" : "text-slate-900"}`}>{confirmedData.patientName}</span>
                       </div>
-                      <div className={`flex justify-between py-0.5 border-b ${isDark ? "border-white/5" : "border-stone-200/60"}`}>
-                        <span className={isDark ? "text-zinc-400" : "text-stone-500"}>Scheduled Date:</span>
-                        <span className={`font-medium ${isDark ? "text-white" : "text-stone-900"}`}>{confirmedData.dateFormatted}</span>
+                      <div className={`flex justify-between py-0.5 border-b ${isDark ? "border-white/5" : "border-slate-200/60"}`}>
+                        <span className={isDark ? "text-zinc-400" : "text-slate-500"}>Scheduled Date:</span>
+                        <span className={`font-medium ${isDark ? "text-white" : "text-slate-900"}`}>{confirmedData.dateFormatted}</span>
                       </div>
-                      <div className={`flex justify-between py-0.5 border-b ${isDark ? "border-white/5" : "border-stone-200/60"}`}>
-                        <span className={isDark ? "text-zinc-400" : "text-stone-500"}>Time Window:</span>
-                        <span className={`font-medium ${isDark ? "text-white" : "text-stone-900"}`}>{confirmedData.slot}</span>
+                      <div className={`flex justify-between py-0.5 border-b ${isDark ? "border-white/5" : "border-slate-200/60"}`}>
+                        <span className={isDark ? "text-zinc-400" : "text-slate-500"}>Time Window:</span>
+                        <span className={`font-medium ${isDark ? "text-white" : "text-slate-900"}`}>{confirmedData.slot}</span>
                       </div>
                       <div className="flex justify-between py-0.5">
-                        <span className={isDark ? "text-zinc-400" : "text-stone-500"}>Specialist:</span>
-                        <span className={`font-medium ${isDark ? "text-white" : "text-stone-900"}`}>{confirmedData.doctor}</span>
+                        <span className={isDark ? "text-zinc-400" : "text-slate-500"}>Specialist:</span>
+                        <span className={`font-medium ${isDark ? "text-white" : "text-slate-900"}`}>{confirmedData.doctor}</span>
                       </div>
                     </div>
                   </div>
@@ -1058,7 +1078,7 @@ export function CalendarBookingExperience({
                       type="button"
                       onClick={handleReset}
                       className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold transition-all cursor-pointer ${
-                        isDark ? "bg-white/10 hover:bg-white/15 text-white" : "bg-stone-200 hover:bg-stone-300 text-stone-900"
+                        isDark ? "bg-white/10 hover:bg-white/15 text-white" : "bg-slate-200 hover:bg-slate-300 text-slate-900"
                       }`}
                     >
                       <RefreshCw className="h-3.5 w-3.5" />
@@ -1070,7 +1090,7 @@ export function CalendarBookingExperience({
                       className={`inline-flex items-center gap-1.5 rounded-xl border px-4 py-2 text-xs font-semibold transition-all ${
                         isDark
                           ? "border-white/10 bg-[#222227] text-zinc-300 hover:text-white hover:bg-[#282830]"
-                          : "border-stone-300 bg-white text-stone-700 hover:text-stone-900 hover:bg-stone-100"
+                          : "border-slate-300 bg-white text-slate-700 hover:text-slate-900 hover:bg-slate-100"
                       }`}
                     >
                       <span>Back to Home</span>
@@ -1083,9 +1103,9 @@ export function CalendarBookingExperience({
             {/* Bottom Row in Step 1: Continue Button with Selection Guidance */}
             {step === 1 && (
               <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 mt-3 border-t ${
-                isDark ? "border-white/10" : "border-stone-200"
+                isDark ? "border-white/10" : "border-slate-200"
               }`}>
-                <div className={`text-[11px] ${isDark ? "text-zinc-400" : "text-stone-500"}`}>
+                <div className={`text-[11px] ${isDark ? "text-zinc-400" : "text-slate-500"}`}>
                   {selectedDate && selectedSlot ? (
                     <span className="inline-flex items-center gap-1 text-emerald-500 font-semibold">
                       <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />

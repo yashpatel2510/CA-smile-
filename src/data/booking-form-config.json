@@ -1,12 +1,14 @@
 {
   "headerBadge": "Quick Appointment Request",
   "title": "Book Your Appointment",
-  "submitButtonText": "Book Now",
-  "clinicName": "VS Multispeciality Dental Clinic",
+  "submitButtonText": "Submit Appointment Request",
+  "clinicName": "CA Smile Dental Clinic",
   "themeMode": "dark",
   "sideHeadingLine1": "Let's Make That",
   "sideHeadingLine2": "Smile Shine!",
   "sideWordmark": "brighter",
+  "logoDarkUrl": "/images/ca-smile-logo-dark.png",
+  "logoLightUrl": "/images/ca-smile-logo-light.png",
   "sideContactAddress": "",
   "sideContactPhone": "",
   "sideContactEmail": "",
@@ -25,7 +27,7 @@
       "type": "text",
       "required": true,
       "enabled": true,
-      "placeholder": "Your Full Name"
+      "placeholder": "e.g. Anish Kumar"
     },
     {
       "id": "mobileNumber",
@@ -82,7 +84,7 @@
       "type": "textarea",
       "required": false,
       "enabled": true,
-      "placeholder": "Describe your symptoms or questions (Optional)..."
+      "placeholder": "Describe your symptoms, tooth sensitivity, or clinical background..."
     },
     {
       "id": "consentAgreed",

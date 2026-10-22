@@ -45,4 +45,20 @@ h6 {
   .text-balance {
     text-wrap: balance;
   }
+
+  /* Sleek custom scrollbar for booking cards and compact containers */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(140, 140, 150, 0.3);
+    border-radius: 9999px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(140, 140, 150, 0.5);
+  }
 }

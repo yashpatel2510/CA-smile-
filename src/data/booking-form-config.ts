@@ -29,7 +29,9 @@ export interface BookingFormConfig {
   themeMode?: "dark" | "light"; // "dark" (Black & White Dribbble) vs "light" (White luxury mode)
   sideHeadingLine1?: string; // Left headline line 1, e.g. "Let's Make That"
   sideHeadingLine2?: string; // Left headline line 2, e.g. "Smile Shine!"
-  sideWordmark?: string; // Left huge wordmark, e.g. "brighter"
+  sideWordmark?: string; // Left huge wordmark fallback (e.g. "brighter")
+  logoDarkUrl?: string; // Logo image for dark theme, defaults to /images/ca-smile-logo-dark.png
+  logoLightUrl?: string; // Logo image for light theme, defaults to /images/ca-smile-logo-light.png
   sideContactAddress?: string; // Custom address override (blank uses clinic address)
   sideContactPhone?: string; // Custom phone override (blank uses clinic phone)
   sideContactEmail?: string; // Custom email override (blank uses clinic email)
@@ -50,12 +52,14 @@ export interface BookingFormConfig {
 export const defaultBookingFormConfig: BookingFormConfig = {
   headerBadge: "Quick Appointment Request",
   title: "Book Your Appointment",
-  submitButtonText: "Book Now",
-  clinicName: "VS Multispeciality Dental Clinic",
+  submitButtonText: "Submit Appointment Request",
+  clinicName: "CA Smile Dental Clinic",
   themeMode: "dark",
   sideHeadingLine1: "Let's Make That",
   sideHeadingLine2: "Smile Shine!",
   sideWordmark: "brighter",
+  logoDarkUrl: "/images/ca-smile-logo-dark.png",
+  logoLightUrl: "/images/ca-smile-logo-light.png",
   sideContactAddress: "",
   sideContactPhone: "",
   sideContactEmail: "",

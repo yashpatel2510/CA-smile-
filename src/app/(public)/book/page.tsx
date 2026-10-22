@@ -29,7 +29,7 @@ export default function BookAppointmentPage() {
   return (
     <main
       className={`min-h-[85vh] py-8 sm:py-12 transition-colors duration-200 ${
-        isDark ? "bg-[#0c0d0f]" : "bg-[#f4f2ee]"
+        isDark ? "bg-[#0c0d0f]" : "bg-[#e2e8f0]"
       }`}
     >
       <SectionWrapper containerSize="default" className="py-0 sm:py-0 lg:py-0">

@@ -26,7 +26,7 @@ export default function ContactPage() {
   return (
     <main
       className={`min-h-[calc(100vh-80px)] py-3 sm:py-5 lg:py-6 flex flex-col justify-center transition-colors duration-200 ${
-        isDark ? "bg-[#0c0d0f]" : "bg-[#f4f2ee]"
+        isDark ? "bg-[#0c0d0f]" : "bg-[#e2e8f0]"
       }`}
     >
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">

@@ -900,10 +900,10 @@ export default function AdminBookingFormBuilderPage() {
                       </div>
                       <div>
                         <div className="font-heading text-sm font-bold text-stone-900">
-                          White / Light Mode
+                          White / Dress Gray Mode
                         </div>
                         <div className="text-[10px] text-stone-500">
-                          Clean Luxury Clinic Theme
+                          Clean Architectural Clinic Theme
                         </div>
                       </div>
                     </div>
@@ -919,25 +919,25 @@ export default function AdminBookingFormBuilderPage() {
                   </div>
 
                   <p className="mt-2 text-xs text-stone-600 leading-relaxed">
-                    Pure white backdrop with soft warm surfaces, slate charcoal typography, and crisp light calendar days. Airy and medical-grade clean.
+                    Sophisticated dress gray backdrop (#e2e8f0) with pure white card surfaces, dark CA Smile logo, and crisp slate calendar grid. Premium, modern, and clinical.
                   </p>
 
                   <div className="mt-3 flex items-center gap-2 rounded-lg bg-stone-100 p-2 text-[10px] text-stone-700 border border-stone-200">
-                    <span className="h-3 w-3 rounded-full bg-white border border-stone-300" />
-                    <span>Background: Pure White (#ffffff)</span>
-                    <span className="h-3 w-3 rounded-full bg-[#1c1917] ml-auto" />
+                    <span className="h-3 w-3 rounded-full bg-[#e2e8f0] border border-stone-300" />
+                    <span>Background: Dress Gray (#e2e8f0)</span>
+                    <span className="h-3 w-3 rounded-full bg-[#0f172a] ml-auto" />
                     <span>Text: Deep Slate Charcoal</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* LEFT-SIDE HEADLINES & WORDMARK SETTINGS */}
+            {/* LEFT-SIDE HEADLINES & LOGO SETTINGS */}
             <div className="space-y-4 rounded-xl border border-brand-border bg-brand-surface p-4">
               <div className="flex items-center gap-2">
                 <Type className="h-4 w-4 text-brand-primary" />
                 <h3 className="font-heading text-sm font-bold text-brand-text">
-                  Left-Side Headlines &amp; Typography
+                  Left-Side Headlines &amp; Brand Logos
                 </h3>
               </div>
 
@@ -984,24 +984,45 @@ export default function AdminBookingFormBuilderPage() {
                   </p>
                 </div>
 
-                <div className="space-y-1 sm:col-span-2">
+                <div className="space-y-1">
                   <label className="text-xs font-semibold text-brand-text">
-                    Large Bottom Wordmark Text
+                    Dark Theme Logo Path
                   </label>
                   <Input
                     type="text"
-                    value={config.sideWordmark ?? "brighter"}
+                    value={config.logoDarkUrl ?? "/images/ca-smile-logo-dark.png"}
                     onChange={(e) =>
                       setConfig((prev) => ({
                         ...prev,
-                        sideWordmark: e.target.value,
+                        logoDarkUrl: e.target.value,
                       }))
                     }
-                    placeholder="e.g. brighter"
-                    className="h-9 font-sans text-sm font-bold"
+                    placeholder="/images/ca-smile-logo-dark.png"
+                    className="h-9 font-mono text-xs"
                   />
                   <p className="text-[10px] text-brand-muted">
-                    Massive artistic wordmark displayed at the bottom of the left column (e.g. brighter, smile, radiance)
+                    White logo for Dark Mode (e.g. /images/ca-smile-logo-dark.png)
+                  </p>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-brand-text">
+                    Light Theme Logo Path
+                  </label>
+                  <Input
+                    type="text"
+                    value={config.logoLightUrl ?? "/images/ca-smile-logo-light.png"}
+                    onChange={(e) =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        logoLightUrl: e.target.value,
+                      }))
+                    }
+                    placeholder="/images/ca-smile-logo-light.png"
+                    className="h-9 font-mono text-xs"
+                  />
+                  <p className="text-[10px] text-brand-muted">
+                    Dark logo for Dress Gray Mode (e.g. /images/ca-smile-logo-light.png)
                   </p>
                 </div>
               </div>
@@ -1807,24 +1828,24 @@ export default function AdminBookingFormBuilderPage() {
             {/* Realistic Preview Container matching /contact page */}
             <div
               className={`rounded-2xl p-4 sm:p-6 transition-colors duration-200 ${
-                config.themeMode === "light" ? "bg-[#f4f2ee]" : "bg-[#0c0d0f]"
+                config.themeMode === "light" ? "bg-[#e2e8f0]" : "bg-[#0c0d0f]"
               }`}
             >
               {/* Dual-Column Card */}
               <div
                 className={`overflow-hidden rounded-[24px] border shadow-2xl transition-colors duration-200 ${
                   config.themeMode === "light"
-                    ? "border-stone-200 bg-white text-stone-900"
+                    ? "border-slate-300 bg-white text-slate-900"
                     : "border-white/10 bg-[#111215] text-white"
                 }`}
               >
                 <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch">
                   
-                  {/* LEFT COLUMN: Headlines, Contact details, Wordmark, Social links */}
+                  {/* LEFT COLUMN: Headlines, Contact details, Logo, Social links */}
                   <div
-                    className={`flex flex-col justify-between border-b p-5 sm:p-6 lg:p-7 lg:col-span-5 lg:border-b-0 lg:border-r transition-colors duration-200 ${
+                    className={`flex flex-col justify-between border-b p-5 sm:p-6 lg:p-7 lg:col-span-5 lg:border-b-0 lg:border-r lg:max-h-[580px] lg:overflow-y-auto custom-scrollbar transition-colors duration-200 ${
                       config.themeMode === "light"
-                        ? "border-stone-200 bg-[#fbf9f6] text-stone-900"
+                        ? "border-slate-200 bg-[#f8fafc] text-slate-900"
                         : "border-white/10 bg-[#0e0f12] text-white"
                     }`}
                   >
@@ -1833,7 +1854,7 @@ export default function AdminBookingFormBuilderPage() {
                       <h3
                         className={`font-heading text-xl sm:text-2xl font-bold tracking-tight leading-[1.1] ${
                           config.themeMode === "light"
-                            ? "text-stone-900"
+                            ? "text-slate-900"
                             : "text-white"
                         }`}
                       >
@@ -1841,7 +1862,7 @@ export default function AdminBookingFormBuilderPage() {
                         <span
                           className={
                             config.themeMode === "light"
-                              ? "text-stone-900"
+                              ? "text-slate-900"
                               : "text-white"
                           }
                         >
@@ -1853,14 +1874,14 @@ export default function AdminBookingFormBuilderPage() {
                       <div
                         className={`mt-4 space-y-1 text-xs ${
                           config.themeMode === "light"
-                            ? "text-stone-600"
+                            ? "text-slate-600"
                             : "text-zinc-400"
                         }`}
                       >
                         <p
                           className={`font-semibold text-[11px] tracking-wider uppercase ${
                             config.themeMode === "light"
-                              ? "text-stone-900"
+                              ? "text-slate-900"
                               : "text-white/90"
                           }`}
                         >
@@ -1884,7 +1905,7 @@ export default function AdminBookingFormBuilderPage() {
                         <div
                           className={`rounded-lg border p-2 text-[11px] ${
                             config.themeMode === "light"
-                              ? "border-stone-300 bg-white text-stone-900"
+                              ? "border-slate-300 bg-white text-slate-900"
                               : "border-white/20 bg-[#1c1d22] text-white"
                           }`}
                         >
@@ -1897,7 +1918,7 @@ export default function AdminBookingFormBuilderPage() {
                         <div
                           className={`rounded-lg border p-2 text-[11px] ${
                             config.themeMode === "light"
-                              ? "border-stone-300 bg-white text-stone-900"
+                              ? "border-slate-300 bg-white text-slate-900"
                               : "border-white/20 bg-[#1c1d22] text-white"
                           }`}
                         >
@@ -1911,22 +1932,24 @@ export default function AdminBookingFormBuilderPage() {
                       </div>
                     </div>
 
-                    {/* Bottom: Wordmark & Follow Us */}
+                    {/* Bottom: CA Smile Logo & Follow Us */}
                     <div className="mt-5 pt-1">
-                      <div
-                        className={`select-none font-sans text-4xl sm:text-5xl font-black tracking-tight leading-none mb-2 ${
-                          config.themeMode === "light"
-                            ? "text-stone-900/90"
-                            : "text-white/95"
-                        }`}
-                      >
-                        {config.sideWordmark || "brighter"}
+                      <div className="mb-2 flex items-center">
+                        <img
+                          src={
+                            config.themeMode === "light"
+                              ? (config.logoLightUrl || "/images/ca-smile-logo-light.png")
+                              : (config.logoDarkUrl || "/images/ca-smile-logo-dark.png")
+                          }
+                          alt="CA Smile Logo"
+                          className="h-10 sm:h-12 w-auto max-w-[190px] object-contain select-none"
+                        />
                       </div>
 
                       <div
                         className={`flex flex-wrap items-center gap-1.5 text-[10px] font-medium ${
                           config.themeMode === "light"
-                            ? "text-stone-600"
+                            ? "text-slate-600"
                             : "text-zinc-400"
                         }`}
                       >
@@ -1944,9 +1967,9 @@ export default function AdminBookingFormBuilderPage() {
 
                   {/* RIGHT COLUMN: Step 1 Calendar OR Step 2 Form */}
                   <div
-                    className={`p-5 sm:p-6 lg:p-7 lg:col-span-7 flex flex-col justify-between transition-colors duration-200 ${
+                    className={`p-5 sm:p-6 lg:p-7 lg:col-span-7 flex flex-col justify-between lg:max-h-[580px] lg:overflow-y-auto custom-scrollbar transition-colors duration-200 ${
                       config.themeMode === "light"
-                        ? "bg-white text-stone-900"
+                        ? "bg-white text-slate-900"
                         : "bg-[#18181c] text-white"
                     }`}
                   >
@@ -2087,31 +2110,38 @@ export default function AdminBookingFormBuilderPage() {
                         <div className="space-y-2">
                           {config.fields
                             .filter((f) => f.enabled)
-                            .map((f) => (
-                              <div
-                                key={f.id}
-                                className={`rounded-xl border px-3 py-2 flex items-center justify-between text-xs ${
-                                  config.themeMode === "light"
-                                    ? "bg-stone-50 border-stone-200 text-stone-800"
-                                    : "bg-[#222227] border-white/10 text-white"
-                                }`}
-                              >
-                                <span className="opacity-90 truncate">
-                                  {f.placeholder || f.label}{" "}
-                                  {f.required && (
-                                    <span className="text-red-500">*</span>
-                                  )}
-                                </span>
-                                <span className="text-[10px] opacity-40">▼</span>
-                              </div>
-                            ))}
+                            .map((f) => {
+                              const isNotes = f.id === "notes" || f.type === "textarea";
+                              return (
+                                <div
+                                  key={f.id}
+                                  className={`rounded-xl border px-3 transition-all ${
+                                    isNotes
+                                      ? "py-2.5 min-h-[64px] flex items-start justify-between"
+                                      : "py-2 flex items-center justify-between"
+                                  } text-xs ${
+                                    config.themeMode === "light"
+                                      ? "bg-slate-50 border-slate-200 text-slate-800"
+                                      : "bg-[#222227] border-white/10 text-white"
+                                  }`}
+                                >
+                                  <span className="opacity-90 leading-relaxed">
+                                    {f.placeholder || f.label}{" "}
+                                    {f.required && (
+                                      <span className="text-red-500">*</span>
+                                    )}
+                                  </span>
+                                  {!isNotes && <span className="text-[10px] opacity-40">▼</span>}
+                                </div>
+                              );
+                            })}
                         </div>
 
                         {/* Submit Button preview */}
                         <div
                           className={`flex items-center justify-between pt-2 border-t ${
                             config.themeMode === "light"
-                              ? "border-stone-200"
+                              ? "border-slate-200"
                               : "border-white/10"
                           }`}
                         >
@@ -2119,7 +2149,7 @@ export default function AdminBookingFormBuilderPage() {
                             type="button"
                             className="inline-flex items-center gap-1.5 rounded-full bg-[#881318] px-4 py-2 text-xs font-bold text-white shadow-md"
                           >
-                            <span>{config.submitButtonText || "Book Now"}</span>
+                            <span>{config.submitButtonText || "Submit Appointment Request"}</span>
                             <span className="flex h-4 w-4 items-center justify-center rounded-sm bg-white text-[#881318]">
                               →
                             </span>
