@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { CalendarBookingExperience } from "@/components/public/calendar-booking-experience";
 import { SectionWrapper } from "@/components/design-system/section-wrapper";
-import { Badge } from "@/components/ui/badge";
 
 export const metadata: Metadata = {
   title: "Book an Appointment Online | PedioDent Dental Clinic",
@@ -22,13 +21,13 @@ export const metadata: Metadata = {
 
 export default function BookAppointmentPage() {
   return (
-    <main className="min-h-[85vh] bg-[#fbf9f5] py-8 sm:py-12">
+    <main className="min-h-[85vh] bg-[#0c0d0f] py-8 sm:py-12">
       <SectionWrapper containerSize="default" className="py-0 sm:py-0 lg:py-0">
         <div className="space-y-6">
           <div className="space-y-2 text-center sm:text-left">
             <Link
               href="/"
-              className="inline-flex items-center gap-1.5 text-xs text-brand-muted transition-colors hover:text-brand-primary"
+              className="inline-flex items-center gap-1.5 text-xs text-zinc-400 transition-colors hover:text-white"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               <span>Back to Home</span>
