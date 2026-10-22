@@ -75,96 +75,97 @@ function AdminDashboardContent() {
     };
   }, []);
 
-  const pendingCount = 3; // Web pending requests awaiting staff action
+  const [appointmentsList, setAppointmentsList] = useState<any[]>([]);
+  const [loadingSchedule, setLoadingSchedule] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    fetch("/api/appointments")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (isMounted && data?.appointments) {
+          setAppointmentsList(data.appointments);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (isMounted) setLoadingSchedule(false);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const pendingCount = appointmentsList.filter(
+    (a) => a.status === "PENDING"
+  ).length;
+
+  const todayStr = new Date().toISOString().split("T")[0];
+  const todayAppointments = appointmentsList.filter((a) => {
+    if (!a.startTime) return false;
+    return a.startTime.startsWith(todayStr);
+  });
 
   const kpiStats = [
     {
       title: "Today's Appointments",
-      value: "28",
-      delta: "24 confirmed, 4 pending",
+      value: todayAppointments.length.toString(),
+      delta: `${todayAppointments.filter((a) => a.status === "CONFIRMED").length} confirmed, ${todayAppointments.filter((a) => a.status === "PENDING").length} pending`,
       icon: CalendarDays,
       badgeColor: "text-brand-primary bg-brand-primary/10",
     },
     {
       title: "Bookings This Week",
-      value: "64",
-      delta: "+18.2% vs last week",
+      value: appointmentsList.length.toString(),
+      delta: `${appointmentsList.length} total active in clinic`,
       icon: Users,
       badgeColor: "text-blue-600 bg-blue-500/10 dark:text-blue-400",
     },
     {
       title: "Clinic No-Show Rate",
-      value: "2.4%",
-      delta: "-1.1% vs last month",
+      value: "0.0%",
+      delta: "Zero no-shows recorded",
       icon: TrendingDown,
       badgeColor: "text-emerald-600 bg-emerald-500/10 dark:text-emerald-400",
     },
     {
       title: "All Bookings",
-      value: "28",
-      delta: "+12% this month",
+      value: appointmentsList.length.toString(),
+      delta: `${pendingCount} awaiting confirmation`,
       icon: CalendarDays,
       badgeColor: "text-blue-600 bg-blue-500/10 dark:text-blue-400",
     },
   ];
 
-  const todaySchedule = [
-    {
-      id: "APT-1",
-      time: "09:00 AM",
-      patientId: "PAT-001",
-      patient: "Eleanor Pena",
-      doctor: "Dr. Evelyn Reed, MD",
-      service: "Cardiovascular Screen & ECG",
-      source: "WEB_FORM",
-      status: "COMPLETED",
-      badgeVariant: "success" as const,
-    },
-    {
-      id: "APT-2",
-      time: "10:30 AM",
-      patientId: "PAT-002",
-      patient: "Robert Fox",
-      doctor: "Dr. Marcus Vance, FACC",
-      service: "Specialist Consultation - Cardiology",
-      source: "WEB_FORM",
-      status: "IN_PROGRESS",
-      badgeVariant: "warning" as const,
-    },
-    {
-      id: "APT-3",
-      time: "01:15 PM",
-      patientId: "PAT-003",
-      patient: "Courtney Henry",
-      doctor: "Dr. Sarah Chen, MD",
-      service: "Pediatric Wellness & Immunization",
-      source: "WEB_FORM",
-      status: "CONFIRMED",
-      badgeVariant: "default" as const,
-    },
-    {
-      id: "APT-4",
-      time: "02:30 PM",
-      patientId: "PAT-004",
-      patient: "Jerome Bell",
-      doctor: "Dr. Elena Rostova, RN",
-      service: "Dental Prophylaxis & Scaling",
-      source: "MANUAL",
-      status: "CONFIRMED",
-      badgeVariant: "default" as const,
-    },
-    {
-      id: "APT-5",
-      time: "04:00 PM",
-      patientId: "PAT-005",
-      patient: "Floyd Miles",
-      doctor: "Dr. Sarah Chen, MD",
-      service: "General Checkup & Prescription",
-      source: "AI_BOOKING",
-      status: "PENDING",
-      badgeVariant: "outline" as const,
-    },
-  ];
+  const todaySchedule = todayAppointments.map((apt) => {
+    const timeFormatted = apt.startTime
+      ? new Date(apt.startTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      : "Pending";
+    const patientName = apt.patient
+      ? `${apt.patient.firstName || ""} ${apt.patient.lastName || ""}`.trim() || apt.childName || "Patient"
+      : apt.childName || "Patient";
+    const doctorName = apt.preferredDoctor || apt.staffUser?.name || "Dr. Sankar";
+    const serviceName = apt.service?.name || apt.reason || "Dental Consultation";
+
+    let badgeVariant: "default" | "secondary" | "destructive" | "outline" = "default";
+    if (apt.status === "CONFIRMED" || apt.status === "COMPLETED" || apt.status === "TREATMENT_DONE") {
+      badgeVariant = "default";
+    } else if (apt.status === "PENDING") {
+      badgeVariant = "outline";
+    }
+
+    return {
+      id: apt.id,
+      time: timeFormatted,
+      patientId: apt.patientId || apt.id,
+      patient: patientName,
+      doctor: doctorName,
+      service: serviceName,
+      source: apt.source || "WEB_FORM",
+      status: apt.status,
+      badgeVariant,
+    };
+  });
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 pb-16">

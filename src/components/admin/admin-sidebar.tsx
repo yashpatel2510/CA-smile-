@@ -13,8 +13,6 @@ import {
   ArrowUpRight,
   Shield,
   Stethoscope,
-  Mail,
-  BarChart3,
   SlidersHorizontal,
   Star,
   Database,
@@ -71,21 +69,10 @@ export function AdminSidebar() {
       icon: UserCog,
     },
     {
-      name: "Email Templates",
-      href: "/admin/email-previews",
-      icon: Mail,
-      badge: "Resend",
-    },
-    {
       name: "Patient Reviews",
       href: "/admin/reviews",
       icon: Star,
       badge: "Google",
-    },
-    {
-      name: "Analytics & Funnel",
-      href: "/admin/analytics",
-      icon: BarChart3,
     },
     {
       name: "Q&A Management",
