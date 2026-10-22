@@ -1,5 +1,34 @@
 import { z } from "zod";
 
+export const APPOINTMENT_STATUSES = [
+  "PENDING",
+  "CONFIRMED",
+  "CHECKED_IN",
+  "TREATMENT_STARTED",
+  "TREATMENT_DONE",
+  "CANCELLED",
+  "NO_SHOW",
+  // Legacy compatibility
+  "DECLINED",
+  "IN_PROGRESS",
+  "COMPLETED",
+] as const;
+
+export type AppointmentStatusType = (typeof APPOINTMENT_STATUSES)[number];
+
+export const ALLOWED_STATUS_TRANSITIONS: Record<string, string[]> = {
+  PENDING: ["CONFIRMED", "CANCELLED", "DECLINED"],
+  CONFIRMED: ["CHECKED_IN", "CANCELLED", "NO_SHOW"],
+  CHECKED_IN: ["TREATMENT_STARTED", "CANCELLED", "NO_SHOW"],
+  TREATMENT_STARTED: ["TREATMENT_DONE", "CANCELLED"],
+  TREATMENT_DONE: [], // Final for this session
+  CANCELLED: ["PENDING", "CONFIRMED"], // Recovery if needed
+  NO_SHOW: ["PENDING", "CONFIRMED"],
+  DECLINED: ["PENDING", "CONFIRMED"],
+  IN_PROGRESS: ["TREATMENT_DONE", "COMPLETED", "CANCELLED"],
+  COMPLETED: [],
+};
+
 export const createAppointmentSchema = z.object({
   patientType: z.enum(["ADULT", "CHILD"]).default("ADULT"),
   fullName: z.string().optional(),
@@ -14,6 +43,10 @@ export const createAppointmentSchema = z.object({
     .max(25, "Phone number cannot exceed 25 characters"),
   preferredDoctor: z.string().optional(),
   treatment: z.string().optional(),
+  treatmentId: z.string().optional(),
+  treatmentSessionId: z.string().optional(),
+  sessionNumber: z.number().int().min(1).optional(),
+  totalSessions: z.number().int().min(1).optional(),
   serviceId: z.string().optional(),
   serviceName: z.string().optional(),
   preferredDate: z.string().optional(),
@@ -27,29 +60,41 @@ export const createAppointmentSchema = z.object({
     .optional(),
   contactMethod: z.enum(["PHONE", "WHATSAPP"]).default("PHONE"),
   startTime: z.string().or(z.date()).optional(),
+  endTime: z.string().or(z.date()).optional(),
   appointmentDate: z.string().optional(),
   appointmentTime: z.string().optional(),
+  durationMinutes: z.number().int().min(5).max(360).default(30),
   notes: z.string().max(1000, "Notes cannot exceed 1000 characters").optional(),
   reason: z.string().max(255, "Reason cannot exceed 255 characters").optional(),
   consentAgreed: z.boolean().default(true),
-  source: z
-    .enum(["MANUAL", "AI_BOOKING", "WHATSAPP", "WEB_FORM"])
-    .default("MANUAL"),
-  clinicSlug: z.string().optional(),
-});
+    source: z
+      .enum([
+        "MANUAL",
+        "AI_BOOKING",
+        "WHATSAPP",
+        "WEB_FORM",
+        "WEBSITE",
+        "CONTACT_PAGE",
+        "PHONE",
+        "WALK_IN",
+        "ADMIN",
+        "OTHER",
+      ])
+      .default("MANUAL"),
+    customFields: z.record(z.string(), z.any()).optional(),
+    clinicSlug: z.string().optional(),
+    patientId: z.string().optional(),
+    totalAmount: z.number().optional(),
+    paidAmount: z.number().optional(),
+    paymentStatus: z.enum(["PENDING", "PAID", "PARTIAL"]).default("PENDING"),
+  }).passthrough();
 
 export type CreateAppointmentInput = z.infer<typeof createAppointmentSchema>;
 
 export const updateAppointmentStatusSchema = z.object({
-  status: z.enum([
-    "PENDING",
-    "CONFIRMED",
-    "DECLINED",
-    "IN_PROGRESS",
-    "COMPLETED",
-    "CANCELLED",
-    "NO_SHOW",
-  ]),
+  status: z.enum(APPOINTMENT_STATUSES),
+  startTime: z.string().or(z.date()).optional(),
+  endTime: z.string().or(z.date()).optional(),
   staffUserId: z.string().optional(),
   performedBy: z
     .string()
@@ -59,24 +104,53 @@ export const updateAppointmentStatusSchema = z.object({
     .string()
     .max(500, "Reason notes cannot exceed 500 characters")
     .optional(),
+  forceOverride: z.boolean().optional().default(false),
+
+  // Treatment Done & Procedure specific fields
+  procedure: z.string().optional(),
+  treatmentNotes: z.string().optional(),
+  dentistNotes: z.string().optional(),
+  paidAmount: z.number().min(0).optional(),
+  paymentMethod: z.string().optional(),
+  nextSessionRequired: z.boolean().optional(),
+  nextSessionDate: z.string().optional(),
+  nextSessionTime: z.string().optional(),
+  nextSessionDoctor: z.string().optional(),
+  nextSessionNotes: z.string().optional(),
 });
 
 export type UpdateAppointmentStatusInput = z.infer<
   typeof updateAppointmentStatusSchema
 >;
 
+export const rescheduleAppointmentSchema = z.object({
+  startTime: z.string(),
+  endTime: z.string().optional(),
+  preferredDoctor: z.string().optional(),
+  reason: z.string().optional(),
+  performedBy: z.string().default("Staff Member"),
+});
+
+export type RescheduleAppointmentInput = z.infer<
+  typeof rescheduleAppointmentSchema
+>;
+
+export const createNextSessionSchema = z.object({
+  treatmentId: z.string().min(1, "Treatment ID is required"),
+  appointmentDate: z.string().min(1, "Date is required"),
+  startTime: z.string().min(1, "Time is required"),
+  preferredDoctor: z.string().optional(),
+  durationMinutes: z.number().int().min(15).max(240).default(45),
+  notes: z.string().optional(),
+  procedure: z.string().optional(),
+  performedBy: z.string().default("Staff Member"),
+});
+
+export type CreateNextSessionInput = z.infer<typeof createNextSessionSchema>;
+
 export const appointmentQuerySchema = z.object({
   status: z
-    .enum([
-      "ALL",
-      "PENDING",
-      "CONFIRMED",
-      "DECLINED",
-      "IN_PROGRESS",
-      "COMPLETED",
-      "CANCELLED",
-      "NO_SHOW",
-    ])
+    .enum(["ALL", ...APPOINTMENT_STATUSES])
     .optional(),
   date: z
     .string()
@@ -87,7 +161,11 @@ export const appointmentQuerySchema = z.object({
   serviceId: z.string().optional(),
   clinicSlug: z.string().optional(),
   source: z.string().optional(),
-  limit: z.coerce.number().min(1).max(100).default(50),
+  doctor: z.string().optional(),
+  dentist: z.string().optional(),
+  patientId: z.string().optional(),
+  search: z.string().optional(),
+  limit: z.coerce.number().min(1).max(500).default(100),
   page: z.coerce.number().min(1).default(1),
 });
 

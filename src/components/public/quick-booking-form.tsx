@@ -161,12 +161,14 @@ export function QuickBookingForm({
     setIsSubmitting(true);
 
     try {
-      const patientDisplayName =
+      const patientDisplayName = (
         patientType === "CHILD" && isFieldEnabled("childName")
           ? childName.trim()
-          : fullName.trim() || "Patient";
-      const [fName, ...lNameParts] = patientDisplayName.split(" ");
-      const lName = lNameParts.join(" ") || "Patient";
+          : fullName.trim()
+      ) || "Valued Patient";
+      const nameParts = patientDisplayName.split(/\s+/).filter(Boolean);
+      const fName = nameParts[0] || patientDisplayName;
+      const lName = nameParts.slice(1).join(" ") || "";
 
       // Append custom fields to clinical notes
       let compiledNotes = notes.trim();

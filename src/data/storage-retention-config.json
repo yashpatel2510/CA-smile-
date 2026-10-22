@@ -1,0 +1,86 @@
+{
+  "autoArchiveEnabled": true,
+  "autoCleanupEnabled": false,
+  "thresholdPercent": 85,
+  "cleanupFrequency": "weekly",
+  "retentionPolicies": {
+    "appointments": "1_YEAR",
+    "whatsapp_bookings": "60_DAYS",
+    "system_logs": "30_DAYS",
+    "patients": "FOREVER",
+    "clinical_services": "FOREVER"
+  },
+  "cleanupHistory": [
+    {
+      "action": "ARCHIVE_BACKUP_ONLY",
+      "dataType": "WhatsApp Bookings",
+      "recordsCount": 0,
+      "storageFreedMb": 0,
+      "admin": "Clinic Owner",
+      "status": "SUCCESS",
+      "archiveFileId": "arc-whatsapp_bookings-1790058664255",
+      "notes": "Archived 0 records (0.4 KB). Verified checksum. Freed ~0 MB.",
+      "id": "cln-1790058664256-c1xh",
+      "date": "2026-09-22T06:31:04.256Z"
+    },
+    {
+      "action": "ARCHIVE_BACKUP_ONLY",
+      "dataType": "WhatsApp Bookings",
+      "recordsCount": 0,
+      "storageFreedMb": 0,
+      "admin": "Clinic Owner",
+      "status": "SUCCESS",
+      "archiveFileId": "arc-whatsapp_bookings-1790057953235",
+      "notes": "Archived 0 records (0.4 KB). Verified checksum. Freed ~0 MB.",
+      "id": "cln-1790057953236-x68x",
+      "date": "2026-09-22T06:19:13.236Z"
+    },
+    {
+      "action": "ARCHIVE_BACKUP_ONLY",
+      "dataType": "WhatsApp Bookings",
+      "recordsCount": 0,
+      "storageFreedMb": 0,
+      "admin": "Clinic Owner",
+      "status": "SUCCESS",
+      "archiveFileId": "arc-whatsapp_bookings-1790057926846",
+      "notes": "Archived 0 records (0.4 KB). Verified checksum. Freed ~0 MB.",
+      "id": "cln-1790057926846-bfh8",
+      "date": "2026-09-22T06:18:46.846Z"
+    },
+    {
+      "id": "cln-initial-001",
+      "date": "2026-09-15T08:30:00.000Z",
+      "action": "POLICY_CHECK",
+      "dataType": "System Initialisation",
+      "recordsCount": 0,
+      "storageFreedMb": 0,
+      "admin": "System Engine",
+      "status": "SUCCESS",
+      "archiveFileId": null,
+      "notes": "Initial storage retention configuration established"
+    }
+  ],
+  "storageHistory": [
+    {
+      "date": "2026-09-01",
+      "storageMb": 185,
+      "percent": 37
+    },
+    {
+      "date": "2026-09-08",
+      "storageMb": 194,
+      "percent": 38.8
+    },
+    {
+      "date": "2026-09-15",
+      "storageMb": 202,
+      "percent": 40.4
+    },
+    {
+      "date": "2026-09-22",
+      "storageMb": 210,
+      "percent": 42
+    }
+  ],
+  "lastUpdated": "2026-09-22T06:34:38.199Z"
+}

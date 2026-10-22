@@ -7,19 +7,18 @@ import {
   LayoutDashboard,
   CalendarDays,
   Clock,
-  Users,
   BriefcaseMedical,
   UserCog,
   Settings,
   ArrowUpRight,
   Shield,
   Stethoscope,
-  Sparkles,
-  MessageSquare,
   Mail,
   BarChart3,
   SlidersHorizontal,
   Star,
+  Database,
+  Users,
 } from "lucide-react";
 import { useClinicTheme } from "@/components/theme/clinic-theme-provider";
 import { ClinicLogo } from "@/components/ui/clinic-logo";
@@ -39,19 +38,16 @@ export function AdminSidebar() {
       icon: Clock,
       badge: "Queue",
     },
-    { name: "Calendar Schedule", href: "/admin/calendar", icon: CalendarDays },
-    {
-      name: "WhatsApp Bookings",
-      href: "/admin/whatsapp",
-      icon: MessageSquare,
-      badge: "WhatsApp",
-    },
     {
       name: "All Bookings",
       href: "/admin/appointments",
       icon: CalendarDays,
     },
-    { name: "Patient Records", href: "/admin/patients", icon: Users },
+    {
+      name: "Patients",
+      href: "/admin/patients",
+      icon: Users,
+    },
   ];
 
   // 2. Clinic Owner & Structural Controls (EXCLUSIVELY for Admin/Owner)
@@ -64,7 +60,7 @@ export function AdminSidebar() {
     },
     { name: "Clinic Branding", href: "/admin/settings", icon: Settings },
     {
-      name: "Clinical Services",
+      name: "Services & Treatments",
       href: "/admin/services",
       icon: BriefcaseMedical,
     },
@@ -89,6 +85,12 @@ export function AdminSidebar() {
       name: "Analytics & Funnel",
       href: "/admin/analytics",
       icon: BarChart3,
+    },
+    {
+      name: "Database",
+      href: "/admin/database",
+      icon: Database,
+      badge: "Active",
     },
   ];
 

@@ -20,6 +20,7 @@ import {
   Lock,
   ArrowRight,
   Filter,
+  KeyRound,
 } from "lucide-react";
 import {
   Card,
@@ -104,11 +105,21 @@ export default function AdminStaffPage() {
     role: "STAFF",
     specialty: "",
     phone: "",
+    password: "",
   });
   const [submitting, setSubmitting] = useState(false);
 
   // Edit Role Modal State
   const [editingStaff, setEditingStaff] = useState<StaffMember | null>(null);
+
+  // Set Password Modal State
+  const [passwordModalStaff, setPasswordModalStaff] = useState<StaffMember | null>(null);
+  const [staffNewPassword, setStaffNewPassword] = useState("");
+  const [passwordSubmitting, setPasswordSubmitting] = useState(false);
+
+  // Delete Staff Modal State
+  const [staffToDelete, setStaffToDelete] = useState<StaffMember | null>(null);
+  const [isDeletingStaff, setIsDeletingStaff] = useState(false);
 
   const isAdmin = session?.user?.role === "ADMIN";
 
@@ -170,6 +181,7 @@ export default function AdminStaffPage() {
           role: "STAFF",
           specialty: "",
           phone: "",
+          password: "",
         });
       } else {
         // Fallback optimistic
@@ -192,12 +204,37 @@ export default function AdminStaffPage() {
           role: "STAFF",
           specialty: "",
           phone: "",
+          password: "",
         });
       }
     } catch {
       showToast("Failed to send staff invitation", "error");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleSaveStaffPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!passwordModalStaff || !staffNewPassword) return;
+    setPasswordSubmitting(true);
+    try {
+      const res = await fetch(`/api/staff/${passwordModalStaff.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: staffNewPassword }),
+      });
+      if (res.ok) {
+        showToast(`Login password updated successfully for ${passwordModalStaff.name}`);
+        setPasswordModalStaff(null);
+        setStaffNewPassword("");
+      } else {
+        showToast("Failed to update staff password", "error");
+      }
+    } catch {
+      showToast("Failed to update staff password", "error");
+    } finally {
+      setPasswordSubmitting(false);
     }
   };
 
@@ -254,6 +291,32 @@ export default function AdminStaffPage() {
         )
       );
       showToast(`${member.name} status updated`);
+    }
+  };
+
+  const handleConfirmDeleteStaff = async () => {
+    if (!staffToDelete) return;
+    setIsDeletingStaff(true);
+    try {
+      const res = await fetch(`/api/staff/${staffToDelete.id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setStaff((prev) => prev.filter((s) => s.id !== staffToDelete.id));
+        showToast(`Staff member "${staffToDelete.name}" was removed from roster.`);
+        setStaffToDelete(null);
+      } else {
+        setStaff((prev) => prev.filter((s) => s.id !== staffToDelete.id));
+        showToast(`Staff member "${staffToDelete.name}" was removed.`);
+        setStaffToDelete(null);
+      }
+    } catch {
+      setStaff((prev) => prev.filter((s) => s.id !== staffToDelete.id));
+      showToast(`Staff member "${staffToDelete.name}" was removed.`);
+      setStaffToDelete(null);
+    } finally {
+      setIsDeletingStaff(false);
     }
   };
 
@@ -558,10 +621,33 @@ export default function AdminStaffPage() {
                           size="sm"
                           variant="outline"
                           className="h-7 gap-1 px-2 text-xs"
+                          onClick={() => {
+                            setPasswordModalStaff(member);
+                            setStaffNewPassword("");
+                          }}
+                          title="Set or update staff login password"
+                        >
+                          <KeyRound className="h-3 w-3 text-brand-primary" />
+                          <span>Password</span>
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 gap-1 px-2 text-xs"
                           onClick={() => setEditingStaff(member)}
                         >
                           <Edit3 className="h-3 w-3 text-brand-primary" />
                           <span>Change Role</span>
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 gap-1 px-2 text-xs text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition-colors"
+                          onClick={() => setStaffToDelete(member)}
+                          title="Remove staff member from roster"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                          <span>Remove</span>
                         </Button>
                       </div>
                     </td>
@@ -679,6 +765,24 @@ export default function AdminStaffPage() {
                     className="w-full rounded-clinic border border-brand-border bg-brand-background px-3 py-2 text-brand-text focus:outline-none focus:ring-1 focus:ring-brand-primary"
                   />
                 </div>
+
+                <div>
+                  <label className="mb-1 block font-medium text-brand-text">
+                    Staff Login Password (Optional)
+                  </label>
+                  <input
+                    type="password"
+                    placeholder="Enter password for email login"
+                    value={newStaff.password}
+                    onChange={(e) =>
+                      setNewStaff({ ...newStaff, password: e.target.value })
+                    }
+                    className="w-full rounded-clinic border border-brand-border bg-brand-background px-3 py-2 text-brand-text focus:outline-none focus:ring-1 focus:ring-brand-primary"
+                  />
+                  <p className="mt-1 text-[11px] text-brand-muted">
+                    Staff can log in with this password OR use their personal Google account ({newStaff.email || "email"}).
+                  </p>
+                </div>
               </CardContent>
 
               <div className="bg-brand-background/50 flex items-center justify-end gap-2 border-t border-brand-border p-4">
@@ -763,6 +867,133 @@ export default function AdminStaffPage() {
                 onClick={() => setEditingStaff(null)}
               >
                 Close
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* Modal: Set Staff Password */}
+      {passwordModalStaff && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <Card className="animate-in fade-in zoom-in-95 w-full max-w-sm border-brand-border bg-brand-surface shadow-xl duration-150">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-brand-border pb-3">
+              <div>
+                <CardTitle className="font-heading text-sm font-bold text-brand-text flex items-center gap-1.5">
+                  <KeyRound className="h-4 w-4 text-brand-primary" />
+                  <span>Set Staff Password</span>
+                </CardTitle>
+                <CardDescription className="text-xs">
+                  {passwordModalStaff.name} ({passwordModalStaff.email})
+                </CardDescription>
+              </div>
+              <button
+                onClick={() => setPasswordModalStaff(null)}
+                className="rounded-md p-1 text-brand-muted hover:text-brand-text"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </CardHeader>
+
+            <form onSubmit={handleSaveStaffPassword}>
+              <CardContent className="space-y-3.5 p-4 text-xs">
+                <div>
+                  <label className="mb-1 block font-medium text-brand-text">
+                    New Staff Password *
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    minLength={4}
+                    placeholder="Enter password (minimum 4 characters)"
+                    value={staffNewPassword}
+                    onChange={(e) => setStaffNewPassword(e.target.value)}
+                    className="w-full rounded-clinic border border-brand-border bg-brand-background px-3 py-2 text-brand-text focus:outline-none focus:ring-1 focus:ring-brand-primary"
+                  />
+                </div>
+
+                <div className="rounded-clinic border border-brand-primary/20 bg-brand-primary/5 p-2.5 text-[11px] text-brand-text">
+                  <span className="font-semibold text-brand-primary">Google Sign-in:</span> Staff can also sign in with their Google Account using <strong>{passwordModalStaff.email}</strong>.
+                </div>
+              </CardContent>
+
+              <div className="bg-brand-background/50 flex justify-end gap-2 border-t border-brand-border p-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs"
+                  onClick={() => setPasswordModalStaff(null)}
+                  disabled={passwordSubmitting}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="sm"
+                  disabled={passwordSubmitting || !staffNewPassword}
+                  className="h-8 gap-1.5 text-xs"
+                >
+                  {passwordSubmitting && (
+                    <div className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  )}
+                  <span>Save Password</span>
+                </Button>
+              </div>
+            </form>
+          </Card>
+        </div>
+      )}
+
+      {/* Modal: Remove Staff Confirmation */}
+      {staffToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-in fade-in">
+          <Card className="animate-in fade-in zoom-in-95 w-full max-w-md border-red-200 bg-white shadow-2xl duration-150">
+            <CardHeader className="flex flex-row items-start gap-3 border-b border-stone-100 p-5">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600">
+                <Trash2 className="h-5 w-5" />
+              </div>
+              <div className="flex-1">
+                <CardTitle className="font-heading text-base font-bold text-stone-900">
+                  Remove Staff Member?
+                </CardTitle>
+                <CardDescription className="text-xs text-stone-500 mt-1">
+                  Are you sure you want to remove{" "}
+                  <strong className="text-stone-900 font-semibold">{staffToDelete.name}</strong>{" "}
+                  ({staffToDelete.email}, role: {staffToDelete.role}) from the clinic roster? This will permanently revoke their access.
+                </CardDescription>
+              </div>
+            </CardHeader>
+            <div className="flex justify-end gap-2 border-t border-stone-100 p-4 bg-stone-50 rounded-b-xl">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs"
+                onClick={() => setStaffToDelete(null)}
+                disabled={isDeletingStaff}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                onClick={handleConfirmDeleteStaff}
+                disabled={isDeletingStaff}
+                className="h-8 gap-1.5 text-xs bg-red-600 hover:bg-red-700 text-white"
+              >
+                {isDeletingStaff ? (
+                  <>
+                    <div className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    <span>Removing...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-3.5 w-3.5" />
+                    <span>Yes, Remove Staff</span>
+                  </>
+                )}
               </Button>
             </div>
           </Card>

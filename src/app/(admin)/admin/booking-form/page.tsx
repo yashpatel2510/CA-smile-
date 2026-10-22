@@ -13,13 +13,13 @@ import {
   Stethoscope,
   Clock,
   User,
-  HelpCircle,
   Sparkles,
-  Layers,
   ArrowRight,
-  ShieldCheck,
   AlertCircle,
-  RefreshCw,
+  Palette,
+  Edit3,
+  X,
+  Copy,
 } from "lucide-react";
 import {
   Card,
@@ -37,6 +37,38 @@ import {
   defaultBookingFormConfig,
 } from "@/data/booking-form-config";
 
+// Palette presets for rapid admin design
+const PRESET_BG_COLORS = [
+  { label: "Pure White", value: "#ffffff" },
+  { label: "Warm Cream", value: "#fbf9f5" },
+  { label: "Soft Pearl", value: "#f8fafc" },
+  { label: "Cool Slate", value: "#f1f5f9" },
+  { label: "Sky Tint", value: "#eff6ff" },
+  { label: "Mint Tint", value: "#f0fdf4" },
+  { label: "Amber Tint", value: "#fefce8" },
+  { label: "Rose Tint", value: "#fff1f2" },
+];
+
+const PRESET_TEXT_COLORS = [
+  { label: "Charcoal Black", value: "#1e293b" },
+  { label: "Deep Navy", value: "#1e3a8a" },
+  { label: "Pure Black", value: "#000000" },
+  { label: "Slate Muted", value: "#475569" },
+  { label: "Forest Green", value: "#065f46" },
+  { label: "Royal Teal", value: "#0f766e" },
+  { label: "Warm Coral", value: "#c2410c" },
+  { label: "Crimson", value: "#991b1b" },
+];
+
+const PRESET_BTN_COLORS = [
+  { label: "Coral Red", value: "#f2583e" },
+  { label: "Ocean Blue", value: "#2563eb" },
+  { label: "Emerald Teal", value: "#0d9488" },
+  { label: "Midnight Slate", value: "#0f172a" },
+  { label: "Forest Green", value: "#16a34a" },
+  { label: "Purple Indigo", value: "#6366f1" },
+];
+
 export default function AdminBookingFormBuilderPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -48,7 +80,7 @@ export default function AdminBookingFormBuilderPage() {
     defaultBookingFormConfig
   );
   const [activeTab, setActiveTab] = useState<
-    "fields" | "treatments" | "slots" | "doctors" | "preview"
+    "fields" | "styling" | "treatments" | "slots" | "doctors" | "preview"
   >("fields");
 
   // New item input states
@@ -56,15 +88,31 @@ export default function AdminBookingFormBuilderPage() {
   const [newTimeSlot, setNewTimeSlot] = useState("");
   const [newDoctor, setNewDoctor] = useState("");
 
-  // Custom Field Creator Modal State
-  const [customFieldModalOpen, setCustomFieldModalOpen] = useState(false);
-  const [customFieldLabel, setCustomFieldLabel] = useState("");
-  const [customFieldType, setCustomFieldType] = useState<
-    "text" | "select" | "checkbox" | "textarea"
+  // Add Field Modal State
+  const [addFieldModalOpen, setAddFieldModalOpen] = useState(false);
+  const [newFieldLabel, setNewFieldLabel] = useState("");
+  const [newFieldType, setNewFieldType] = useState<
+    "text" | "tel" | "email" | "select" | "checkbox" | "textarea" | "date"
   >("text");
-  const [customFieldRequired, setCustomFieldRequired] = useState(false);
-  const [customFieldOptions, setCustomFieldOptions] = useState("");
-  const [customFieldPlaceholder, setCustomFieldPlaceholder] = useState("");
+  const [newFieldRequired, setNewFieldRequired] = useState(false);
+  const [newFieldOptions, setNewFieldOptions] = useState("");
+  const [newFieldPlaceholder, setNewFieldPlaceholder] = useState("");
+  const [newFieldBgColor, setNewFieldBgColor] = useState("#ffffff");
+  const [newFieldTextColor, setNewFieldTextColor] = useState("#1e293b");
+  const [newFieldHelpText, setNewFieldHelpText] = useState("");
+
+  // Edit Field Modal State
+  const [editingField, setEditingField] =
+    useState<BookingFormFieldConfig | null>(null);
+  const [editLabel, setEditLabel] = useState("");
+  const [editPlaceholder, setEditPlaceholder] = useState("");
+  const [editType, setEditType] = useState<any>("text");
+  const [editRequired, setEditRequired] = useState(false);
+  const [editEnabled, setEditEnabled] = useState(true);
+  const [editOptions, setEditOptions] = useState("");
+  const [editBgColor, setEditBgColor] = useState("#ffffff");
+  const [editTextColor, setEditTextColor] = useState("#1e293b");
+  const [editHelpText, setEditHelpText] = useState("");
 
   // Fetch live configuration from API
   const fetchConfig = async () => {
@@ -73,7 +121,10 @@ export default function AdminBookingFormBuilderPage() {
       const res = await fetch("/api/booking-form/config");
       const data = await res.json();
       if (data.success && data.config) {
-        setConfig(data.config);
+        setConfig({
+          ...defaultBookingFormConfig,
+          ...data.config,
+        });
       }
     } catch {
       setErrorMsg("Failed to load booking form configuration.");
@@ -100,7 +151,7 @@ export default function AdminBookingFormBuilderPage() {
       if (data.success) {
         setConfig(data.config);
         setSuccessMsg(
-          "Booking form configuration updated successfully! All changes are live on the website."
+          "Booking & Contact form configuration updated! All changes are live on the website."
         );
         setTimeout(() => setSuccessMsg(null), 5000);
       } else {
@@ -117,7 +168,7 @@ export default function AdminBookingFormBuilderPage() {
   const handleResetDefaults = async () => {
     if (
       !confirm(
-        "Are you sure you want to reset all booking form fields, treatments, and time slots to default clinic settings?"
+        "Are you sure you want to reset all booking form fields, styling, treatments, and time slots to default clinic settings?"
       )
     ) {
       return;
@@ -162,22 +213,90 @@ export default function AdminBookingFormBuilderPage() {
     }));
   };
 
-  const deleteCustomField = (fieldId: string) => {
+  // Delete ANY field (custom or standard)
+  const handleDeleteField = (fieldId: string) => {
+    const field = config.fields.find((f) => f.id === fieldId);
+    if (!field) return;
+
+    if (
+      !confirm(
+        `Are you sure you want to remove the field "${field.label}" from the booking form?`
+      )
+    ) {
+      return;
+    }
+
     setConfig((prev) => ({
       ...prev,
       fields: prev.fields.filter((f) => f.id !== fieldId),
     }));
+    setSuccessMsg(`Field "${field.label}" removed from form.`);
+    setTimeout(() => setSuccessMsg(null), 3000);
   };
 
-  // Add Custom Field Submit
-  const handleAddCustomField = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!customFieldLabel.trim()) return;
+  // Open Edit Modal for any field
+  const handleOpenEditField = (field: BookingFormFieldConfig) => {
+    setEditingField(field);
+    setEditLabel(field.label);
+    setEditPlaceholder(field.placeholder || "");
+    setEditType(field.type);
+    setEditRequired(field.required);
+    setEditEnabled(field.enabled);
+    setEditOptions(field.options?.join(", ") || "");
+    setEditBgColor(field.bgColor || "#ffffff");
+    setEditTextColor(field.textColor || "#1e293b");
+    setEditHelpText(field.helpText || "");
+  };
 
-    const newId = `custom_${Date.now()}`;
+  // Save changes to edited field
+  const handleSaveEditedField = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingField || !editLabel.trim()) return;
+
     const optionsArray =
-      customFieldType === "select"
-        ? customFieldOptions
+      editType === "select" || editType === "radio" || editType === "segmented"
+        ? editOptions
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : editingField.options;
+
+    setConfig((prev) => ({
+      ...prev,
+      fields: prev.fields.map((f) =>
+        f.id === editingField.id
+          ? {
+              ...f,
+              label: editLabel.trim(),
+              placeholder: editPlaceholder.trim() || undefined,
+              type: editType,
+              required: editRequired,
+              enabled: editEnabled,
+              bgColor: editBgColor || undefined,
+              textColor: editTextColor || undefined,
+              options: optionsArray,
+              helpText: editHelpText.trim() || undefined,
+            }
+          : f
+      ),
+    }));
+
+    setEditingField(null);
+    setSuccessMsg(
+      `Updated field "${editLabel}". Remember to click "Save & Apply Live"!`
+    );
+    setTimeout(() => setSuccessMsg(null), 4000);
+  };
+
+  // Add New Field Submit
+  const handleAddNewField = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newFieldLabel.trim()) return;
+
+    const newId = `field_${Date.now()}`;
+    const optionsArray =
+      newFieldType === "select"
+        ? newFieldOptions
             .split(",")
             .map((s) => s.trim())
             .filter(Boolean)
@@ -185,14 +304,16 @@ export default function AdminBookingFormBuilderPage() {
 
     const newField: BookingFormFieldConfig = {
       id: newId,
-      label: customFieldLabel.trim(),
-      type: customFieldType,
-      required: customFieldRequired,
+      label: newFieldLabel.trim(),
+      type: newFieldType,
+      required: newFieldRequired,
       enabled: true,
-      placeholder: customFieldPlaceholder.trim() || undefined,
+      placeholder: newFieldPlaceholder.trim() || undefined,
       options: optionsArray,
+      bgColor: newFieldBgColor || undefined,
+      textColor: newFieldTextColor || undefined,
       isCustom: true,
-      helpText: "Custom question added by clinic administrator",
+      helpText: newFieldHelpText.trim() || "Custom field added by administrator",
     };
 
     setConfig((prev) => ({
@@ -201,14 +322,17 @@ export default function AdminBookingFormBuilderPage() {
     }));
 
     // Reset modal form
-    setCustomFieldLabel("");
-    setCustomFieldType("text");
-    setCustomFieldRequired(false);
-    setCustomFieldOptions("");
-    setCustomFieldPlaceholder("");
-    setCustomFieldModalOpen(false);
+    setNewFieldLabel("");
+    setNewFieldType("text");
+    setNewFieldRequired(false);
+    setNewFieldOptions("");
+    setNewFieldPlaceholder("");
+    setNewFieldBgColor("#ffffff");
+    setNewFieldTextColor("#1e293b");
+    setNewFieldHelpText("");
+    setAddFieldModalOpen(false);
     setSuccessMsg(
-      `Added custom field "${newField.label}". Remember to click "Save Changes"!`
+      `Added field "${newField.label}". Remember to click "Save & Apply Live"!`
     );
     setTimeout(() => setSuccessMsg(null), 4000);
   };
@@ -298,9 +422,9 @@ export default function AdminBookingFormBuilderPage() {
             </Badge>
           </div>
           <p className="mt-1 text-xs text-brand-muted sm:text-sm">
-            Add, remove, toggle, or customize any field, question, treatment
-            concern, time slot, or doctor in the public appointment booking
-            form.
+            Add or remove any field, edit labels, placeholders, background
+            colors, text colors, and styling for the public contact &amp;
+            booking form.
           </p>
         </div>
 
@@ -401,10 +525,14 @@ export default function AdminBookingFormBuilderPage() {
 
         <Card className="border-brand-border bg-brand-surface p-3.5">
           <div className="text-[11px] font-bold uppercase tracking-wider text-brand-muted">
-            Available Doctors
+            Form Theme &amp; Style
           </div>
-          <div className="mt-1 text-2xl font-bold text-brand-text">
-            {config.doctors.length}
+          <div className="mt-1 flex items-center gap-2">
+            <span
+              className="h-4 w-4 rounded-full border border-stone-300"
+              style={{ backgroundColor: config.buttonBgColor || "#f2583e" }}
+            />
+            <span className="text-xs font-bold text-brand-text">Custom Palette</span>
           </div>
         </Card>
       </div>
@@ -421,7 +549,20 @@ export default function AdminBookingFormBuilderPage() {
           }`}
         >
           <Sliders className="h-3.5 w-3.5" />
-          <span>Form Fields &amp; Questions ({config.fields.length})</span>
+          <span>Form Fields &amp; Settings ({config.fields.length})</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("styling")}
+          className={`flex items-center gap-1.5 rounded-clinic px-3.5 py-2 text-xs font-bold transition-all ${
+            activeTab === "styling"
+              ? "shadow-xs bg-brand-primary text-white"
+              : "border border-brand-border bg-brand-surface text-brand-muted hover:text-brand-text"
+          }`}
+        >
+          <Palette className="h-3.5 w-3.5" />
+          <span>Colors &amp; Styling</span>
         </button>
 
         <button
@@ -434,7 +575,7 @@ export default function AdminBookingFormBuilderPage() {
           }`}
         >
           <Stethoscope className="h-3.5 w-3.5" />
-          <span>Treatments &amp; Concerns ({config.treatments.length})</span>
+          <span>Treatments ({config.treatments.length})</span>
         </button>
 
         <button
@@ -460,7 +601,7 @@ export default function AdminBookingFormBuilderPage() {
           }`}
         >
           <User className="h-3.5 w-3.5" />
-          <span>Doctors List ({config.doctors.length})</span>
+          <span>Doctors ({config.doctors.length})</span>
         </button>
 
         <button
@@ -477,7 +618,7 @@ export default function AdminBookingFormBuilderPage() {
         </button>
       </div>
 
-      {/* TAB 1: FORM FIELDS & CUSTOM QUESTIONS */}
+      {/* TAB 1: FORM FIELDS & SETTINGS */}
       {activeTab === "fields" && (
         <div className="space-y-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -486,8 +627,8 @@ export default function AdminBookingFormBuilderPage() {
                 Manage Booking Form Fields
               </h2>
               <p className="text-xs text-brand-muted">
-                Toggle fields on or off to show/hide them on the public form.
-                Mark fields as mandatory or optional.
+                Add, remove, or customize any field&apos;s label, placeholder,
+                background color, text color, and validation.
               </p>
             </div>
 
@@ -495,11 +636,11 @@ export default function AdminBookingFormBuilderPage() {
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => setCustomFieldModalOpen(true)}
+              onClick={() => setAddFieldModalOpen(true)}
               className="border-brand-primary/40 hover:bg-brand-primary/10 gap-1.5 text-xs font-bold text-brand-primary"
             >
               <Plus className="h-3.5 w-3.5" />
-              <span>Add Custom Field / Question</span>
+              <span>Add New Field</span>
             </Button>
           </div>
 
@@ -519,38 +660,84 @@ export default function AdminBookingFormBuilderPage() {
                       <span className="font-heading text-sm font-bold text-brand-text">
                         {field.label}
                       </span>
-                      {field.isCustom && (
-                        <span className="py-0.2 rounded bg-purple-100 px-1.5 text-[9px] font-bold text-purple-800">
+                      {field.isCustom ? (
+                        <span className="rounded bg-purple-100 px-1.5 py-0.5 text-[9px] font-bold text-purple-800">
                           Custom
+                        </span>
+                      ) : (
+                        <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-semibold text-slate-600">
+                          Standard
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-1.5">
                       <span className="font-mono text-[10px] uppercase text-brand-muted">
                         Type: {field.type}
                       </span>
                       {field.required ? (
-                        <span className="py-0.2 rounded bg-red-100 px-1.5 text-[9px] font-bold text-red-800">
+                        <span className="rounded bg-red-100 px-1.5 py-0.2 text-[9px] font-bold text-red-800">
                           Required
                         </span>
                       ) : (
-                        <span className="py-0.2 rounded bg-slate-100 px-1.5 text-[9px] text-slate-600">
+                        <span className="rounded bg-slate-100 px-1.5 py-0.2 text-[9px] text-slate-600">
                           Optional
                         </span>
                       )}
                     </div>
                   </div>
 
-                  {field.isCustom && (
+                  <div className="flex items-center gap-1">
                     <button
                       type="button"
-                      onClick={() => deleteCustomField(field.id)}
-                      className="p-1 text-red-500 hover:text-red-700"
-                      title="Delete custom field"
+                      onClick={() => handleOpenEditField(field)}
+                      className="rounded p-1 text-brand-primary hover:bg-brand-accent/20"
+                      title="Edit field settings (label, placeholder, colors)"
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      <Edit3 className="h-4 w-4" />
                     </button>
-                  )}
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteField(field.id)}
+                      className="rounded p-1 text-red-500 hover:bg-red-50 hover:text-red-700"
+                      title="Remove field"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Field Appearance Preview */}
+                <div className="mt-3 rounded-lg border border-slate-200/80 bg-slate-50/80 p-2.5 text-[11px]">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Input Style Preview:
+                  </div>
+                  <div className="mt-1 flex items-center justify-between gap-2">
+                    <div
+                      className="truncate rounded border px-2 py-1 text-xs font-medium"
+                      style={{
+                        backgroundColor: field.bgColor || "#ffffff",
+                        color: field.textColor || "#1e293b",
+                        borderColor: "#e2e8f0",
+                      }}
+                    >
+                      {field.placeholder ||
+                        field.label ||
+                        "Enter value..."}
+                    </div>
+
+                    <div className="flex shrink-0 items-center gap-1 text-[10px] text-slate-500">
+                      <span
+                        className="inline-block h-3 w-3 rounded-full border border-stone-300"
+                        style={{ backgroundColor: field.bgColor || "#ffffff" }}
+                        title={`BG: ${field.bgColor || "#ffffff"}`}
+                      />
+                      <span
+                        className="inline-block h-3 w-3 rounded-full border border-stone-300"
+                        style={{ backgroundColor: field.textColor || "#1e293b" }}
+                        title={`Text: ${field.textColor || "#1e293b"}`}
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 {field.helpText && (
@@ -560,7 +747,7 @@ export default function AdminBookingFormBuilderPage() {
                 )}
 
                 {/* Field Controls: Enabled Toggle & Required Toggle */}
-                <div className="border-brand-border/60 mt-4 flex items-center justify-between border-t pt-3 text-xs">
+                <div className="border-brand-border/60 mt-3 flex items-center justify-between border-t pt-2.5 text-xs">
                   <label className="flex cursor-pointer select-none items-center gap-2">
                     <input
                       type="checkbox"
@@ -597,7 +784,310 @@ export default function AdminBookingFormBuilderPage() {
         </div>
       )}
 
-      {/* TAB 2: TREATMENTS & CONCERNS MANAGER */}
+      {/* TAB 2: COLORS & FORM STYLING */}
+      {activeTab === "styling" && (
+        <Card className="border-brand-border p-6">
+          <div className="space-y-6">
+            <div>
+              <h2 className="font-heading text-lg font-bold text-brand-text">
+                Form Appearance &amp; Color Scheme
+              </h2>
+              <p className="text-xs text-brand-muted">
+                Customize the background, text, and button colors for the
+                public appointment and contact form.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              {/* Form Container Background */}
+              <div className="space-y-3 rounded-xl border border-brand-border bg-brand-surface p-4">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold uppercase tracking-wider text-brand-text">
+                    Form Card Background
+                  </label>
+                  <span className="font-mono text-xs text-brand-muted">
+                    {config.formBgColor || "#ffffff"}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={config.formBgColor || "#ffffff"}
+                    onChange={(e) =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        formBgColor: e.target.value,
+                      }))
+                    }
+                    className="h-10 w-16 cursor-pointer rounded border border-brand-border bg-transparent p-1"
+                  />
+                  <Input
+                    type="text"
+                    value={config.formBgColor || "#ffffff"}
+                    onChange={(e) =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        formBgColor: e.target.value,
+                      }))
+                    }
+                    className="h-9 font-mono text-xs"
+                  />
+                </div>
+
+                <div className="space-y-1 pt-1">
+                  <span className="text-[10px] font-semibold text-brand-muted">
+                    Quick Presets:
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {PRESET_BG_COLORS.map((c) => (
+                      <button
+                        key={c.value}
+                        type="button"
+                        onClick={() =>
+                          setConfig((prev) => ({
+                            ...prev,
+                            formBgColor: c.value,
+                          }))
+                        }
+                        className="inline-flex items-center gap-1 rounded-full border border-stone-200 px-2 py-0.5 text-[10px] text-stone-700 hover:bg-stone-100"
+                      >
+                        <span
+                          className="h-2.5 w-2.5 rounded-full border border-stone-300"
+                          style={{ backgroundColor: c.value }}
+                        />
+                        <span>{c.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Form Text Color */}
+              <div className="space-y-3 rounded-xl border border-brand-border bg-brand-surface p-4">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold uppercase tracking-wider text-brand-text">
+                    Form Primary Text Color
+                  </label>
+                  <span className="font-mono text-xs text-brand-muted">
+                    {config.formTextColor || "#1c1917"}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={config.formTextColor || "#1c1917"}
+                    onChange={(e) =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        formTextColor: e.target.value,
+                      }))
+                    }
+                    className="h-10 w-16 cursor-pointer rounded border border-brand-border bg-transparent p-1"
+                  />
+                  <Input
+                    type="text"
+                    value={config.formTextColor || "#1c1917"}
+                    onChange={(e) =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        formTextColor: e.target.value,
+                      }))
+                    }
+                    className="h-9 font-mono text-xs"
+                  />
+                </div>
+
+                <div className="space-y-1 pt-1">
+                  <span className="text-[10px] font-semibold text-brand-muted">
+                    Quick Presets:
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {PRESET_TEXT_COLORS.map((c) => (
+                      <button
+                        key={c.value}
+                        type="button"
+                        onClick={() =>
+                          setConfig((prev) => ({
+                            ...prev,
+                            formTextColor: c.value,
+                          }))
+                        }
+                        className="inline-flex items-center gap-1 rounded-full border border-stone-200 px-2 py-0.5 text-[10px] text-stone-700 hover:bg-stone-100"
+                      >
+                        <span
+                          className="h-2.5 w-2.5 rounded-full border border-stone-300"
+                          style={{ backgroundColor: c.value }}
+                        />
+                        <span>{c.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Submit Button Background */}
+              <div className="space-y-3 rounded-xl border border-brand-border bg-brand-surface p-4">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold uppercase tracking-wider text-brand-text">
+                    Submit Button Color
+                  </label>
+                  <span className="font-mono text-xs text-brand-muted">
+                    {config.buttonBgColor || "#f2583e"}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={config.buttonBgColor || "#f2583e"}
+                    onChange={(e) =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        buttonBgColor: e.target.value,
+                      }))
+                    }
+                    className="h-10 w-16 cursor-pointer rounded border border-brand-border bg-transparent p-1"
+                  />
+                  <Input
+                    type="text"
+                    value={config.buttonBgColor || "#f2583e"}
+                    onChange={(e) =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        buttonBgColor: e.target.value,
+                      }))
+                    }
+                    className="h-9 font-mono text-xs"
+                  />
+                </div>
+
+                <div className="space-y-1 pt-1">
+                  <span className="text-[10px] font-semibold text-brand-muted">
+                    Quick Presets:
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {PRESET_BTN_COLORS.map((c) => (
+                      <button
+                        key={c.value}
+                        type="button"
+                        onClick={() =>
+                          setConfig((prev) => ({
+                            ...prev,
+                            buttonBgColor: c.value,
+                          }))
+                        }
+                        className="inline-flex items-center gap-1 rounded-full border border-stone-200 px-2 py-0.5 text-[10px] text-stone-700 hover:bg-stone-100"
+                      >
+                        <span
+                          className="h-2.5 w-2.5 rounded-full border border-stone-300"
+                          style={{ backgroundColor: c.value }}
+                        />
+                        <span>{c.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Submit Button Text Color */}
+              <div className="space-y-3 rounded-xl border border-brand-border bg-brand-surface p-4">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold uppercase tracking-wider text-brand-text">
+                    Submit Button Text Color
+                  </label>
+                  <span className="font-mono text-xs text-brand-muted">
+                    {config.buttonTextColor || "#ffffff"}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={config.buttonTextColor || "#ffffff"}
+                    onChange={(e) =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        buttonTextColor: e.target.value,
+                      }))
+                    }
+                    className="h-10 w-16 cursor-pointer rounded border border-brand-border bg-transparent p-1"
+                  />
+                  <Input
+                    type="text"
+                    value={config.buttonTextColor || "#ffffff"}
+                    onChange={(e) =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        buttonTextColor: e.target.value,
+                      }))
+                    }
+                    className="h-9 font-mono text-xs"
+                  />
+                </div>
+
+                <div className="space-y-1 pt-1">
+                  <span className="text-[10px] font-semibold text-brand-muted">
+                    Button Label:
+                  </span>
+                  <Input
+                    type="text"
+                    value={config.submitButtonText || "Confirm Booking"}
+                    onChange={(e) =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        submitButtonText: e.target.value,
+                      }))
+                    }
+                    placeholder="e.g. Confirm Booking"
+                    className="h-9 text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Form Title & Badge customization */}
+            <div className="grid grid-cols-1 gap-4 rounded-xl border border-brand-border bg-brand-surface p-4 sm:grid-cols-2">
+              <div className="space-y-1">
+                <label className="text-xs font-bold uppercase tracking-wider text-brand-text">
+                  Header Badge Text
+                </label>
+                <Input
+                  type="text"
+                  value={config.headerBadge}
+                  onChange={(e) =>
+                    setConfig((prev) => ({
+                      ...prev,
+                      headerBadge: e.target.value,
+                    }))
+                  }
+                  className="h-9 text-xs"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold uppercase tracking-wider text-brand-text">
+                  Form Main Headline
+                </label>
+                <Input
+                  type="text"
+                  value={config.title}
+                  onChange={(e) =>
+                    setConfig((prev) => ({
+                      ...prev,
+                      title: e.target.value,
+                    }))
+                  }
+                  className="h-9 text-xs"
+                />
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* TAB 3: TREATMENTS & CONCERNS */}
       {activeTab === "treatments" && (
         <Card className="border-brand-border p-6">
           <div className="space-y-4">
@@ -608,8 +1098,7 @@ export default function AdminBookingFormBuilderPage() {
                 </h2>
                 <p className="text-xs text-brand-muted">
                   These treatments appear in the &quot;Treatment or
-                  Concern&quot; dropdown on the public booking form and WhatsApp
-                  widget.
+                  Concern&quot; dropdown on the public booking form.
                 </p>
               </div>
               <Badge variant="outline" className="text-xs">
@@ -668,7 +1157,7 @@ export default function AdminBookingFormBuilderPage() {
         </Card>
       )}
 
-      {/* TAB 3: TIME SLOTS MANAGER */}
+      {/* TAB 4: TIME SLOTS MANAGER */}
       {activeTab === "slots" && (
         <Card className="border-brand-border p-6">
           <div className="space-y-4">
@@ -691,7 +1180,7 @@ export default function AdminBookingFormBuilderPage() {
             <form onSubmit={handleAddTimeSlot} className="flex gap-2">
               <Input
                 type="text"
-                placeholder="e.g. Early Morning (8:00 AM - 9:30 AM) or Night Care..."
+                placeholder="e.g. Early Morning (8:00 AM - 9:30 AM)..."
                 value={newTimeSlot}
                 onChange={(e) => setNewTimeSlot(e.target.value)}
                 className="text-xs"
@@ -734,7 +1223,7 @@ export default function AdminBookingFormBuilderPage() {
         </Card>
       )}
 
-      {/* TAB 4: DOCTORS ON BOOKING FORM */}
+      {/* TAB 5: DOCTORS ON BOOKING FORM */}
       {activeTab === "doctors" && (
         <Card className="border-brand-border p-6">
           <div className="space-y-4">
@@ -802,7 +1291,7 @@ export default function AdminBookingFormBuilderPage() {
         </Card>
       )}
 
-      {/* TAB 5: LIVE PREVIEW */}
+      {/* TAB 6: LIVE PREVIEW */}
       {activeTab === "preview" && (
         <Card className="border-brand-border p-6">
           <div className="space-y-4">
@@ -814,19 +1303,27 @@ export default function AdminBookingFormBuilderPage() {
                 Live Preview of Patient Booking Form
               </h2>
               <p className="text-xs text-brand-muted">
-                This shows exactly how the appointment form renders to patients
-                on the website with your current settings.
+                This shows exactly how the contact &amp; appointment form
+                renders with your custom field styling, placeholders, and
+                colors.
               </p>
             </div>
 
             {/* Mock Booking Form rendering current state */}
-            <div className="mx-auto max-w-xl space-y-4 rounded-2xl border border-slate-200 bg-white p-6 text-xs shadow-sm">
-              <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+            <div
+              className="mx-auto max-w-xl space-y-4 rounded-2xl border p-6 text-xs shadow-md transition-colors"
+              style={{
+                backgroundColor: config.formBgColor || "#ffffff",
+                color: config.formTextColor || "#1c1917",
+                borderColor: "#e2e8f0",
+              }}
+            >
+              <div className="flex items-start justify-between border-b border-stone-200/60 pb-3">
                 <div>
-                  <span className="text-[10px] font-bold uppercase text-emerald-600">
+                  <span className="text-[10px] font-bold uppercase text-[#e0533c]">
                     {config.headerBadge}
                   </span>
-                  <h3 className="font-heading text-base font-bold text-slate-900">
+                  <h3 className="font-heading text-base font-bold">
                     {config.title}
                   </h3>
                 </div>
@@ -835,18 +1332,18 @@ export default function AdminBookingFormBuilderPage() {
                 </div>
               </div>
 
-              {/* Render enabled fields */}
+              {/* Render enabled fields with dynamic styling */}
               <div className="space-y-3">
                 {config.fields
                   .filter((f) => f.enabled)
                   .map((f) => (
                     <div key={f.id} className="space-y-1">
-                      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700">
+                      <label className="block text-[11px] font-bold uppercase tracking-wider opacity-90">
                         {f.label}{" "}
                         {f.required ? (
                           <span className="text-red-500">*</span>
                         ) : (
-                          <span className="font-normal text-slate-400">
+                          <span className="font-normal opacity-60">
                             (Optional)
                           </span>
                         )}
@@ -862,19 +1359,37 @@ export default function AdminBookingFormBuilderPage() {
                           </div>
                         </div>
                       ) : f.id === "treatment" ? (
-                        <select className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs">
+                        <select
+                          className="h-9 w-full rounded-xl border border-slate-200 px-3 text-xs"
+                          style={{
+                            backgroundColor: f.bgColor || "#ffffff",
+                            color: f.textColor || "#1e293b",
+                          }}
+                        >
                           {config.treatments.map((t, i) => (
                             <option key={i}>{t}</option>
                           ))}
                         </select>
                       ) : f.id === "preferredDoctor" ? (
-                        <select className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs">
+                        <select
+                          className="h-9 w-full rounded-xl border border-slate-200 px-3 text-xs"
+                          style={{
+                            backgroundColor: f.bgColor || "#ffffff",
+                            color: f.textColor || "#1e293b",
+                          }}
+                        >
                           {config.doctors.map((d, i) => (
                             <option key={i}>{d}</option>
                           ))}
                         </select>
                       ) : f.id === "timeRange" ? (
-                        <select className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs">
+                        <select
+                          className="h-9 w-full rounded-xl border border-slate-200 px-3 text-xs"
+                          style={{
+                            backgroundColor: f.bgColor || "#ffffff",
+                            color: f.textColor || "#1e293b",
+                          }}
+                        >
                           {config.timeSlots.map((s, i) => (
                             <option key={i}>{s}</option>
                           ))}
@@ -887,26 +1402,35 @@ export default function AdminBookingFormBuilderPage() {
                           </label>
                           <label className="flex items-center gap-1.5">
                             <input type="radio" readOnly />
-                            <span>WhatsApp</span>
+                            <span>Email</span>
                           </label>
                         </div>
                       ) : f.type === "textarea" ? (
                         <textarea
                           rows={2}
                           placeholder={f.placeholder}
-                          className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs"
+                          className="w-full rounded-xl border border-slate-200 p-2 text-xs"
+                          style={{
+                            backgroundColor: f.bgColor || "#ffffff",
+                            color: f.textColor || "#1e293b",
+                          }}
                           readOnly
                         />
                       ) : f.type === "checkbox" ? (
                         <label className="flex items-center gap-2 pt-1">
                           <input type="checkbox" checked readOnly />
-                          <span className="text-[11px] text-slate-600">
-                            I agree to receive clinic communications regarding
-                            this appointment.
+                          <span className="text-[11px] opacity-80">
+                            {f.helpText || "I agree to clinic communication."}
                           </span>
                         </label>
                       ) : f.type === "select" && f.options ? (
-                        <select className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs">
+                        <select
+                          className="h-9 w-full rounded-xl border border-slate-200 px-3 text-xs"
+                          style={{
+                            backgroundColor: f.bgColor || "#ffffff",
+                            color: f.textColor || "#1e293b",
+                          }}
+                        >
                           {f.options.map((opt, i) => (
                             <option key={i}>{opt}</option>
                           ))}
@@ -915,7 +1439,11 @@ export default function AdminBookingFormBuilderPage() {
                         <input
                           type={f.type}
                           placeholder={f.placeholder}
-                          className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs"
+                          className="h-9 w-full rounded-xl border border-slate-200 px-3 text-xs"
+                          style={{
+                            backgroundColor: f.bgColor || "#ffffff",
+                            color: f.textColor || "#1e293b",
+                          }}
                           readOnly
                         />
                       )}
@@ -926,9 +1454,13 @@ export default function AdminBookingFormBuilderPage() {
               <div className="pt-2">
                 <button
                   type="button"
-                  className="shadow-xs flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#881318] font-bold text-white"
+                  className="shadow-md flex h-11 w-full items-center justify-center gap-2 rounded-xl font-bold transition-all"
+                  style={{
+                    backgroundColor: config.buttonBgColor || "#f2583e",
+                    color: config.buttonTextColor || "#ffffff",
+                  }}
                 >
-                  <span>{config.submitButtonText}</span>
+                  <span>{config.submitButtonText || "Confirm Booking"}</span>
                   <ArrowRight className="h-4 w-4" />
                 </button>
               </div>
@@ -937,89 +1469,142 @@ export default function AdminBookingFormBuilderPage() {
         </Card>
       )}
 
-      {/* MODAL: ADD CUSTOM FIELD */}
-      {customFieldModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md space-y-4 rounded-clinic border border-brand-border bg-brand-surface p-6 shadow-2xl">
+      {/* MODAL: ADD NEW FIELD */}
+      {addFieldModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-lg space-y-4 rounded-clinic border border-brand-border bg-white p-6 shadow-2xl">
             <div className="flex items-start justify-between border-b border-brand-border pb-3">
               <div>
                 <h3 className="font-heading text-lg font-bold text-brand-text">
-                  Add Custom Field / Question
+                  Add New Form Field
                 </h3>
                 <p className="text-xs text-brand-muted">
-                  Create a new question to show in the appointment booking form.
+                  Create a custom question or field with custom styling and
+                  placeholder.
                 </p>
               </div>
               <button
                 type="button"
-                onClick={() => setCustomFieldModalOpen(false)}
+                onClick={() => setAddFieldModalOpen(false)}
                 className="text-base text-brand-muted hover:text-brand-text"
               >
-                ×
+                <X className="h-5 w-5" />
               </button>
             </div>
 
-            <form
-              onSubmit={handleAddCustomField}
-              className="space-y-3.5 text-xs"
-            >
+            <form onSubmit={handleAddNewField} className="space-y-3.5 text-xs">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <label className="font-semibold text-brand-text">
+                    Field Label *
+                  </label>
+                  <Input
+                    required
+                    placeholder="e.g. Dental Insurance Provider or Preferred Branch"
+                    value={newFieldLabel}
+                    onChange={(e) => setNewFieldLabel(e.target.value)}
+                    className="text-xs"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-semibold text-brand-text">
+                    Field Type
+                  </label>
+                  <select
+                    value={newFieldType}
+                    onChange={(e) => setNewFieldType(e.target.value as any)}
+                    className="h-9 w-full rounded-clinic border border-brand-border bg-white px-3 text-xs text-brand-text"
+                  >
+                    <option value="text">Single Line Text</option>
+                    <option value="tel">Telephone / Mobile</option>
+                    <option value="email">Email Address</option>
+                    <option value="select">Dropdown Selection</option>
+                    <option value="textarea">Multi-line Paragraph</option>
+                    <option value="checkbox">Checkbox (Yes/No)</option>
+                    <option value="date">Date Picker</option>
+                  </select>
+                </div>
+              </div>
+
               <div className="space-y-1">
                 <label className="font-semibold text-brand-text">
-                  Question / Field Label *
+                  Placeholder Text
                 </label>
                 <Input
-                  required
-                  placeholder="e.g. Do you have dental insurance? or Referral Code"
-                  value={customFieldLabel}
-                  onChange={(e) => setCustomFieldLabel(e.target.value)}
+                  placeholder="e.g. Enter provider name or policy ID..."
+                  value={newFieldPlaceholder}
+                  onChange={(e) => setNewFieldPlaceholder(e.target.value)}
                   className="text-xs"
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="font-semibold text-brand-text">
-                  Field Input Type
-                </label>
-                <select
-                  value={customFieldType}
-                  onChange={(e) =>
-                    setCustomFieldType(
-                      e.target.value as
-                        "text" | "select" | "checkbox" | "textarea"
-                    )
-                  }
-                  className="h-9 w-full rounded-clinic border border-brand-border bg-brand-background px-3 text-xs text-brand-text"
-                >
-                  <option value="text">Single Line Text</option>
-                  <option value="select">Dropdown Selection</option>
-                  <option value="textarea">Multi-line Paragraph</option>
-                  <option value="checkbox">Single Checkbox (Yes/No)</option>
-                </select>
-              </div>
-
-              {customFieldType === "select" && (
+              {newFieldType === "select" && (
                 <div className="space-y-1">
                   <label className="font-semibold text-brand-text">
                     Dropdown Options (comma-separated) *
                   </label>
                   <Input
                     required
-                    placeholder="e.g. Yes, No, Self-Pay, Private Insurance"
-                    value={customFieldOptions}
-                    onChange={(e) => setCustomFieldOptions(e.target.value)}
+                    placeholder="e.g. Cigna, MetLife, Aetna, Self-Pay"
+                    value={newFieldOptions}
+                    onChange={(e) => setNewFieldOptions(e.target.value)}
                     className="text-xs"
                   />
                 </div>
               )}
 
+              {/* Color Customization for the field */}
+              <div className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <label className="font-semibold text-brand-text">
+                    Field Background Color
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={newFieldBgColor}
+                      onChange={(e) => setNewFieldBgColor(e.target.value)}
+                      className="h-8 w-12 cursor-pointer rounded border bg-transparent p-0.5"
+                    />
+                    <Input
+                      type="text"
+                      value={newFieldBgColor}
+                      onChange={(e) => setNewFieldBgColor(e.target.value)}
+                      className="h-8 font-mono text-xs"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="font-semibold text-brand-text">
+                    Field Text Color
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={newFieldTextColor}
+                      onChange={(e) => setNewFieldTextColor(e.target.value)}
+                      className="h-8 w-12 cursor-pointer rounded border bg-transparent p-0.5"
+                    />
+                    <Input
+                      type="text"
+                      value={newFieldTextColor}
+                      onChange={(e) => setNewFieldTextColor(e.target.value)}
+                      className="h-8 font-mono text-xs"
+                    />
+                  </div>
+                </div>
+              </div>
+
               <div className="space-y-1">
                 <label className="font-semibold text-brand-text">
-                  Placeholder Text (Optional)
+                  Help Text / Description (Optional)
                 </label>
                 <Input
-                  placeholder="e.g. Enter details here..."
-                  value={customFieldPlaceholder}
-                  onChange={(e) => setCustomFieldPlaceholder(e.target.value)}
+                  placeholder="e.g. Helpful hint shown under the field"
+                  value={newFieldHelpText}
+                  onChange={(e) => setNewFieldHelpText(e.target.value)}
                   className="text-xs"
                 />
               </div>
@@ -1027,12 +1612,12 @@ export default function AdminBookingFormBuilderPage() {
               <label className="flex cursor-pointer items-center gap-2 pt-1">
                 <input
                   type="checkbox"
-                  checked={customFieldRequired}
-                  onChange={(e) => setCustomFieldRequired(e.target.checked)}
+                  checked={newFieldRequired}
+                  onChange={(e) => setNewFieldRequired(e.target.checked)}
                   className="h-4 w-4 rounded border-slate-300 text-brand-primary"
                 />
                 <span className="font-semibold text-brand-text">
-                  Mark this custom question as mandatory (Required)
+                  Mark this field as mandatory (Required)
                 </span>
               </label>
 
@@ -1041,7 +1626,7 @@ export default function AdminBookingFormBuilderPage() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => setCustomFieldModalOpen(false)}
+                  onClick={() => setAddFieldModalOpen(false)}
                 >
                   Cancel
                 </Button>
@@ -1053,6 +1638,216 @@ export default function AdminBookingFormBuilderPage() {
                 >
                   Add Field to Form
                 </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: EDIT FIELD SETTINGS */}
+      {editingField && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-lg space-y-4 rounded-clinic border border-brand-border bg-white p-6 shadow-2xl">
+            <div className="flex items-start justify-between border-b border-brand-border pb-3">
+              <div>
+                <h3 className="font-heading text-lg font-bold text-brand-text">
+                  Edit Field: {editingField.label}
+                </h3>
+                <p className="text-xs text-brand-muted">
+                  Update label, placeholder, background color, text color, and
+                  visibility.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingField(null)}
+                className="text-base text-brand-muted hover:text-brand-text"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form
+              onSubmit={handleSaveEditedField}
+              className="space-y-3.5 text-xs"
+            >
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <label className="font-semibold text-brand-text">
+                    Field Label *
+                  </label>
+                  <Input
+                    required
+                    value={editLabel}
+                    onChange={(e) => setEditLabel(e.target.value)}
+                    className="text-xs"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-semibold text-brand-text">
+                    Field Input Type
+                  </label>
+                  <select
+                    value={editType}
+                    onChange={(e) => setEditType(e.target.value)}
+                    className="h-9 w-full rounded-clinic border border-brand-border bg-white px-3 text-xs text-brand-text"
+                  >
+                    <option value="text">Single Line Text</option>
+                    <option value="tel">Telephone / Mobile</option>
+                    <option value="email">Email Address</option>
+                    <option value="select">Dropdown Selection</option>
+                    <option value="textarea">Multi-line Paragraph</option>
+                    <option value="checkbox">Checkbox (Yes/No)</option>
+                    <option value="date">Date Picker</option>
+                    <option value="radio">Radio Buttons</option>
+                    <option value="segmented">Segmented Buttons</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-semibold text-brand-text">
+                  Placeholder Text
+                </label>
+                <Input
+                  value={editPlaceholder}
+                  onChange={(e) => setEditPlaceholder(e.target.value)}
+                  placeholder="Placeholder shown inside input..."
+                  className="text-xs"
+                />
+              </div>
+
+              {(editType === "select" ||
+                editType === "radio" ||
+                editType === "segmented") && (
+                <div className="space-y-1">
+                  <label className="font-semibold text-brand-text">
+                    Dropdown / Choice Options (comma-separated)
+                  </label>
+                  <Input
+                    value={editOptions}
+                    onChange={(e) => setEditOptions(e.target.value)}
+                    placeholder="Option 1, Option 2, Option 3"
+                    className="text-xs"
+                  />
+                </div>
+              )}
+
+              {/* Color Customization */}
+              <div className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <label className="font-semibold text-brand-text">
+                    Input Background Color (bg)
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={editBgColor}
+                      onChange={(e) => setEditBgColor(e.target.value)}
+                      className="h-8 w-12 cursor-pointer rounded border bg-transparent p-0.5"
+                    />
+                    <Input
+                      type="text"
+                      value={editBgColor}
+                      onChange={(e) => setEditBgColor(e.target.value)}
+                      className="h-8 font-mono text-xs"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="font-semibold text-brand-text">
+                    Input Text Color
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={editTextColor}
+                      onChange={(e) => setEditTextColor(e.target.value)}
+                      className="h-8 w-12 cursor-pointer rounded border bg-transparent p-0.5"
+                    />
+                    <Input
+                      type="text"
+                      value={editTextColor}
+                      onChange={(e) => setEditTextColor(e.target.value)}
+                      className="h-8 font-mono text-xs"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-semibold text-brand-text">
+                  Help Text / Caption
+                </label>
+                <Input
+                  value={editHelpText}
+                  onChange={(e) => setEditHelpText(e.target.value)}
+                  placeholder="Optional hint text shown below the field"
+                  className="text-xs"
+                />
+              </div>
+
+              <div className="flex items-center gap-6 pt-1">
+                <label className="flex cursor-pointer items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={editEnabled}
+                    onChange={(e) => setEditEnabled(e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-300 text-brand-primary"
+                  />
+                  <span className="font-semibold text-brand-text">
+                    Field is Visible on Website
+                  </span>
+                </label>
+
+                <label className="flex cursor-pointer items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={editRequired}
+                    onChange={(e) => setEditRequired(e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-300 text-red-600"
+                  />
+                  <span className="font-semibold text-brand-text">
+                    Mandatory (Required)
+                  </span>
+                </label>
+              </div>
+
+              <div className="flex items-center justify-between border-t border-brand-border pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    handleDeleteField(editingField.id);
+                    setEditingField(null);
+                  }}
+                  className="gap-1 text-xs text-red-600 hover:bg-red-50"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  <span>Remove Field</span>
+                </Button>
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setEditingField(null)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="sm"
+                    className="bg-brand-primary font-bold text-white"
+                  >
+                    Save Field Settings
+                  </Button>
+                </div>
               </div>
             </form>
           </div>

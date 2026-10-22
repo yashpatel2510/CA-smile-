@@ -1,12 +1,14 @@
 {
   "googleConfig": {
-    "placeId": "ChIJN1t_tDeuEmsRUsoyG83frY4",
-    "businessName": "HealthSphere Clinic & Dental Center",
+    "placeId": "/g/11kqclnrjh",
+    "businessName": "Dr. Preeti Shah Dental Clinic",
     "googleRating": 4.9,
-    "totalReviewsCount": 188,
+    "totalReviewsCount": 187,
     "autoApproveGoogleReviews": true,
-    "googleMapsUrl": "https://maps.google.com/?cid=1029384756123",
-    "lastSyncedAt": "2026-09-11T07:36:18.439Z"
+    "googleMapsUrl": "https://share.google/KRr7QvSMEB4CjYaYN",
+    "lastSyncedAt": "2026-10-16T04:27:20.259Z",
+    "darkMode": true,
+    "apiKey": ""
   },
   "reviews": [
     {
@@ -116,7 +118,7 @@
       "treatment": "Cardiology Consultation",
       "date": "Yesterday",
       "source": "GOOGLE",
-      "status": "PENDING_APPROVAL",
+      "status": "APPROVED",
       "authorPhotoUrl": "",
       "googleReviewId": "g-rev-105",
       "verifiedPatient": true,
@@ -130,10 +132,11 @@
       "treatment": "Root Canal Treatment",
       "date": "3 days ago",
       "source": "WEBSITE",
-      "status": "PENDING_APPROVAL",
+      "status": "APPROVED",
       "authorPhotoUrl": "",
       "verifiedPatient": true,
       "createdAt": "2026-09-08T13:20:00.000Z"
     }
-  ]
+  ],
+  "darkMode": true
 }

@@ -27,15 +27,38 @@ export async function POST(req: NextRequest) {
       // Body optional
     }
 
-    const { placeId, businessName, autoApprove } = body as any;
+    const {
+      placeId,
+      businessName,
+      googleMapsUrl,
+      googleRating,
+      totalReviewsCount,
+      autoApprove,
+      apiKey,
+    } = body as any;
 
-    if (placeId || businessName || typeof autoApprove === "boolean") {
-      updateGoogleConfig({
+    let updatedConfig;
+    if (
+      placeId ||
+      businessName ||
+      googleMapsUrl ||
+      googleRating !== undefined ||
+      totalReviewsCount !== undefined ||
+      typeof autoApprove === "boolean" ||
+      typeof apiKey === "string"
+    ) {
+      updatedConfig = updateGoogleConfig({
         ...(placeId ? { placeId } : {}),
         ...(businessName ? { businessName } : {}),
+        ...(googleMapsUrl ? { googleMapsUrl } : {}),
+        ...(googleRating !== undefined ? { googleRating: Number(googleRating) } : {}),
+        ...(totalReviewsCount !== undefined
+          ? { totalReviewsCount: Number(totalReviewsCount) }
+          : {}),
         ...(typeof autoApprove === "boolean"
           ? { autoApproveGoogleReviews: autoApprove }
           : {}),
+        ...(typeof apiKey === "string" ? { apiKey: apiKey.trim() } : {}),
       });
     }
 
@@ -43,9 +66,15 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Google Business reviews sync completed. ${syncResult.syncedCount} review(s) imported.`,
+      message: syncResult.isLiveApi
+        ? `Connected to Google Places API! ${syncResult.message}`
+        : syncResult.syncedCount > 0
+        ? `Google Business reviews sync completed. ${syncResult.syncedCount} new review(s) imported.`
+        : `Google reviews synchronized. All existing reviews are up-to-date.`,
       syncedCount: syncResult.syncedCount,
       newReviews: syncResult.newReviews,
+      googleConfig: updatedConfig,
+      isLiveApi: syncResult.isLiveApi,
     });
   } catch (error) {
     console.error("Error syncing Google Business reviews:", error);

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import prisma, { authPrisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { z } from "zod";
+import bcrypt from "bcryptjs";
 
 const createStaffSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -12,6 +13,7 @@ const createStaffSchema = z.object({
     .default("STAFF"),
   specialty: z.string().optional(),
   phone: z.string().optional(),
+  password: z.string().min(4, "Password must be at least 4 characters").optional(),
 });
 
 const DEMO_STAFF = [
@@ -61,7 +63,7 @@ export async function GET(req: NextRequest) {
   try {
     let staffList = [];
     try {
-      staffList = await prisma.staffUser.findMany({
+      staffList = await authPrisma.staffUser.findMany({
         orderBy: { createdAt: "asc" },
       });
     } catch {
@@ -115,12 +117,15 @@ export async function POST(req: NextRequest) {
     }
 
     const input = parseResult.data;
+    const hashedPassword = input.password
+      ? await bcrypt.hash(input.password, 10)
+      : null;
 
     let createdStaff;
     try {
-      let clinic = await prisma.clinic.findFirst();
+      let clinic = await authPrisma.clinic.findFirst();
       if (!clinic) {
-        clinic = await prisma.clinic.create({
+        clinic = await authPrisma.clinic.create({
           data: {
             name: "HealthSphere Clinic",
             slug: "healthsphere-main",
@@ -128,7 +133,7 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      createdStaff = await prisma.staffUser.create({
+      createdStaff = await authPrisma.staffUser.create({
         data: {
           clinicId: clinic.id,
           name: input.name,
@@ -136,27 +141,33 @@ export async function POST(req: NextRequest) {
           role: input.role as any,
           specialty: input.specialty || "General Practice",
           phone: input.phone || null,
+          password: hashedPassword,
           isActive: true,
         },
       });
 
-      // Audit Log
-      await prisma.auditLog.create({
-        data: {
-          clinicId: clinic.id,
-          action: "STAFF_INVITED",
-          entityType: "StaffUser",
-          entityId: createdStaff.id,
-          performedBy: session?.user?.name || "Clinic Administrator",
-          details: `Invited new staff member '${input.name}' with role ${input.role}`,
-          newValues: {
-            email: input.email,
-            role: input.role,
-            specialty: input.specialty,
+      // Optional Audit Log
+      try {
+        await prisma.auditLog.create({
+          data: {
+            clinicId: clinic.id,
+            action: "STAFF_INVITED",
+            entityType: "StaffUser",
+            entityId: createdStaff.id,
+            performedBy: session?.user?.name || "Clinic Administrator",
+            details: `Invited new staff member '${input.name}' with role ${input.role}`,
+            newValues: {
+              email: input.email,
+              role: input.role,
+              specialty: input.specialty,
+            },
           },
-        },
-      });
-    } catch {
+        });
+      } catch (auditErr) {
+        // Non-blocking audit log
+      }
+    } catch (err: any) {
+      console.error("Staff user creation error in auth database:", err);
       createdStaff = {
         id: `staff-${Date.now()}`,
         name: input.name,
@@ -183,6 +194,79 @@ export async function POST(req: NextRequest) {
         success: false,
         message: error.message || "Failed to create staff member",
       },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (session && session.user?.role !== "ADMIN") {
+      return NextResponse.json(
+        { success: false, message: "Forbidden: Admin privileges required" },
+        { status: 403 }
+      );
+    }
+
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+    if (!id) {
+      return NextResponse.json(
+        { success: false, message: "Query parameter 'id' is required" },
+        { status: 400 }
+      );
+    }
+
+    let staffName = "Staff Member";
+    try {
+      const existing = await authPrisma.staffUser.findUnique({
+        where: { id },
+      });
+
+      if (existing) {
+        staffName = existing.name;
+
+        await authPrisma.appointment.updateMany({
+          where: { staffUserId: id },
+          data: { staffUserId: null },
+        });
+
+        await authPrisma.auditLog.updateMany({
+          where: { staffUserId: id },
+          data: { staffUserId: null },
+        });
+
+        await authPrisma.staffUser.delete({
+          where: { id },
+        });
+
+        const clinic = await prisma.clinic.findFirst();
+        if (clinic) {
+          await prisma.auditLog.create({
+            data: {
+              clinicId: clinic.id,
+              action: "STAFF_REMOVED",
+              entityType: "StaffUser",
+              entityId: id,
+              performedBy: session?.user?.name || "Clinic Administrator",
+              details: `Removed staff member "${staffName}" from clinic roster`,
+            },
+          });
+        }
+      }
+    } catch (dbErr) {
+      console.warn("Error deleting staff in route.ts:", dbErr);
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: `Staff member "${staffName}" removed successfully.`,
+      deletedId: id,
+    });
+  } catch (error: any) {
+    return NextResponse.json(
+      { success: false, message: error.message || "Failed to delete staff member" },
       { status: 500 }
     );
   }

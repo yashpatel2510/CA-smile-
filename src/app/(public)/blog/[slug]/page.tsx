@@ -89,7 +89,7 @@ export default function BlogPostDetailPage({ params }: BlogPostPageProps) {
               href="/blog"
               className="transition-colors hover:text-brand-primary"
             >
-              Health Journal
+              Dental Journal
             </Link>
             <span>/</span>
             <span className="truncate font-semibold text-brand-text">
@@ -101,7 +101,7 @@ export default function BlogPostDetailPage({ params }: BlogPostPageProps) {
           <header className="space-y-5 border-b border-brand-border pb-8">
             <div className="flex flex-wrap items-center gap-3">
               <Badge variant="default">{post.category}</Badge>
-              <div className="flex items-center gap-1.5 text-xs text-brand-muted">
+              <div className="flex items-center gap-1.5 text-xs text-brand-muted font-mono">
                 <Clock
                   className="h-3.5 w-3.5 text-brand-primary"
                   aria-hidden="true"
@@ -109,7 +109,7 @@ export default function BlogPostDetailPage({ params }: BlogPostPageProps) {
                 <span>{post.readTime}</span>
               </div>
               <span className="text-brand-border">•</span>
-              <span className="text-xs text-brand-muted">
+              <span className="text-xs text-brand-muted font-mono">
                 {post.publishedAt}
               </span>
             </div>
@@ -123,9 +123,9 @@ export default function BlogPostDetailPage({ params }: BlogPostPageProps) {
             </p>
 
             {/* Author Bar */}
-            <div className="flex items-center justify-between rounded-clinic border border-brand-border bg-brand-surface p-4">
+            <div className="flex items-center justify-between rounded-2xl border border-brand-border bg-brand-surface p-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-clinic bg-brand-primary font-heading text-base font-bold text-brand-primary-foreground">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-black text-white font-heading text-base font-bold dark:bg-white dark:text-black">
                   {post.author.name.split(" ")[1]?.charAt(0) || "D"}
                 </div>
                 <div>
@@ -141,26 +141,26 @@ export default function BlogPostDetailPage({ params }: BlogPostPageProps) {
                 variant="success"
                 className="hidden text-[10px] sm:inline-flex"
               >
-                Verified Physician Author
+                Verified Dental Specialist
               </Badge>
             </div>
           </header>
 
-          {/* Medical Review Disclaimer Callout */}
-          <div className="bg-brand-accent/20 flex items-start gap-3 rounded-clinic border border-brand-border p-4">
+          {/* Clinical Review Disclaimer Callout */}
+          <div className="bg-brand-accent/20 flex items-start gap-3 rounded-2xl border border-brand-border p-4">
             <ShieldCheck
               className="mt-0.5 h-5 w-5 shrink-0 text-brand-primary"
               aria-hidden="true"
             />
             <div className="space-y-1 text-xs text-brand-muted">
               <span className="block font-semibold text-brand-text">
-                Clinical Evidence & Fact-Checking Standard
+                Clinical Evidence &amp; Fact-Checking Standard
               </span>
               <span>
-                All medical articles on HealthSphere are written or
-                peer-reviewed by licensed, board-certified clinicians. This
+                All oral health articles on PedioDent are written or
+                peer-reviewed by licensed dental surgeons. This
                 content is for educational awareness and does not replace direct
-                clinical diagnosis.
+                clinical examination.
               </span>
             </div>
           </div>

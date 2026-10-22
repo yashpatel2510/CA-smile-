@@ -10,6 +10,7 @@ import {
   GraduationCap,
   Sparkles,
   CheckCircle2,
+  Stethoscope,
 } from "lucide-react";
 import { SectionWrapper } from "@/components/design-system/section-wrapper";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,17 +18,19 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BookNowButton } from "@/components/ui/book-now-button";
 
+import { DoctorOwnerProfile } from "@/components/public/doctor-owner-profile";
+
 export const metadata: Metadata = {
-  title: "About HealthSphere Clinic | Medical Mission & Leadership",
+  title: "About HealthSphere Clinic | Medical Leadership & Mission",
   description:
-    "Learn about HealthSphere Clinic's commitment to patient-centered evidence-based medicine, board-certified physician leadership, and accredited facilities.",
+    "Learn about HealthSphere Clinic's leadership, physician founder, clinic ownership, patient-centered care philosophy, and modern facilities.",
   alternates: {
     canonical: "/about",
   },
   openGraph: {
-    title: "About HealthSphere Medical Clinic - Our Mission & Physicians",
+    title: "About HealthSphere Medical Clinic - Doctor & Founder Profile",
     description:
-      "Founded by board-certified physicians to unite compassionate bedside care with modern clinical diagnostics.",
+      "Founded by experienced physicians to provide compassionate care, advanced diagnostics, and surgical precision.",
     url: "/about",
   },
 };
@@ -92,7 +95,7 @@ export default function AboutPage() {
       {/* Intro Hero */}
       <SectionWrapper containerSize="default" className="py-0 sm:py-0 lg:py-0">
         <div className="max-w-3xl space-y-4">
-          <Badge variant="default">Our Story & Care Philosophy</Badge>
+          <Badge variant="default">Our Story &amp; Care Philosophy</Badge>
           <h1 className="font-heading text-3xl font-extrabold tracking-tight text-brand-text sm:text-4xl lg:text-5xl">
             Re-architecting Outpatient Healthcare Around the Patient
           </h1>
@@ -101,6 +104,19 @@ export default function AboutPage() {
             most effective when physicians have the time to listen, diagnostics
             are immediate, and patient care is treated as a lasting partnership.
           </p>
+        </div>
+      </SectionWrapper>
+
+      {/* Doctor & Owner Spotlight Section */}
+      <SectionWrapper containerSize="default" className="py-0 sm:py-0 lg:py-0">
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Badge variant="default" className="gap-1.5 text-xs">
+              <Stethoscope className="h-3.5 w-3.5 text-brand-primary" />
+              <span>Physician &amp; Ownership Profile</span>
+            </Badge>
+          </div>
+          <DoctorOwnerProfile />
         </div>
       </SectionWrapper>
 
@@ -174,7 +190,7 @@ export default function AboutPage() {
                   24 / 7
                 </div>
                 <div className="mt-1 text-xs text-brand-muted">
-                  Urgent Triage Coverage
+                  Urgent Care Support
                 </div>
               </div>
             </div>

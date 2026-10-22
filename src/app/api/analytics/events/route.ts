@@ -5,7 +5,7 @@ interface AnalyticsStore {
   pageViews: Record<string, number>;
   funnelSteps: Record<number, number>;
   serviceInterests: Record<string, number>;
-  aiChatInteractions: number;
+  directInquiries: number;
   totalEvents: number;
 }
 
@@ -31,7 +31,7 @@ const analyticsStore: AnalyticsStore = {
     "Pediatric Wellness & Immunization Check": 28,
     "Preventive Dental Cleaning & Examination": 22,
   },
-  aiChatInteractions: 41,
+  directInquiries: 54,
   totalEvents: 1227,
 };
 
@@ -57,8 +57,8 @@ export async function POST(req: NextRequest) {
         (analyticsStore.serviceInterests[serviceName] || 0) + 1;
     }
 
-    if (eventName === "ai_chat_interaction") {
-      analyticsStore.aiChatInteractions++;
+    if (eventName === "direct_inquiry" || eventName === "contact_submit") {
+      analyticsStore.directInquiries++;
     }
 
     return NextResponse.json({ success: true });
@@ -121,7 +121,7 @@ export async function GET(req: NextRequest) {
       metrics: {
         totalPageViews,
         totalEvents: analyticsStore.totalEvents,
-        aiChatInteractions: analyticsStore.aiChatInteractions,
+        directInquiries: analyticsStore.directInquiries,
         pageViews: analyticsStore.pageViews,
         funnel: funnelWithPercentages,
         serviceInterests: analyticsStore.serviceInterests,

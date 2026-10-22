@@ -37,7 +37,7 @@ interface PendingAppointment {
   service: string;
   requestedDate: string;
   requestedTime: string;
-  source: "AI_BOOKING" | "MANUAL";
+  source: "AI_BOOKING" | "MANUAL" | "WHATSAPP" | "WEB_FORM" | string;
   symptomsOrNotes?: string;
   createdAt: string;
   patientType?: string;
@@ -78,11 +78,12 @@ export default function PendingConfirmationsPage() {
           (apt: any) => ({
             id: apt.id,
             patientName:
-              apt.patientType === "CHILD" && apt.childName
+              apt.patientName ||
+              (apt.patientType === "CHILD" && apt.childName
                 ? `${apt.childName} (Child)`
                 : apt.patient
-                  ? `${apt.patient.firstName} ${apt.patient.lastName}`
-                  : "Patient",
+                  ? `${apt.patient.firstName || ""} ${apt.patient.lastName && apt.patient.lastName !== "Patient" ? apt.patient.lastName : ""}`.trim()
+                  : apt.childName || "Valued Patient"),
             phone: apt.patient?.phone || "(555) 000-0000",
             email: apt.patient?.email || "patient@example.com",
             service: apt.service?.name || apt.reason || "General Consultation",
@@ -129,9 +130,9 @@ export default function PendingConfirmationsPage() {
           service: "Comprehensive Cardiology Diagnostic Panel",
           requestedDate: "Sep 18, 2026",
           requestedTime: "10:30 AM",
-          source: "AI_BOOKING",
+          source: "ONLINE_BOOKING",
           symptomsOrNotes:
-            "AI triage flagged mild resting arrhythmia. Patient requested morning slot.",
+            "Patient reported mild resting arrhythmia. Patient requested morning slot.",
           createdAt: "Today at 09:15 AM",
         },
         {
@@ -171,21 +172,22 @@ export default function PendingConfirmationsPage() {
 
   const handleConfirm = async (apt: PendingAppointment) => {
     try {
-      await fetch(`/api/appointments/${apt.id}/status`, {
-        method: "PATCH",
+      const res = await fetch(`/api/admin/appointments/${apt.id}/confirm`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          status: "CONFIRMED",
-          performedBy,
-          reason: "Confirmed by clinical staff",
-        }),
+        body: JSON.stringify({ performedBy }),
       });
+      const data = await res.json();
 
-      setAppointments((prev) => prev.filter((item) => item.id !== apt.id));
-      setActionSuccessMsg(
-        `Appointment for ${apt.patientName} was approved and moved to Confirmed Bookings!`
-      );
-      setTimeout(() => setActionSuccessMsg(null), 5000);
+      if (res.ok && data.success) {
+        setAppointments((prev) => prev.filter((item) => item.id !== apt.id));
+        setActionSuccessMsg(
+          data.message || `Appointment for ${apt.patientName} was approved successfully!`
+        );
+        setTimeout(() => setActionSuccessMsg(null), 5000);
+      } else {
+        alert(data.message || "Failed to confirm appointment.");
+      }
     } catch {
       alert("Failed to confirm appointment.");
     }
@@ -196,25 +198,31 @@ export default function PendingConfirmationsPage() {
     if (!selectedAppointment) return;
 
     try {
-      await fetch(`/api/appointments/${selectedAppointment.id}/status`, {
+      const res = await fetch(`/api/appointments/${selectedAppointment.id}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           status: "CONFIRMED",
           performedBy,
+          forceOverride: true,
           reason: `Confirmed via staff phone call. Notes: ${callNotes || "Slot verbally verified with patient over phone"}`,
         }),
       });
 
-      setAppointments((prev) =>
-        prev.filter((item) => item.id !== selectedAppointment.id)
-      );
-      setActionSuccessMsg(
-        `Appointment for ${selectedAppointment.patientName} was approved via phone call verification and moved to Confirmed Bookings!`
-      );
-      setCallModalOpen(false);
-      setSelectedAppointment(null);
-      setTimeout(() => setActionSuccessMsg(null), 5000);
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setAppointments((prev) =>
+          prev.filter((item) => item.id !== selectedAppointment.id)
+        );
+        setActionSuccessMsg(
+          `Appointment for ${selectedAppointment.patientName} was approved via phone call verification and moved to Confirmed Bookings!`
+        );
+        setCallModalOpen(false);
+        setSelectedAppointment(null);
+        setTimeout(() => setActionSuccessMsg(null), 5000);
+      } else {
+        alert(data.message || "Failed to confirm appointment.");
+      }
     } catch {
       alert("Failed to confirm appointment.");
     }
@@ -293,9 +301,8 @@ export default function PendingConfirmationsPage() {
             </Badge>
           </div>
           <p className="mt-0.5 text-xs text-brand-muted">
-            Review incoming WhatsApp bookings and patient web requests. Staff
-            must call or message the patient to confirm details before
-            approving.
+            Review incoming patient appointment requests. Staff must call or message
+            the patient to confirm details before approving.
           </p>
         </div>
 
@@ -356,7 +363,7 @@ export default function PendingConfirmationsPage() {
             All Appointments Processed
           </h2>
           <p className="mx-auto max-w-sm text-xs leading-relaxed text-brand-muted">
-            There are currently no pending AI or web requests waiting for
+            There are currently no pending online or web requests waiting for
             confirmation. All patients are scheduled.
           </p>
           <div className="pt-4">
@@ -469,11 +476,11 @@ export default function PendingConfirmationsPage() {
                   </div>
                 </div>
 
-                {/* Patient / AI Symptoms Notes */}
+                {/* Patient Symptoms & Clinical Notes */}
                 {apt.symptomsOrNotes && (
                   <div className="space-y-1 text-xs">
                     <span className="text-[10px] font-semibold uppercase tracking-wider text-brand-muted">
-                      Clinical Notes / Triage Findings:
+                      Clinical Notes / Patient Details:
                     </span>
                     <p className="rounded border border-amber-100 bg-amber-50/60 p-2.5 leading-relaxed text-brand-text">
                       {apt.symptomsOrNotes}

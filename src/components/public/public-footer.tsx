@@ -71,10 +71,10 @@ export function PublicFooter() {
         </div>
 
         <div className="mt-8 border-t border-brand-border pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-brand-muted">
-          <p>© {new Date().getFullYear()} HealthSphere Platform. Multi-tenant Clinic Software.</p>
+          <p>© {new Date().getFullYear()} VS Multispeciality Dental Clinic. All rights reserved.</p>
           <div className="flex gap-4 mt-2 sm:mt-0">
-            <Link href="/api/health" className="hover:underline">System API Health</Link>
-            <Link href="/admin/settings" className="hover:underline">Clinic Theme Settings</Link>
+            <Link href="/privacy" className="hover:underline">Privacy Policy</Link>
+            <Link href="/terms" className="hover:underline">Terms of Service</Link>
           </div>
         </div>
       </div>

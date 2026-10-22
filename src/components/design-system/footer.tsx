@@ -199,15 +199,6 @@ export function Footer() {
                   contact@healthsphere.example.com
                 </a>
               </li>
-              <li className="pt-2">
-                <Link
-                  href="/admin"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-primary hover:underline"
-                >
-                  <span>Staff & Admin Portal</span>
-                  <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
-                </Link>
-              </li>
             </ul>
           </div>
         </div>
@@ -215,21 +206,15 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-brand-border pt-6 text-xs text-brand-muted sm:flex-row">
           <p>
-            © {new Date().getFullYear()} HealthSphere Clinic Platform. All
+            © {new Date().getFullYear()} VS Multispeciality Dental Clinic. All
             rights reserved.
           </p>
           <div className="flex flex-wrap items-center gap-4 sm:gap-6">
-            <Link href="/sitemap.xml" className="hover:underline">
-              XML Sitemap
+            <Link href="/privacy" className="hover:underline">
+              Privacy Policy
             </Link>
-            <Link href="/robots.txt" className="hover:underline">
-              Robots.txt
-            </Link>
-            <Link href="/api/health" className="hover:underline">
-              API Health
-            </Link>
-            <Link href="/admin/settings" className="hover:underline">
-              Theme Switcher
+            <Link href="/terms" className="hover:underline">
+              Terms of Service
             </Link>
           </div>
         </div>

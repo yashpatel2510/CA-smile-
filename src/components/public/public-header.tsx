@@ -13,9 +13,9 @@ export function PublicHeader() {
 
   const navLinks = [
     { href: "/", label: "Home" },
-    { href: "/services", label: "Services & Treatments" },
-    { href: "/doctors", label: "Medical Specialists" },
-    { href: "/book", label: "Book Appointment" },
+    { href: "/services", label: "Services" },
+    { href: "/about", label: "About Us" },
+    { href: "/blog", label: "Blog" },
   ];
 
   return (

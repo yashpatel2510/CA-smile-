@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
+import { getTreatmentById } from "@/lib/treatments-store";
 import {
   Clock,
   CheckCircle2,
@@ -34,6 +35,14 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: ServicePageProps): Promise<Metadata> {
+  const treatment = getTreatmentById(params.slug);
+  if (treatment) {
+    return {
+      title: `${treatment.title} | White Dental Clinic`,
+      description: treatment.whatItIs || treatment.paragraphs[0],
+    };
+  }
+
   const service = getServiceBySlug(params.slug);
   if (!service) {
     return {
@@ -57,6 +66,11 @@ export async function generateMetadata({
 }
 
 export default function ServiceDetailPage({ params }: ServicePageProps) {
+  const treatment = getTreatmentById(params.slug);
+  if (treatment) {
+    redirect(`/treatments/${params.slug}`);
+  }
+
   const service = getServiceBySlug(params.slug);
 
   if (!service) {

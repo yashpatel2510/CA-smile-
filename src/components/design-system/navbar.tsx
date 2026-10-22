@@ -10,20 +10,13 @@ import {
   type Variants,
 } from "framer-motion";
 import {
-  Stethoscope,
-  Calendar,
-  ShieldCheck,
-  Phone,
-  Clock,
   Menu,
   X,
+  ArrowUpRight,
   ArrowRight,
-  Sparkles,
+  ShieldCheck,
 } from "lucide-react";
 import { useClinicTheme } from "@/components/theme/clinic-theme-provider";
-import { Button } from "@/components/ui/button";
-import { BookNowButton } from "@/components/ui/book-now-button";
-import { ClinicLogo } from "@/components/ui/clinic-logo";
 
 export interface NavItem {
   label: string;
@@ -37,20 +30,32 @@ export interface NavbarProps {
   navItems?: NavItem[];
 }
 
-const defaultNavItems: NavItem[] = [
+export const defaultNavItems: NavItem[] = [
   { label: "Home", href: "/" },
-  { label: "Clinical Services", href: "/services" },
-  { label: "Medical Specialists", href: "/doctors" },
-  { label: "Book Appointment", href: "/book", badge: "Online" },
+  { label: "Services", href: "/services" },
+  { label: "About Us", href: "/about" },
+  { label: "Blog", href: "/blog" },
 ];
 
+function ToothIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M7.5 2C4.5 2 2.5 4.2 2.5 7.2c0 2.4 1.1 4.8 2.1 7.2.9 2.3 1.9 5.6 3.4 5.6 1.4 0 1.8-3 4-3s2.6 3 4 3c1.5 0 2.5-3.3 3.4-5.6 1-2.4 2.1-4.8 2.1-7.2 0-3-2-5.2-5-5.2-1.9 0-3.3 1-4.5 2.2C10.8 3 9.4 2 7.5 2z" />
+    </svg>
+  );
+}
+
 export function Navbar({
-  clinicName = "HealthSphere",
-  emergencyPhone = "(800) 555-CLINIC",
+  clinicName = "PedioDent",
   navItems = defaultNavItems,
 }: NavbarProps) {
   const pathname = usePathname();
-  const { currentTheme, brandConfig } = useClinicTheme();
+  const { brandConfig } = useClinicTheme();
   const shouldReduceMotion = useReducedMotion();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -73,36 +78,13 @@ export function Navbar({
     }
   }, [mobileMenuOpen]);
 
-  // Handle Escape key and focus trap
+  // Handle Escape key
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (!mobileMenuOpen) return;
-
       if (e.key === "Escape") {
         setMobileMenuOpen(false);
         toggleButtonRef.current?.focus();
-        return;
-      }
-
-      if (e.key === "Tab" && mobileMenuRef.current) {
-        const focusableElements =
-          mobileMenuRef.current.querySelectorAll<HTMLElement>(
-            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-          );
-        const firstElement = focusableElements[0];
-        const lastElement = focusableElements[focusableElements.length - 1];
-
-        if (e.shiftKey) {
-          if (document.activeElement === firstElement) {
-            e.preventDefault();
-            lastElement?.focus();
-          }
-        } else {
-          if (document.activeElement === lastElement) {
-            e.preventDefault();
-            firstElement?.focus();
-          }
-        }
       }
     },
     [mobileMenuOpen]
@@ -113,288 +95,257 @@ export function Navbar({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
-  // Animation variants
   const mobileMenuVariants: Variants = {
     closed: {
       opacity: 0,
-      height: 0,
+      y: -8,
       transition: {
-        duration: shouldReduceMotion ? 0 : 0.25,
+        duration: shouldReduceMotion ? 0 : 0.2,
         ease: "easeInOut",
       },
     },
     open: {
       opacity: 1,
-      height: "auto",
+      y: 0,
       transition: {
-        duration: shouldReduceMotion ? 0 : 0.35,
+        duration: shouldReduceMotion ? 0 : 0.25,
         ease: "easeOut",
-        staggerChildren: shouldReduceMotion ? 0 : 0.06,
-        delayChildren: 0.08,
       },
     },
   };
 
-  const menuItemVariants: Variants = {
-    closed: {
-      opacity: 0,
-      x: shouldReduceMotion ? 0 : -14,
-    },
-    open: {
-      opacity: 1,
-      x: 0,
-      transition: {
-        duration: shouldReduceMotion ? 0 : 0.22,
-      },
-    },
-  };
+  const displayName =
+    brandConfig?.logo?.clinicDisplayName ||
+    brandConfig?.clinicName ||
+    clinicName ||
+    "PedioDent";
+
+  const mobileDisplayName =
+    brandConfig?.logo?.mobileClinicDisplayName ||
+    "CA SMILE";
+
+  const headerBgColor = brandConfig?.headerBgColor || "#f4f4f5";
+  const headerTextColor = brandConfig?.headerTextColor || "#18181b";
+  const headerContactBtnBgColor =
+    brandConfig?.headerContactBtnBgColor || "#000000";
+  const headerContactBtnTextColor =
+    brandConfig?.headerContactBtnTextColor || "#ffffff";
+  const customLogoUrl = brandConfig?.logo?.imageUrl;
 
   return (
-    <header className="bg-brand-surface/95 sticky top-0 z-50 w-full border-b border-brand-border backdrop-blur-md transition-colors">
-      {/* Top Clinical Announcement Bar */}
-      <div className="bg-brand-primary px-4 py-1.5 text-xs text-brand-primary-foreground">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
-            </span>
-            <span className="truncate">
-              24/7 Urgent Triage Hotline:{" "}
-              <a
-                href={`tel:${emergencyPhone.replace(/\D/g, "")}`}
-                className="font-bold underline hover:opacity-80"
-                aria-label={`Call urgent triage hotline at ${emergencyPhone}`}
-              >
-                {emergencyPhone}
-              </a>
-            </span>
-          </div>
-
-          <div className="hidden items-center gap-3 lg:flex">
-            <div className="flex items-center gap-1.5 opacity-90">
-              <Sparkles className="h-3 w-3" />
-              <span>
-                Theme: <strong>{currentTheme.name}</strong>
-              </span>
-            </div>
-            <Link
-              href="/admin/settings"
-              className="text-[11px] underline transition-opacity hover:opacity-80"
-              aria-label="Customize clinic theme in admin settings"
-            >
-              (Customize)
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Navbar */}
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:h-20 sm:px-6 lg:px-8">
-        {/* Brand Logo */}
+    <header className="sticky top-0 z-50 relative w-full px-3 py-2.5 sm:px-6 sm:py-3.5 transition-all">
+      {/* Floating Pill Container (Matching Sample Design) */}
+      <div
+        className="mx-auto flex h-14 sm:h-16 max-w-6xl items-center justify-between rounded-2xl border border-zinc-200/90 px-3.5 sm:px-6 shadow-xs backdrop-blur-md transition-all duration-300 dark:border-zinc-800"
+        style={{
+          backgroundColor: headerBgColor,
+        }}
+      >
+        {/* Left: Tooth / Custom Logo Badge + Brand Title */}
         <Link
           href="/"
-          className="group flex items-center gap-3 rounded-clinic focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
-          aria-label={`${brandConfig?.logo?.clinicDisplayName || clinicName} homepage`}
+          className="group flex items-center gap-2.5 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900"
+          aria-label={`${displayName} homepage`}
         >
-          <motion.div
-            whileHover={shouldReduceMotion ? {} : { scale: 1.05, rotate: 2 }}
-            whileTap={shouldReduceMotion ? {} : { scale: 0.96 }}
+          {customLogoUrl ? (
+            <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center overflow-hidden rounded-xl bg-black/5 p-1 transition-transform duration-200 group-hover:scale-105 dark:bg-white/10">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={customLogoUrl}
+                alt={displayName}
+                className="h-full w-full object-contain rounded-lg"
+              />
+            </div>
+          ) : (
+            <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-black text-white shadow-xs transition-transform duration-200 group-hover:scale-105 dark:bg-white dark:text-black">
+              <ToothIcon className="h-5 w-5" />
+            </div>
+          )}
+
+          {/* Mobile Brand Name: ONLY SHOW "CA SMILE" */}
+          <span
+            className="font-heading text-base sm:text-lg font-bold tracking-tight transition-colors group-hover:opacity-85 md:hidden"
+            style={{ color: headerTextColor }}
           >
-            <ClinicLogo size="md" />
-          </motion.div>
-          <div>
-            <span className="block font-heading text-lg font-bold tracking-tight text-brand-text sm:text-xl">
-              {brandConfig?.logo?.clinicDisplayName || clinicName}
-            </span>
-            <span className="-mt-1 block text-[11px] font-medium text-brand-muted sm:text-xs">
-              {brandConfig?.logo?.tagline || `${currentTheme.name} Center`}
-            </span>
-          </div>
+            {mobileDisplayName}
+          </span>
+
+          {/* Desktop / Tablet Brand Name */}
+          <span
+            className="font-heading text-lg font-bold tracking-tight transition-colors group-hover:opacity-85 hidden md:inline sm:text-xl"
+            style={{ color: headerTextColor }}
+          >
+            {displayName}
+          </span>
         </Link>
 
-        {/* Desktop Navigation Links */}
+        {/* Center: 4 Desktop Nav Links (Home, Services, About Us, Blog) */}
         <nav
-          className="hidden items-center gap-1 md:flex lg:gap-2"
+          className="hidden items-center gap-6 md:flex lg:gap-8"
           aria-label="Main Navigation"
         >
           {navItems.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive =
+              item.href === "/"
+                ? pathname === "/"
+                : pathname.startsWith(item.href);
+
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`relative rounded-clinic px-3.5 py-2 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary ${
-                  isActive
-                    ? "font-semibold text-brand-primary"
-                    : "hover:bg-brand-accent/20 text-brand-muted hover:text-brand-text"
+                className={`text-sm transition-opacity hover:opacity-75 ${
+                  isActive ? "font-bold underline decoration-2 underline-offset-4" : "font-medium opacity-90"
                 }`}
+                style={{ color: headerTextColor }}
                 aria-current={isActive ? "page" : undefined}
               >
                 <span>{item.label}</span>
-                {item.badge && (
-                  <span className="ml-1.5 rounded-full bg-brand-accent px-1.5 py-0.5 text-[10px] font-bold text-brand-accent-foreground">
-                    {item.badge}
-                  </span>
-                )}
-                {isActive && (
-                  <motion.div
-                    layoutId="activeNavIndicator"
-                    className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full bg-brand-primary"
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                  />
-                )}
               </Link>
             );
           })}
         </nav>
 
-        {/* Desktop Action Buttons */}
-        <div className="hidden items-center gap-3 md:flex">
-          <Link href="/admin">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-1.5 text-xs text-brand-muted hover:text-brand-text"
-              aria-label="Go to clinic staff and administrator portal"
+        {/* Right: Desktop Contact Button + Mobile Menu Toggle */}
+        <div className="flex items-center gap-2">
+          {/* Desktop Contact Button with Arrow Badge */}
+          <Link
+            href="/contact"
+            className="group hidden md:inline-flex items-center justify-between gap-2.5 rounded-xl pl-4 pr-1.5 py-1.5 text-xs sm:text-sm font-semibold shadow-xs transition-all duration-200 hover:opacity-95 hover:shadow-md select-none"
+            style={{
+              backgroundColor: headerContactBtnBgColor,
+              color: headerContactBtnTextColor,
+            }}
+            aria-label="Contact clinic"
+          >
+            <span className="font-heading tracking-wide">Contact</span>
+            <span
+              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white shadow-xs transition-transform duration-200 group-hover:translate-x-0.5"
+              aria-hidden="true"
             >
-              <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-              <span>Staff Portal</span>
-            </Button>
+              <ArrowRight
+                className="h-3.5 w-3.5 stroke-[2.2]"
+                style={{ color: headerContactBtnBgColor }}
+              />
+            </span>
           </Link>
-          <BookNowButton href="/book" text="Book Now" size="md" />
-        </div>
 
-        {/* Mobile Hamburger Toggle Button */}
-        <button
-          ref={toggleButtonRef}
-          type="button"
-          onClick={() => setMobileMenuOpen((prev) => !prev)}
-          className="hover:bg-brand-accent/20 inline-flex items-center justify-center rounded-clinic border border-brand-border p-2 text-brand-text transition-colors focus:outline-none focus:ring-2 focus:ring-brand-primary md:hidden"
-          aria-label={
-            mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"
-          }
-          aria-expanded={mobileMenuOpen}
-          aria-controls="mobile-navigation-drawer"
-        >
-          {mobileMenuOpen ? (
-            <X className="h-6 w-6 text-brand-primary" aria-hidden="true" />
-          ) : (
-            <Menu className="h-6 w-6 text-brand-text" aria-hidden="true" />
-          )}
-        </button>
+          {/* Mobile Hamburger Toggle Button */}
+          <button
+            ref={toggleButtonRef}
+            type="button"
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
+            style={{ color: headerTextColor }}
+            className="inline-flex items-center justify-center rounded-xl p-2 opacity-90 hover:opacity-100 hover:bg-black/5 transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-900 md:hidden"
+            aria-label={
+              mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"
+            }
+            aria-expanded={mobileMenuOpen}
+          >
+            {mobileMenuOpen ? (
+              <X className="h-5 w-5" aria-hidden="true" />
+            ) : (
+              <Menu className="h-5 w-5" aria-hidden="true" />
+            )}
+          </button>
+        </div>
       </div>
 
-      {/* Mobile Drawer Navigation (Accessible + Framer Motion) */}
+      {/* Mobile Drawer Navigation (Floats ON TOP of hero image without shifting page layout) */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div
-            id="mobile-navigation-drawer"
-            ref={mobileMenuRef}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Mobile Navigation Menu"
-            initial="closed"
-            animate="open"
-            exit="closed"
-            variants={mobileMenuVariants}
-            className="overflow-hidden border-t border-brand-border bg-brand-surface px-4 pb-6 pt-3 shadow-xl md:hidden"
-          >
-            <nav
-              aria-label="Mobile navigation links"
-              className="flex flex-col space-y-1"
+          <>
+            {/* Soft backdrop to tap outside */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              onClick={() => setMobileMenuOpen(false)}
+              className="fixed inset-0 z-40 bg-black/25 backdrop-blur-xs md:hidden"
+              aria-hidden="true"
+            />
+
+            <motion.div
+              ref={mobileMenuRef}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Mobile Navigation Menu"
+              initial="closed"
+              animate="open"
+              exit="closed"
+              variants={mobileMenuVariants}
+              className="absolute left-3 right-3 top-full mt-2 max-w-6xl mx-auto overflow-hidden rounded-2xl border border-zinc-200/90 p-4 shadow-2xl backdrop-blur-xl md:hidden dark:border-zinc-800 z-50"
+              style={{
+                backgroundColor: headerBgColor,
+              }}
             >
-              {navItems.map((item) => {
-                const isActive = pathname === item.href;
-                return (
-                  <motion.div key={item.href} variants={menuItemVariants}>
+              <nav
+                aria-label="Mobile navigation links"
+                className="flex flex-col space-y-1.5"
+              >
+                {navItems.map((item) => {
+                  const isActive =
+                    item.href === "/"
+                      ? pathname === "/"
+                      : pathname.startsWith(item.href);
+
+                  return (
                     <Link
+                      key={item.href}
                       href={item.href}
                       onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center justify-between rounded-clinic px-3.5 py-3 text-base font-medium transition-colors ${
+                      style={{ color: headerTextColor }}
+                      className={`flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors ${
                         isActive
-                          ? "bg-brand-primary font-semibold text-brand-primary-foreground"
-                          : "hover:bg-brand-accent/20 text-brand-text"
+                          ? "bg-black/10 font-bold"
+                          : "opacity-85 hover:bg-black/5 hover:opacity-100"
                       }`}
                       aria-current={isActive ? "page" : undefined}
                     >
-                      <span className="flex items-center gap-2">
-                        {item.label}
-                        {item.badge && (
-                          <span
-                            className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                              isActive
-                                ? "bg-white/20 text-white"
-                                : "bg-brand-accent text-brand-accent-foreground"
-                            }`}
-                          >
-                            {item.badge}
-                          </span>
-                        )}
-                      </span>
+                      <span>{item.label}</span>
                       <ArrowRight
-                        className={`h-4 w-4 ${isActive ? "text-white" : "text-brand-muted"}`}
+                        className="h-4 w-4 opacity-60"
                         aria-hidden="true"
                       />
                     </Link>
-                  </motion.div>
-                );
-              })}
-            </nav>
+                  );
+                })}
+              </nav>
 
-            {/* Mobile Actions & Urgent Hotline */}
-            <motion.div
-              variants={menuItemVariants}
-              className="mt-5 space-y-3 border-t border-brand-border pt-4"
-            >
-              <BookNowButton
-                href="/book"
-                text="Book Now"
-                size="lg"
-                fullWidth
-                onClick={() => setMobileMenuOpen(false)}
-              />
-
-              <div className="grid grid-cols-2 gap-2">
-                <a
-                  href={`tel:${emergencyPhone.replace(/\D/g, "")}`}
-                  className="hover:border-brand-primary/40 flex items-center justify-center gap-2 rounded-clinic border border-brand-border bg-brand-background p-2.5 text-xs font-semibold text-brand-text transition-colors"
-                  aria-label={`Call clinic at ${emergencyPhone}`}
+              <div className="mt-3 pt-3 border-t border-black/10 dark:border-white/10 space-y-2">
+                <Link
+                  href="/contact"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="group flex w-full items-center justify-between rounded-xl pl-5 pr-2 py-2.5 text-sm font-semibold shadow-xs transition-opacity hover:opacity-95 select-none"
+                  style={{
+                    backgroundColor: headerContactBtnBgColor,
+                    color: headerContactBtnTextColor,
+                  }}
                 >
-                  <Phone
-                    className="h-3.5 w-3.5 text-brand-primary"
+                  <span className="font-heading tracking-wide">Contact</span>
+                  <span
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white shadow-xs transition-transform duration-200 group-hover:translate-x-0.5"
                     aria-hidden="true"
-                  />
-                  <span>Call Hotline</span>
-                </a>
+                  >
+                    <ArrowRight
+                      className="h-4 w-4 stroke-[2.2]"
+                      style={{ color: headerContactBtnBgColor }}
+                    />
+                  </span>
+                </Link>
+
                 <Link
                   href="/admin"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="hover:border-brand-primary/40 flex items-center justify-center gap-2 rounded-clinic border border-brand-border bg-brand-background p-2.5 text-xs font-semibold text-brand-text transition-colors"
-                  aria-label="Staff administration portal"
+                  className="flex items-center justify-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300 pt-1"
                 >
-                  <ShieldCheck
-                    className="h-3.5 w-3.5 text-brand-primary"
-                    aria-hidden="true"
-                  />
+                  <ShieldCheck className="h-3.5 w-3.5" />
                   <span>Staff Portal</span>
                 </Link>
               </div>
-
-              <div className="bg-brand-accent/20 flex items-center justify-between rounded-clinic p-3 text-xs text-brand-muted">
-                <span>
-                  Active Theme: <strong>{currentTheme.name}</strong>
-                </span>
-                <Link
-                  href="/admin/settings"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="font-semibold text-brand-primary hover:underline"
-                >
-                  Change
-                </Link>
-              </div>
             </motion.div>
-          </motion.div>
+          </>
         )}
       </AnimatePresence>
     </header>

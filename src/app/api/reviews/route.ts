@@ -5,6 +5,7 @@ import {
   getReviewsStoreData,
   getPublicApprovedReviews,
   addReview,
+  updateReviewsDarkMode,
 } from "@/lib/reviews-store";
 
 export async function GET(req: NextRequest) {
@@ -13,11 +14,14 @@ export async function GET(req: NextRequest) {
     const isPublic = searchParams.get("public") === "true";
 
     if (isPublic) {
+      const store = getReviewsStoreData();
       const publicReviews = getPublicApprovedReviews();
       return NextResponse.json({
         success: true,
         reviews: publicReviews,
         count: publicReviews.length,
+        darkMode: Boolean(store.darkMode ?? store.googleConfig?.darkMode ?? false),
+        googleConfig: store.googleConfig,
       });
     }
 
@@ -26,6 +30,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       success: true,
       googleConfig: store.googleConfig,
+      darkMode: Boolean(store.darkMode ?? store.googleConfig?.darkMode ?? false),
       reviews: store.reviews,
       metrics: {
         total: store.reviews.length,
@@ -98,3 +103,35 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export async function PATCH(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (session?.user && session.user.role !== "ADMIN") {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 403 }
+      );
+    }
+    const body = await req.json();
+    if (typeof body.darkMode === "boolean") {
+      const updated = updateReviewsDarkMode(body.darkMode);
+      return NextResponse.json({
+        success: true,
+        message: `Review section theme updated to ${updated ? "Dark" : "Light"} mode.`,
+        darkMode: updated,
+      });
+    }
+    return NextResponse.json(
+      { success: false, error: "Invalid payload: darkMode boolean expected." },
+      { status: 400 }
+    );
+  } catch (error) {
+    console.error("Error updating review theme:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to update review theme." },
+      { status: 500 }
+    );
+  }
+}
+

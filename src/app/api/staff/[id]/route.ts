@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import prisma, { authPrisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { z } from "zod";
+import bcrypt from "bcryptjs";
 
 const updateStaffSchema = z.object({
   role: z
@@ -10,6 +11,7 @@ const updateStaffSchema = z.object({
     .optional(),
   specialty: z.string().optional(),
   phone: z.string().optional(),
+  password: z.string().min(4, "Password must be at least 4 characters").optional(),
   isActive: z.boolean().optional(),
 });
 
@@ -37,13 +39,17 @@ export async function PATCH(
       );
     }
 
-    const updateData = parseResult.data;
+    const updateData: any = { ...parseResult.data };
+
+    if (updateData.password) {
+      updateData.password = await bcrypt.hash(updateData.password, 10);
+    }
 
     let updatedStaff;
     try {
-      updatedStaff = await prisma.staffUser.update({
+      updatedStaff = await authPrisma.staffUser.update({
         where: { id: staffId },
-        data: updateData as any,
+        data: updateData,
       });
 
       const clinic = await prisma.clinic.findFirst();
@@ -95,39 +101,61 @@ export async function DELETE(
     }
 
     const staffId = params.id;
+    let staffName = "Staff Member";
 
     try {
-      await prisma.staffUser.update({
+      const existing = await authPrisma.staffUser.findUnique({
         where: { id: staffId },
-        data: { isActive: false },
       });
 
-      const clinic = await prisma.clinic.findFirst();
-      if (clinic) {
-        await prisma.auditLog.create({
-          data: {
-            clinicId: clinic.id,
-            action: "STAFF_DEACTIVATED",
-            entityType: "StaffUser",
-            entityId: staffId,
-            performedBy: session?.user?.name || "Clinic Administrator",
-            details: `Deactivated staff access for ID ${staffId}`,
-          },
+      if (existing) {
+        staffName = existing.name;
+
+        // Safely unlink appointment assignments
+        await authPrisma.appointment.updateMany({
+          where: { staffUserId: staffId },
+          data: { staffUserId: null },
         });
+
+        // Safely unlink audit log references
+        await authPrisma.auditLog.updateMany({
+          where: { staffUserId: staffId },
+          data: { staffUserId: null },
+        });
+
+        // Permanently delete staff user from database
+        await authPrisma.staffUser.delete({
+          where: { id: staffId },
+        });
+
+        const clinic = await prisma.clinic.findFirst();
+        if (clinic) {
+          await prisma.auditLog.create({
+            data: {
+              clinicId: clinic.id,
+              action: "STAFF_REMOVED",
+              entityType: "StaffUser",
+              entityId: staffId,
+              performedBy: session?.user?.name || "Clinic Administrator",
+              details: `Removed staff member "${staffName}" (${existing.email}) from clinic roster`,
+            },
+          });
+        }
       }
-    } catch {
-      // In-memory fallback
+    } catch (dbErr) {
+      console.warn("DB error deleting staff member:", dbErr);
     }
 
     return NextResponse.json({
       success: true,
-      message: "Staff member deactivated successfully",
+      message: `Staff member "${staffName}" was removed successfully.`,
+      deletedId: staffId,
     });
   } catch (error: any) {
     return NextResponse.json(
       {
         success: false,
-        message: error.message || "Failed to deactivate staff member",
+        message: error.message || "Failed to remove staff member",
       },
       { status: 500 }
     );

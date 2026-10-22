@@ -17,6 +17,8 @@ export interface BookingFormFieldConfig {
   options?: string[];
   helpText?: string;
   isCustom?: boolean;
+  bgColor?: string;
+  textColor?: string;
 }
 
 export interface BookingFormConfig {
@@ -24,6 +26,10 @@ export interface BookingFormConfig {
   title: string;
   submitButtonText: string;
   clinicName: string;
+  formBgColor?: string;
+  formTextColor?: string;
+  buttonBgColor?: string;
+  buttonTextColor?: string;
   fields: BookingFormFieldConfig[];
   treatments: string[];
   timeSlots: string[];
@@ -35,6 +41,10 @@ export const defaultBookingFormConfig: BookingFormConfig = {
   title: "Select Date & Time",
   submitButtonText: "Submit Appointment Request",
   clinicName: "VS Multispeciality Dental Clinic",
+  formBgColor: "#ffffff",
+  formTextColor: "#1c1917",
+  buttonBgColor: "#f2583e",
+  buttonTextColor: "#ffffff",
   fields: [
     {
       id: "patientType",
@@ -125,7 +135,7 @@ export const defaultBookingFormConfig: BookingFormConfig = {
       type: "radio",
       required: true,
       enabled: true,
-      options: ["Phone Call", "WhatsApp"],
+      options: ["Phone Call", "Email"],
       helpText: "How clinic staff should follow up for verbal confirmation",
     },
     {

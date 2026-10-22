@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { inMemoryStore } from "@/lib/in-memory-store";
-import { updateAppointmentStatusSchema } from "@/lib/validations/appointment";
+import {
+  updateAppointmentStatusSchema,
+  ALLOWED_STATUS_TRANSITIONS,
+} from "@/lib/validations/appointment";
 import { sendEmail } from "@/lib/email";
 import {
   renderBookingConfirmedEmail,
@@ -29,92 +32,342 @@ export async function PATCH(
       );
     }
 
-    const { status, staffUserId, performedBy, reason } = parseResult.data;
+    const {
+      status,
+      staffUserId,
+      performedBy,
+      reason,
+      startTime,
+      endTime,
+      forceOverride,
+      procedure,
+      treatmentNotes,
+      dentistNotes,
+      paidAmount,
+      paymentMethod,
+      nextSessionRequired,
+      nextSessionDate,
+      nextSessionTime,
+      nextSessionDoctor,
+      nextSessionNotes,
+    } = parseResult.data;
 
-    let updatedAppointment;
-    let auditEntry;
+    let existingAppointment: any = null;
+    let isMemoryFallback = false;
 
     try {
-      const existing = await prisma.appointment.findUnique({
+      existingAppointment = await prisma.appointment.findUnique({
         where: { id: appointmentId },
-        include: { patient: true, service: true },
-      });
-
-      if (!existing) {
-        return NextResponse.json(
-          {
-            success: false,
-            message: `Appointment with ID ${appointmentId} not found.`,
-          },
-          { status: 404 }
-        );
-      }
-
-      const previousStatus = existing.status;
-
-      // Update the status
-      updatedAppointment = await prisma.appointment.update({
-        where: { id: appointmentId },
-        data: {
-          status,
-          staffUserId: staffUserId || existing.staffUserId,
-          notes: reason
-            ? `${existing.notes ? existing.notes + " | " : ""}${reason}`
-            : existing.notes,
-        },
         include: {
           patient: true,
           service: true,
           staffUser: true,
-        },
-      });
-
-      // Track action in AuditLog
-      let actionName = `APPOINTMENT_${status}`;
-      if (status === "CONFIRMED") actionName = "APPOINTMENT_CONFIRMED";
-      else if (status === "DECLINED") actionName = "APPOINTMENT_DECLINED";
-      else if (status === "CANCELLED") actionName = "APPOINTMENT_CANCELLED";
-
-      auditEntry = await prisma.auditLog.create({
-        data: {
-          clinicId: existing.clinicId,
-          appointmentId: existing.id,
-          staffUserId: staffUserId || null,
-          action: actionName,
-          entityType: "Appointment",
-          entityId: existing.id,
-          performedBy,
-          details:
-            reason ||
-            `Appointment status transitioned from ${previousStatus} to ${status}.`,
-          previousValues: { status: previousStatus },
-          newValues: { status, reason: reason || null },
+          treatment: {
+            include: {
+              sessions: true,
+            },
+          },
+          treatmentSession: true,
         },
       });
     } catch {
-      // Fallback in dev/mock if PostgreSQL is offline
-      const stored = inMemoryStore.updateAppointmentStatus(
+      isMemoryFallback = true;
+      existingAppointment = inMemoryStore.getAppointment(appointmentId);
+    }
+
+    if (!existingAppointment && !isMemoryFallback) {
+      existingAppointment = inMemoryStore.getAppointment(appointmentId);
+      if (existingAppointment) isMemoryFallback = true;
+    }
+
+    if (!existingAppointment) {
+      return NextResponse.json(
+        { success: false, message: `Appointment ${appointmentId} not found` },
+        { status: 404 }
+      );
+    }
+
+    const previousStatus = existingAppointment.status;
+
+    // Requirement 2: Status Transition Validation
+    if (!forceOverride && previousStatus !== status) {
+      const allowed = ALLOWED_STATUS_TRANSITIONS[previousStatus] || [];
+      if (!allowed.includes(status)) {
+        return NextResponse.json(
+          {
+            success: false,
+            invalidTransition: true,
+            message: `Invalid status transition: Cannot move from ${previousStatus} directly to ${status}. Allowed next steps: [${allowed.join(", ") || "None"}]. Set forceOverride to bypass.`,
+          },
+          { status: 422 }
+        );
+      }
+    }
+
+    const nowIso = new Date().toISOString();
+    const nowDate = new Date();
+
+    let updatedAppointment: any;
+    let auditEntry: any;
+    let nextCreatedAppointment: any = null;
+
+    if (!isMemoryFallback) {
+      try {
+        const updateData: any = {
+          status,
+          staffUserId: staffUserId || existingAppointment.staffUserId,
+        };
+
+        if (reason) {
+          updateData.notes = existingAppointment.notes
+            ? `${existingAppointment.notes} | ${reason}`
+            : reason;
+        }
+
+        if (startTime) updateData.startTime = new Date(startTime);
+        if (endTime) updateData.endTime = new Date(endTime);
+
+        // Status timestamp updates
+        if (status === "CONFIRMED" && !existingAppointment.confirmedAt) {
+          updateData.confirmedAt = nowDate;
+        } else if (status === "CHECKED_IN") {
+          updateData.checkedInAt = nowDate;
+        } else if (status === "TREATMENT_STARTED") {
+          updateData.treatmentStartedAt = nowDate;
+        } else if (status === "TREATMENT_DONE") {
+          updateData.treatmentDoneAt = nowDate;
+          if (typeof paidAmount === "number" && paidAmount > 0) {
+            updateData.paidAmount =
+              Number(existingAppointment.paidAmount || 0) + paidAmount;
+            if (
+              Number(updateData.paidAmount) >=
+              Number(existingAppointment.totalAmount || 0)
+            ) {
+              updateData.paymentStatus = "PAID";
+            } else {
+              updateData.paymentStatus = "PARTIAL";
+            }
+          }
+        } else if (status === "CANCELLED") {
+          updateData.cancelledAt = nowDate;
+          updateData.cancellationReason = reason || "Cancelled by clinic";
+        } else if (status === "NO_SHOW") {
+          updateData.noShowAt = nowDate;
+        }
+
+        updatedAppointment = await prisma.appointment.update({
+          where: { id: appointmentId },
+          data: updateData,
+          include: {
+            patient: true,
+            service: true,
+            staffUser: true,
+            treatment: {
+              include: { sessions: true },
+            },
+            treatmentSession: true,
+          },
+        });
+
+        // If Treatment Done, update linked session and Treatment status (Requirement 6, 7, 8)
+        if (status === "TREATMENT_DONE") {
+          if (existingAppointment.treatmentSession) {
+            await prisma.treatmentSession.update({
+              where: { id: existingAppointment.treatmentSession.id },
+              data: {
+                status: "TREATMENT_DONE",
+                procedure: procedure || existingAppointment.treatmentSession.procedure,
+                treatmentNotes: treatmentNotes || null,
+                dentistNotes: dentistNotes || null,
+                paidAmount: typeof paidAmount === "number" ? paidAmount : undefined,
+                paymentMethod: paymentMethod || undefined,
+                paymentStatus:
+                  typeof paidAmount === "number" && paidAmount > 0 ? "PAID" : undefined,
+                completedAt: nowDate,
+                completedBy: performedBy,
+                nextSessionRequired: Boolean(nextSessionRequired),
+              },
+            });
+          }
+
+          // Check treatment progress
+          if (existingAppointment.treatmentId) {
+            const trt = await prisma.treatment.findUnique({
+              where: { id: existingAppointment.treatmentId },
+              include: { sessions: true },
+            });
+
+            if (trt) {
+              const newCompletedCount = trt.completedSessions + 1;
+              const isFinal =
+                newCompletedCount >= trt.totalSessions ||
+                nextSessionRequired === false;
+
+              const treatmentStatus = isFinal ? "COMPLETED" : "IN_PROGRESS";
+
+              await prisma.treatment.update({
+                where: { id: trt.id },
+                data: {
+                  completedSessions: newCompletedCount,
+                  status: treatmentStatus as any,
+                  paidAmount:
+                    typeof paidAmount === "number"
+                      ? Number(trt.paidAmount || 0) + paidAmount
+                      : trt.paidAmount,
+                },
+              });
+
+              // Requirement 6: If next session required is YES, auto-create next session appointment
+              if (nextSessionRequired && nextSessionDate && nextSessionTime) {
+                const nextDate = new Date(`${nextSessionDate}T${nextSessionTime}`);
+                const nextEndDate = new Date(nextDate.getTime() + 45 * 60000);
+                const nextSessionNum = newCompletedCount + 1;
+
+                nextCreatedAppointment = await prisma.appointment.create({
+                  data: {
+                    clinicId: existingAppointment.clinicId,
+                    patientId: existingAppointment.patientId,
+                    serviceId: existingAppointment.serviceId,
+                    treatmentId: trt.id,
+                    startTime: nextDate,
+                    endTime: nextEndDate,
+                    status: "CONFIRMED",
+                    source: "ADMIN",
+                    preferredDoctor:
+                      nextSessionDoctor || existingAppointment.preferredDoctor,
+                    notes: `Session ${nextSessionNum}/${trt.totalSessions}: ${nextSessionNotes || "Follow-up treatment session"}`,
+                    paidAmount: 0.0,
+                    totalAmount: 0.0,
+                  },
+                });
+
+                await prisma.treatmentSession.create({
+                  data: {
+                    treatmentId: trt.id,
+                    appointmentId: nextCreatedAppointment.id,
+                    sessionNumber: nextSessionNum,
+                    totalSessions: trt.totalSessions,
+                    status: "CONFIRMED",
+                    procedure: nextSessionNotes || "Next Treatment Session",
+                  },
+                });
+              }
+            }
+          }
+        }
+
+        // Audit Log entry
+        auditEntry = await prisma.auditLog.create({
+          data: {
+            clinicId: existingAppointment.clinicId,
+            appointmentId: existingAppointment.id,
+            staffUserId: staffUserId || null,
+            action: `APPOINTMENT_${status}`,
+            entityType: "Appointment",
+            entityId: existingAppointment.id,
+            performedBy,
+            details:
+              reason ||
+              `Status transitioned from ${previousStatus} to ${status} by ${performedBy}`,
+            previousValues: { status: previousStatus },
+            newValues: { status, reason: reason || null },
+          },
+        });
+      } catch {
+        isMemoryFallback = true;
+      }
+    }
+
+    if (isMemoryFallback) {
+      // In-memory fallback handler
+      updatedAppointment = inMemoryStore.updateAppointmentStatus(
         appointmentId,
         status as any,
-        reason
+        reason,
+        performedBy
       );
-      updatedAppointment = stored || {
-        id: appointmentId,
-        status,
-        updatedAt: new Date().toISOString(),
-        notes: reason || "Status updated",
-      };
+
+      if (status === "TREATMENT_DONE" && updatedAppointment) {
+        if (typeof paidAmount === "number" && paidAmount > 0) {
+          updatedAppointment.paidAmount =
+            (updatedAppointment.paidAmount || 0) + paidAmount;
+          if (updatedAppointment.paidAmount >= (updatedAppointment.totalAmount || 0)) {
+            updatedAppointment.paymentStatus = "PAID";
+          } else {
+            updatedAppointment.paymentStatus = "PARTIAL";
+          }
+        }
+
+        // Check treatment completion
+        if (updatedAppointment.treatmentId) {
+          const trt = inMemoryStore.getTreatment(updatedAppointment.treatmentId);
+          if (trt) {
+            const nextCompleted = (trt.completedSessions || 0) + 1;
+            const isFinal =
+              nextCompleted >= trt.totalSessions || nextSessionRequired === false;
+            inMemoryStore.updateTreatmentStatus(
+              trt.id,
+              isFinal ? "COMPLETED" : "IN_PROGRESS",
+              nextCompleted
+            );
+
+            // Auto-create next session in memory if required
+            if (nextSessionRequired && nextSessionDate && nextSessionTime) {
+              const nextStart = `${nextSessionDate}T${nextSessionTime}:00`;
+              const nextEnd = new Date(
+                new Date(nextStart).getTime() + 45 * 60000
+              ).toISOString();
+              const nextSessionNum = nextCompleted + 1;
+              const nextId = `APT-${Math.floor(100000 + Math.random() * 900000)}`;
+
+              const newSes = inMemoryStore.saveTreatmentSession({
+                id: `SES-${Math.floor(1000 + Math.random() * 9000)}`,
+                treatmentId: trt.id,
+                appointmentId: nextId,
+                sessionNumber: nextSessionNum,
+                totalSessions: trt.totalSessions,
+                status: "CONFIRMED",
+                amount: 0,
+                paidAmount: 0,
+                paymentStatus: "PENDING",
+                createdAt: nowIso,
+                updatedAt: nowIso,
+              });
+
+              nextCreatedAppointment = inMemoryStore.saveAppointment({
+                id: nextId,
+                startTime: nextStart,
+                endTime: nextEnd,
+                status: "CONFIRMED",
+                source: "ADMIN",
+                treatmentId: trt.id,
+                treatment: trt,
+                treatmentSessionId: newSes.id,
+                treatmentSession: newSes,
+                notes: `Session ${nextSessionNum}/${trt.totalSessions}: ${nextSessionNotes || "Next scheduled session"}`,
+                patient: updatedAppointment.patient,
+                service: updatedAppointment.service,
+                preferredDoctor:
+                  nextSessionDoctor || updatedAppointment.preferredDoctor,
+                createdAt: nowIso,
+                updatedAt: nowIso,
+              });
+            }
+          }
+        }
+      }
+
       auditEntry = {
         action: `APPOINTMENT_${status}`,
         performedBy,
         entityType: "Appointment",
         entityId: appointmentId,
-        details: reason || `Transitioned to ${status}`,
-        createdAt: new Date().toISOString(),
+        details: reason || `Status updated to ${status}`,
+        createdAt: nowIso,
       };
     }
 
-    // Trigger Status-Specific Transactional Email to Patient
+    // Patient email notifications
     const patientEmail = updatedAppointment?.patient?.email;
     if (patientEmail) {
       try {
@@ -127,7 +380,7 @@ export async function PATCH(
             updatedAppointment.patient?.lastName || "Patient"
           }`.trim(),
           serviceName:
-            updatedAppointment.service?.name || "Clinical Consultation",
+            updatedAppointment.service?.name || "Dental Clinical Treatment",
           appointmentDate: appointmentTimeDate.toLocaleDateString("en-US", {
             weekday: "long",
             year: "numeric",
@@ -139,48 +392,52 @@ export async function PATCH(
             minute: "2-digit",
           }),
           doctorName:
-            updatedAppointment.staffUser?.name || "Attending Physician",
-          servicePrice: updatedAppointment.service?.price
-            ? Number(updatedAppointment.service.price).toFixed(2)
-            : "85.00",
+            updatedAppointment.preferredDoctor ||
+            updatedAppointment.staffUser?.name ||
+            "Chief Dental Surgeon",
+          servicePrice: updatedAppointment.totalAmount
+            ? String(updatedAppointment.totalAmount)
+            : "0.00",
           durationMinutes: updatedAppointment.service?.durationMinutes || 30,
           reason,
         };
 
         if (status === "CONFIRMED") {
           const email = renderBookingConfirmedEmail(templateData);
-          await sendEmail({
+          sendEmail({
             to: patientEmail,
             subject: email.subject,
             html: email.html,
             text: email.text,
-          });
+          }).catch(() => {});
         } else if (status === "DECLINED") {
           const email = renderBookingDeclinedEmail(templateData);
-          await sendEmail({
+          sendEmail({
             to: patientEmail,
             subject: email.subject,
             html: email.html,
             text: email.text,
-          });
+          }).catch(() => {});
         } else if (status === "CANCELLED") {
           const email = renderBookingCancelledEmail(templateData);
-          await sendEmail({
+          sendEmail({
             to: patientEmail,
             subject: email.subject,
             html: email.html,
             text: email.text,
-          });
+          }).catch(() => {});
         }
       } catch {
-        // Safe fail: email errors should not block database status transition
+        // Safe fail
       }
     }
 
+
     return NextResponse.json({
       success: true,
-      message: `Appointment successfully updated to ${status}.`,
+      message: `Appointment successfully transitioned to ${status}.`,
       appointment: updatedAppointment,
+      nextSessionAppointment: nextCreatedAppointment,
       auditLog: auditEntry,
     });
   } catch (error: any) {

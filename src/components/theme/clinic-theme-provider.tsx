@@ -29,13 +29,17 @@ const LOCAL_STORAGE_KEY = "healthsphere_clinic_branding_v1";
 export function ClinicThemeProvider({
   children,
   initialThemeKey = defaultThemeKey,
+  initialBrandConfig,
 }: {
   children: React.ReactNode;
   initialThemeKey?: string;
+  initialBrandConfig?: ClinicBrandConfig;
 }) {
-  const [themeKey, setThemeKey] = useState<string>(initialThemeKey);
+  const [themeKey, setThemeKey] = useState<string>(
+    initialBrandConfig?.themeKey || initialThemeKey
+  );
   const [brandConfig, setBrandConfig] = useState<ClinicBrandConfig>(
-    DEFAULT_CLINIC_BRANDING
+    initialBrandConfig || DEFAULT_CLINIC_BRANDING
   );
 
   const currentTheme = getClinicTheme(themeKey);
@@ -97,6 +101,10 @@ export function ClinicThemeProvider({
       logo: {
         ...brandConfig.logo,
         ...(partial.logo || {}),
+      },
+      hero: {
+        ...(brandConfig.hero || DEFAULT_CLINIC_BRANDING.hero!),
+        ...(partial.hero || {}),
       },
     };
 

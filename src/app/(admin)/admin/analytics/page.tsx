@@ -6,7 +6,7 @@ import {
   Users,
   CalendarCheck,
   Eye,
-  Bot,
+  MessageSquare,
   ShieldCheck,
   RefreshCw,
   ArrowRight,
@@ -36,7 +36,7 @@ interface FunnelStep {
 interface AnalyticsData {
   totalPageViews: number;
   totalEvents: number;
-  aiChatInteractions: number;
+  directInquiries?: number;
   overallConversionRate: number;
   funnel: FunnelStep[];
   pageViews: Record<string, number>;
@@ -70,7 +70,7 @@ export default function AdminAnalyticsPage() {
 
   const totalPageViews = data?.totalPageViews || 1246;
   const overallConversion = data?.overallConversionRate || 48;
-  const aiChats = data?.aiChatInteractions || 41;
+  const directInquiries = data?.directInquiries || 54;
 
   const funnelSteps: FunnelStep[] = data?.funnel || [
     { step: 1, name: "View Booking Page", count: 184, conversionRate: 100 },
@@ -180,14 +180,14 @@ export default function AdminAnalyticsPage() {
 
         <Card className="flex items-center gap-3 p-4">
           <div className="rounded-lg bg-purple-500/10 p-2.5 text-purple-600 dark:text-purple-400">
-            <Bot className="h-5 w-5" />
+            <MessageSquare className="h-5 w-5" />
           </div>
           <div>
             <div className="text-[11px] font-semibold uppercase tracking-wider text-brand-muted">
-              AI Chat Inquiries
+              Direct Inquiries
             </div>
             <div className="mt-0.5 font-heading text-xl font-bold text-purple-600 dark:text-purple-400">
-              {aiChats} Sessions
+              {directInquiries} Inquiries
             </div>
           </div>
         </Card>

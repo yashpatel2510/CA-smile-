@@ -51,7 +51,8 @@ async function runE2ETest() {
   let adultAppointmentId = null;
   let childAppointmentId = null;
 
-  const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000)
+  const randomDaysAhead = 2 + Math.floor(Math.random() * 20);
+  const tomorrow = new Date(Date.now() + randomDaysAhead * 24 * 60 * 60 * 1000)
     .toISOString()
     .split("T")[0];
 
@@ -88,45 +89,20 @@ async function runE2ETest() {
 
   try {
     // -------------------------------------------------------------
-    // Step 1: Patient chats with AI receptionist
+    // Step 1: Patient discovers clinical services & operating hours
     // -------------------------------------------------------------
     logStep(
       1,
-      "Patient chats with AI receptionist asking about clinic hours & services"
+      "Patient discovers clinical services & available dental treatments"
     );
-    const chatPayload = {
-      message:
-        "Hello! What are your clinical operating hours and what dental treatments do you offer?",
-      sessionId: `e2e-session-${Date.now()}`,
-      history: [],
-    };
-
-    const chatRes = await fetch(`${BASE_URL}/api/ai/chat`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(chatPayload),
-    });
-
-    if (!chatRes.ok) {
-      throw new Error(
-        `AI Chat API returned HTTP ${chatRes.status}: ${await chatRes.text()}`
-      );
+    const servicesRes = await fetch(`${BASE_URL}/api/services`);
+    if (!servicesRes.ok) {
+      throw new Error(`Services API returned HTTP ${servicesRes.status}`);
     }
-
-    const chatData = await chatRes.json();
-    if (!chatData.success || !chatData.reply) {
-      throw new Error(
-        `AI Chat API failed to generate valid reply: ${JSON.stringify(chatData)}`
-      );
-    }
-
+    const servicesData = await servicesRes.json();
     logSuccess(
-      `AI Receptionist responded cleanly (${chatData.reply.length} chars)`
+      `Discovered ${servicesData.length || 0} active clinical treatments`
     );
-    console.log(
-      `    Response snippet: "${chatData.reply.slice(0, 120).replace(/\n/g, " ")}..."`
-    );
-    logSuccess(`Chat session preserved (Session ID: ${chatData.sessionId})`);
 
     // -------------------------------------------------------------
     // Step 2: Adult patient submits Quick Booking request

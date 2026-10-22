@@ -1,7 +1,7 @@
 import React from "react";
 import { Navbar } from "@/components/design-system/navbar";
 import { Footer } from "@/components/design-system/footer";
-import { WhatsAppBookingWidget } from "@/components/whatsapp/whatsapp-booking-widget";
+import { ClinicMapSection } from "@/components/public/clinic-map-section";
 
 export default function PublicSiteLayout({
   children,
@@ -12,8 +12,8 @@ export default function PublicSiteLayout({
     <div className="flex min-h-screen flex-col bg-brand-background text-brand-text">
       <Navbar />
       <main className="flex-1">{children}</main>
+      <ClinicMapSection />
       <Footer />
-      <WhatsAppBookingWidget />
     </div>
   );
 }

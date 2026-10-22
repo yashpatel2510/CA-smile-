@@ -2,202 +2,636 @@
 
 import React from "react";
 import Link from "next/link";
-import { motion, useReducedMotion, type Variants } from "framer-motion";
-import {
-  Calendar,
-  PhoneCall,
-  CheckCircle2,
-  ShieldCheck,
-  Sparkles,
-} from "lucide-react";
-import { QuickBookingForm } from "@/components/public/quick-booking-form";
-import { BookNowButton } from "@/components/ui/book-now-button";
+import { motion, useReducedMotion } from "framer-motion";
+import { ArrowRight, ArrowUpRight, Star } from "lucide-react";
+import { useClinicTheme } from "@/components/theme/clinic-theme-provider";
+import { DEFAULT_HERO_CONFIG, HeroSectionConfig } from "@/types/branding";
 
 export interface HeroProps {
-  headlinePrefix?: string;
-  headlineHighlight?: string;
-  description?: string;
-  primaryCtaText?: string;
-  primaryCtaHref?: string;
-  phoneCtaText?: string;
-  phoneCtaHref?: string;
+  customConfig?: HeroSectionConfig;
+  previewMode?: "desktop" | "tablet" | "mobile";
 }
 
-export function Hero({
-  headlinePrefix = "Gentle Precision Dental Care &",
-  headlineHighlight = "Pediatric Dentistry",
-  description = "Led by Dr. Vidhyamol (Pediatric Specialist) and Dr. Sankar (Chief Dental Surgeon), VS Multispeciality Dental Clinic delivers compassionate, advanced dental solutions in Palakkad.",
-  primaryCtaText = "Book Now",
-  primaryCtaHref = "#quick-booking",
-  phoneCtaText = "Call +9185904 22464",
-  phoneCtaHref = "tel:+918590422464",
-}: HeroProps) {
+export function Hero({ customConfig, previewMode }: HeroProps) {
+  const { brandConfig } = useClinicTheme();
   const shouldReduceMotion = useReducedMotion();
 
-  const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: shouldReduceMotion ? 0 : 0.1,
-        delayChildren: 0.05,
-      },
-    },
+  // Active configuration (custom override > brandConfig.hero > default factory baseline)
+  const hero: HeroSectionConfig = {
+    ...DEFAULT_HERO_CONFIG,
+    ...(brandConfig?.hero || {}),
+    ...(customConfig || {}),
   };
 
-  const itemFadeUp: Variants = {
-    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 16 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.45, ease: "easeOut" },
-    },
-  };
+  const bgColor = hero.backgroundColor || "#ffffff";
+  const doctorImg = hero.imageUrl || "/images/hero-doctor-dental-care.png";
+  const mobileDoctorImg =
+    hero.mobileImageUrl || hero.imageUrl || "/images/hero-doctor-mobile.png";
+  const doctorAvatar =
+    hero.doctorBoxPhotoUrl || hero.imageUrl || "/images/hero-doctor-dental-care.png";
 
-  const metrics = [
-    { value: "15,000+", label: "PATIENTS SERVED", isOrange: false },
-    { value: "100%", label: "CLASS-B STERILE", isOrange: false },
-    { value: "0 Pain", label: "ANXIETY PROTOCOL", isOrange: true },
-  ];
+  const isMobilePreview = previewMode === "mobile";
+  const isTabletPreview = previewMode === "tablet";
+  const minHeightVal = hero.heroMinHeight || "620px";
 
-  return (
-    <section className="relative overflow-hidden border-b border-slate-200/80 bg-[#f0fdf9]/40 pb-16 pt-8 sm:pt-12 lg:pb-24 lg:pt-14">
-      {/* Soft mint & ambient background tint */}
-      <div
-        className="pointer-events-none absolute -top-40 left-1/4 -z-10 h-[550px] w-[750px] -translate-x-1/2 rounded-full opacity-40 blur-3xl"
+  // Top information row colors and values
+  const isDarkBg =
+    bgColor.toLowerCase() === "#000000" ||
+    bgColor.toLowerCase() === "#050505" ||
+    bgColor.toLowerCase() === "#18181b" ||
+    bgColor.toLowerCase() === "#0f172a" ||
+    bgColor.toLowerCase() === "#111827" ||
+    (hero.imageOverlayOpacity ?? 0) >= 0.25;
+
+  const defaultTopInfoLabelColor = isDarkBg
+    ? "rgba(255, 255, 255, 0.75)"
+    : "#64748b";
+  const defaultTopInfoTextColor = isDarkBg ? "#ffffff" : "#18181b";
+
+  const topInfoLabelColor =
+    hero.topInfoLabelColor || defaultTopInfoLabelColor;
+  const topInfoTextColor =
+    hero.topInfoTextColor || defaultTopInfoTextColor;
+
+  const workingHoursLabel = hero.topInfoWorkingHoursLabel || "Working hours";
+  const workingHoursValue = hero.topInfoWorkingHoursValue || "Mon - Sat 8:00-20:00";
+  const locationLabel = hero.topInfoLocationLabel || "Location";
+  const locationValue = hero.topInfoLocationValue || "12 Shevchenko Street, Kyiv";
+
+  // =========================================================================
+  // 1. MOBILE VIEW LAYOUT (Full Hero Image Canvas Spanning Behind Navbar)
+  // =========================================================================
+  // 1. MOBILE VIEW LAYOUT (Image first, content AFTER the image)
+  // =========================================================================
+  const renderMobileLayout = (isContainerPreview: boolean) => {
+    const mobileSubtitleColor =
+      hero.subtitleTextColor &&
+      hero.subtitleTextColor.toLowerCase() !== "#ffffff" &&
+      hero.subtitleTextColor.toLowerCase() !== "#fff"
+        ? hero.subtitleTextColor
+        : "#475569";
+
+    const mobileImageFit = hero.mobileImageFit || "cover";
+    const mobileImageHeight = hero.mobileImageHeight || "440px";
+    const isMobileCover = mobileImageFit === "cover";
+    const isMobileFill = mobileImageFit === "fill";
+    const isFullWidth = hero.mobileImageFullWidth !== false;
+    const mobileBorderRadius = hero.mobileImageBorderRadius || hero.imageBorderRadius || "0px";
+    const mobileMaxWidth = isFullWidth ? "100%" : (hero.mobileImageWidth || "380px");
+
+    return (
+      <section
+        className={`relative w-full overflow-hidden transition-all ${
+          isContainerPreview
+            ? "rounded-b-2xl -mt-[56px] pt-[56px] pb-8"
+            : "-mt-[76px] pt-[76px] pb-8"
+        } flex flex-col items-center text-center`}
         style={{
-          background:
-            "radial-gradient(circle, #a7f3d0 0%, #ccfbf1 40%, transparent 70%)",
+          backgroundColor: bgColor,
         }}
-        aria-hidden="true"
-      />
-
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:items-start xl:gap-14">
-          {/* Left Column: Clinic Introduction & Stats */}
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="space-y-6 lg:col-span-7 lg:pt-4 xl:col-span-7"
+      >
+        {/* 1. TOP GRAND TITLE: "DENTAL CARE" (if explicitly enabled) */}
+        {hero.showUpperText && (
+          <motion.h1
+            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="font-heading font-light tracking-[0.24em] text-2xl uppercase select-none mt-2 mb-2 px-4"
+            style={{
+              color: hero.upperTextColor || "#000000",
+              letterSpacing: hero.upperTextLetterSpacing || "0.20em",
+            }}
           >
-            {/* Top Brand Micro Badge */}
-            <motion.div
-              variants={itemFadeUp}
-              className="inline-flex items-center gap-2 rounded-full bg-emerald-100/80 px-3 py-1 text-xs font-semibold text-emerald-800"
-            >
-              <Sparkles className="h-3.5 w-3.5 text-emerald-600" />
-              <span>Multi-Speciality Care in Palakkad</span>
-            </motion.div>
+            {hero.upperText || "DENTAL CARE"}
+          </motion.h1>
+        )}
 
-            {/* Main Fluid Headline matching screenshot */}
-            <motion.h1
-              variants={itemFadeUp}
-              className="font-heading text-4xl font-extrabold leading-[1.12] tracking-tight text-[#064e3b] sm:text-5xl lg:text-[3.25rem]"
-            >
-              <span>{headlinePrefix}</span> <br />
-              <span className="text-[#059669]">{headlineHighlight}</span>
-            </motion.h1>
+        {/* 2. MOBILE HERO IMAGE (CUSTOMIZABLE FIT & SIZE: COVER / CONTAIN / FILL) */}
+        {mobileDoctorImg && (
+          <motion.div
+            initial={{ opacity: 0, scale: shouldReduceMotion ? 1 : 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className={`relative w-full ${
+              isFullWidth
+                ? "max-w-none px-0"
+                : "max-w-[340px] sm:max-w-[380px] px-4"
+            } mx-auto flex justify-center items-center overflow-hidden`}
+            style={{
+              height: isMobileCover || isMobileFill ? mobileImageHeight : undefined,
+              maxHeight: mobileImageHeight === "auto" ? "none" : mobileImageHeight,
+            }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={mobileDoctorImg}
+              alt={hero.imageAltText || "Dental Care Specialist Doctor"}
+              className={`w-full select-none transition-all duration-300 drop-shadow-xs ${
+                isMobileCover
+                  ? "h-full object-cover object-center"
+                  : isMobileFill
+                  ? "h-full object-fill"
+                  : "h-auto object-contain"
+              }`}
+              style={{
+                borderRadius: mobileBorderRadius,
+                maxWidth: mobileMaxWidth,
+                maxHeight: mobileImageHeight === "auto" ? "none" : mobileImageHeight,
+              }}
+            />
 
-            {/* Subtitle description */}
-            <motion.p
-              variants={itemFadeUp}
-              className="max-w-2xl text-base leading-relaxed text-slate-600 sm:text-lg"
-            >
-              {description}
-            </motion.p>
-
-            {/* 3 Metric Cards matching reference screenshot */}
-            <motion.div
-              variants={itemFadeUp}
-              className="grid max-w-lg grid-cols-3 gap-3 pt-2 sm:gap-4"
-            >
-              {metrics.map((m, idx) => (
-                <div
-                  key={idx}
-                  className="backdrop-blur-xs rounded-2xl border border-slate-200/90 bg-white/90 p-3 text-left shadow-sm transition-transform hover:-translate-y-0.5 sm:p-4"
-                >
-                  <div
-                    className={`font-heading text-xl font-black tracking-tight sm:text-2xl ${
-                      m.isOrange ? "text-[#f97316]" : "text-slate-900"
-                    }`}
-                  >
-                    {m.value}
-                  </div>
-                  <div className="mt-1 text-[10px] font-bold uppercase leading-tight tracking-wider text-slate-500 sm:text-[11px]">
-                    {m.label}
-                  </div>
-                </div>
-              ))}
-            </motion.div>
-
-            {/* CTA Action Buttons matching reference screenshot */}
-            <motion.div
-              variants={itemFadeUp}
-              className="flex flex-wrap items-center gap-3.5 pt-3"
-            >
-              <BookNowButton
-                href={primaryCtaHref}
-                text={primaryCtaText}
-                size="lg"
+            {/* Contrast overlay / dimming if configured */}
+            {(hero.imageOverlayOpacity ?? 0) > 0 && (
+              <div
+                className={`absolute inset-0 bg-black pointer-events-none ${
+                  isFullWidth ? "" : "rounded-xl"
+                }`}
+                style={{ opacity: hero.imageOverlayOpacity }}
               />
+            )}
 
-              <a
-                href="https://wa.me/918590422464?text=Hello%20VS%20Dental%20Clinic,%20I%20would%20like%20to%20book%20an%20appointment."
-                target="_blank"
-                rel="noopener noreferrer"
+            {/* Bottom Torso / Canvas Gradient Fade on Mobile */}
+            {hero.mobileImageBottomFade !== false && isFullWidth && (
+              <div
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-16 sm:h-24"
+                style={{
+                  background: `linear-gradient(to top, ${bgColor} 0%, ${bgColor}ea 35%, transparent 100%)`,
+                }}
+                aria-hidden="true"
+              />
+            )}
+          </motion.div>
+        )}
+
+        {/* TOP INFO ROW: Rendered after image is completed in mobile view */}
+        {hero.topInfoEnabled !== false && (
+          <motion.div
+            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.05 }}
+            className="w-full max-w-[340px] sm:max-w-[380px] px-4 flex items-start justify-between gap-4 mt-3 mb-1"
+            style={{
+              marginTop:
+                hero.topInfoMarginTop && hero.topInfoMarginTop !== "0px"
+                  ? hero.topInfoMarginTop
+                  : "12px",
+            }}
+          >
+            {/* Left side: Working hours */}
+            <div className="text-left space-y-0.5">
+              <p
+                className="text-[11px] sm:text-xs font-normal"
+                style={{ color: topInfoLabelColor }}
               >
-                <button
-                  type="button"
-                  className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-[#25D366] px-5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-emerald-500/25 transition-all hover:bg-[#20ba59] active:scale-[0.99] sm:text-sm"
-                >
-                  <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24">
-                    <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.694.072-2.179-.536-1.528-.627-2.515-2.172-2.592-2.273-.076-.101-.617-.824-.617-1.571 0-.747.387-1.115.526-1.268.143-.153.313-.191.419-.191.106 0 .211.002.304.007.099.005.231-.038.361.275.134.321.46 1.119.5 1.2.04.082.067.177.013.284-.053.106-.08.172-.16.265-.079.095-.167.211-.238.284-.081.082-.165.172-.072.332.094.159.418.69 0.896 1.116.615.547 1.135.717 1.295.798.16.08.254.071.35-.041.095-.112.408-.475.517-.638.11-.164.218-.137.368-.082.15.054.954.45 1.118.532.164.081.273.123.313.191.04.068.04.394-.104.799zM12.045 2C6.505 2 2 6.506 2 12.047c0 1.973.57 3.815 1.558 5.378L2 22l4.743-1.517A9.977 9.977 0 0012.045 22c5.54 0 10.045-4.505 10.045-10.047C22.09 6.506 17.585 2 12.045 2z" />
-                  </svg>
-                  <span>Book via WhatsApp</span>
-                </button>
-              </a>
+                {workingHoursLabel}
+              </p>
+              <p
+                className="text-xs sm:text-sm font-semibold tracking-tight"
+                style={{ color: topInfoTextColor }}
+              >
+                {workingHoursValue}
+              </p>
+            </div>
 
-              <a href={phoneCtaHref}>
-                <button
-                  type="button"
-                  className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-[#064e3b] px-5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-emerald-950/20 transition-all hover:bg-[#065f46] active:scale-[0.99] sm:text-sm"
-                >
-                  <PhoneCall className="h-4 w-4" />
-                  <span>{phoneCtaText}</span>
-                </button>
-              </a>
-            </motion.div>
+            {/* Right side: Location */}
+            <div className="text-right space-y-0.5">
+              <p
+                className="text-[11px] sm:text-xs font-normal"
+                style={{ color: topInfoLabelColor }}
+              >
+                {locationLabel}
+              </p>
+              <p
+                className="text-xs sm:text-sm font-semibold tracking-tight"
+                style={{ color: topInfoTextColor }}
+              >
+                {locationValue}
+              </p>
+            </div>
+          </motion.div>
+        )}
 
-            {/* Clinical Trust & Safety Guarantee */}
-            <motion.div
-              variants={itemFadeUp}
-              className="grid grid-cols-1 gap-2.5 border-t border-slate-200/80 pt-5 text-xs text-slate-500 sm:grid-cols-3"
+        {/* 3. CONTENT SECTION: RENDERED AFTER (BELOW) THE IMAGE */}
+        <div className="w-full px-4 pt-3 flex flex-col items-center text-center max-w-sm mx-auto space-y-3">
+          {/* A. Subtitle Description Text */}
+          {hero.subtitleText && (
+            <motion.p
+              initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.08 }}
+              className="text-xs sm:text-sm text-center leading-relaxed font-normal max-w-[320px] mx-auto px-2"
+              style={{
+                color: mobileSubtitleColor,
+                marginTop: hero.subtitleBoxMarginTop || "0px",
+                marginBottom: hero.subtitleBoxMarginBottom || "0px",
+              }}
             >
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
-                <span>Zero-Pain Anxiety Care</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-600" />
-                <span>100% Class-B Autoclaved</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
-                <span>Immediate Call Confirmation</span>
-              </div>
-            </motion.div>
+              {hero.subtitleText}
+            </motion.p>
+          )}
+
+          {/* B. Appointment CTA Button */}
+          <motion.div
+            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.14 }}
+            className="w-full flex justify-center mb-1"
+          >
+            <Link
+              href={hero.ctaButtonUrl || "/book"}
+              className={`group relative inline-flex items-center font-medium shadow-lg transition-all duration-200 select-none hover:scale-[1.02] active:scale-[0.98] w-full max-w-[280px] sm:max-w-[300px] ${
+                hero.ctaButtonStyle !== "classic"
+                  ? "h-11 sm:h-12 pl-5 pr-2 gap-3.5 text-xs sm:text-sm justify-between"
+                  : "py-3.5 px-6 gap-2 text-sm justify-center"
+              }`}
+              style={{
+                backgroundColor: hero.ctaButtonBgColor || "#850000",
+                color: hero.ctaButtonTextColor || "#ffffff",
+                borderRadius: hero.ctaButtonBorderRadius || "14px",
+              }}
+            >
+              <span className="font-heading font-semibold tracking-wide">
+                {hero.ctaButtonText || "Book Your Appointment"}
+              </span>
+              {hero.ctaButtonShowIcon !== false && (
+                hero.ctaButtonStyle !== "classic" ? (
+                  <span
+                    className="shadow-xs flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-lg transition-transform duration-200 group-hover:translate-x-0.5"
+                    style={{
+                      backgroundColor: hero.ctaButtonBadgeBgColor || "#ffffff",
+                    }}
+                    aria-hidden="true"
+                  >
+                    <ArrowRight
+                      className="h-4 w-4 stroke-[2.2] transition-colors"
+                      style={{
+                        color:
+                          hero.ctaButtonBadgeIconColor ||
+                          hero.ctaButtonBgColor ||
+                          "#881318",
+                      }}
+                    />
+                  </span>
+                ) : (
+                  <ArrowUpRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                )
+              )}
+            </Link>
           </motion.div>
 
-          {/* Right Column: Quick Appointment Request Card matching screenshot */}
-          <div
-            id="quick-booking"
-            className="w-full scroll-mt-24 lg:col-span-5 xl:col-span-5"
+          {/* C. Floating Doctor Information Card */}
+          {hero.doctorBoxEnabled !== false && (
+            <motion.div
+              initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+              className="w-full max-w-[310px] mx-auto mt-5 sm:mt-6"
+              style={{
+                marginTop:
+                  hero.doctorBoxMarginTop && hero.doctorBoxMarginTop !== "0px"
+                    ? hero.doctorBoxMarginTop
+                    : "22px",
+                marginBottom: hero.doctorBoxMarginBottom || "0px",
+              }}
+            >
+              <div
+                className="flex items-center gap-3 p-3 shadow-lg backdrop-blur-md border border-white/30 dark:border-white/15 transition-transform hover:-translate-y-0.5"
+                style={{
+                  backgroundColor:
+                    hero.doctorBoxBgColor || "rgba(148, 153, 162, 0.92)",
+                  color: hero.doctorBoxTextColor || "#ffffff",
+                  borderRadius: hero.doctorBoxBorderRadius || "20px",
+                }}
+              >
+                {/* Doctor Avatar Thumbnail */}
+                {hero.doctorBoxShowPhoto !== false && (
+                  <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-white/25 bg-black/10">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={doctorAvatar}
+                      alt={hero.doctorBoxName || "Doctor Avatar"}
+                      className="h-full w-full object-cover object-top"
+                    />
+                  </div>
+                )}
+
+                {/* Doctor Text Information */}
+                <div className="min-w-0 flex-1 text-left">
+                  <h4 className="font-heading text-xs sm:text-sm font-bold leading-snug tracking-tight text-white drop-shadow-xs truncate">
+                    {hero.doctorBoxName || "Dr. Alex Mercer"}
+                  </h4>
+
+                  {hero.doctorBoxShowRole !== false && hero.doctorBoxRole && (
+                    <p className="text-[10px] sm:text-[11px] font-medium text-slate-100/90 leading-tight truncate mt-0.5">
+                      {hero.doctorBoxRole}
+                    </p>
+                  )}
+
+                  {hero.doctorBoxShowExperience !== false &&
+                    hero.doctorBoxExperience && (
+                      <div className="mt-1 flex items-center gap-1 text-[9px] sm:text-[10px] font-normal text-slate-200/85">
+                        <Star className="h-3 w-3 fill-amber-300 text-amber-300 shrink-0" />
+                        <span className="truncate">
+                          {hero.doctorBoxExperience}
+                        </span>
+                      </div>
+                    )}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </div>
+      </section>
+    );
+  };
+
+  // =========================================================================
+  // 2. DESKTOP / TABLET VIEW LAYOUT (Full Banner Spanning Behind Navbar)
+  // =========================================================================
+  const renderDesktopLayout = (isContainerPreview: boolean) => (
+    <section
+      className={`relative w-full overflow-hidden transition-all ${
+        isContainerPreview
+          ? "rounded-b-2xl -mt-[56px] sm:-mt-[64px] pt-[56px] sm:pt-[64px]"
+          : "-mt-[76px] sm:-mt-[92px] pt-[76px] sm:pt-[92px]"
+      }`}
+      style={{
+        backgroundColor: bgColor,
+        minHeight: isTabletPreview ? "580px" : minHeightVal,
+      }}
+    >
+      {/* 1. FULL HERO IMAGE (FILLS/CONTAINS ENTIRE HERO SECTION + BEHIND NAVBAR) */}
+      {doctorImg && (
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={doctorImg}
+            alt={hero.imageAltText || "Dental Care Specialist"}
+            className={`w-full h-full select-none transition-all duration-300 ${
+              hero.imageFit === "contain"
+                ? "object-contain object-bottom sm:object-center"
+                : "object-cover object-center"
+            }`}
+            style={{
+              borderRadius: hero.imageBorderRadius || "0px",
+            }}
+          />
+
+          {/* Contrast overlay / dimming if configured */}
+          {(hero.imageOverlayOpacity ?? 0) > 0 && (
+            <div
+              className="absolute inset-0 bg-black pointer-events-none"
+              style={{ opacity: hero.imageOverlayOpacity }}
+            />
+          )}
+
+          {/* Bottom Torso / Canvas Gradient Fade */}
+          {hero.imageBottomFade !== false && (
+            <div
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-28 sm:h-36 lg:h-44"
+              style={{
+                background: `linear-gradient(to top, ${bgColor} 0%, ${bgColor}ea 35%, transparent 100%)`,
+              }}
+              aria-hidden="true"
+            />
+          )}
+        </div>
+      )}
+
+      {/* 2. OVERLAY CONTENT LAYER (ON TOP OF THE IMAGE: BUTTON & DOCTOR BADGE BOX) */}
+      <div
+        className={`relative z-20 mx-auto flex flex-col justify-between w-full h-full ${
+          isTabletPreview
+            ? "max-w-3xl px-6 pt-16 pb-8 min-h-[520px]"
+            : "max-w-7xl px-4 sm:px-8 lg:px-12 pt-16 sm:pt-20 pb-8 sm:pb-12 min-h-[540px] sm:min-h-[580px] lg:min-h-[620px]"
+        }`}
+      >
+        {/* --- TOP ROW: WORKING HOURS (LEFT) & LOCATION (RIGHT) ON TOP OF HERO IMAGE --- */}
+        {hero.topInfoEnabled !== false && (
+          <motion.div
+            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.05 }}
+            className="w-full flex items-start justify-between gap-6 pt-2 sm:pt-4 mb-auto"
+            style={{
+              marginTop: hero.topInfoMarginTop || "0px",
+            }}
           >
-            <QuickBookingForm />
-          </div>
+            {/* Left side: Working hours */}
+            <div className="text-left space-y-0.5">
+              <p
+                className="text-xs sm:text-sm font-normal tracking-normal transition-colors"
+                style={{
+                  color: topInfoLabelColor,
+                }}
+              >
+                {workingHoursLabel}
+              </p>
+              <p
+                className="text-sm sm:text-base font-semibold tracking-tight transition-colors"
+                style={{
+                  color: topInfoTextColor,
+                }}
+              >
+                {workingHoursValue}
+              </p>
+            </div>
+
+            {/* Right side: Location */}
+            <div className="text-right sm:text-left space-y-0.5">
+              <p
+                className="text-xs sm:text-sm font-normal tracking-normal transition-colors"
+                style={{
+                  color: topInfoLabelColor,
+                }}
+              >
+                {locationLabel}
+              </p>
+              <p
+                className="text-sm sm:text-base font-semibold tracking-tight transition-colors"
+                style={{
+                  color: topInfoTextColor,
+                }}
+              >
+                {locationValue}
+              </p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* --- BOTTOM ROW: SUBTITLE & APPOINTMENT CTA BUTTON (LEFT) AND DOCTOR CARD (RIGHT) --- */}
+        <div
+          className={`w-full mt-auto pt-8 ${
+            isTabletPreview
+              ? "flex flex-col sm:flex-row items-end justify-between gap-6"
+              : "flex flex-col items-center text-center md:grid md:grid-cols-12 md:items-end md:text-left gap-6"
+          }`}
+        >
+          {/* --- LEFT SECTION: SUBTITLE & APPOINTMENT CTA BUTTON ON THE IMAGE --- */}
+          <motion.div
+            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className={`${
+              isTabletPreview
+                ? "space-y-3.5 max-w-[340px]"
+                : "w-full max-w-xs md:max-w-[380px] space-y-3.5 md:space-y-4 md:col-span-6 lg:col-span-5 flex flex-col items-center md:items-start"
+            }`}
+            style={{
+              marginTop: hero.subtitleBoxMarginTop || "0px",
+              marginBottom: hero.subtitleBoxMarginBottom || "0px",
+            }}
+          >
+            {/* Subtitle Description Text */}
+            <p
+              className={`leading-relaxed font-normal ${
+                isTabletPreview
+                  ? "text-xs sm:text-sm text-left drop-shadow-xs"
+                  : "text-xs sm:text-sm lg:text-[15px] text-center md:text-left drop-shadow-xs"
+              }`}
+              style={{
+                color: hero.subtitleTextColor || "#475569",
+              }}
+            >
+              {hero.subtitleText ||
+                "Discover advanced care, personalized treatments, and trusted experts in a gentle, modern environment"}
+            </p>
+
+            {/* Appointment CTA Button (Placed ON the image) */}
+            <div className="w-full flex justify-center md:justify-start">
+              <Link
+                href={hero.ctaButtonUrl || "/book"}
+                className={`group relative inline-flex items-center font-medium shadow-lg transition-all duration-200 select-none hover:scale-[1.02] hover:opacity-95 active:scale-[0.98] ${
+                  hero.ctaButtonStyle !== "classic"
+                    ? "h-11 sm:h-12 pl-5 pr-2 gap-3.5 text-xs sm:text-sm justify-between"
+                    : "py-3 px-6 gap-2 text-xs sm:text-sm justify-center"
+                }`}
+                style={{
+                  backgroundColor: hero.ctaButtonBgColor || "#050505",
+                  color: hero.ctaButtonTextColor || "#ffffff",
+                  borderRadius: hero.ctaButtonBorderRadius || "14px",
+                }}
+              >
+                <span className="font-heading font-semibold tracking-wide">
+                  {hero.ctaButtonText || "Book Your Appointment"}
+                </span>
+                {hero.ctaButtonShowIcon !== false && (
+                  hero.ctaButtonStyle !== "classic" ? (
+                    <span
+                      className="shadow-xs flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-lg transition-transform duration-200 group-hover:translate-x-0.5"
+                      style={{
+                        backgroundColor: hero.ctaButtonBadgeBgColor || "#ffffff",
+                      }}
+                      aria-hidden="true"
+                    >
+                      <ArrowRight
+                        className="h-4 w-4 stroke-[2.2] transition-colors"
+                        style={{
+                          color:
+                            hero.ctaButtonBadgeIconColor ||
+                            hero.ctaButtonBgColor ||
+                            "#881318",
+                        }}
+                      />
+                    </span>
+                  ) : (
+                    <ArrowUpRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  )
+                )}
+              </Link>
+            </div>
+          </motion.div>
+
+          {/* Spacer for desktop layout */}
+          {!isTabletPreview && (
+            <div className="hidden md:block md:col-span-1 lg:col-span-2" />
+          )}
+
+          {/* --- RIGHT SECTION: FLOATING DOCTOR BADGE BOX ON THE IMAGE --- */}
+          {hero.doctorBoxEnabled !== false && (
+            <motion.div
+              initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className={`${
+                isTabletPreview
+                  ? "shrink-0 max-w-[320px]"
+                  : "w-full max-w-[340px] md:max-w-none md:col-span-5 lg:col-span-5 flex justify-center md:justify-end"
+              }`}
+              style={{
+                marginTop: hero.doctorBoxMarginTop || "0px",
+                marginBottom: hero.doctorBoxMarginBottom || "0px",
+              }}
+            >
+              <div
+                className="flex items-center gap-3.5 p-3.5 sm:p-4 shadow-xl backdrop-blur-md border border-white/30 dark:border-white/15 transition-transform hover:-translate-y-1 w-full"
+                style={{
+                  backgroundColor:
+                    hero.doctorBoxBgColor || "rgba(148, 153, 162, 0.92)",
+                  color: hero.doctorBoxTextColor || "#ffffff",
+                  borderRadius: hero.doctorBoxBorderRadius || "20px",
+                }}
+              >
+                {/* Doctor Avatar Thumbnail */}
+                {hero.doctorBoxShowPhoto !== false && (
+                  <div className="relative h-12 w-12 sm:h-14 sm:w-14 shrink-0 overflow-hidden rounded-xl border border-white/25 bg-black/10">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={doctorAvatar}
+                      alt={hero.doctorBoxName || "Doctor Avatar"}
+                      className="h-full w-full object-cover object-top"
+                    />
+                  </div>
+                )}
+
+                {/* Doctor Text Information */}
+                <div className="min-w-0 flex-1 text-left">
+                  <h4 className="font-heading text-sm sm:text-base font-bold leading-snug tracking-tight text-white drop-shadow-xs truncate">
+                    {hero.doctorBoxName || "Dr. Alex Mercer"}
+                  </h4>
+
+                  {hero.doctorBoxShowRole !== false && hero.doctorBoxRole && (
+                    <p className="text-[11px] sm:text-xs font-medium text-slate-100/90 leading-tight truncate mt-0.5">
+                      {hero.doctorBoxRole}
+                    </p>
+                  )}
+
+                  {hero.doctorBoxShowExperience !== false &&
+                    hero.doctorBoxExperience && (
+                      <div className="mt-1 flex items-center gap-1 text-[10px] sm:text-[11px] font-normal text-slate-200/85">
+                        <Star className="h-3 w-3 fill-amber-300 text-amber-300 shrink-0" />
+                        <span className="truncate">
+                          {hero.doctorBoxExperience}
+                        </span>
+                      </div>
+                    )}
+                </div>
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
     </section>
+  );
+
+  // Return mode-specific or fully responsive dual-layer
+  if (isMobilePreview) {
+    return renderMobileLayout(true);
+  }
+
+  if (isTabletPreview) {
+    return renderDesktopLayout(true);
+  }
+
+  if (previewMode === "desktop") {
+    return renderDesktopLayout(true);
+  }
+
+  // Public website mode: automatically responsive
+  return (
+    <>
+      <div className="block md:hidden">{renderMobileLayout(false)}</div>
+      <div className="hidden md:block">{renderDesktopLayout(false)}</div>
+    </>
   );
 }

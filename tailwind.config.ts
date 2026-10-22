@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: "class",
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -10,6 +11,11 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Top-level theme tokens for shadcn UI components
+        background: "var(--color-background)",
+        surface: "var(--color-surface)",
+        primary: "var(--color-primary)",
+        border: "var(--color-border)",
         // Dynamic Clinic Theme Tokens
         brand: {
           primary: "var(--color-primary)",

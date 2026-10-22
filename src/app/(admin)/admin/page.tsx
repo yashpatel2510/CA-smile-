@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
@@ -15,7 +15,6 @@ import {
   AlertCircle,
   PlusCircle,
   Sparkles,
-  Bot,
   TrendingDown,
   Calendar,
   ChevronRight,
@@ -26,6 +25,8 @@ import {
   SlidersHorizontal,
   Shield,
   Settings,
+  HardDrive,
+  Database,
 } from "lucide-react";
 import {
   Card,
@@ -37,14 +38,44 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-export default function AdminDashboardPage() {
+function AdminDashboardContent() {
   const { data: session } = useSession();
   const searchParams = useSearchParams();
   const isAdmin = session?.user?.role === "ADMIN";
   const errorParam = searchParams.get("error");
   const [loading, setLoading] = useState(false);
+  const [storageInfo, setStorageInfo] = useState<{
+    usedMb: number;
+    quotaMb: number;
+    percentage: number;
+    statusText: string;
+    warningLevel: "normal" | "warning" | "high" | "critical" | "emergency";
+    connectionStatus: string;
+  } | null>(null);
 
-  const pendingCount = 3; // AI & WhatsApp pending requests awaiting staff action
+  useEffect(() => {
+    let isMounted = true;
+    fetch("/api/admin/storage-management")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (isMounted && data?.metrics) {
+          setStorageInfo({
+            usedMb: data.metrics.storageUsedMb,
+            quotaMb: data.metrics.storageLimitMb,
+            percentage: data.metrics.usagePercent,
+            statusText: data.metrics.warningLevel === "NORMAL" ? "Healthy" : data.metrics.warningLevel,
+            warningLevel: data.metrics.warningLevel.toLowerCase(),
+            connectionStatus: data.metrics.connectionStatus,
+          });
+        }
+      })
+      .catch(() => {});
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const pendingCount = 3; // Web pending requests awaiting staff action
 
   const kpiStats = [
     {
@@ -64,16 +95,16 @@ export default function AdminDashboardPage() {
     {
       title: "Clinic No-Show Rate",
       value: "2.4%",
-      delta: "-1.1% (automated SMS active)",
+      delta: "-1.1% vs last month",
       icon: TrendingDown,
       badgeColor: "text-emerald-600 bg-emerald-500/10 dark:text-emerald-400",
     },
     {
-      title: "WhatsApp Bookings",
-      value: "14",
-      delta: "Active mobile chats",
-      icon: MessageSquare,
-      badgeColor: "text-emerald-600 bg-emerald-500/10 dark:text-emerald-400",
+      title: "All Bookings",
+      value: "28",
+      delta: "+12% this month",
+      icon: CalendarDays,
+      badgeColor: "text-blue-600 bg-blue-500/10 dark:text-blue-400",
     },
   ];
 
@@ -85,7 +116,7 @@ export default function AdminDashboardPage() {
       patient: "Eleanor Pena",
       doctor: "Dr. Evelyn Reed, MD",
       service: "Cardiovascular Screen & ECG",
-      source: "WHATSAPP",
+      source: "WEB_FORM",
       status: "COMPLETED",
       badgeVariant: "success" as const,
     },
@@ -107,7 +138,7 @@ export default function AdminDashboardPage() {
       patient: "Courtney Henry",
       doctor: "Dr. Sarah Chen, MD",
       service: "Pediatric Wellness & Immunization",
-      source: "WHATSAPP",
+      source: "WEB_FORM",
       status: "CONFIRMED",
       badgeVariant: "default" as const,
     },
@@ -159,22 +190,21 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* Alert Banner: Pending AI / WhatsApp Confirmations */}
+      {/* Alert Banner: Pending Web Confirmations */}
       {pendingCount > 0 && (
         <div className="relative overflow-hidden rounded-clinic border border-amber-500/30 bg-amber-500/10 p-4 text-amber-900 dark:text-amber-200">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
-                <MessageSquare className="h-5 w-5" />
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-500/20 text-blue-700 dark:text-blue-300">
+                <CalendarDays className="h-5 w-5" />
               </div>
               <div>
                 <div className="text-xs font-semibold sm:text-sm">
                   {pendingCount} Booking Requests Awaiting Staff Review
                 </div>
                 <p className="mt-0.5 text-[11px] text-amber-800/80 sm:text-xs dark:text-amber-300/80">
-                  Patients have submitted appointment requests through WhatsApp
-                  and the website scheduler. Call patient to confirm before
-                  approving.
+                  Patients have submitted appointment requests through the
+                  website scheduler. Call patient to confirm before approving.
                 </p>
               </div>
             </div>
@@ -208,7 +238,7 @@ export default function AdminDashboardPage() {
           </div>
           <p className="mt-1 text-[11px] text-blue-900/80 dark:text-blue-300/80">
             You have access to daily operational tools: pending phone
-            verification, calendar schedules, WhatsApp bookings, and patient
+            verification, calendar schedules, all bookings, and patient
             records. Website layout, booking form customizer, and clinic
             branding are restricted to the Clinic Owner.
           </p>
@@ -235,15 +265,15 @@ export default function AdminDashboardPage() {
             )}
           </div>
           <p className="mt-1 text-xs text-brand-muted sm:text-sm">
-            Live patient triage, appointment calendar, clinical fee schedules,
+            Live patient bookings, clinical records, fee schedules,
             and staff coordination.
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Link href="/admin/calendar">
+          <Link href="/admin/appointments">
             <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs">
               <Calendar className="h-3.5 w-3.5" />
-              <span>Calendar View</span>
+              <span>All Bookings</span>
             </Button>
           </Link>
           <Link href="/admin/pending">
@@ -284,39 +314,107 @@ export default function AdminDashboardPage() {
         })}
       </div>
 
-      {/* Quick Navigation Cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Link href="/admin/whatsapp" className="group">
-          <Card className="flex h-full items-center justify-between border-emerald-200/60 bg-emerald-50/20 p-4 transition-all hover:border-emerald-500/50">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-emerald-500/15 p-2 text-emerald-600 transition-transform group-hover:scale-105">
-                <MessageSquare className="h-5 w-5" />
+      {/* Database Storage Status Card */}
+      <Card className="border-brand-border/60 bg-gradient-to-r from-brand-surface via-brand-surface to-brand-primary/5 p-4 sm:p-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3.5">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-primary/10 text-brand-primary">
+              <HardDrive className="h-5 w-5" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-brand-muted">
+                  Database Storage
+                </span>
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                    (storageInfo?.percentage ?? 42) >= 90
+                      ? "bg-red-500/10 text-red-600 dark:text-red-400"
+                      : (storageInfo?.percentage ?? 42) >= 80
+                      ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                      : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                  }`}
+                >
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full ${
+                      (storageInfo?.percentage ?? 42) >= 90
+                        ? "bg-red-500"
+                        : (storageInfo?.percentage ?? 42) >= 80
+                        ? "bg-amber-500"
+                        : "bg-emerald-500 animate-pulse"
+                    }`}
+                  />
+                  <span>
+                    {storageInfo?.percentage !== undefined
+                      ? `${storageInfo.percentage}% Used`
+                      : "42% Used"}
+                  </span>
+                  <span>• {storageInfo?.statusText || "Healthy"}</span>
+                </span>
               </div>
-              <div>
-                <div className="text-xs font-semibold text-brand-text">
-                  WhatsApp Bookings
+              <div className="flex items-baseline gap-2">
+                <span className="text-xl font-bold tracking-tight text-brand-text">
+                  {storageInfo ? `${storageInfo.usedMb} MB` : "210 MB"}
+                </span>
+                <span className="text-xs font-medium text-brand-muted">
+                  / {storageInfo ? `${storageInfo.quotaMb} MB` : "500 MB"} Limit
+                </span>
+              </div>
+              {/* Visual storage progress bar */}
+              <div className="mt-1.5 flex items-center gap-3">
+                <div className="h-2 w-44 sm:w-56 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      (storageInfo?.percentage ?? 42) >= 90
+                        ? "bg-red-500"
+                        : (storageInfo?.percentage ?? 42) >= 80
+                        ? "bg-amber-500"
+                        : "bg-emerald-500"
+                    }`}
+                    style={{
+                      width: `${Math.min(100, storageInfo?.percentage ?? 42)}%`,
+                    }}
+                  />
                 </div>
-                <div className="text-[11px] text-brand-muted">
-                  Live chat &amp; fast booking queue
-                </div>
+                <span className="text-[11px] font-mono text-brand-muted">
+                  {storageInfo?.quotaMb && storageInfo?.usedMb
+                    ? `${Math.max(0, storageInfo.quotaMb - storageInfo.usedMb)} MB Available`
+                    : "290 MB Available"}
+                </span>
               </div>
             </div>
-            <ChevronRight className="h-4 w-4 text-brand-muted transition-colors group-hover:text-brand-primary" />
-          </Card>
-        </Link>
+          </div>
 
-        <Link href="/admin/calendar" className="group">
-          <Card className="hover:border-brand-primary/50 flex h-full items-center justify-between p-4 transition-all">
+          <div className="flex items-center gap-2 self-start sm:self-center">
+            <Link href="/admin/database">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 gap-1.5 border-brand-primary/30 text-xs font-semibold text-brand-primary hover:bg-brand-primary/10"
+              >
+                <Database className="h-3.5 w-3.5" />
+                <span>Manage Storage</span>
+                <ChevronRight className="h-3 w-3" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </Card>
+
+      {/* Quick Navigation Cards */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Link href="/admin/appointments" className="group">
+          <Card className="flex h-full items-center justify-between border-blue-200/60 bg-blue-50/20 p-4 transition-all hover:border-blue-500/50">
             <div className="flex items-center gap-3">
-              <div className="bg-brand-primary/10 rounded-lg p-2 text-brand-primary transition-transform group-hover:scale-105">
+              <div className="rounded-lg bg-blue-500/15 p-2 text-blue-600 transition-transform group-hover:scale-105">
                 <CalendarDays className="h-5 w-5" />
               </div>
               <div>
                 <div className="text-xs font-semibold text-brand-text">
-                  Appointment Calendar
+                  All Bookings
                 </div>
                 <div className="text-[11px] text-brand-muted">
-                  Day, Week &amp; Month schedules
+                  Manage &amp; confirm appointments
                 </div>
               </div>
             </div>
@@ -324,18 +422,18 @@ export default function AdminDashboardPage() {
           </Card>
         </Link>
 
-        <Link href="/admin/patients" className="group">
-          <Card className="hover:border-brand-primary/50 flex h-full items-center justify-between p-4 transition-all">
+        <Link href="/admin/pending" className="group">
+          <Card className="hover:border-amber-500/50 flex h-full items-center justify-between border-amber-200/60 bg-amber-50/20 p-4 transition-all">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-blue-500/10 p-2 text-blue-600 transition-transform group-hover:scale-105 dark:text-blue-400">
-                <Users className="h-5 w-5" />
+              <div className="rounded-lg bg-amber-500/15 p-2 text-amber-600 transition-transform group-hover:scale-105">
+                <Clock className="h-5 w-5" />
               </div>
               <div>
                 <div className="text-xs font-semibold text-brand-text">
-                  Patient Directory &amp; EMR
+                  Pending Confirmations
                 </div>
                 <div className="text-[11px] text-brand-muted">
-                  Charts, records &amp; family history
+                  Review patient requests
                 </div>
               </div>
             </div>
@@ -343,7 +441,7 @@ export default function AdminDashboardPage() {
           </Card>
         </Link>
 
-        {/* 4th Card: Form Builder for Clinic Owner, Pending Queue for Staff */}
+        {/* 3rd Card: Form Builder for Clinic Owner, Clinic Calendar for Staff */}
         {isAdmin ? (
           <Link href="/admin/booking-form" className="group">
             <Card className="flex h-full items-center justify-between border-purple-200/60 bg-purple-50/20 p-4 transition-all hover:border-purple-500/50 dark:border-purple-900/40 dark:bg-purple-950/20">
@@ -364,18 +462,18 @@ export default function AdminDashboardPage() {
             </Card>
           </Link>
         ) : (
-          <Link href="/admin/pending" className="group">
-            <Card className="flex h-full items-center justify-between border-amber-200/60 bg-amber-50/20 p-4 transition-all hover:border-amber-500/50 dark:border-amber-900/40 dark:bg-amber-950/20">
+          <Link href="/admin/calendar" className="group">
+            <Card className="flex h-full items-center justify-between border-teal-200/60 bg-teal-50/20 p-4 transition-all hover:border-teal-500/50 dark:border-teal-900/40 dark:bg-teal-950/20">
               <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-amber-500/15 p-2 text-amber-600 transition-transform group-hover:scale-105 dark:text-amber-400">
-                  <Clock className="h-5 w-5" />
+                <div className="rounded-lg bg-teal-500/15 p-2 text-teal-600 transition-transform group-hover:scale-105 dark:text-teal-400">
+                  <Calendar className="h-5 w-5" />
                 </div>
                 <div>
                   <div className="text-xs font-semibold text-brand-text">
-                    Pending Confirmations
+                    Clinic Calendar
                   </div>
                   <div className="text-[11px] text-brand-muted">
-                    Call patient &amp; approve booking
+                    Day &amp; week schedule
                   </div>
                 </div>
               </div>
@@ -398,9 +496,9 @@ export default function AdminDashboardPage() {
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
-            <Link href="/admin/calendar">
+            <Link href="/admin/appointments">
               <Button variant="outline" size="sm" className="h-7 gap-1 text-xs">
-                <span>Full Calendar</span>
+                <span>All Bookings</span>
                 <ArrowUpRight className="h-3.5 w-3.5" />
               </Button>
             </Link>
@@ -443,12 +541,9 @@ export default function AdminDashboardPage() {
                       </div>
                     </td>
                     <td className="px-6 py-3.5 font-medium text-brand-text">
-                      <Link
-                        href={`/admin/patients/${item.patientId}`}
-                        className="block font-semibold transition-colors hover:text-brand-primary"
-                      >
+                      <span className="block font-semibold">
                         {item.patient}
-                      </Link>
+                      </span>
                       <span className="font-mono text-[10px] text-brand-muted">
                         {item.patientId}
                       </span>
@@ -457,16 +552,9 @@ export default function AdminDashboardPage() {
                       {item.service}
                     </td>
                     <td className="px-6 py-3.5">
-                      {item.source === "WHATSAPP" ? (
-                        <span className="inline-flex items-center gap-1 rounded border border-emerald-500/20 bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
-                          <MessageSquare className="h-3 w-3" />
-                          <span>WhatsApp</span>
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 rounded border border-zinc-500/20 bg-zinc-500/10 px-1.5 py-0.5 text-[10px] font-medium text-zinc-600 dark:text-zinc-400">
-                          <span>Web Form</span>
-                        </span>
-                      )}
+                      <span className="inline-flex items-center gap-1 rounded border border-zinc-500/20 bg-zinc-500/10 px-1.5 py-0.5 text-[10px] font-medium text-zinc-600 dark:text-zinc-400">
+                        <span>{item.source === "MANUAL" ? "Manual" : "Web Form"}</span>
+                      </span>
                     </td>
                     <td className="px-6 py-3.5 font-medium text-brand-text">
                       {item.doctor}
@@ -475,14 +563,14 @@ export default function AdminDashboardPage() {
                       <Badge variant={item.badgeVariant}>{item.status}</Badge>
                     </td>
                     <td className="px-6 py-3.5 text-right">
-                      <Link href={`/admin/patients/${item.patientId}`}>
+                      <Link href="/admin/appointments">
                         <Button
                           variant="outline"
                           size="sm"
                           className="h-7 gap-1 px-2 text-xs"
                         >
-                          <FileText className="h-3 w-3 text-brand-primary" />
-                          <span>View Chart</span>
+                          <CalendarDays className="h-3 w-3 text-brand-primary" />
+                          <span>View Bookings</span>
                         </Button>
                       </Link>
                     </td>
@@ -494,5 +582,13 @@ export default function AdminDashboardPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function AdminDashboardPage() {
+  return (
+    <React.Suspense fallback={<div className="p-8 text-brand-muted">Loading dashboard...</div>}>
+      <AdminDashboardContent />
+    </React.Suspense>
   );
 }

@@ -27,9 +27,13 @@ export interface GoogleReviewsConfig {
   autoApproveGoogleReviews: boolean;
   googleMapsUrl: string;
   lastSyncedAt?: string;
+  apiKey?: string;
+  darkMode?: boolean;
 }
 
 export interface ReviewsStoreData {
   googleConfig: GoogleReviewsConfig;
   reviews: ClinicReview[];
+  darkMode?: boolean;
 }
+

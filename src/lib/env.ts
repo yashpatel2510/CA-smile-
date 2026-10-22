@@ -22,6 +22,12 @@ export const env = {
     process.env.NEXTAUTH_SECRET ||
     "super-secret-clinic-auth-token-for-dev-session-key-32-chars-min",
   NEXTAUTH_URL: process.env.NEXTAUTH_URL || "http://localhost:3000",
+  OWNER_EMAILS: process.env.OWNER_EMAILS || "casmileatbilimora@gmail.com",
+  ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || "DrDeep@59570",
+  AUTH_DATABASE_URL: process.env.AUTH_DATABASE_URL || "",
+  ENCRYPTION_SECRET:
+    process.env.ENCRYPTION_SECRET ||
+    "super-secret-clinic-aes-256-encryption-key-for-credentials-32",
   isProduction: process.env.NODE_ENV === "production",
   isDevelopment: process.env.NODE_ENV === "development",
 };
