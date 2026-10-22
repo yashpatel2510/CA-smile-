@@ -4,6 +4,7 @@ import { Footer } from "@/components/design-system/footer";
 import { ClinicMapSection } from "@/components/public/clinic-map-section";
 import { FaqSection } from "@/components/public/faq-section";
 import { getFaqsConfig } from "@/lib/faqs-store";
+import { getBookingFormConfig } from "@/lib/booking-form-store";
 
 export default function PublicSiteLayout({
   children,
@@ -11,10 +12,11 @@ export default function PublicSiteLayout({
   children: React.ReactNode;
 }) {
   const faqsConfig = getFaqsConfig();
+  const bookingConfig = getBookingFormConfig();
 
   return (
     <div className="flex min-h-screen flex-col bg-brand-background text-brand-text">
-      <Navbar />
+      <Navbar initialThemeMode={bookingConfig.themeMode || "dark"} />
       <main className="flex-1">{children}</main>
       <ClinicMapSection />
       <FaqSection initialConfig={faqsConfig} hideOnFaqPage={true} />

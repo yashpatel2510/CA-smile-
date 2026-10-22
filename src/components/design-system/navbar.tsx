@@ -28,6 +28,7 @@ export interface NavbarProps {
   clinicName?: string;
   emergencyPhone?: string;
   navItems?: NavItem[];
+  initialThemeMode?: "dark" | "light";
 }
 
 export const defaultNavItems: NavItem[] = [
@@ -54,10 +55,30 @@ function ToothIcon({ className = "h-5 w-5" }: { className?: string }) {
 export function Navbar({
   clinicName = "PedioDent",
   navItems = defaultNavItems,
+  initialThemeMode = "dark",
 }: NavbarProps) {
   const pathname = usePathname();
   const { brandConfig } = useClinicTheme();
   const shouldReduceMotion = useReducedMotion();
+
+  const [themeMode, setThemeMode] = useState<"dark" | "light">(initialThemeMode);
+
+  useEffect(() => {
+    setThemeMode(initialThemeMode);
+  }, [initialThemeMode]);
+
+  useEffect(() => {
+    if (pathname === "/contact" || pathname === "/book") {
+      fetch("/api/booking-form/config")
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data?.config?.themeMode) {
+            setThemeMode(data.config.themeMode);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [pathname]);
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const toggleButtonRef = useRef<HTMLButtonElement>(null);
@@ -131,21 +152,36 @@ export function Navbar({
     brandConfig?.headerContactBtnBgColor || "#000000";
   const headerContactBtnTextColor =
     brandConfig?.headerContactBtnTextColor || "#ffffff";
-  const customLogoUrl = brandConfig?.logo?.imageUrl;
+  const isContactOrBook = pathname === "/contact" || pathname === "/book";
+  const isDark = themeMode === "dark";
 
-  const isDarkBelt = pathname === "/contact" || pathname === "/book";
+  // Match the page background behind the floating navbar:
+  // - In dark mode on /contact or /book: belt is deep black (#0c0d0f)
+  // - In white mode (Dress Gray) on /contact or /book: belt is Dress Gray (#e2e8f0)
+  const headerBeltBgClass = isContactOrBook
+    ? (isDark ? "bg-[#0c0d0f]" : "bg-[#e2e8f0]")
+    : "";
+
+  const isPillDark =
+    !headerBgColor ||
+    headerBgColor === "#18181b" ||
+    headerBgColor === "#000000" ||
+    headerBgColor.startsWith("#1") ||
+    headerBgColor.startsWith("#2");
+
+  const effectiveLogoUrl = isPillDark
+    ? "/images/ca-smile-logo-dark.png"
+    : (brandConfig?.logo?.imageUrl || "/images/ca-smile-logo-light.png");
 
   return (
     <header
-      className={`sticky top-0 z-50 relative w-full px-3 py-2.5 sm:px-6 sm:py-3.5 transition-all ${
-        isDarkBelt ? "bg-[#0c0d0f]" : ""
-      }`}
+      className={`sticky top-0 z-50 relative w-full px-3 py-2.5 sm:px-6 sm:py-3.5 transition-all ${headerBeltBgClass}`}
     >
       {/* Floating Pill Container (Matching Sample Design) */}
       <div
         className={`mx-auto flex h-14 sm:h-16 max-w-6xl items-center justify-between rounded-2xl px-3.5 sm:px-6 shadow-xs backdrop-blur-md transition-all duration-300 ${
-          isDarkBelt
-            ? "border border-white/10"
+          isContactOrBook
+            ? (isDark ? "border border-white/10" : "border border-black/10 shadow-sm")
             : "border border-zinc-200/90 dark:border-zinc-800"
         }`}
         style={{
@@ -158,11 +194,11 @@ export function Navbar({
           className="group flex items-center gap-2.5 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900"
           aria-label={`${displayName} homepage`}
         >
-          {customLogoUrl ? (
+          {effectiveLogoUrl ? (
             <div className="flex h-9 sm:h-10 w-auto max-w-[140px] items-center justify-center overflow-hidden transition-transform duration-200 group-hover:scale-105">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={customLogoUrl}
+                src={effectiveLogoUrl}
                 alt={displayName}
                 className="h-8 sm:h-9 w-auto max-w-[130px] object-contain"
               />
