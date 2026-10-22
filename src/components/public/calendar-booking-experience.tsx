@@ -299,8 +299,9 @@ export function CalendarBookingExperience({
 
     if (isFieldEnabled("mobileNumber") && isFieldRequired("mobileNumber")) {
       const cleanMobile = phone.replace(/\D/g, "");
-      if (cleanMobile.length < 10) {
+      if (cleanMobile.length !== 10) {
         setErrorMsg("Please enter a valid 10-digit mobile number.");
+        setIsSubmitting(false);
         return;
       }
     }
@@ -556,7 +557,7 @@ export function CalendarBookingExperience({
 
             {/* Bottom: CA Smile Logo (Replaced 'brighter' wordmark) + Follow Us */}
             <div className="mt-5 sm:mt-6 pt-2">
-              <div className="mb-3 flex items-center">
+              <div className="mb-3 sm:mb-4 flex items-center">
                 <img
                   src={
                     isDark
@@ -564,7 +565,7 @@ export function CalendarBookingExperience({
                       : (config.logoLightUrl || "/images/ca-smile-logo-light.png")
                   }
                   alt={config.clinicName || "CA Smile Dental Clinic"}
-                  className="h-12 sm:h-14 lg:h-16 w-auto max-w-[240px] object-contain select-none transition-opacity duration-200"
+                  className="h-16 sm:h-20 lg:h-24 w-auto max-w-[280px] sm:max-w-[340px] object-contain select-none transition-all duration-200"
                 />
               </div>
 
@@ -795,7 +796,7 @@ export function CalendarBookingExperience({
                     </div>
                   )}
 
-                  {/* Field 2: Phone Number (Editable via Admin) */}
+                  {/* Field 2: Phone Number (Editable via Admin - only accepts 10 numeric digits) */}
                   {isFieldEnabled("mobileNumber") && (
                     <div className={inputWrapperClass}>
                       <input
@@ -804,7 +805,13 @@ export function CalendarBookingExperience({
                         required={isFieldRequired("mobileNumber")}
                         placeholder={getField("mobileNumber")?.placeholder || "10-digit mobile number"}
                         value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
+                        onChange={(e) => {
+                          const numericValue = e.target.value.replace(/\D/g, "").slice(0, 10);
+                          setPhone(numericValue);
+                        }}
+                        maxLength={10}
+                        pattern="[0-9]{10}"
+                        inputMode="numeric"
                         className={inputClass}
                       />
                       <ChevronDown className={iconClass} />
@@ -1008,25 +1015,29 @@ export function CalendarBookingExperience({
                     </div>
                   )}
 
-                  {/* Bottom Row: Small navbar Book Now Button + View Full Calendar link */}
-                  <div className="pt-2 flex items-center justify-between">
-                    <BookNowButton
-                      type="submit"
-                      size="sm"
-                      text={isSubmitting ? "Submitting..." : (config.submitButtonText || "Submit Appointment Request")}
-                      disabled={isSubmitting}
-                    />
+                  {/* Bottom Row: Submit on LEFT side, Calendar on RIGHT side matching Image 2 */}
+                  <div className="pt-3 flex items-center justify-between w-full gap-3 border-t border-white/10 dark:border-white/10">
+                    <div className="shrink-0 flex items-center justify-start">
+                      <BookNowButton
+                        type="submit"
+                        size="sm"
+                        text={isSubmitting ? "Submitting..." : (config.submitButtonText || "Submit Appointment Request")}
+                        disabled={isSubmitting}
+                      />
+                    </div>
 
-                    <button
-                      type="button"
-                      onClick={() => setStep(1)}
-                      className={`inline-flex items-center gap-1.5 text-xs transition-colors cursor-pointer ${
-                        isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900"
-                      }`}
-                    >
-                      <CalendarIcon className={`h-3.5 w-3.5 ${isDark ? "text-zinc-400" : "text-slate-500"}`} />
-                      <span>View Full Calendar</span>
-                    </button>
+                    <div className="shrink-0 flex items-center justify-end ml-auto">
+                      <button
+                        type="button"
+                        onClick={() => setStep(1)}
+                        className={`inline-flex items-center gap-1.5 text-xs font-semibold transition-colors cursor-pointer ${
+                          isDark ? "text-zinc-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
+                        }`}
+                      >
+                        <CalendarIcon className={`h-4 w-4 ${isDark ? "text-zinc-400" : "text-slate-600"}`} />
+                        <span>View Full Calendar</span>
+                      </button>
+                    </div>
                   </div>
                 </form>
               )}

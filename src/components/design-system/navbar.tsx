@@ -149,12 +149,12 @@ export function Navbar({
           aria-label={`${displayName} homepage`}
         >
           {customLogoUrl ? (
-            <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center overflow-hidden rounded-xl bg-black/5 p-1 transition-transform duration-200 group-hover:scale-105 dark:bg-white/10">
+            <div className="flex h-9 sm:h-10 w-auto max-w-[140px] items-center justify-center overflow-hidden transition-transform duration-200 group-hover:scale-105">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={customLogoUrl}
                 alt={displayName}
-                className="h-full w-full object-contain rounded-lg"
+                className="h-8 sm:h-9 w-auto max-w-[130px] object-contain"
               />
             </div>
           ) : (

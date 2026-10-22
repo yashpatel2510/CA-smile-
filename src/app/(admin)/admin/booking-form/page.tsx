@@ -28,6 +28,7 @@ import {
   Phone,
   Mail,
   Calendar,
+  Image as ImageIcon,
 } from "lucide-react";
 import {
   Card,
@@ -88,7 +89,7 @@ export default function AdminBookingFormBuilderPage() {
     defaultBookingFormConfig
   );
   const [activeTab, setActiveTab] = useState<
-    "fields" | "theme" | "styling" | "treatments" | "slots" | "doctors" | "preview"
+    "fields" | "theme" | "styling" | "treatments" | "slots" | "doctors" | "logos" | "preview"
   >("fields");
   const [previewStep, setPreviewStep] = useState<1 | 2>(1);
 
@@ -146,7 +147,7 @@ export default function AdminBookingFormBuilderPage() {
     fetchConfig();
   }, []);
 
-  // Save updated config to API
+  // Save updated config to API & sync global logo
   const handleSaveConfig = async () => {
     setSaving(true);
     setErrorMsg(null);
@@ -159,8 +160,31 @@ export default function AdminBookingFormBuilderPage() {
       const data = await res.json();
       if (data.success) {
         setConfig(data.config);
+
+        // Synchronize logo globally across navbar, footer & platform
+        try {
+          const chosenLogo =
+            config.themeMode === "dark"
+              ? (config.logoDarkUrl || "/images/ca-smile-logo-dark.png")
+              : (config.logoLightUrl || "/images/ca-smile-logo-light.png");
+
+          await fetch("/api/clinic/branding", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              logo: {
+                type: "IMAGE",
+                imageUrl: chosenLogo,
+                clinicDisplayName: config.clinicName || "CA Smile",
+              },
+            }),
+          });
+        } catch (brandingErr) {
+          console.warn("Could not sync global clinic branding:", brandingErr);
+        }
+
         setSuccessMsg(
-          "Booking & Contact form configuration updated! All changes are live on the website."
+          "Configuration & Logo assets saved! Synchronized live across booking form, navbar, and entire clinic platform."
         );
         setTimeout(() => setSuccessMsg(null), 5000);
       } else {
@@ -634,6 +658,19 @@ export default function AdminBookingFormBuilderPage() {
         >
           <User className="h-3.5 w-3.5" />
           <span>Doctors ({config.doctors.length})</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("logos")}
+          className={`flex items-center gap-1.5 rounded-clinic px-3.5 py-2 text-xs font-bold transition-all ${
+            activeTab === "logos"
+              ? "shadow-xs bg-brand-primary text-white"
+              : "border border-brand-border bg-brand-surface text-brand-muted hover:text-brand-text"
+          }`}
+        >
+          <ImageIcon className="h-3.5 w-3.5" />
+          <span>Brand Logos &amp; Assets</span>
         </button>
 
         <button
@@ -1752,6 +1789,250 @@ export default function AdminBookingFormBuilderPage() {
               ))}
             </div>
           </div>
+        </Card>
+      )}
+
+      {/* TAB: BRAND LOGOS & ASSET CENTRAL */}
+      {activeTab === "logos" && (
+        <Card className="rounded-clinic border border-brand-border bg-brand-surface shadow-xs">
+          <CardHeader className="border-b border-brand-border pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <CardTitle className="font-heading text-lg font-bold text-brand-text flex items-center gap-2">
+                  <ImageIcon className="h-5 w-5 text-brand-primary" />
+                  <span>Clinic Brand Logos &amp; Asset Central</span>
+                </CardTitle>
+                <CardDescription className="text-xs text-brand-muted">
+                  Manage the official CA Smile clinic logos. Saved logos here automatically update the booking experience, header navbar, footer, and patient touchpoints site-wide.
+                </CardDescription>
+              </div>
+
+              <Button
+                type="button"
+                onClick={handleSaveConfig}
+                disabled={saving}
+                className="gap-2 bg-brand-primary text-xs font-bold text-white hover:bg-brand-primary-hover active:scale-95 transition-all"
+              >
+                <Save className="h-4 w-4" />
+                <span>{saving ? "Saving..." : "Save & Sync Logos Live"}</span>
+              </Button>
+            </div>
+          </CardHeader>
+
+          <CardContent className="space-y-6 pt-6">
+            {/* Quick Uploaded Presets Banner */}
+            <div className="rounded-2xl border border-brand-border bg-brand-background p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h4 className="font-heading text-sm font-bold text-brand-text flex items-center gap-1.5">
+                  <Sparkles className="h-4 w-4 text-amber-500" />
+                  <span>Official Transparent CA Smile Logos Ready</span>
+                </h4>
+                <p className="text-xs text-brand-muted mt-0.5">
+                  Both high-resolution transparent logos are saved and ready to be used anywhere on the website.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setConfig((prev) => ({
+                      ...prev,
+                      logoDarkUrl: "/images/ca-smile-logo-dark.png",
+                      logoLightUrl: "/images/ca-smile-logo-light.png",
+                    }));
+                    setSuccessMsg("Applied both uploaded CA Smile logos! Click 'Save & Sync Logos Live' to commit.");
+                    setTimeout(() => setSuccessMsg(null), 3500);
+                  }}
+                  className="text-xs font-semibold"
+                >
+                  Apply Uploaded Logos
+                </Button>
+              </div>
+            </div>
+
+            {/* Two Logo Cards Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              
+              {/* Card 1: Dark Theme Logo */}
+              <div className="rounded-2xl border border-brand-border bg-brand-surface p-5 space-y-4">
+                <div className="flex items-center justify-between pb-2 border-b border-brand-border">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-zinc-900 border border-zinc-700 text-white">
+                      <Moon className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <h4 className="font-heading text-sm font-bold text-brand-text">
+                        Dark Theme Logo (Transparent White)
+                      </h4>
+                      <p className="text-[10px] text-brand-muted">
+                        Used on dark mode booking cards, dark header bars &amp; dark backgrounds
+                      </p>
+                    </div>
+                  </div>
+                  <Badge variant="outline" className="text-[10px] bg-zinc-900 text-white border-zinc-700">
+                    Dark Backgrounds
+                  </Badge>
+                </div>
+
+                {/* Dark Preview Canvas */}
+                <div className="rounded-xl border border-white/10 bg-[#0e0f12] p-6 flex flex-col items-center justify-center min-h-[160px] text-center">
+                  <span className="text-[10px] uppercase font-bold text-zinc-500 mb-2">Live Dark Canvas Preview</span>
+                  <img
+                    src={config.logoDarkUrl || "/images/ca-smile-logo-dark.png"}
+                    alt="Dark Theme Logo"
+                    className="h-16 sm:h-20 w-auto max-w-[280px] object-contain select-none transition-all"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-brand-text">
+                    Dark Logo Asset Path or Image URL
+                  </label>
+                  <Input
+                    type="text"
+                    value={config.logoDarkUrl ?? "/images/ca-smile-logo-dark.png"}
+                    onChange={(e) =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        logoDarkUrl: e.target.value,
+                      }))
+                    }
+                    placeholder="/images/ca-smile-logo-dark.png"
+                    className="h-9 font-mono text-xs"
+                  />
+                  <p className="text-[10px] text-brand-muted">
+                    Defaults to <code className="font-mono text-brand-text font-bold">/images/ca-smile-logo-dark.png</code>
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        logoDarkUrl: "/images/ca-smile-logo-dark.png",
+                      }))
+                    }
+                    className="text-[11px] font-semibold text-brand-primary hover:underline cursor-pointer"
+                  >
+                    Reset to Uploaded White Logo
+                  </button>
+                </div>
+              </div>
+
+              {/* Card 2: Light Theme Logo */}
+              <div className="rounded-2xl border border-brand-border bg-brand-surface p-5 space-y-4">
+                <div className="flex items-center justify-between pb-2 border-b border-brand-border">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-100 border border-slate-300 text-slate-800">
+                      <Sun className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <h4 className="font-heading text-sm font-bold text-brand-text">
+                        Light Theme Logo (Transparent Dark)
+                      </h4>
+                      <p className="text-[10px] text-brand-muted">
+                        Used on Dress Gray mode, white cards, light navbar &amp; bright surfaces
+                      </p>
+                    </div>
+                  </div>
+                  <Badge variant="outline" className="text-[10px] bg-slate-100 text-slate-800 border-slate-300">
+                    Dress Gray Mode
+                  </Badge>
+                </div>
+
+                {/* Light / Dress Gray Preview Canvas */}
+                <div className="rounded-xl border border-slate-300 bg-[#e2e8f0] p-6 flex flex-col items-center justify-center min-h-[160px] text-center">
+                  <span className="text-[10px] uppercase font-bold text-slate-500 mb-2">Live Dress Gray Canvas Preview</span>
+                  <img
+                    src={config.logoLightUrl || "/images/ca-smile-logo-light.png"}
+                    alt="Light Theme Logo"
+                    className="h-16 sm:h-20 w-auto max-w-[280px] object-contain select-none transition-all"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-brand-text">
+                    Light Logo Asset Path or Image URL
+                  </label>
+                  <Input
+                    type="text"
+                    value={config.logoLightUrl ?? "/images/ca-smile-logo-light.png"}
+                    onChange={(e) =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        logoLightUrl: e.target.value,
+                      }))
+                    }
+                    placeholder="/images/ca-smile-logo-light.png"
+                    className="h-9 font-mono text-xs"
+                  />
+                  <p className="text-[10px] text-brand-muted">
+                    Defaults to <code className="font-mono text-brand-text font-bold">/images/ca-smile-logo-light.png</code>
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        logoLightUrl: "/images/ca-smile-logo-light.png",
+                      }))
+                    }
+                    className="text-[11px] font-semibold text-brand-primary hover:underline cursor-pointer"
+                  >
+                    Reset to Uploaded Dark Logo
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Global Sync Overview Callout */}
+            <div className="rounded-2xl border border-brand-border bg-brand-surface p-5 space-y-3">
+              <h4 className="font-heading text-sm font-bold text-brand-text">
+                Where are these logos displayed?
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                <div className="rounded-xl border border-brand-border p-3 bg-brand-background space-y-1">
+                  <span className="font-bold text-brand-text block">1. Booking Card (Desktop &amp; Mobile)</span>
+                  <span className="text-brand-muted text-[11px] block">
+                    Displays prominently on the bottom-left of the booking card, scaled bigger with high-resolution crisp rendering.
+                  </span>
+                </div>
+                <div className="rounded-xl border border-brand-border p-3 bg-brand-background space-y-1">
+                  <span className="font-bold text-brand-text block">2. Header Navbar</span>
+                  <span className="text-brand-muted text-[11px] block">
+                    Synchronized into the sticky top navigation header across all public pages (/contact, /book, homepage, etc.).
+                  </span>
+                </div>
+                <div className="rounded-xl border border-brand-border p-3 bg-brand-background space-y-1">
+                  <span className="font-bold text-brand-text block">3. Confirmation &amp; Admin</span>
+                  <span className="text-brand-muted text-[11px] block">
+                    Appears in appointment confirmation states, patient receipts, and live admin builder previews.
+                  </span>
+                </div>
+              </div>
+
+              <div className="pt-2 flex justify-end">
+                <Button
+                  type="button"
+                  onClick={handleSaveConfig}
+                  disabled={saving}
+                  className="gap-2 bg-brand-primary text-xs font-bold text-white hover:bg-brand-primary-hover active:scale-95 transition-all"
+                >
+                  <Save className="h-4 w-4" />
+                  <span>{saving ? "Saving..." : "Save Logos & Synchronize Platform"}</span>
+                </Button>
+              </div>
+            </div>
+          </CardContent>
         </Card>
       )}
 

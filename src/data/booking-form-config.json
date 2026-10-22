@@ -35,7 +35,7 @@
       "type": "tel",
       "required": true,
       "enabled": true,
-      "placeholder": "Phone Number",
+      "placeholder": "10-digit mobile number",
       "helpText": "Primary contact phone number for confirmation"
     },
     {
