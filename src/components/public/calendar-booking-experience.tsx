@@ -5,9 +5,6 @@ import Link from "next/link";
 import {
   Calendar as CalendarIcon,
   Clock,
-  User,
-  Phone,
-  Mail,
   ChevronLeft,
   ChevronRight,
   ArrowRight,
@@ -61,7 +58,7 @@ export function CalendarBookingExperience({
 }: CalendarBookingExperienceProps) {
   const { brandConfig } = useClinicTheme();
 
-  // Dynamic booking form configuration from admin
+  // Dynamic booking form configuration from admin panel (Booking Form Builder & Field Settings)
   const [config, setConfig] = useState<BookingFormConfig>(
     defaultBookingFormConfig
   );
@@ -88,21 +85,22 @@ export function CalendarBookingExperience({
     return t;
   }, []);
 
-  // Selected date & slot (pre-selected to tomorrow and morning for instant usability)
+  // Selected date & slot
   const [selectedDate, setSelectedDate] = useState<Date | null>(defaultDate);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(
     DEFAULT_TIME_RANGES[0]
   );
 
-  // Patient Details form fields (matching Image 2)
+  // Patient Details form fields (matching Image 2 & config fields)
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [treatment, setTreatment] = useState(initialService || "");
   const [preferredTime, setPreferredTime] = useState(DEFAULT_TIME_RANGES[0]);
-  const [doctorPreference, setDoctorPreference] = useState(
-    "Doctor Preference: Any Available Specialist"
-  );
+  const [doctorPreference, setDoctorPreference] = useState("Any Available Specialist");
+  const [notes, setNotes] = useState("");
   const [consentAgreed, setConsentAgreed] = useState(true);
+  const [customFieldValues, setCustomFieldValues] = useState<Record<string, string>>({});
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -116,23 +114,35 @@ export function CalendarBookingExperience({
     doctor: string;
   } | null>(null);
 
-  // Fetch admin booking form configuration
+  // Fetch admin booking form configuration live from /api/booking-form/config
   useEffect(() => {
     fetch("/api/booking-form/config")
       .then((res) => res.json())
       .then((data) => {
         if (data?.success && data?.config) {
           setConfig(data.config);
+
+          // Sync default slot from admin config
           if (data.config.timeSlots && data.config.timeSlots.length > 0) {
             setSelectedSlot(data.config.timeSlots[0]);
             setPreferredTime(data.config.timeSlots[0]);
+          }
+
+          // Sync default doctor from admin config
+          if (data.config.doctors && data.config.doctors.length > 0) {
+            setDoctorPreference(data.config.doctors[0]);
+          }
+
+          // Sync default treatment from admin config
+          if (data.config.treatments && data.config.treatments.length > 0 && !treatment) {
+            setTreatment(data.config.treatments[0]);
           }
         }
       })
       .catch((err) => {
         console.warn("Could not load dynamic booking configuration:", err);
       });
-  }, []);
+  }, [treatment]);
 
   // Sync selected slot with preferred time dropdown
   useEffect(() => {
@@ -140,6 +150,47 @@ export function CalendarBookingExperience({
       setPreferredTime(selectedSlot);
     }
   }, [selectedSlot]);
+
+  // Dynamic field helper lookups from admin config
+  const getField = (id: string) => config.fields?.find((f) => f.id === id);
+  const isFieldEnabled = (id: string) => getField(id)?.enabled !== false;
+  const isFieldRequired = (id: string) => getField(id)?.required === true;
+
+  // Dynamic lists from admin panel configuration
+  const availableSlots = useMemo(() => {
+    if (config?.timeSlots && config.timeSlots.length > 0) {
+      return config.timeSlots;
+    }
+    return DEFAULT_TIME_RANGES;
+  }, [config.timeSlots]);
+
+  const doctorsList = useMemo(() => {
+    if (config?.doctors && config.doctors.length > 0) {
+      return config.doctors;
+    }
+    return [
+      "Any Available Specialist",
+      "Dr. Vidhyamol (Pediatric Specialist)",
+      "Dr. Sankar (Chief Dental Surgeon)",
+      "Dr. Sarah Vance, MD (Lead Physician)",
+    ];
+  }, [config.doctors]);
+
+  const treatmentsList = useMemo(() => {
+    if (config?.treatments && config.treatments.length > 0) {
+      return config.treatments;
+    }
+    return [
+      "General Dental Consultation & Checkup",
+      "Pediatric Dentistry & Child Care",
+      "Root Canal Treatment (Endodontics)",
+      "Teeth Cleaning & Scaling (Prophylaxis)",
+      "Orthodontics & Invisible Braces",
+      "Dental Implants & Restoration",
+      "Toothache & Emergency Dental Relief",
+      "Cosmetic Dentistry & Smile Makeover",
+    ];
+  }, [config.treatments]);
 
   // Calendar dates computation
   const year = viewDate.getFullYear();
@@ -217,14 +268,6 @@ export function CalendarBookingExperience({
     return `${dd}/${mm}/${yyyy}`;
   }, [selectedDate]);
 
-  // Available Slots
-  const availableSlots = useMemo(() => {
-    if (config?.timeSlots && config.timeSlots.length > 0) {
-      return config.timeSlots;
-    }
-    return DEFAULT_TIME_RANGES;
-  }, [config]);
-
   const handleContinueToDetails = () => {
     if (!selectedDate) {
       setErrorMsg("Please select a date on the calendar.");
@@ -247,23 +290,27 @@ export function CalendarBookingExperience({
     e.preventDefault();
     setErrorMsg(null);
 
-    if (!fullName.trim()) {
+    if (isFieldEnabled("fullName") && isFieldRequired("fullName") && !fullName.trim()) {
       setErrorMsg("Please enter your full name.");
       return;
     }
 
-    const cleanMobile = phone.replace(/\D/g, "");
-    if (cleanMobile.length < 10) {
-      setErrorMsg("Please enter a valid 10-digit mobile number.");
-      return;
+    if (isFieldEnabled("mobileNumber") && isFieldRequired("mobileNumber")) {
+      const cleanMobile = phone.replace(/\D/g, "");
+      if (cleanMobile.length < 10) {
+        setErrorMsg("Please enter a valid 10-digit mobile number.");
+        return;
+      }
     }
 
-    if (!email.trim() || !email.includes("@")) {
-      setErrorMsg("Please enter a valid email address.");
-      return;
+    if (isFieldEnabled("email") && isFieldRequired("email")) {
+      if (!email.trim() || !email.includes("@")) {
+        setErrorMsg("Please enter a valid email address.");
+        return;
+      }
     }
 
-    if (!consentAgreed) {
+    if (isFieldEnabled("consentAgreed") && isFieldRequired("consentAgreed") && !consentAgreed) {
       setErrorMsg("Please accept the contact agreement to proceed.");
       return;
     }
@@ -272,8 +319,8 @@ export function CalendarBookingExperience({
 
     try {
       const nameParts = fullName.trim().split(/\s+/).filter(Boolean);
-      const fName = nameParts[0] || fullName.trim();
-      const lName = nameParts.slice(1).join(" ") || "";
+      const fName = nameParts[0] || fullName.trim() || "Valued";
+      const lName = nameParts.slice(1).join(" ") || "Patient";
 
       const formattedIsoDate = selectedDate
         ? new Date(
@@ -290,22 +337,41 @@ export function CalendarBookingExperience({
 
       const chosenDoctor = doctorPreference.replace(/^Doctor Preference:\s*/, "");
       const chosenTime = preferredTime.replace(/^Preferred Time:\s*/, "");
+      const chosenTreatment = treatment || treatmentsList[0] || "General Dental Consultation";
+
+      // Append custom fields and extra notes
+      const customNotesArr = Object.entries(customFieldValues)
+        .filter(([_, val]) => Boolean(val && val.trim()))
+        .map(([k, val]) => {
+          const matchingField = config.fields.find((f) => f.id === k);
+          return `[${matchingField?.label || k}]: ${val.trim()}`;
+        });
+
+      const allNotes = [
+        `Doctor: ${chosenDoctor}`,
+        `Time Slot: ${chosenTime}`,
+        notes.trim(),
+        ...customNotesArr,
+      ]
+        .filter(Boolean)
+        .join(" | ");
 
       const payload = {
         patientType: "ADULT",
-        fullName: fullName.trim(),
+        fullName: fullName.trim() || "Valued Patient",
         firstName: fName,
         lastName: lName,
-        phone: cleanMobile,
-        email: email.trim(),
-        treatment: initialService || "General Dental Consultation",
-        serviceName: initialService || "General Dental Consultation",
-        reason: initialService || "General Dental Consultation",
+        phone: phone.trim() || "0000000000",
+        email: email.trim() || undefined,
+        treatment: chosenTreatment,
+        serviceName: chosenTreatment,
+        reason: chosenTreatment,
         preferredDoctor: chosenDoctor,
         preferredDate: selectedDate?.toISOString().split("T")[0],
         timeRange: chosenTime,
         startTime: formattedIsoDate,
-        notes: `Doctor Preference: ${chosenDoctor} | Preferred Time: ${chosenTime}`,
+        notes: allNotes || undefined,
+        customFields: customFieldValues,
         consentAgreed: true,
         source: "WEB_FORM",
       };
@@ -326,7 +392,7 @@ export function CalendarBookingExperience({
 
       setConfirmedData({
         id: appointmentId,
-        patientName: fullName.trim(),
+        patientName: fullName.trim() || "Valued Patient",
         dateFormatted: dateFormattedSlash || selectedDateShortString,
         slot: chosenTime,
         doctor: chosenDoctor,
@@ -353,6 +419,8 @@ export function CalendarBookingExperience({
     setFullName("");
     setPhone("");
     setEmail("");
+    setNotes("");
+    setCustomFieldValues({});
     setErrorMsg(null);
   };
 
@@ -497,7 +565,7 @@ export function CalendarBookingExperience({
               {step === 1 && (
                 <div className="space-y-4">
                   <h3 className="font-heading text-lg sm:text-xl font-bold tracking-tight text-white">
-                    Book Your Appointment
+                    {config.title || "Book Your Appointment"}
                   </h3>
 
                   {/* Month & Year Navigation Header */}
@@ -585,7 +653,7 @@ export function CalendarBookingExperience({
                     })}
                   </div>
 
-                  {/* Available Time Slots Header & Grid */}
+                  {/* Available Time Slots Header & Grid (From Admin Panel Config) */}
                   <div className="space-y-2 pt-1">
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="font-semibold tracking-wider text-zinc-400 uppercase">
@@ -625,55 +693,61 @@ export function CalendarBookingExperience({
               )}
 
               {/* ----------------------------------------------------------------- */}
-              {/* STEP 2: EXACT IMAGE 2 FORM DESIGN                                 */}
+              {/* STEP 2: EXACT IMAGE 2 FORM DESIGN (FULLY EDITABLE VIA ADMIN)      */}
               {/* ----------------------------------------------------------------- */}
               {step === 2 && (
                 <form onSubmit={handleConfirmBooking} className="space-y-3">
                   <h3 className="font-heading text-lg sm:text-xl font-bold tracking-tight text-white mb-3">
-                    Book Your Appointment
+                    {config.title || "Book Your Appointment"}
                   </h3>
 
-                  {/* Field 1: Your Full Name */}
-                  <div className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-2.5 flex items-center justify-between">
-                    <input
-                      type="text"
-                      name="fullName"
-                      required
-                      placeholder="Your Full Name"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      className="w-full bg-transparent text-xs sm:text-sm text-white placeholder:text-zinc-500 focus:outline-none"
-                    />
-                    <ChevronDown className="h-4 w-4 text-zinc-500 shrink-0 pointer-events-none group-hover:text-zinc-400" />
-                  </div>
+                  {/* Field 1: Your Full Name (Editable via Admin) */}
+                  {isFieldEnabled("fullName") && (
+                    <div className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-2.5 flex items-center justify-between">
+                      <input
+                        type="text"
+                        name="fullName"
+                        required={isFieldRequired("fullName")}
+                        placeholder={getField("fullName")?.placeholder || getField("fullName")?.label || "Your Full Name"}
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        className="w-full bg-transparent text-xs sm:text-sm text-white placeholder:text-zinc-500 focus:outline-none"
+                      />
+                      <ChevronDown className="h-4 w-4 text-zinc-500 shrink-0 pointer-events-none group-hover:text-zinc-400" />
+                    </div>
+                  )}
 
-                  {/* Field 2: Phone Number */}
-                  <div className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-2.5 flex items-center justify-between">
-                    <input
-                      type="tel"
-                      name="phone"
-                      required
-                      placeholder="Phone Number"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="w-full bg-transparent text-xs sm:text-sm text-white placeholder:text-zinc-500 focus:outline-none"
-                    />
-                    <ChevronDown className="h-4 w-4 text-zinc-500 shrink-0 pointer-events-none group-hover:text-zinc-400" />
-                  </div>
+                  {/* Field 2: Phone Number (Editable via Admin) */}
+                  {isFieldEnabled("mobileNumber") && (
+                    <div className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-2.5 flex items-center justify-between">
+                      <input
+                        type="tel"
+                        name="phone"
+                        required={isFieldRequired("mobileNumber")}
+                        placeholder={getField("mobileNumber")?.placeholder || getField("mobileNumber")?.label || "Phone Number"}
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="w-full bg-transparent text-xs sm:text-sm text-white placeholder:text-zinc-500 focus:outline-none"
+                      />
+                      <ChevronDown className="h-4 w-4 text-zinc-500 shrink-0 pointer-events-none group-hover:text-zinc-400" />
+                    </div>
+                  )}
 
-                  {/* Field 3: Email Address */}
-                  <div className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-2.5 flex items-center justify-between">
-                    <input
-                      type="email"
-                      name="email"
-                      required
-                      placeholder="Email Address"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full bg-transparent text-xs sm:text-sm text-white placeholder:text-zinc-500 focus:outline-none"
-                    />
-                    <ChevronDown className="h-4 w-4 text-zinc-500 shrink-0 pointer-events-none group-hover:text-zinc-400" />
-                  </div>
+                  {/* Field 3: Email Address (Editable via Admin) */}
+                  {isFieldEnabled("email") && (
+                    <div className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-2.5 flex items-center justify-between">
+                      <input
+                        type="email"
+                        name="email"
+                        required={isFieldRequired("email")}
+                        placeholder={getField("email")?.placeholder || getField("email")?.label || "Email Address"}
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full bg-transparent text-xs sm:text-sm text-white placeholder:text-zinc-500 focus:outline-none"
+                      />
+                      <ChevronDown className="h-4 w-4 text-zinc-500 shrink-0 pointer-events-none group-hover:text-zinc-400" />
+                    </div>
+                  )}
 
                   {/* Field 4: Selected Date (with calendar icon on right matching Image 2) */}
                   <div
@@ -687,7 +761,7 @@ export function CalendarBookingExperience({
                     <CalendarIcon className="h-4 w-4 text-zinc-400 shrink-0 pointer-events-none group-hover:text-white transition-colors" />
                   </div>
 
-                  {/* Field 5: Preferred Time (Select dropdown matching Image 2) */}
+                  {/* Field 5: Preferred Time (Select dropdown matching Image 2 & Admin slots) */}
                   <div className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-2.5 flex items-center justify-between">
                     <select
                       value={preferredTime}
@@ -695,64 +769,138 @@ export function CalendarBookingExperience({
                       aria-label="Preferred Time"
                       className="w-full bg-transparent text-xs sm:text-sm text-white appearance-none focus:outline-none cursor-pointer [color-scheme:dark]"
                     >
-                      <option value="Morning (9:30 AM - 1:00 PM)" className="bg-[#222227] text-white">
-                        Preferred Time: Morning (9:30 AM - 1:00 PM)
-                      </option>
-                      <option value="Afternoon (2:00 PM - 5:00 PM)" className="bg-[#222227] text-white">
-                        Preferred Time: Afternoon (2:00 PM - 5:00 PM)
-                      </option>
-                      <option value="Evening (5:00 PM - 7:30 PM)" className="bg-[#222227] text-white">
-                        Preferred Time: Evening (5:00 PM - 7:30 PM)
-                      </option>
+                      {availableSlots.map((slot, i) => (
+                        <option key={i} value={slot} className="bg-[#222227] text-white">
+                          Preferred Time: {slot}
+                        </option>
+                      ))}
                     </select>
                     <ChevronDown className="h-4 w-4 text-zinc-500 shrink-0 pointer-events-none group-hover:text-zinc-400" />
                   </div>
 
-                  {/* Field 6: Doctor Preference (Select dropdown matching Image 2) */}
-                  <div className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-2.5 flex items-center justify-between">
-                    <select
-                      value={doctorPreference}
-                      onChange={(e) => setDoctorPreference(e.target.value)}
-                      aria-label="Doctor Preference"
-                      className="w-full bg-transparent text-xs sm:text-sm text-white appearance-none focus:outline-none cursor-pointer [color-scheme:dark]"
-                    >
-                      <option value="Doctor Preference: Any Available Specialist" className="bg-[#222227] text-white">
-                        Doctor Preference: Any Available Specialist
-                      </option>
-                      <option value="Dr. Sankar (Chief Dental Surgeon)" className="bg-[#222227] text-white">
-                        Dr. Sankar (Chief Dental Surgeon)
-                      </option>
-                      <option value="Dr. Meera (Pediatric Specialist)" className="bg-[#222227] text-white">
-                        Dr. Meera (Pediatric Specialist)
-                      </option>
-                      <option value="Dr. Arjun (Orthodontics & Aligners)" className="bg-[#222227] text-white">
-                        Dr. Arjun (Orthodontics & Aligners)
-                      </option>
-                    </select>
-                    <ChevronDown className="h-4 w-4 text-zinc-500 shrink-0 pointer-events-none group-hover:text-zinc-400" />
-                  </div>
+                  {/* Field 6: Doctor Preference (Select dropdown populated from Admin doctors) */}
+                  {isFieldEnabled("preferredDoctor") && (
+                    <div className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-2.5 flex items-center justify-between">
+                      <select
+                        value={doctorPreference}
+                        onChange={(e) => setDoctorPreference(e.target.value)}
+                        aria-label="Doctor Preference"
+                        className="w-full bg-transparent text-xs sm:text-sm text-white appearance-none focus:outline-none cursor-pointer [color-scheme:dark]"
+                      >
+                        {doctorsList.map((doc, i) => (
+                          <option key={i} value={doc} className="bg-[#222227] text-white">
+                            Doctor Preference: {doc}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="h-4 w-4 text-zinc-500 shrink-0 pointer-events-none group-hover:text-zinc-400" />
+                    </div>
+                  )}
 
-                  {/* Checkbox: Agreement matching Image 2 */}
-                  <div className="pt-0.5">
-                    <label className="flex items-center gap-2.5 cursor-pointer text-xs text-zinc-400 select-none group">
+                  {/* Optional Treatment Field (If enabled in Admin) */}
+                  {isFieldEnabled("treatment") && (
+                    <div className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-2.5 flex items-center justify-between">
+                      <select
+                        value={treatment}
+                        onChange={(e) => setTreatment(e.target.value)}
+                        aria-label="Treatment Category"
+                        className="w-full bg-transparent text-xs sm:text-sm text-white appearance-none focus:outline-none cursor-pointer [color-scheme:dark]"
+                      >
+                        {treatmentsList.map((t, idx) => (
+                          <option key={idx} value={t} className="bg-[#222227] text-white">
+                            Treatment: {t}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="h-4 w-4 text-zinc-500 shrink-0 pointer-events-none group-hover:text-zinc-400" />
+                    </div>
+                  )}
+
+                  {/* Optional Symptoms / Clinical Notes (If enabled in Admin) */}
+                  {isFieldEnabled("notes") && (
+                    <div className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-2.5 flex items-center justify-between">
                       <input
-                        type="checkbox"
-                        checked={consentAgreed}
-                        onChange={(e) => setConsentAgreed(e.target.checked)}
-                        className="h-4 w-4 rounded border-zinc-700 bg-zinc-800 text-red-600 focus:ring-0 focus:ring-offset-0 cursor-pointer accent-[#881318]"
+                        type="text"
+                        name="notes"
+                        placeholder={getField("notes")?.placeholder || "Describe your symptoms or questions (Optional)..."}
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                        className="w-full bg-transparent text-xs sm:text-sm text-white placeholder:text-zinc-500 focus:outline-none"
                       />
-                      <span className="group-hover:text-zinc-300 transition-colors">
-                        I agree to be contacted to confirm my appointment.
-                      </span>
-                    </label>
-                  </div>
+                    </div>
+                  )}
+
+                  {/* Dynamic Custom Fields Added via Admin Builder */}
+                  {config.fields
+                    ?.filter((f) => f.isCustom && f.enabled !== false)
+                    .map((field) => (
+                      <div
+                        key={field.id}
+                        className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-2.5 flex items-center justify-between"
+                      >
+                        {field.type === "select" && field.options?.length ? (
+                          <select
+                            value={customFieldValues[field.id] || ""}
+                            required={field.required}
+                            onChange={(e) =>
+                              setCustomFieldValues((prev) => ({
+                                ...prev,
+                                [field.id]: e.target.value,
+                              }))
+                            }
+                            className="w-full bg-transparent text-xs sm:text-sm text-white appearance-none focus:outline-none cursor-pointer [color-scheme:dark]"
+                          >
+                            <option value="" className="bg-[#222227] text-white">
+                              {field.placeholder || `Select ${field.label}`}
+                            </option>
+                            {field.options.map((opt, i) => (
+                              <option key={i} value={opt} className="bg-[#222227] text-white">
+                                {opt}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input
+                            type={field.type === "tel" ? "tel" : field.type === "email" ? "email" : "text"}
+                            required={field.required}
+                            placeholder={field.placeholder || field.label}
+                            value={customFieldValues[field.id] || ""}
+                            onChange={(e) =>
+                              setCustomFieldValues((prev) => ({
+                                ...prev,
+                                [field.id]: e.target.value,
+                              }))
+                            }
+                            className="w-full bg-transparent text-xs sm:text-sm text-white placeholder:text-zinc-500 focus:outline-none"
+                          />
+                        )}
+                        <ChevronDown className="h-4 w-4 text-zinc-500 shrink-0 pointer-events-none group-hover:text-zinc-400" />
+                      </div>
+                    ))}
+
+                  {/* Checkbox: Agreement matching Image 2 & Admin */}
+                  {isFieldEnabled("consentAgreed") && (
+                    <div className="pt-0.5">
+                      <label className="flex items-center gap-2.5 cursor-pointer text-xs text-zinc-400 select-none group">
+                        <input
+                          type="checkbox"
+                          checked={consentAgreed}
+                          onChange={(e) => setConsentAgreed(e.target.checked)}
+                          className="h-4 w-4 rounded border-zinc-700 bg-zinc-800 text-red-600 focus:ring-0 focus:ring-offset-0 cursor-pointer accent-[#881318]"
+                        />
+                        <span className="group-hover:text-zinc-300 transition-colors">
+                          {getField("consentAgreed")?.label || "I agree to be contacted to confirm my appointment."}
+                        </span>
+                      </label>
+                    </div>
+                  )}
 
                   {/* Bottom Row: Small navbar Book Now Button + View Full Calendar link */}
                   <div className="pt-2 flex items-center justify-between">
                     <BookNowButton
                       type="submit"
                       size="sm"
-                      text={isSubmitting ? "Submitting..." : "Book Now"}
+                      text={isSubmitting ? "Submitting..." : (config.submitButtonText || "Book Now")}
                       disabled={isSubmitting}
                     />
 

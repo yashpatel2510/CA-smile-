@@ -53,10 +53,9 @@ function persistConfigToFile(config: BookingFormConfig): void {
 }
 
 export function getBookingFormConfig(): BookingFormConfig {
-  if (!global.__bookingFormConfig) {
-    global.__bookingFormConfig = loadPersistedConfig();
-  }
-  return global.__bookingFormConfig;
+  const loaded = loadPersistedConfig();
+  global.__bookingFormConfig = loaded;
+  return loaded;
 }
 
 export function updateBookingFormConfig(
