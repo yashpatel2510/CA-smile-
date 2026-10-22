@@ -325,21 +325,9 @@
   "diagnostics": [
     {
       "id": "radiological-examination",
-      "title": "Radiological Examination",
-      "subtitle": "Ultra-Low Dose Digital Panoramic X-Rays",
+      "title": "Radiological examination",
       "category": "Digital Imaging",
       "image": "/images/treatments/radiological-examination.jpg",
-      "whatItIs": "A comprehensive digital scan capturing full panoramic and cephalometric images of your mouth, jawbone, roots, and nerve canals in seconds.",
-      "howItWorks": "The scanner rotates smoothly around your head while you stand comfortably. Low-dose digital sensors immediately render high-resolution views.",
-      "benefits": "Provides complete 360° structural insights with 90% less radiation than legacy film X-rays, enabling precise treatment planning.",
-      "procedure": [
-        "Positioning comfortably with gentle chin support.",
-        "Smooth 12-second panoramic rotation.",
-        "Instant crystal-clear image generation on screen.",
-        "Physician review and personalized consultation."
-      ],
-      "result": "Immediate full-mouth anatomical roadmap identifying hidden bone conditions, impactions, and root health.",
-      "whatIfNotDone": "Deep-seated bone loss, cystic lesions, or nerve proximity can remain invisible until severe dental emergencies occur.",
       "paragraphs": [
         "High-precision panoramic and cephalometric digital radiology delivering complete structural insights into tooth roots, bone density, and anatomical canals.",
         "Our ultra-low dose diagnostic units minimize radiation exposure by up to 90% while providing immediate high-resolution digital clarity for accurate clinical evaluation."
@@ -349,21 +337,9 @@
     },
     {
       "id": "periodontal-examination",
-      "title": "Periodontal Examination",
-      "subtitle": "Detailed Gum & Bone Support Evaluation",
+      "title": "Periodontal examination",
       "category": "Clinical Diagnostics",
       "image": "/images/treatments/periodontal-examination.jpg",
-      "whatItIs": "A gentle clinical check of your gum foundation using calibrated micro-probes to measure pocket depths and spot early inflammation.",
-      "howItWorks": "The periodontist measures pocket depth around each tooth with millimeter accuracy to evaluate tissue attachment and bone stability.",
-      "benefits": "Identifies early gingivitis and periodontitis before bone deterioration occurs, preserving the natural support of your teeth.",
-      "procedure": [
-        "Gentle micro-probe depth mapping around each tooth.",
-        "Tissue firmness and bleeding index evaluation.",
-        "Bacterial plaque biofilm assessment.",
-        "Customized preventative therapy plan."
-      ],
-      "result": "Complete periodontal health profile that protects against gum recession and loose teeth.",
-      "whatIfNotDone": "Silent, painless gum disease gradually destroys underlying jawbone, leading to premature tooth loosening and extraction.",
       "paragraphs": [
         "Detailed clinical assessment of gum tissues, measuring periodontal pocket depths with calibrated titanium micro-probes to identify micro-inflammation before bone recession begins.",
         "Essential for safeguarding the foundational biological support of your teeth and planning individualized preventative or regenerative therapy."
@@ -373,21 +349,9 @@
     },
     {
       "id": "tooth-sensitivity-test",
-      "title": "Tooth Sensitivity Test",
-      "subtitle": "Nerve Vitality & Micro-Fracture Diagnostics",
+      "title": "Tooth sensitivity test",
       "category": "Pulp Vitality",
       "image": "/images/treatments/tooth-sensitivity.jpg",
-      "whatItIs": "A fast, non-invasive assessment to determine whether tooth pain stems from superficial enamel erosion or internal nerve inflammation.",
-      "howItWorks": "Calibrated temperature and electrical impulses evaluate sensory responses to precisely map nerve health and detect microscopic hairline cracks.",
-      "benefits": "Instantly clarifies whether gentle mineral desensitization bonding is sufficient or if targeted endodontic care is necessary.",
-      "procedure": [
-        "Visual inspection of tooth enamel surfaces.",
-        "Thermal and electrical pulp response test.",
-        "Bite-stress test to rule out hairline fractures.",
-        "Clear explanation of conservative treatment choices."
-      ],
-      "result": "Accurate clarity on tooth nerve viability, avoiding unnecessary root canals or prolonged discomfort.",
-      "whatIfNotDone": "Unaddressed pulp inflammation can progress into deep root abscesses, excruciating throbbing pain, and permanent tooth damage.",
       "paragraphs": [
         "Precise thermal and electrical pulp vitality diagnostics used to evaluate sensory response, detect micro-fractures, and pinpoint concealed nerve inflammation.",
         "Provides immediate clarity to determine whether gentle remineralization, bonding, or targeted endodontic care is required."
@@ -397,21 +361,9 @@
     },
     {
       "id": "digital-radiography",
-      "title": "Digital Radiography",
-      "subtitle": "Chairside High-Resolution Intraoral Sensors",
+      "title": "Digital radiography",
       "category": "Intraoral X-Ray",
       "image": "/images/treatments/digital-radiography.jpg",
-      "whatItIs": "Next-generation intraoral digital sensors that take instant, high-magnification radiographs of individual teeth right by your dental chair.",
-      "howItWorks": "A miniature rounded sensor rests gently beside the target tooth, immediately capturing high-definition radiographs directly onto the display.",
-      "benefits": "No waiting for film chemicals, instant magnification to detect micro-decay between tight teeth, and 90% lower radiation.",
-      "procedure": [
-        "Placing a comfortable cushioned sensor inside mouth.",
-        "Instant 1-second exposure.",
-        "Magnified review on high-definition chairside monitor.",
-        "Doctor explains findings in plain language."
-      ],
-      "result": "Pinpoint detection of early interdental cavities, defective margins, and bone levels.",
-      "whatIfNotDone": "Hidden cavities between teeth cannot be seen visually and will continue expanding silently into the inner tooth nerve.",
       "paragraphs": [
         "Next-generation chairside digital intraoral sensors transmitting instant crystal-clear radiographs directly to high-definition screens.",
         "Enables instant diagnosis during consultation with unmatched diagnostic precision and minimal patient wait time."
@@ -421,21 +373,9 @@
     },
     {
       "id": "computed-tomography",
-      "title": "Computed Tomography (3D CBCT)",
-      "subtitle": "3D Cone Beam Volumetric Imaging",
+      "title": "Computed tomography",
       "category": "3D CBCT Scans",
       "image": "/images/treatments/computed-tomography.jpg",
-      "whatItIs": "Advanced 3D CBCT dental imaging producing millimeter-accurate three-dimensional digital models of teeth, jaw bones, sinuses, and nerves.",
-      "howItWorks": "An open rotating scanner captures volumetric slices in under 15 seconds, assembling a full interactive 3D anatomical model.",
-      "benefits": "Guarantees 100% predictable implant placement, safe wisdom tooth surgeries, and micro-endodontic root canal treatments.",
-      "procedure": [
-        "Standing or sitting comfortably in an open, non-claustrophobic unit.",
-        "Quick 15-second 3D rotation.",
-        "Computerized volumetric 3D reconstruction.",
-        "Interactive virtual treatment simulation with surgeon."
-      ],
-      "result": "Complete 3D anatomical visualization ensuring treatments are safe, minimally invasive, and painless.",
-      "whatIfNotDone": "Performing surgical implants or extractions without 3D planning risks nerve injury, sinus perforation, and unpredictable outcomes.",
       "paragraphs": [
         "Computed tomography is a fast, painless, and precise procedure that creates a 3D image of the teeth, jaw, and tissues.",
         "It helps assess bone structures, detect hidden pathologies, and plan treatment with accuracy. With minimal radiation, it is safe even for frequent use."
@@ -445,21 +385,9 @@
     },
     {
       "id": "occlusal-analysis",
-      "title": "Occlusal Analysis",
-      "subtitle": "Computerized Digital Bite Force Dynamics",
+      "title": "Occlusal analysis",
       "category": "Bite & TMJ",
       "image": "/images/treatments/occlusal-analysis.jpg",
-      "whatItIs": "A digital computerized analysis measuring how your upper and lower teeth contact during chewing, biting, and resting.",
-      "howItWorks": "You bite down on an ultra-thin digital pressure sensor wand that maps bite forces and micro-second contact timing in color-coded 2D and 3D.",
-      "benefits": "Identifies destructive bite imbalances, relieves chronic TMJ jaw pain and headaches, and ensures long-lasting veneers and implants.",
-      "procedure": [
-        "Placing the thin digital sensor between your teeth.",
-        "Performing natural chewing and tapping motions.",
-        "Real-time digital mapping of excessive bite pressure.",
-        "Micro-equilibration to evenly balance bite forces."
-      ],
-      "result": "A harmonious, strain-free bite that relieves jaw joint stress and protects restorations from fracture.",
-      "whatIfNotDone": "Unbalanced bite forces cause cracked teeth, broken crowns, worn enamel, and chronic jaw clenching pain.",
       "paragraphs": [
         "Digital computerized evaluation of bite forces, tooth contact dynamics, and jaw joint movement using high-precision sensor wands.",
         "Identifies destructive chewing imbalances, relieves TMJ strain, and guarantees the lasting stability of veneers, crowns, and implants."
@@ -469,21 +397,9 @@
     },
     {
       "id": "fluorescence-diagnostics",
-      "title": "Fluorescence Diagnostics",
-      "subtitle": "Laser Optical Enamel Caries Detection",
+      "title": "Fluorescence diagnostics",
       "category": "Caries Detection",
       "image": "/images/treatments/fluorescence-diagnostics.jpg",
-      "whatItIs": "A completely pain-free optical laser device that scans tooth enamel to detect early demineralization long before a cavity hole forms.",
-      "howItWorks": "Different wavelengths of light illuminate enamel surfaces, causing bacterial decay to fluoresce and alerting the clinician to sub-surface spots.",
-      "benefits": "Allows micro-preventative fluoride remineralization treatments that can heal teeth and prevent the need for drilling or fillings.",
-      "procedure": [
-        "Painless optical light wand swept over tooth grooves.",
-        "Instant digital numeric readout of enamel density.",
-        "Identification of early demineralization areas.",
-        "Application of preventive remineralization varnish."
-      ],
-      "result": "Earliest possible discovery of decay, preserving 100% of your natural healthy tooth structure.",
-      "whatIfNotDone": "Undetected micro-decay expands silently beneath enamel, eventually turning into deep cavities requiring restorative fillings.",
       "paragraphs": [
         "Optical fluorescence wavelength diagnostics illuminating dental enamel to expose hidden subsurface caries and early demineralization.",
         "Allows for biological tooth preservation and non-invasive micro-interventions long before traditional drilling would be required."
@@ -493,21 +409,9 @@
     },
     {
       "id": "bacteriological-analysis",
-      "title": "Bacteriological Analysis",
-      "subtitle": "Oral Microbiome & Pathogen Biofilm Profiling",
+      "title": "Bacteriological analysis",
       "category": "Microbiology",
       "image": "/images/treatments/digital-radiography.jpg",
-      "whatItIs": "A specialized laboratory test analyzing the bacterial strains present in your saliva and gum pockets to pinpoint aggressive periodontal pathogens.",
-      "howItWorks": "A gentle paper point sample is collected from the gumline and processed with molecular DNA profiling to identify specific bacteria.",
-      "benefits": "Enables targeted, biocompatible antiseptic therapies tailored to your specific oral microbiome rather than guesswork.",
-      "procedure": [
-        "Painless collection of sample with sterile paper point.",
-        "Molecular DNA testing for periodontal pathogens.",
-        "Detailed laboratory report on bacterial strain resistance.",
-        "Targeted clinical therapy prescribed for permanent control."
-      ],
-      "result": "Long-term control of harmful bacteria, safeguarding natural teeth and dental implant integration.",
-      "whatIfNotDone": "Persistent aggressive bacterial colonies remain untreated, causing recurrent gum infections and potential implant failure.",
       "paragraphs": [
         "Specialized laboratory testing of the oral microbiome to detect specific anaerobic periodontal pathogens and establish biological susceptibility profiles.",
         "Guides targeted, biocompatible antibacterial treatments to eliminate persistent infection and safeguard long-term implant integration."

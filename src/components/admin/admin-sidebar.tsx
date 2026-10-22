@@ -19,6 +19,7 @@ import {
   Star,
   Database,
   Users,
+  HelpCircle,
 } from "lucide-react";
 import { useClinicTheme } from "@/components/theme/clinic-theme-provider";
 import { ClinicLogo } from "@/components/ui/clinic-logo";
@@ -85,6 +86,12 @@ export function AdminSidebar() {
       name: "Analytics & Funnel",
       href: "/admin/analytics",
       icon: BarChart3,
+    },
+    {
+      name: "FAQs Management",
+      href: "/admin/faqs",
+      icon: HelpCircle,
+      badge: "Live",
     },
     {
       name: "Database",
