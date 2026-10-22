@@ -82,8 +82,8 @@ export function FaqSection({
   const pathname = usePathname();
   const [openId, setOpenId] = useState<string | null>(null);
 
-  // If this section is loaded in public layout and user is already on /faq, don't duplicate
-  if (hideOnFaqPage && pathname === "/faq") {
+  // If on /contact or /faq, hide this section
+  if (pathname === "/contact" || (hideOnFaqPage && pathname === "/faq")) {
     return null;
   }
 

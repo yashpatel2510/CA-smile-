@@ -12,11 +12,18 @@ import {
   ShieldCheck,
   ArrowUpRight,
 } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useClinicTheme } from "@/components/theme/clinic-theme-provider";
 import { ClinicLogo } from "@/components/ui/clinic-logo";
 
 export function Footer() {
+  const pathname = usePathname();
   const { currentTheme, brandConfig } = useClinicTheme();
+
+  // Hide footer on contact page per user request
+  if (pathname === "/contact") {
+    return null;
+  }
 
   return (
     <footer className="border-t border-brand-border bg-brand-surface text-brand-text transition-colors">

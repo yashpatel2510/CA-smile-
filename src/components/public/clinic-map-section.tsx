@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useClinicTheme } from "@/components/theme/clinic-theme-provider";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,7 +24,13 @@ export function ClinicMapSection({
   showTitle = true,
   className = "",
 }: ClinicMapSectionProps) {
+  const pathname = usePathname();
   const { brandConfig, currentTheme } = useClinicTheme();
+
+  // Hide on contact page per user request
+  if (pathname === "/contact") {
+    return null;
+  }
 
   const lat = brandConfig.latitude ?? 10.01586;
   const lng = brandConfig.longitude ?? 76.34186;

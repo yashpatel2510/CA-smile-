@@ -18,8 +18,8 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <main className="min-h-screen bg-[#0c0d0f] py-8 sm:py-14">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <main className="min-h-[calc(100vh-80px)] bg-[#0c0d0f] py-3 sm:py-5 lg:py-6 flex flex-col justify-center">
+      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
         <CalendarBookingExperience />
       </div>
     </main>

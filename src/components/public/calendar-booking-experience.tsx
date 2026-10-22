@@ -8,7 +8,6 @@ import {
   User,
   Phone,
   Mail,
-  Sparkles,
   ChevronLeft,
   ChevronRight,
   ArrowRight,
@@ -16,9 +15,9 @@ import {
   CheckCircle2,
   PhoneCall,
   ArrowUp,
-  FileText,
   AlertCircle,
   ChevronDown,
+  RefreshCw,
 } from "lucide-react";
 import { useClinicTheme } from "@/components/theme/clinic-theme-provider";
 import {
@@ -50,6 +49,12 @@ const MONTH_NAMES = [
 
 const DAY_NAMES = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
+const DEFAULT_TIME_RANGES = [
+  "Morning (9:30 AM - 1:00 PM)",
+  "Afternoon (2:00 PM - 5:00 PM)",
+  "Evening (5:00 PM - 7:30 PM)",
+];
+
 export function CalendarBookingExperience({
   initialService,
   onSuccess,
@@ -61,7 +66,7 @@ export function CalendarBookingExperience({
     defaultBookingFormConfig
   );
 
-  // Booking Flow Steps: 1 = Calendar & Slot, 2 = Patient Details, 3 = Confirmation
+  // Booking Flow Steps: 1 = Calendar & Slot, 2 = Image 2 Form Design, 3 = Confirmation
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
   // Today's date reference at midnight
@@ -75,22 +80,29 @@ export function CalendarBookingExperience({
     new Date(todayMidnight.getFullYear(), todayMidnight.getMonth(), 1)
   );
 
-  // Selected date & slot
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+  // Default initial selected date: tomorrow
+  const defaultDate = useMemo(() => {
+    const t = new Date();
+    t.setDate(t.getDate() + 1);
+    t.setHours(0, 0, 0, 0);
+    return t;
+  }, []);
 
-  // Patient Details form fields
+  // Selected date & slot (pre-selected to tomorrow and morning for instant usability)
+  const [selectedDate, setSelectedDate] = useState<Date | null>(defaultDate);
+  const [selectedSlot, setSelectedSlot] = useState<string | null>(
+    DEFAULT_TIME_RANGES[0]
+  );
+
+  // Patient Details form fields (matching Image 2)
   const [fullName, setFullName] = useState("");
-  const [countryCode, setCountryCode] = useState("+91");
-  const [mobileNumber, setMobileNumber] = useState("");
+  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [treatment, setTreatment] = useState(initialService || "");
-  const [doctorPreference, setDoctorPreference] = useState("Any Available Specialist");
-  const [additionalMessage, setAdditionalMessage] = useState("");
+  const [preferredTime, setPreferredTime] = useState(DEFAULT_TIME_RANGES[0]);
+  const [doctorPreference, setDoctorPreference] = useState(
+    "Doctor Preference: Any Available Specialist"
+  );
   const [consentAgreed, setConsentAgreed] = useState(true);
-  const [customFieldValues, setCustomFieldValues] = useState<
-    Record<string, string>
-  >({});
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -98,10 +110,10 @@ export function CalendarBookingExperience({
   // Confirmation result
   const [confirmedData, setConfirmedData] = useState<{
     id: string;
+    patientName: string;
     dateFormatted: string;
     slot: string;
-    email: string;
-    treatment: string;
+    doctor: string;
   } | null>(null);
 
   // Fetch admin booking form configuration
@@ -111,15 +123,23 @@ export function CalendarBookingExperience({
       .then((data) => {
         if (data?.success && data?.config) {
           setConfig(data.config);
-          if (!treatment && data.config.treatments?.length > 0) {
-            setTreatment(data.config.treatments[0]);
+          if (data.config.timeSlots && data.config.timeSlots.length > 0) {
+            setSelectedSlot(data.config.timeSlots[0]);
+            setPreferredTime(data.config.timeSlots[0]);
           }
         }
       })
       .catch((err) => {
         console.warn("Could not load dynamic booking configuration:", err);
       });
-  }, [treatment]);
+  }, []);
+
+  // Sync selected slot with preferred time dropdown
+  useEffect(() => {
+    if (selectedSlot) {
+      setPreferredTime(selectedSlot);
+    }
+  }, [selectedSlot]);
 
   // Calendar dates computation
   const year = viewDate.getFullYear();
@@ -188,18 +208,13 @@ export function CalendarBookingExperience({
     return `${days[selectedDate.getDay()]}, ${months[selectedDate.getMonth()]} ${selectedDate.getDate()}`;
   }, [selectedDate]);
 
-  const selectedDateLongString = useMemo(() => {
+  // Date format DD/MM/YYYY matching Image 2
+  const dateFormattedSlash = useMemo(() => {
     if (!selectedDate) return "";
-    const fullDays = [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-    ];
-    return `${fullDays[selectedDate.getDay()]}, ${MONTH_NAMES[selectedDate.getMonth()]} ${selectedDate.getDate()}, ${selectedDate.getFullYear()}`;
+    const dd = String(selectedDate.getDate()).padStart(2, "0");
+    const mm = String(selectedDate.getMonth() + 1).padStart(2, "0");
+    const yyyy = selectedDate.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
   }, [selectedDate]);
 
   // Available Slots
@@ -207,35 +222,7 @@ export function CalendarBookingExperience({
     if (config?.timeSlots && config.timeSlots.length > 0) {
       return config.timeSlots;
     }
-    return [
-      "9:00 AM",
-      "10:00 AM",
-      "11:00 AM",
-      "1:00 PM",
-      "2:00 PM",
-      "3:00 PM",
-      "4:00 PM",
-      "5:00 PM",
-      "6:00 PM",
-      "7:00 PM",
-    ];
-  }, [config]);
-
-  // Treatments
-  const treatmentsList = useMemo(() => {
-    if (config?.treatments && config.treatments.length > 0) {
-      return config.treatments;
-    }
-    return [
-      "General Dental Consultation",
-      "Pediatric Dentistry & Child Care",
-      "Dental Implants & Restoration",
-      "Orthodontics & Clear Aligners",
-      "Root Canal Treatment",
-      "Teeth Cleaning & Scaling",
-      "Teeth Whitening & Aesthetics",
-      "Emergency Toothache Relief",
-    ];
+    return DEFAULT_TIME_RANGES;
   }, [config]);
 
   const handleContinueToDetails = () => {
@@ -265,9 +252,14 @@ export function CalendarBookingExperience({
       return;
     }
 
-    const cleanMobile = mobileNumber.replace(/\D/g, "");
-    if (cleanMobile.length < 7) {
-      setErrorMsg("Please enter a valid phone number.");
+    const cleanMobile = phone.replace(/\D/g, "");
+    if (cleanMobile.length < 10) {
+      setErrorMsg("Please enter a valid 10-digit mobile number.");
+      return;
+    }
+
+    if (!email.trim() || !email.includes("@")) {
+      setErrorMsg("Please enter a valid email address.");
       return;
     }
 
@@ -296,40 +288,24 @@ export function CalendarBookingExperience({
           ).toISOString()
         : new Date().toISOString();
 
-      const chosenTreatment = treatment || treatmentsList[0];
-
-      // Custom fields in notes
-      const customNotesArr = Object.entries(customFieldValues)
-        .filter(([_, val]) => Boolean(val && val.trim()))
-        .map(([k, val]) => {
-          const matchingField = config.fields.find((f) => f.id === k);
-          return `[${matchingField?.label || k}]: ${val.trim()}`;
-        });
-
-      const allNotes = [
-        `Doctor: ${doctorPreference}`,
-        additionalMessage.trim(),
-        ...customNotesArr,
-      ]
-        .filter(Boolean)
-        .join(" | ");
+      const chosenDoctor = doctorPreference.replace(/^Doctor Preference:\s*/, "");
+      const chosenTime = preferredTime.replace(/^Preferred Time:\s*/, "");
 
       const payload = {
         patientType: "ADULT",
         fullName: fullName.trim(),
         firstName: fName,
         lastName: lName,
-        phone: `${countryCode} ${mobileNumber.trim()}`,
-        email: email.trim() || undefined,
-        treatment: chosenTreatment,
-        serviceName: chosenTreatment,
-        reason: chosenTreatment,
-        preferredDoctor: doctorPreference,
+        phone: cleanMobile,
+        email: email.trim(),
+        treatment: initialService || "General Dental Consultation",
+        serviceName: initialService || "General Dental Consultation",
+        reason: initialService || "General Dental Consultation",
+        preferredDoctor: chosenDoctor,
         preferredDate: selectedDate?.toISOString().split("T")[0],
-        timeRange: selectedSlot,
+        timeRange: chosenTime,
         startTime: formattedIsoDate,
-        notes: allNotes || undefined,
-        customFields: customFieldValues,
+        notes: `Doctor Preference: ${chosenDoctor} | Preferred Time: ${chosenTime}`,
         consentAgreed: true,
         source: "WEB_FORM",
       };
@@ -350,10 +326,10 @@ export function CalendarBookingExperience({
 
       setConfirmedData({
         id: appointmentId,
-        dateFormatted: selectedDateLongString,
-        slot: selectedSlot || "Confirmed Slot",
-        email: email.trim() || "Not provided",
-        treatment: chosenTreatment,
+        patientName: fullName.trim(),
+        dateFormatted: dateFormattedSlash || selectedDateShortString,
+        slot: chosenTime,
+        doctor: chosenDoctor,
       });
 
       trackBookingFunnel(4, "appointment_confirmed");
@@ -375,105 +351,102 @@ export function CalendarBookingExperience({
     setStep(1);
     setConfirmedData(null);
     setFullName("");
-    setMobileNumber("");
+    setPhone("");
     setEmail("");
-    setAdditionalMessage("");
     setErrorMsg(null);
   };
 
-  // Dynamic clinic details with fallback matching reference image
+  // Dynamic clinic details with fallback matching reference
   const clinicAddress =
     brandConfig?.address
-      ? `${brandConfig.address}${brandConfig.city ? `, ${brandConfig.city}` : ""}`
-      : "5670 Greenwood Plaza Blvd Suite 404, Greenwood Village, CO 80111";
+      ? `${brandConfig.address}${brandConfig.city ? `, ${brandConfig.city}` : ""}${brandConfig.postalCode ? ` ${brandConfig.postalCode}` : ""}`
+      : "742 Evergreen Medical Way, Suite 400, Springfield 97477";
 
-  const clinicPhone = brandConfig?.phone || "(720) 620-5348";
-  const clinicEmail = brandConfig?.email || "info@brightdental.com";
+  const clinicPhone = brandConfig?.phone || "(800) 555-CLINIC";
+  const clinicEmail = brandConfig?.email || "contact@pediodent.example.com";
 
   return (
     <div className="relative w-full overflow-hidden text-white">
-      {/* Outer Card Container Matching Reference Dribbble Mock */}
-      <div className="overflow-hidden rounded-[28px] sm:rounded-[36px] border border-white/10 bg-[#111215] shadow-2xl">
-        <div className="grid grid-cols-1 lg:grid-cols-12">
+      {/* Outer Card: Compact styling so the whole section fits inside one screen properly */}
+      <div className="overflow-hidden rounded-[24px] sm:rounded-[32px] border border-white/10 bg-[#111215] shadow-2xl">
+        <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch">
           
           {/* =================================================================== */}
           {/* LEFT COLUMN: "Let's Make That Smile Shine!" + Contact Us + "brighter" */}
           {/* =================================================================== */}
-          <div className="flex flex-col justify-between border-b border-white/10 bg-[#0e0f12] p-6 sm:p-8 lg:col-span-5 lg:border-b-0 lg:border-r lg:border-white/10 lg:p-10">
-            <div className="space-y-6">
-              {/* Main Elegant Headline */}
-              <div>
-                <h2 className="font-heading text-3xl sm:text-4xl lg:text-[2.75rem] font-bold text-white tracking-tight leading-[1.08]">
-                  Let&apos;s Make That<br />
-                  <span className="text-white">Smile Shine!</span>
-                </h2>
+          <div className="flex flex-col justify-between border-b border-white/10 bg-[#0e0f12] p-5 sm:p-6 lg:p-8 lg:col-span-5 lg:border-b-0 lg:border-r lg:border-white/10">
+            <div>
+              {/* Main Headline */}
+              <h2 className="font-heading text-2xl sm:text-3xl lg:text-[2.35rem] font-bold text-white tracking-tight leading-[1.1]">
+                Let&apos;s Make That<br />
+                <span className="text-white">Smile Shine!</span>
+              </h2>
 
-                {/* Contact Us Block */}
-                <div className="mt-6 sm:mt-8 space-y-2 text-xs sm:text-sm text-zinc-400">
-                  <p className="font-semibold text-white/90 text-xs tracking-wider uppercase">
-                    Contact Us
-                  </p>
-                  <p className="leading-relaxed max-w-xs text-zinc-400">
-                    {clinicAddress}
-                  </p>
-                  <p className="pt-1 font-mono text-zinc-300">
-                    <a href={`tel:${clinicPhone.replace(/\D/g, "")}`} className="hover:text-white transition-colors">
-                      {clinicPhone}
-                    </a>
-                  </p>
-                  <p className="text-zinc-400">
-                    <a href={`mailto:${clinicEmail}`} className="hover:text-white transition-colors">
-                      {clinicEmail}
-                    </a>
-                  </p>
-                </div>
+              {/* Contact Us Block */}
+              <div className="mt-4 sm:mt-5 space-y-1.5 text-xs text-zinc-400">
+                <p className="font-semibold text-white/90 text-xs tracking-wider uppercase">
+                  Contact Us
+                </p>
+                <p className="leading-relaxed max-w-xs text-zinc-400">
+                  {clinicAddress}
+                </p>
+                <p className="pt-0.5 font-mono text-zinc-300">
+                  <a href={`tel:${clinicPhone.replace(/\D/g, "")}`} className="hover:text-white transition-colors">
+                    {clinicPhone}
+                  </a>
+                </p>
+                <p className="text-zinc-400">
+                  <a href={`mailto:${clinicEmail}`} className="hover:text-white transition-colors">
+                    {clinicEmail}
+                  </a>
+                </p>
               </div>
 
               {/* Selected Summary Pills */}
-              <div className="space-y-3 pt-2">
+              <div className="space-y-2 pt-3">
                 {/* DATE PILL */}
                 <div
-                  className={`rounded-2xl border p-3.5 sm:p-4 transition-all ${
+                  className={`rounded-xl border p-2.5 sm:p-3 transition-all ${
                     selectedDate
-                      ? "border-white/30 bg-[#1d1e24] shadow-md"
-                      : "border-white/5 bg-[#16171b]"
+                      ? "border-white/20 bg-[#1c1d22]"
+                      : "border-white/5 bg-[#151619]"
                   }`}
                 >
                   <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
                     SELECTED DATE
                   </div>
-                  <div className="mt-1 flex items-center gap-2 text-xs sm:text-sm font-semibold text-white">
-                    <CalendarIcon className="h-4 w-4 text-zinc-300" />
+                  <div className="mt-0.5 flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-white">
+                    <CalendarIcon className="h-3.5 w-3.5 text-zinc-300" />
                     <span>{selectedDateShortString}</span>
                   </div>
                 </div>
 
                 {/* TIME SLOT PILL */}
                 <div
-                  className={`rounded-2xl border p-3.5 sm:p-4 transition-all ${
+                  className={`rounded-xl border p-2.5 sm:p-3 transition-all ${
                     selectedSlot
-                      ? "border-white/30 bg-[#1d1e24] shadow-md"
-                      : "border-white/5 bg-[#16171b]"
+                      ? "border-white/20 bg-[#1c1d22]"
+                      : "border-white/5 bg-[#151619]"
                   }`}
                 >
                   <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
                     TIME SLOT
                   </div>
-                  <div className="mt-1 flex items-center gap-2 text-xs sm:text-sm font-semibold text-white">
-                    <Clock className="h-4 w-4 text-zinc-300" />
-                    <span>{selectedSlot || "Select a time"}</span>
+                  <div className="mt-0.5 flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-white">
+                    <Clock className="h-3.5 w-3.5 text-zinc-300" />
+                    <span className="truncate">{selectedSlot || "Select a time"}</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Bottom: Massive "brighter" typography + Follow Us */}
-            <div className="mt-8 sm:mt-12 pt-4">
-              <div className="select-none font-sans text-6xl sm:text-7xl lg:text-[6.5rem] font-black tracking-tight text-white/95 leading-none mb-6">
+            {/* Bottom: "brighter" typography + Follow Us */}
+            <div className="mt-5 sm:mt-6 pt-2">
+              <div className="select-none font-sans text-5xl sm:text-6xl lg:text-[4.75rem] font-black tracking-tight text-white/95 leading-none mb-3">
                 brighter
               </div>
 
-              <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-400 font-medium">
+              <div className="flex flex-wrap items-center gap-2 text-[11px] text-zinc-400 font-medium">
                 <span className="text-zinc-300 font-semibold">Follow Us:</span>
                 <a
                   href="https://facebook.com"
@@ -506,284 +479,244 @@ export function CalendarBookingExperience({
           </div>
 
           {/* =================================================================== */}
-          {/* RIGHT COLUMN: "Book Your Appointment" Dark Elevated Card           */}
+          {/* RIGHT COLUMN: STEP 1 (Calendar) or STEP 2 (Image 2 Form Design)     */}
           {/* =================================================================== */}
-          <div className="bg-[#18181c] p-6 sm:p-8 lg:col-span-7 lg:p-10">
-            {/* Error Alert */}
-            {errorMsg && (
-              <div className="mb-6 flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 p-3.5 text-xs text-red-300">
-                <AlertCircle className="h-4 w-4 shrink-0 text-red-400" />
-                <span>{errorMsg}</span>
-              </div>
-            )}
-
-            {/* ----------------------------------------------------------------- */}
-            {/* STEP 1: INTERACTIVE REAL-TIME CALENDAR & SLOTS                    */}
-            {/* ----------------------------------------------------------------- */}
-            {step === 1 && (
-              <div className="space-y-6">
-                <h3 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-white">
-                  Book Your Appointment
-                </h3>
-
-                {/* Month & Year Navigation Header */}
-                <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                  <h4 className="font-heading text-base sm:text-lg font-bold text-white">
-                    {MONTH_NAMES[month]} {year}
-                  </h4>
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      onClick={handlePrevMonth}
-                      disabled={!isCanPrevMonth}
-                      className={`flex h-8 w-8 items-center justify-center rounded-lg border transition-colors ${
-                        !isCanPrevMonth
-                          ? "border-white/5 text-zinc-600 opacity-40 cursor-not-allowed select-none"
-                          : "border-white/10 bg-[#222227] text-white hover:bg-[#2c2c34] active:scale-95 cursor-pointer"
-                      }`}
-                      aria-label="Previous Month"
-                      title={!isCanPrevMonth ? "Cannot view past months" : "Previous Month"}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleNextMonth}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-[#222227] text-white hover:bg-[#2c2c34] active:scale-95 cursor-pointer transition-colors"
-                      aria-label="Next Month"
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </button>
-                  </div>
+          <div className="bg-[#18181c] p-5 sm:p-6 lg:p-8 lg:col-span-7 flex flex-col justify-between">
+            <div>
+              {/* Error Alert */}
+              {errorMsg && (
+                <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 p-2.5 text-xs text-red-300">
+                  <AlertCircle className="h-4 w-4 shrink-0 text-red-400" />
+                  <span>{errorMsg}</span>
                 </div>
+              )}
 
-                {/* Days of week header */}
-                <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-bold tracking-wider text-zinc-500">
-                  {DAY_NAMES.map((d) => (
-                    <div key={d} className="py-1">
-                      {d}
-                    </div>
-                  ))}
-                </div>
+              {/* ----------------------------------------------------------------- */}
+              {/* STEP 1: COMPACT CALENDAR & TIME SLOTS (Fits screen cleanly)       */}
+              {/* ----------------------------------------------------------------- */}
+              {step === 1 && (
+                <div className="space-y-4">
+                  <h3 className="font-heading text-lg sm:text-xl font-bold tracking-tight text-white">
+                    Book Your Appointment
+                  </h3>
 
-                {/* Calendar Days Grid */}
-                <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
-                  {/* Empty offset days */}
-                  {Array.from({ length: firstDayOfWeek }).map((_, i) => (
-                    <div key={`empty-${i}`} className="h-10 sm:h-12" />
-                  ))}
-
-                  {/* Month days */}
-                  {Array.from({ length: daysInMonth }).map((_, i) => {
-                    const day = i + 1;
-                    const dateObj = new Date(year, month, day);
-                    dateObj.setHours(0, 0, 0, 0);
-
-                    const isPast = dateObj < todayMidnight;
-                    const isToday =
-                      dateObj.toDateString() === todayMidnight.toDateString();
-                    const isSelected =
-                      selectedDate &&
-                      dateObj.toDateString() === selectedDate.toDateString();
-
-                    return (
+                  {/* Month & Year Navigation Header */}
+                  <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                    <h4 className="font-heading text-sm sm:text-base font-bold text-white">
+                      {MONTH_NAMES[month]} {year}
+                    </h4>
+                    <div className="flex items-center gap-1.5">
                       <button
-                        key={day}
                         type="button"
-                        disabled={isPast}
-                        onClick={() => handleSelectDate(day)}
-                        className={`group relative flex h-10 sm:h-12 items-center justify-center rounded-xl text-xs sm:text-sm font-semibold transition-all ${
-                          isPast
-                            ? "cursor-not-allowed text-zinc-600 bg-transparent select-none opacity-40"
-                            : isSelected
-                            ? "border-2 border-white bg-white text-black font-extrabold shadow-lg scale-[1.03]"
-                            : isToday
-                            ? "border border-white/20 bg-[#25252c] text-white hover:bg-[#2d2d36]"
-                            : "border border-white/5 bg-[#202025] text-zinc-300 hover:border-white/15 hover:bg-[#27272f]"
+                        onClick={handlePrevMonth}
+                        disabled={!isCanPrevMonth}
+                        className={`flex h-7 w-7 items-center justify-center rounded-lg border transition-colors ${
+                          !isCanPrevMonth
+                            ? "border-white/5 text-zinc-600 opacity-40 cursor-not-allowed select-none"
+                            : "border-white/10 bg-[#222227] text-white hover:bg-[#2c2c34] active:scale-95 cursor-pointer"
                         }`}
+                        aria-label="Previous Month"
+                        title={!isCanPrevMonth ? "Cannot view past months" : "Previous Month"}
                       >
-                        <span>{day}</span>
-                        {isToday && !isSelected && (
-                          <span className="absolute bottom-1.5 h-1 w-1 rounded-full bg-white" />
-                        )}
+                        <ChevronLeft className="h-3.5 w-3.5" />
                       </button>
-                    );
-                  })}
-                </div>
-
-                {/* Available Time Slots Header & Grid */}
-                <div className="space-y-3 pt-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold tracking-wider text-zinc-400 uppercase">
-                      Available Time Slots
-                    </span>
-                    {selectedDate && (
-                      <span className="text-xs text-zinc-400">
-                        For <strong className="text-white">{selectedDateShortString}</strong>
-                      </span>
-                    )}
+                      <button
+                        type="button"
+                        onClick={handleNextMonth}
+                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-[#222227] text-white hover:bg-[#2c2c34] active:scale-95 cursor-pointer transition-colors"
+                        aria-label="Next Month"
+                      >
+                        <ChevronRight className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                    {availableSlots.map((slot) => {
-                      const isSlotSelected = selectedSlot === slot;
+                  {/* Days of week header */}
+                  <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold tracking-wider text-zinc-500">
+                    {DAY_NAMES.map((d) => (
+                      <div key={d} className="py-0.5">
+                        {d}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Calendar Days Grid: Compact h-8 / h-8.5 */}
+                  <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
+                    {/* Empty offset days */}
+                    {Array.from({ length: firstDayOfWeek }).map((_, i) => (
+                      <div key={`empty-${i}`} className="h-8 sm:h-8.5" />
+                    ))}
+
+                    {/* Month days */}
+                    {Array.from({ length: daysInMonth }).map((_, i) => {
+                      const day = i + 1;
+                      const dateObj = new Date(year, month, day);
+                      dateObj.setHours(0, 0, 0, 0);
+
+                      const isPast = dateObj < todayMidnight;
+                      const isToday =
+                        dateObj.toDateString() === todayMidnight.toDateString();
+                      const isSelected =
+                        selectedDate &&
+                        dateObj.toDateString() === selectedDate.toDateString();
+
                       return (
                         <button
-                          key={slot}
+                          key={day}
                           type="button"
-                          onClick={() => {
-                            setSelectedSlot(slot);
-                            setErrorMsg(null);
-                          }}
-                          className={`rounded-xl border py-2.5 px-3 text-center text-xs transition-all cursor-pointer ${
-                            isSlotSelected
-                              ? "border-2 border-white bg-white font-extrabold text-black shadow-md"
-                              : "border-white/5 bg-[#202025] text-zinc-300 hover:border-white/15 hover:bg-[#26262d]"
+                          disabled={isPast}
+                          onClick={() => handleSelectDate(day)}
+                          className={`group relative flex h-8 sm:h-8.5 items-center justify-center rounded-lg text-xs font-semibold transition-all ${
+                            isPast
+                              ? "cursor-not-allowed text-zinc-600 bg-transparent select-none opacity-30"
+                              : isSelected
+                              ? "border-2 border-white bg-white text-black font-extrabold shadow-md scale-[1.04]"
+                              : isToday
+                              ? "border border-white/20 bg-[#25252c] text-white hover:bg-[#2d2d36]"
+                              : "border border-white/5 bg-[#202025] text-zinc-300 hover:border-white/15 hover:bg-[#27272f]"
                           }`}
                         >
-                          {slot}
+                          <span>{day}</span>
+                          {isToday && !isSelected && (
+                            <span className="absolute bottom-1 h-1 w-1 rounded-full bg-white" />
+                          )}
                         </button>
                       );
                     })}
                   </div>
-                </div>
 
-                {/* Continue Action Button matching navbar button in small size */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-4 border-t border-white/10">
-                  <div className="text-xs text-zinc-400">
-                    {!selectedDate ? (
-                      <span className="inline-flex items-center gap-1.5 text-zinc-400">
-                        <span className="inline-block h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
-                        Step 1: Pick a date on the calendar
+                  {/* Available Time Slots Header & Grid */}
+                  <div className="space-y-2 pt-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="font-semibold tracking-wider text-zinc-400 uppercase">
+                        Available Time Slots
                       </span>
-                    ) : !selectedSlot ? (
-                      <span className="inline-flex items-center gap-1.5 text-zinc-400">
-                        <span className="inline-block h-2 w-2 rounded-full bg-blue-400 animate-pulse" />
-                        Step 2: Choose a time slot for {selectedDateShortString}
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1.5 text-emerald-400 font-semibold">
-                        <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                        Selected: {selectedDateShortString} at {selectedSlot}
-                      </span>
-                    )}
+                      {selectedDate && (
+                        <span className="text-zinc-400">
+                          For <strong className="text-white">{selectedDateShortString}</strong>
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      {availableSlots.map((slot) => {
+                        const isSlotSelected = selectedSlot === slot;
+                        return (
+                          <button
+                            key={slot}
+                            type="button"
+                            onClick={() => {
+                              setSelectedSlot(slot);
+                              setErrorMsg(null);
+                            }}
+                            className={`rounded-lg border py-2 px-2 text-center text-xs transition-all cursor-pointer truncate ${
+                              isSlotSelected
+                                ? "border-2 border-white bg-white font-bold text-black shadow-sm"
+                                : "border-white/5 bg-[#202025] text-zinc-300 hover:border-white/15 hover:bg-[#26262d]"
+                            }`}
+                          >
+                            {slot}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-
-                  {/* Button matching navbar button in small size */}
-                  <BookNowButton
-                    type="button"
-                    onClick={handleContinueToDetails}
-                    size="sm"
-                    text="Continue"
-                    disabled={!selectedDate || !selectedSlot}
-                  />
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* ----------------------------------------------------------------- */}
-            {/* STEP 2: PATIENT DETAILS FORM (MATCHING DRIBBLE INPUT STYLING)     */}
-            {/* ----------------------------------------------------------------- */}
-            {step === 2 && (
-              <form onSubmit={handleConfirmBooking} className="space-y-4">
-                {/* Back button */}
-                <button
-                  type="button"
-                  onClick={() => setStep(1)}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-400 hover:text-white transition-colors cursor-pointer"
-                >
-                  <ArrowLeft className="h-3.5 w-3.5" />
-                  <span>BACK TO CALENDAR</span>
-                </button>
-
-                <div>
-                  <h3 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-white">
+              {/* ----------------------------------------------------------------- */}
+              {/* STEP 2: EXACT IMAGE 2 FORM DESIGN                                 */}
+              {/* ----------------------------------------------------------------- */}
+              {step === 2 && (
+                <form onSubmit={handleConfirmBooking} className="space-y-3">
+                  <h3 className="font-heading text-lg sm:text-xl font-bold tracking-tight text-white mb-3">
                     Book Your Appointment
                   </h3>
-                  <p className="mt-0.5 text-xs text-zinc-400">
-                    Provide your contact details to lock in your consultation.
-                  </p>
-                </div>
 
-                <div className="space-y-3.5 pt-1">
-                  {/* Field: Full Name */}
-                  <div className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-3 flex items-center justify-between">
+                  {/* Field 1: Your Full Name */}
+                  <div className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-2.5 flex items-center justify-between">
                     <input
                       type="text"
+                      name="fullName"
                       required
                       placeholder="Your Full Name"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      className="w-full bg-transparent text-sm text-white placeholder:text-zinc-500 focus:outline-none"
+                      className="w-full bg-transparent text-xs sm:text-sm text-white placeholder:text-zinc-500 focus:outline-none"
                     />
                     <ChevronDown className="h-4 w-4 text-zinc-500 shrink-0 pointer-events-none group-hover:text-zinc-400" />
                   </div>
 
-                  {/* Field: Phone Number */}
-                  <div className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-3 flex items-center justify-between">
-                    <div className="flex items-center gap-2 w-full">
-                      <select
-                        value={countryCode}
-                        onChange={(e) => setCountryCode(e.target.value)}
-                        className="bg-transparent text-xs sm:text-sm font-semibold text-zinc-300 focus:outline-none cursor-pointer [color-scheme:dark]"
-                      >
-                        <option value="+91" className="bg-[#222227] text-white">+91</option>
-                        <option value="+1" className="bg-[#222227] text-white">+1</option>
-                        <option value="+44" className="bg-[#222227] text-white">+44</option>
-                        <option value="+971" className="bg-[#222227] text-white">+971</option>
-                      </select>
-                      <span className="text-zinc-600">|</span>
-                      <input
-                        type="tel"
-                        required
-                        placeholder="Phone Number"
-                        value={mobileNumber}
-                        onChange={(e) => setMobileNumber(e.target.value)}
-                        className="w-full bg-transparent text-sm text-white placeholder:text-zinc-500 focus:outline-none"
-                      />
-                    </div>
+                  {/* Field 2: Phone Number */}
+                  <div className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-2.5 flex items-center justify-between">
+                    <input
+                      type="tel"
+                      name="phone"
+                      required
+                      placeholder="Phone Number"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="w-full bg-transparent text-xs sm:text-sm text-white placeholder:text-zinc-500 focus:outline-none"
+                    />
                     <ChevronDown className="h-4 w-4 text-zinc-500 shrink-0 pointer-events-none group-hover:text-zinc-400" />
                   </div>
 
-                  {/* Field: Email Address */}
-                  <div className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-3 flex items-center justify-between">
+                  {/* Field 3: Email Address */}
+                  <div className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-2.5 flex items-center justify-between">
                     <input
                       type="email"
+                      name="email"
                       required
                       placeholder="Email Address"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full bg-transparent text-sm text-white placeholder:text-zinc-500 focus:outline-none"
+                      className="w-full bg-transparent text-xs sm:text-sm text-white placeholder:text-zinc-500 focus:outline-none"
                     />
                     <ChevronDown className="h-4 w-4 text-zinc-500 shrink-0 pointer-events-none group-hover:text-zinc-400" />
                   </div>
 
-                  {/* Field: Treatment or Doctor Preference */}
-                  <div className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-3 flex items-center justify-between">
+                  {/* Field 4: Selected Date (with calendar icon on right matching Image 2) */}
+                  <div
+                    onClick={() => setStep(1)}
+                    className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] border border-white/10 transition-all px-4 py-2.5 flex items-center justify-between cursor-pointer"
+                    title="Click to change date on calendar"
+                  >
+                    <span className="text-xs sm:text-sm text-white font-medium">
+                      {dateFormattedSlash || "Select Date"}
+                    </span>
+                    <CalendarIcon className="h-4 w-4 text-zinc-400 shrink-0 pointer-events-none group-hover:text-white transition-colors" />
+                  </div>
+
+                  {/* Field 5: Preferred Time (Select dropdown matching Image 2) */}
+                  <div className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-2.5 flex items-center justify-between">
                     <select
-                      value={treatment}
-                      onChange={(e) => setTreatment(e.target.value)}
-                      aria-label="Treatment Category"
-                      className="w-full bg-transparent text-sm text-white appearance-none focus:outline-none cursor-pointer [color-scheme:dark]"
+                      value={preferredTime}
+                      onChange={(e) => setPreferredTime(e.target.value)}
+                      aria-label="Preferred Time"
+                      className="w-full bg-transparent text-xs sm:text-sm text-white appearance-none focus:outline-none cursor-pointer [color-scheme:dark]"
                     >
-                      {treatmentsList.map((t, idx) => (
-                        <option key={idx} value={t} className="bg-[#222227] text-white">
-                          Treatment: {t}
-                        </option>
-                      ))}
+                      <option value="Morning (9:30 AM - 1:00 PM)" className="bg-[#222227] text-white">
+                        Preferred Time: Morning (9:30 AM - 1:00 PM)
+                      </option>
+                      <option value="Afternoon (2:00 PM - 5:00 PM)" className="bg-[#222227] text-white">
+                        Preferred Time: Afternoon (2:00 PM - 5:00 PM)
+                      </option>
+                      <option value="Evening (5:00 PM - 7:30 PM)" className="bg-[#222227] text-white">
+                        Preferred Time: Evening (5:00 PM - 7:30 PM)
+                      </option>
                     </select>
                     <ChevronDown className="h-4 w-4 text-zinc-500 shrink-0 pointer-events-none group-hover:text-zinc-400" />
                   </div>
 
-                  {/* Field: Doctor Preference */}
-                  <div className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-3 flex items-center justify-between">
+                  {/* Field 6: Doctor Preference (Select dropdown matching Image 2) */}
+                  <div className="group relative rounded-xl bg-[#222227] hover:bg-[#26262d] focus-within:bg-[#26262d] border border-white/10 focus-within:border-white/20 transition-all px-4 py-2.5 flex items-center justify-between">
                     <select
                       value={doctorPreference}
                       onChange={(e) => setDoctorPreference(e.target.value)}
                       aria-label="Doctor Preference"
-                      className="w-full bg-transparent text-sm text-white appearance-none focus:outline-none cursor-pointer [color-scheme:dark]"
+                      className="w-full bg-transparent text-xs sm:text-sm text-white appearance-none focus:outline-none cursor-pointer [color-scheme:dark]"
                     >
-                      <option value="Any Available Specialist" className="bg-[#222227] text-white">
+                      <option value="Doctor Preference: Any Available Specialist" className="bg-[#222227] text-white">
                         Doctor Preference: Any Available Specialist
                       </option>
                       <option value="Dr. Sankar (Chief Dental Surgeon)" className="bg-[#222227] text-white">
@@ -799,8 +732,8 @@ export function CalendarBookingExperience({
                     <ChevronDown className="h-4 w-4 text-zinc-500 shrink-0 pointer-events-none group-hover:text-zinc-400" />
                   </div>
 
-                  {/* Checkbox: Agreement */}
-                  <div className="pt-1">
+                  {/* Checkbox: Agreement matching Image 2 */}
+                  <div className="pt-0.5">
                     <label className="flex items-center gap-2.5 cursor-pointer text-xs text-zinc-400 select-none group">
                       <input
                         type="checkbox"
@@ -813,82 +746,111 @@ export function CalendarBookingExperience({
                       </span>
                     </label>
                   </div>
-                </div>
 
-                {/* Submit button: navbar button in small size */}
-                <div className="pt-3 flex items-center justify-between">
-                  <BookNowButton
-                    type="submit"
-                    size="sm"
-                    text={isSubmitting ? "Confirming..." : (config.submitButtonText || "Book Now")}
-                    disabled={isSubmitting}
-                  />
+                  {/* Bottom Row: Small navbar Book Now Button + View Full Calendar link */}
+                  <div className="pt-2 flex items-center justify-between">
+                    <BookNowButton
+                      type="submit"
+                      size="sm"
+                      text={isSubmitting ? "Submitting..." : "Book Now"}
+                      disabled={isSubmitting}
+                    />
 
-                  <span className="text-xs text-zinc-500">
-                    Selected: {selectedDateShortString} ({selectedSlot})
-                  </span>
-                </div>
-              </form>
-            )}
+                    <button
+                      type="button"
+                      onClick={() => setStep(1)}
+                      className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                    >
+                      <CalendarIcon className="h-3.5 w-3.5 text-zinc-400" />
+                      <span>View Full Calendar</span>
+                    </button>
+                  </div>
+                </form>
+              )}
 
-            {/* ----------------------------------------------------------------- */}
-            {/* STEP 3: CONFIRMATION / THANK YOU STATE                            */}
-            {/* ----------------------------------------------------------------- */}
-            {step === 3 && confirmedData && (
-              <div className="space-y-6 py-4">
-                <div className="rounded-2xl border border-white/10 bg-[#222227] p-6 text-white space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                      <CheckCircle2 className="h-6 w-6" />
+              {/* ----------------------------------------------------------------- */}
+              {/* STEP 3: CONFIRMATION / THANK YOU STATE                            */}
+              {/* ----------------------------------------------------------------- */}
+              {step === 3 && confirmedData && (
+                <div className="space-y-4 py-2">
+                  <div className="rounded-2xl border border-white/10 bg-[#202025] p-5 text-white space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                        <CheckCircle2 className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h4 className="font-heading text-base sm:text-lg font-bold text-white">
+                          Appointment Confirmed!
+                        </h4>
+                        <p className="text-xs text-zinc-400">
+                          Reference: <span className="font-mono font-bold text-white">{confirmedData.id}</span>
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-heading text-lg font-bold text-white">
-                        Appointment Confirmed!
-                      </h4>
-                      <p className="text-xs text-zinc-400">
-                        Reference: <span className="font-mono font-bold text-white">{confirmedData.id}</span>
-                      </p>
+
+                    <div className="space-y-1.5 border-t border-white/10 pt-3 text-xs text-zinc-300">
+                      <div className="flex justify-between py-0.5 border-b border-white/5">
+                        <span className="text-zinc-400">Patient:</span>
+                        <span className="font-medium text-white">{confirmedData.patientName}</span>
+                      </div>
+                      <div className="flex justify-between py-0.5 border-b border-white/5">
+                        <span className="text-zinc-400">Scheduled Date:</span>
+                        <span className="font-medium text-white">{confirmedData.dateFormatted}</span>
+                      </div>
+                      <div className="flex justify-between py-0.5 border-b border-white/5">
+                        <span className="text-zinc-400">Time Window:</span>
+                        <span className="font-medium text-white">{confirmedData.slot}</span>
+                      </div>
+                      <div className="flex justify-between py-0.5">
+                        <span className="text-zinc-400">Specialist:</span>
+                        <span className="font-medium text-white">{confirmedData.doctor}</span>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="space-y-2 border-t border-white/10 pt-4 text-xs text-zinc-300">
-                    <div className="flex justify-between py-1 border-b border-white/5">
-                      <span className="text-zinc-400">Scheduled Date:</span>
-                      <span className="font-medium text-white">{confirmedData.dateFormatted}</span>
-                    </div>
-                    <div className="flex justify-between py-1 border-b border-white/5">
-                      <span className="text-zinc-400">Chair Time:</span>
-                      <span className="font-medium text-white">{confirmedData.slot}</span>
-                    </div>
-                    <div className="flex justify-between py-1 border-b border-white/5">
-                      <span className="text-zinc-400">Treatment:</span>
-                      <span className="font-medium text-white">{confirmedData.treatment}</span>
-                    </div>
-                    <div className="flex justify-between py-1">
-                      <span className="text-zinc-400">Email:</span>
-                      <span className="font-medium text-white">{confirmedData.email}</span>
-                    </div>
+                  <div className="flex flex-wrap items-center gap-3 pt-1">
+                    <button
+                      type="button"
+                      onClick={handleReset}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 hover:bg-white/15 px-4 py-2 text-xs font-semibold text-white transition-all cursor-pointer"
+                    >
+                      <RefreshCw className="h-3.5 w-3.5" />
+                      <span>Book Another Appointment</span>
+                    </button>
+
+                    <Link
+                      href="/"
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-[#222227] px-4 py-2 text-xs font-semibold text-zinc-300 hover:text-white hover:bg-[#282830] transition-all"
+                    >
+                      <span>Back to Home</span>
+                    </Link>
                   </div>
                 </div>
+              )}
+            </div>
 
-                {/* Action Buttons */}
-                <div className="flex flex-wrap items-center gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={handleReset}
-                    className="inline-flex items-center gap-2 rounded-xl bg-white/10 hover:bg-white/15 px-5 py-2.5 text-xs font-semibold text-white transition-all cursor-pointer"
-                  >
-                    <CalendarIcon className="h-3.5 w-3.5" />
-                    <span>Book Another Appointment</span>
-                  </button>
-
-                  <Link
-                    href="/"
-                    className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-[#222227] px-5 py-2.5 text-xs font-semibold text-zinc-300 hover:text-white hover:bg-[#282830] transition-all"
-                  >
-                    <span>Back to Home</span>
-                  </Link>
+            {/* Bottom Row in Step 1: Continue Button with Selection Guidance */}
+            {step === 1 && (
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 mt-3 border-t border-white/10">
+                <div className="text-[11px] text-zinc-400">
+                  {selectedDate && selectedSlot ? (
+                    <span className="inline-flex items-center gap-1 text-emerald-400 font-semibold">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                      Selected: {selectedDateShortString} ({selectedSlot})
+                    </span>
+                  ) : (
+                    <span>Please choose a date & time slot to continue</span>
+                  )}
                 </div>
+
+                {/* Continue button: small navbar button style */}
+                <BookNowButton
+                  type="button"
+                  onClick={handleContinueToDetails}
+                  size="sm"
+                  text="Continue"
+                  disabled={!selectedDate || !selectedSlot}
+                />
               </div>
             )}
           </div>
@@ -896,24 +858,24 @@ export function CalendarBookingExperience({
         </div>
       </div>
 
-      {/* Floating Action Buttons Matching Reference Mock (Phone, WhatsApp, Scroll to Top) */}
+      {/* Floating Action Buttons Matching Reference Mock */}
       <div className="fixed bottom-6 right-6 z-40 flex flex-col gap-2.5">
         <a
           href={`tel:${clinicPhone.replace(/\D/g, "")}`}
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-[#18181c] text-white border border-white/20 shadow-xl transition-transform hover:scale-110 active:scale-95"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-[#18181c] text-white border border-white/20 shadow-xl transition-transform hover:scale-110 active:scale-95"
           aria-label="Call clinic"
         >
-          <PhoneCall className="h-5 w-5" />
+          <PhoneCall className="h-4 w-4" />
         </a>
 
         <a
           href={`https://wa.me/${clinicPhone.replace(/\D/g, "")}?text=Hello%20there,%20I%20would%20like%20to%20book%20an%20appointment.`}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-[#25D366] text-white shadow-xl transition-transform hover:scale-110 active:scale-95"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-[#25D366] text-white shadow-xl transition-transform hover:scale-110 active:scale-95"
           aria-label="Chat on WhatsApp"
         >
-          <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24">
+          <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24">
             <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.694.072-2.179-.536-1.528-.627-2.515-2.172-2.592-2.273-.076-.101-.617-.824-.617-1.571 0-.747.387-1.115.526-1.268.143-.153.313-.191.419-.191.106 0 .211.002.304.007.099.005.231-.038.361.275.134.321.46 1.119.5 1.2.04.082.067.177.013.284-.053.106-.08.172-.16.265-.079.095-.167.211-.238.284-.081.082-.165.172-.072.332.094.159.418.69 0.896 1.116.615.547 1.135.717 1.295.798.16.08.254.071.35-.041.095-.112.408-.475.517-.638.11-.164.218-.137.368-.082.15.054.954.45 1.118.532.164.081.273.123.313.191.04.068.04.394-.104.799zM12.045 2C6.505 2 2 6.506 2 12.047c0 1.973.57 3.815 1.558 5.378L2 22l4.743-1.517A9.977 9.977 0 0012.045 22c5.54 0 10.045-4.505 10.045-10.047C22.09 6.506 17.585 2 12.045 2z" />
           </svg>
         </a>
@@ -921,10 +883,10 @@ export function CalendarBookingExperience({
         <button
           type="button"
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-[#18181c] text-white border border-white/20 shadow-xl transition-transform hover:scale-110 active:scale-95 cursor-pointer"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-[#18181c] text-white border border-white/20 shadow-xl transition-transform hover:scale-110 active:scale-95 cursor-pointer"
           aria-label="Scroll to top"
         >
-          <ArrowUp className="h-5 w-5" />
+          <ArrowUp className="h-4 w-4" />
         </button>
       </div>
     </div>
