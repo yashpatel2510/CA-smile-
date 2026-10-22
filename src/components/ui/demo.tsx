@@ -1,3 +1,4 @@
+import Faq from "@/components/ui/faq";
 import Component, {
   TestimonialsSection,
   TestimonialsColumn,
@@ -12,6 +13,10 @@ export {
 };
 export type { Testimonial, Testimonial as TestimonialItem };
 
-export default function DemoOne() {
-  return <Component />;
+export function FaqDemo() {
+  return <Faq />;
+}
+
+export default function Demo() {
+  return <Faq />;
 }

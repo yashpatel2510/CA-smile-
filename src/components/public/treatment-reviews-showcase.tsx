@@ -1,10 +1,12 @@
 import React from "react";
-import { Testimonials } from "@/components/ui/demo";
+import {
+  TestimonialsSection as Testimonials,
+  Testimonial,
+} from "@/components/ui/testimonial-v2";
 import {
   getPublicApprovedReviews,
   getReviewsStoreData,
 } from "@/lib/reviews-store";
-import { Testimonial } from "@/components/ui/testimonial-v2";
 
 interface TreatmentReviewsShowcaseProps {
   title?: string;
