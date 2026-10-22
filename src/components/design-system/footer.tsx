@@ -106,6 +106,14 @@ export function Footer() {
               </li>
               <li>
                 <Link
+                  href="/faq"
+                  className="transition-colors hover:text-brand-primary"
+                >
+                  Frequently Asked Questions
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/book"
                   className="font-medium text-brand-primary transition-colors hover:text-brand-primary"
                 >

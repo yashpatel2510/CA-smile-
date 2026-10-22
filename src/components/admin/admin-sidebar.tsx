@@ -88,7 +88,7 @@ export function AdminSidebar() {
       icon: BarChart3,
     },
     {
-      name: "FAQs Management",
+      name: "Q&A Management",
       href: "/admin/faqs",
       icon: HelpCircle,
       badge: "Live",

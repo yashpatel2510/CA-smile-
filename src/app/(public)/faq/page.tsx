@@ -1,49 +1,48 @@
 import type { Metadata } from "next";
-import { Faq } from "@/components/ui/faq";
-import { getFaqsStoreData } from "@/lib/faqs-store";
+import { getFaqsConfig } from "@/lib/faqs-store";
+import { FaqPageClient } from "./faq-page-client";
 
 export const metadata: Metadata = {
-  title: "Frequently Asked Questions | CA Smile Dental Clinic",
+  title: "Frequently Asked Questions | Questions, Answered",
   description:
-    "Find answers to frequently asked questions about appointments, painless dental treatments, clear aligners, dental emergencies, and pricing.",
+    "Explore commonly asked questions about our clinical specialties, painless treatments, appointment booking, pricing, and ongoing care.",
+  alternates: {
+    canonical: "/faq",
+  },
+  openGraph: {
+    title: "Frequently Asked Questions | PedioDent & Smile Dental Clinic",
+    description:
+      "Clear, transparent answers to the most common questions before starting your dental care or treatment.",
+    url: "/faq",
+  },
 };
 
 export const dynamic = "force-dynamic";
 
 export default function FaqPage() {
-  const store = getFaqsStoreData();
-  const activeItems = (store.items || [])
-    .filter((i) => i.isActive)
-    .sort((a, b) => (a.order || 0) - (b.order || 0))
-    .map((item) => ({
-      id: item.id,
-      question: item.question,
-      answer: item.answer,
-    }));
+  const config = getFaqsConfig();
+
+  // JSON-LD structured data for FAQPage schema
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: (config.faqs || []).map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
+  };
 
   return (
-    <main className="min-h-screen bg-brand-background py-8">
-      <Faq
-        eyebrow="Patient Knowledge Base"
-        title={store.settings?.title || "Frequently Asked Questions"}
-        description={
-          store.settings?.subtitle ||
-          "Find answers to the questions patients ask most about our dental treatments, technology, and scheduling."
-        }
-        items={activeItems.length > 0 ? activeItems : undefined}
-        layout={store.settings?.layout === "centered" ? "stacked" : "split"}
-        footer={
-          <span>
-            {store.settings?.supportText || "Still have questions?"}{" "}
-            <a
-              href={store.settings?.supportLinkHref || "/contact"}
-              className="text-brand-primary font-semibold underline underline-offset-4 hover:no-underline"
-            >
-              {store.settings?.supportLinkText || "Contact our clinical team"}
-            </a>
-          </span>
-        }
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-    </main>
+      <FaqPageClient initialConfig={config} />
+    </>
   );
 }

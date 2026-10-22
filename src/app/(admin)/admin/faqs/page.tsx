@@ -12,8 +12,6 @@ import {
   Sun,
   Moon,
   Sparkles,
-  LayoutGrid,
-  AlignLeft,
   Eye,
   CheckCircle2,
   AlertCircle,
@@ -24,37 +22,48 @@ import {
   Search,
   ExternalLink,
   Layers,
+  Check,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ClinicFaqSection } from "@/components/public/clinic-faq-section";
-import { FaqItem, FaqSettings, DEFAULT_FAQS_STORE } from "@/types/faqs";
+import { FaqSection } from "@/components/public/faq-section";
+import { FaqItem, FaqsConfig } from "@/lib/faqs-store";
 
 export default function AdminFaqsPage() {
-  const [settings, setSettings] = useState<FaqSettings>(DEFAULT_FAQS_STORE.settings);
-  const [items, setItems] = useState<FaqItem[]>(DEFAULT_FAQS_STORE.items);
-  const [loading, setLoading] = useState(true);
-  const [savingSettings, setSavingSettings] = useState(false);
-  const [saveMessage, setSaveMessage] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  // Search & Filter
-  const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState<"questions" | "settings" | "preview">("questions");
-
-  // Modal / Form state for Add/Edit
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<FaqItem | null>(null);
-  const [formData, setFormData] = useState({
-    question: "",
-    answer: "",
-    category: "General Care",
-    isActive: true,
+  const [config, setConfig] = useState<FaqsConfig>({
+    tag: "• FAQS",
+    headingLine1: "QUESTIONS,",
+    headingLine2: "ANSWERED",
+    subtitle: "Here are the most common questions before starting a project with us.",
+    themeMode: "light",
+    faqs: [],
   });
 
-  // Load FAQs from API
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+
+  // Tabs: questions | settings | preview
+  const [activeTab, setActiveTab] = useState<"questions" | "settings" | "preview">("questions");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Modal State for Add / Edit
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<FaqItem | null>(null);
+  const [formQuestion, setFormQuestion] = useState("");
+  const [formAnswer, setFormAnswer] = useState("");
+  const [formCategory, setFormCategory] = useState("General");
+  const [formIsActive, setFormIsActive] = useState(true);
+
+  // Form State for Section Appearance & Dark Mode
+  const [editTag, setEditTag] = useState("• FAQS");
+  const [editHeading1, setEditHeading1] = useState("QUESTIONS,");
+  const [editHeading2, setEditHeading2] = useState("ANSWERED");
+  const [editSubtitle, setEditSubtitle] = useState("");
+  const [editThemeMode, setEditThemeMode] = useState<"light" | "dark">("light");
+
   useEffect(() => {
     loadData();
   }, []);
@@ -65,80 +74,135 @@ export default function AdminFaqsPage() {
       const res = await fetch("/api/admin/faqs");
       if (res.ok) {
         const data = await res.json();
-        if (data.settings) setSettings(data.settings);
-        if (Array.isArray(data.items)) setItems(data.items);
+        if (data.config) {
+          const cfg = {
+            tag: data.config.tag || "• FAQS",
+            headingLine1: data.config.headingLine1 || "QUESTIONS,",
+            headingLine2: data.config.headingLine2 || "ANSWERED",
+            subtitle: data.config.subtitle || "",
+            themeMode: data.config.themeMode === "dark" ? ("dark" as const) : ("light" as const),
+            faqs: Array.isArray(data.faqs) ? data.faqs : [],
+          };
+          setConfig(cfg);
+          setEditTag(cfg.tag);
+          setEditHeading1(cfg.headingLine1);
+          setEditHeading2(cfg.headingLine2);
+          setEditSubtitle(cfg.subtitle);
+          setEditThemeMode(cfg.themeMode);
+        }
       }
-    } catch (err: any) {
-      setErrorMessage("Failed to load FAQs data");
+    } catch (err) {
+      notify("Failed to load FAQs", "error");
     } finally {
       setLoading(false);
     }
   }
 
-  function showNotification(msg: string) {
-    setSaveMessage(msg);
-    setTimeout(() => setSaveMessage(null), 3500);
+  function notify(text: string, type: "success" | "error" = "success") {
+    setMessage({ text, type });
+    setTimeout(() => setMessage(null), 4000);
   }
 
-  // Save Settings
-  async function handleSaveSettings() {
-    setSavingSettings(true);
-    setErrorMessage(null);
+  // Save Settings & Theme Mode
+  async function handleSaveSettings(e?: React.FormEvent) {
+    if (e) e.preventDefault();
+    setSaving(true);
     try {
       const res = await fetch("/api/admin/faqs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "update-settings",
-          settings,
+          settings: {
+            tag: editTag,
+            headingLine1: editHeading1,
+            headingLine2: editHeading2,
+            subtitle: editSubtitle,
+            themeMode: editThemeMode,
+          },
         }),
       });
 
       if (res.ok) {
-        showNotification("FAQ settings saved successfully!");
+        setConfig((prev) => ({
+          ...prev,
+          tag: editTag,
+          headingLine1: editHeading1,
+          headingLine2: editHeading2,
+          subtitle: editSubtitle,
+          themeMode: editThemeMode,
+        }));
+        notify(`Settings saved! Theme is now set to ${editThemeMode.toUpperCase()} mode.`);
       } else {
-        const data = await res.json();
-        setErrorMessage(data.error || "Failed to save settings");
+        notify("Failed to save settings", "error");
       }
     } catch (err: any) {
-      setErrorMessage(err.message || "Network error");
+      notify(err?.message || "Error saving settings", "error");
     } finally {
-      setSavingSettings(false);
+      setSaving(false);
     }
   }
 
-  // Open Add Modal
+  // Toggle Theme Mode quickly
+  async function handleToggleTheme(mode: "light" | "dark") {
+    setEditThemeMode(mode);
+    setSaving(true);
+    try {
+      const res = await fetch("/api/admin/faqs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "update-settings",
+          settings: {
+            tag: editTag,
+            headingLine1: editHeading1,
+            headingLine2: editHeading2,
+            subtitle: editSubtitle,
+            themeMode: mode,
+          },
+        }),
+      });
+
+      if (res.ok) {
+        setConfig((prev) => ({ ...prev, themeMode: mode }));
+        notify(`Theme changed to ${mode.toUpperCase()} mode!`);
+      }
+    } catch (err: any) {
+      notify("Failed to toggle theme", "error");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  // Open Modal to Add
   function handleOpenAdd() {
     setEditingItem(null);
-    setFormData({
-      question: "",
-      answer: "",
-      category: "General Care",
-      isActive: true,
-    });
+    setFormQuestion("");
+    setFormAnswer("");
+    setFormCategory("General");
+    setFormIsActive(true);
     setIsModalOpen(true);
   }
 
-  // Open Edit Modal
+  // Open Modal to Edit
   function handleOpenEdit(item: FaqItem) {
     setEditingItem(item);
-    setFormData({
-      question: item.question,
-      answer: item.answer,
-      category: item.category || "General Care",
-      isActive: item.isActive,
-    });
+    setFormQuestion(item.question);
+    setFormAnswer(item.answer);
+    setFormCategory(item.category || "General");
+    setFormIsActive(item.isActive !== false);
     setIsModalOpen(true);
   }
 
-  // Submit Add or Edit
-  async function handleSubmitItem(e: React.FormEvent) {
+  // Save Modal (Add or Edit)
+  async function handleSaveItem(e: React.FormEvent) {
     e.preventDefault();
-    if (!formData.question.trim() || !formData.answer.trim()) {
-      alert("Please fill in both the Question and the Answer.");
+    if (!formQuestion.trim() || !formAnswer.trim()) {
+      notify("Question and Answer cannot be empty", "error");
       return;
     }
 
+    setSaving(true);
     try {
       if (editingItem) {
         // Update
@@ -148,16 +212,20 @@ export default function AdminFaqsPage() {
           body: JSON.stringify({
             action: "update-item",
             id: editingItem.id,
-            updates: formData,
+            updates: {
+              question: formQuestion,
+              answer: formAnswer,
+              category: formCategory,
+              isActive: formIsActive,
+            },
           }),
         });
-
         if (res.ok) {
-          setItems((prev) =>
-            prev.map((i) => (i.id === editingItem.id ? { ...i, ...formData } : i))
-          );
+          notify("Question updated successfully!");
           setIsModalOpen(false);
-          showNotification("Question updated successfully!");
+          await loadData();
+        } else {
+          notify("Failed to update question", "error");
         }
       } else {
         // Add
@@ -166,25 +234,30 @@ export default function AdminFaqsPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             action: "add-item",
-            ...formData,
+            question: formQuestion,
+            answer: formAnswer,
+            category: formCategory,
+            isActive: formIsActive,
           }),
         });
-
         if (res.ok) {
-          const data = await res.json();
-          setItems((prev) => [...prev, data.item]);
+          notify("New question added successfully!");
           setIsModalOpen(false);
-          showNotification("New question added successfully!");
+          await loadData();
+        } else {
+          notify("Failed to add question", "error");
         }
       }
     } catch (err: any) {
-      alert("Error saving item: " + err.message);
+      notify(err?.message || "Operation failed", "error");
+    } finally {
+      setSaving(false);
     }
   }
 
-  // Delete Item
-  async function handleDeleteItem(id: string, question: string) {
-    if (!confirm(`Are you sure you want to delete this question?\n\n"${question}"`)) {
+  // Delete Question
+  async function handleDelete(id: string, questionText: string) {
+    if (!confirm(`Are you sure you want to remove this question?\n\n"${questionText}"`)) {
       return;
     }
 
@@ -199,73 +272,51 @@ export default function AdminFaqsPage() {
       });
 
       if (res.ok) {
-        setItems((prev) => prev.filter((i) => i.id !== id));
-        showNotification("Question removed successfully.");
+        notify("Question deleted!");
+        await loadData();
+      } else {
+        notify("Failed to delete question", "error");
       }
-    } catch (err: any) {
-      alert("Failed to delete item: " + err.message);
+    } catch (err) {
+      notify("Error deleting question", "error");
     }
   }
 
-  // Toggle Active/Inactive
-  async function handleToggleActive(item: FaqItem) {
-    const updatedStatus = !item.isActive;
+  // Move Up / Down
+  async function handleMove(index: number, direction: "up" | "down") {
+    const list = [...config.faqs];
+    const targetIdx = direction === "up" ? index - 1 : index + 1;
+    if (targetIdx < 0 || targetIdx >= list.length) return;
+
+    const temp = list[index];
+    list[index] = list[targetIdx];
+    list[targetIdx] = temp;
+
+    const orderedIds = list.map((f) => f.id);
+
     try {
       const res = await fetch("/api/admin/faqs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          action: "update-item",
-          id: item.id,
-          updates: { isActive: updatedStatus },
+          action: "reorder-items",
+          orderedIds,
         }),
       });
 
       if (res.ok) {
-        setItems((prev) =>
-          prev.map((i) => (i.id === item.id ? { ...i, isActive: updatedStatus } : i))
-        );
-        showNotification(
-          updatedStatus ? "Question published on site." : "Question hidden from site."
-        );
+        setConfig((prev) => ({ ...prev, faqs: list }));
       }
     } catch (err) {
-      console.error(err);
+      notify("Failed to reorder items", "error");
     }
   }
 
-  // Move Item Up
-  async function handleMove(index: number, direction: "up" | "down") {
-    const newItems = [...items];
-    const targetIndex = direction === "up" ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= newItems.length) return;
-
-    const temp = newItems[index];
-    newItems[index] = newItems[targetIndex];
-    newItems[targetIndex] = temp;
-
-    setItems(newItems);
-
-    try {
-      await fetch("/api/admin/faqs", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "reorder-items",
-          orderedIds: newItems.map((i) => i.id),
-        }),
-      });
-      showNotification("Order updated.");
-    } catch (err) {
-      console.error("Failed to persist order:", err);
-    }
-  }
-
-  // Reset to Defaults
+  // Reset defaults
   async function handleResetDefaults() {
     if (
       !confirm(
-        "Are you sure you want to reset all FAQs and settings to the clinic standard defaults?"
+        "Are you sure you want to reset all FAQs to default questions? Any custom questions will be restored to template."
       )
     ) {
       return;
@@ -279,655 +330,561 @@ export default function AdminFaqsPage() {
       });
 
       if (res.ok) {
-        const data = await res.json();
-        setSettings(data.settings);
-        setItems(data.items);
-        showNotification("Reset to clinic defaults successfully!");
+        notify("FAQs restored to default template!");
+        await loadData();
       }
-    } catch (err: any) {
-      alert("Error resetting defaults: " + err.message);
+    } catch (err) {
+      notify("Failed to reset defaults", "error");
     }
   }
 
-  const filteredItems = items.filter(
-    (i) =>
-      i.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      i.answer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (i.category && i.category.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredFaqs = config.faqs.filter(
+    (f) =>
+      f.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      f.answer.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (f.category && f.category.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   return (
-    <div className="space-y-8 p-6 md:p-8">
-      {/* Page Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-brand-border/60 pb-6">
+    <div className="space-y-8 p-6 lg:p-10 max-w-7xl mx-auto">
+      {/* Top Banner / Notification */}
+      {message && (
+        <div
+          className={`flex items-center gap-3 rounded-xl p-4 text-sm font-medium transition-all ${
+            message.type === "success"
+              ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+              : "bg-red-50 text-red-800 border border-red-200"
+          }`}
+        >
+          {message.type === "success" ? (
+            <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+          ) : (
+            <AlertCircle className="h-5 w-5 text-red-600 shrink-0" />
+          )}
+          <span>{message.text}</span>
+        </div>
+      )}
+
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="gap-1.5 px-3 py-1 font-mono text-xs">
-              <HelpCircle className="h-3.5 w-3.5 text-brand-primary" />
-              Public FAQ Section
+            <Badge variant="default" className="gap-1.5 text-xs">
+              <HelpCircle className="h-3.5 w-3.5" />
+              <span>Full Admin Access</span>
             </Badge>
-            <span
-              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                settings.showFaqSection
-                  ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
-                  : "bg-amber-500/10 text-amber-600 border border-amber-500/20"
-              }`}
-            >
-              {settings.showFaqSection ? "● Live on Website" : "○ Hidden from Website"}
+            <span className="text-xs text-brand-muted font-mono">
+              {config.faqs.length} Total Questions
             </span>
           </div>
-          <h1 className="mt-2 font-heading text-2xl font-bold tracking-tight text-brand-text md:text-3xl">
-            FAQ Section Management
+          <h1 className="mt-2 font-heading text-2xl font-bold tracking-tight text-brand-text sm:text-3xl">
+            Q&amp;A / FAQ Section Management
           </h1>
           <p className="mt-1 text-sm text-brand-muted">
-            Customize the public FAQ section rendered after the map on your website. Full control over
-            questions, answers, dark/white theme modes, and layouts.
+            Add, edit, or remove all questions. Configure section titles, subtitles, and switch between Light Mode &amp; Dark Mode.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <Link href="/#clinic-faq-section" target="_blank">
-            <Button variant="outline" size="sm" className="gap-1.5 rounded-xl">
-              <ExternalLink className="h-4 w-4" />
-              <span>View on Site</span>
-            </Button>
+        {/* Action Buttons */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          <Link
+            href="/faq"
+            target="_blank"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-brand-border bg-brand-surface px-3.5 py-2 text-xs font-semibold text-brand-text hover:bg-brand-surface/80 transition-colors shadow-sm"
+          >
+            <Eye className="h-3.5 w-3.5 text-brand-muted" />
+            <span>View Public /faq</span>
+            <ExternalLink className="h-3 w-3 text-brand-muted ml-0.5" />
           </Link>
+
           <Button
             onClick={handleOpenAdd}
             size="sm"
-            className="gap-1.5 rounded-xl bg-brand-primary text-brand-primary-foreground hover:bg-brand-primary/90 shadow"
+            className="gap-1.5 rounded-xl text-xs font-semibold shadow-sm"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-3.5 w-3.5" />
             <span>Add New Question</span>
           </Button>
         </div>
       </div>
 
-      {/* Notifications */}
-      {saveMessage && (
-        <div className="flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm font-medium text-emerald-700 dark:text-emerald-300">
-          <CheckCircle2 className="h-5 w-5 shrink-0" />
-          <span>{saveMessage}</span>
+      {/* QUICK DARK MODE BAR & TABS */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-brand-border pb-4">
+        {/* Navigation Tabs */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setActiveTab("questions")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+              activeTab === "questions"
+                ? "bg-brand-primary text-brand-primary-foreground shadow-sm"
+                : "text-brand-muted hover:text-brand-text hover:bg-brand-surface"
+            }`}
+          >
+            <Layers className="h-4 w-4" />
+            <span>All Questions ({config.faqs.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("settings")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+              activeTab === "settings"
+                ? "bg-brand-primary text-brand-primary-foreground shadow-sm"
+                : "text-brand-muted hover:text-brand-text hover:bg-brand-surface"
+            }`}
+          >
+            <Sliders className="h-4 w-4" />
+            <span>Appearance &amp; Dark Mode</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("preview")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+              activeTab === "preview"
+                ? "bg-brand-primary text-brand-primary-foreground shadow-sm"
+                : "text-brand-muted hover:text-brand-text hover:bg-brand-surface"
+            }`}
+          >
+            <Eye className="h-4 w-4" />
+            <span>Live Component Preview</span>
+          </button>
         </div>
-      )}
 
-      {errorMessage && (
-        <div className="flex items-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-sm font-medium text-rose-700 dark:text-rose-300">
-          <AlertCircle className="h-5 w-5 shrink-0" />
-          <span>{errorMessage}</span>
+        {/* ONE-CLICK DARK / LIGHT MODE SWITCH */}
+        <div className="flex items-center gap-2 bg-brand-surface border border-brand-border p-1.5 rounded-2xl shrink-0">
+          <span className="text-[11px] font-medium text-brand-muted px-2 select-none">
+            Display Mode:
+          </span>
+          <button
+            type="button"
+            onClick={() => handleToggleTheme("light")}
+            disabled={saving}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+              config.themeMode === "light"
+                ? "bg-white text-neutral-900 shadow-sm border border-neutral-200"
+                : "text-brand-muted hover:text-brand-text"
+            }`}
+          >
+            <Sun className="h-3.5 w-3.5 text-amber-500" />
+            <span>Light</span>
+            {config.themeMode === "light" && <Check className="h-3 w-3 ml-0.5 text-emerald-600" />}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleToggleTheme("dark")}
+            disabled={saving}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+              config.themeMode === "dark"
+                ? "bg-neutral-900 text-white shadow-sm border border-neutral-700"
+                : "text-brand-muted hover:text-brand-text"
+            }`}
+          >
+            <Moon className="h-3.5 w-3.5 text-blue-400" />
+            <span>Dark</span>
+            {config.themeMode === "dark" && <Check className="h-3 w-3 ml-0.5 text-emerald-400" />}
+          </button>
         </div>
-      )}
-
-      {/* Tabs */}
-      <div className="flex border-b border-brand-border/60">
-        <button
-          onClick={() => setActiveTab("questions")}
-          className={`flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-semibold transition-colors ${
-            activeTab === "questions"
-              ? "border-brand-primary text-brand-primary"
-              : "border-transparent text-brand-muted hover:text-brand-text"
-          }`}
-        >
-          <HelpCircle className="h-4 w-4" />
-          <span>Questions & Answers ({items.length})</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab("settings")}
-          className={`flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-semibold transition-colors ${
-            activeTab === "settings"
-              ? "border-brand-primary text-brand-primary"
-              : "border-transparent text-brand-muted hover:text-brand-text"
-          }`}
-        >
-          <Sliders className="h-4 w-4" />
-          <span>Section Appearance & Dark/White Mode</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab("preview")}
-          className={`flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-semibold transition-colors ${
-            activeTab === "preview"
-              ? "border-brand-primary text-brand-primary"
-              : "border-transparent text-brand-muted hover:text-brand-text"
-          }`}
-        >
-          <Eye className="h-4 w-4" />
-          <span>Live Preview</span>
-        </button>
       </div>
 
-      {/* TAB 1: QUESTIONS LIST */}
+      {/* TAB 1: ALL QUESTIONS LIST & CRUD */}
       {activeTab === "questions" && (
-        <div className="space-y-6">
-          {/* Search bar and counter */}
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-            <div className="relative w-full sm:max-w-md">
+        <div className="space-y-4">
+          {/* Search bar & quick filters */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-muted" />
               <Input
                 placeholder="Search questions, answers, or categories..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 rounded-xl"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 rounded-xl text-xs bg-brand-surface border-brand-border"
               />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-brand-muted hover:text-brand-text"
+                >
+                  Clear
+                </button>
+              )}
             </div>
 
-            <div className="flex items-center gap-2 text-xs text-brand-muted">
-              <span>Showing {filteredItems.length} of {items.length} questions</span>
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleResetDefaults}
+              className="gap-1.5 rounded-xl text-xs text-brand-muted hover:text-brand-text"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              <span>Reset Template</span>
+            </Button>
           </div>
 
-          {/* List of FAQ Cards */}
-          {filteredItems.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-brand-border p-12 text-center">
-              <HelpCircle className="mx-auto h-12 w-12 text-brand-muted/50" />
-              <h3 className="mt-4 text-base font-semibold text-brand-text">No questions found</h3>
-              <p className="mt-1 text-sm text-brand-muted">
-                {searchTerm ? "No questions match your search query." : "You have not added any questions yet."}
-              </p>
-              <Button onClick={handleOpenAdd} size="sm" className="mt-4 rounded-xl">
-                <Plus className="mr-1.5 h-4 w-4" />
-                Add Your First Question
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {filteredItems.map((item, index) => (
-                <div
-                  key={item.id}
-                  className={`group rounded-2xl border transition-all duration-200 p-5 ${
-                    item.isActive
-                      ? "border-brand-border bg-brand-surface shadow-sm hover:border-brand-primary/50"
-                      : "border-brand-border/40 bg-brand-surface/40 opacity-70"
-                  }`}
-                >
-                  <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                    <div className="flex-1 space-y-2">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-mono text-xs font-semibold text-brand-muted">
-                          #{item.order || index + 1}
-                        </span>
-                        {item.category && (
-                          <Badge variant="secondary" className="text-xs font-medium">
-                            {item.category}
-                          </Badge>
-                        )}
-                        <span
-                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-                            item.isActive
-                              ? "bg-emerald-500/10 text-emerald-600"
-                              : "bg-zinc-500/10 text-zinc-600"
-                          }`}
+          {/* Questions Table / List */}
+          <div className="rounded-2xl border border-brand-border bg-brand-surface overflow-hidden shadow-sm">
+            {loading ? (
+              <div className="p-12 text-center text-sm text-brand-muted">Loading questions...</div>
+            ) : filteredFaqs.length === 0 ? (
+              <div className="p-12 text-center space-y-3">
+                <HelpCircle className="h-10 w-10 text-brand-muted/40 mx-auto" />
+                <p className="text-sm font-medium text-brand-text">No questions found</p>
+                <Button size="sm" onClick={handleOpenAdd} className="rounded-xl text-xs">
+                  Add Your First Question
+                </Button>
+              </div>
+            ) : (
+              <div className="divide-y divide-brand-border/60">
+                {filteredFaqs.map((faq, index) => (
+                  <div
+                    key={faq.id}
+                    className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-brand-surface/40 transition-colors"
+                  >
+                    {/* Left: Reorder & Number */}
+                    <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
+                      <div className="flex flex-col gap-0.5 shrink-0 pt-0.5 sm:pt-0">
+                        <button
+                          type="button"
+                          disabled={index === 0}
+                          onClick={() => handleMove(index, "up")}
+                          className="p-1 rounded text-brand-muted hover:text-brand-text hover:bg-brand-background disabled:opacity-30 disabled:pointer-events-none"
+                          title="Move Up"
                         >
-                          {item.isActive ? "Active on Site" : "Hidden"}
-                        </span>
+                          <MoveUp className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={index === filteredFaqs.length - 1}
+                          onClick={() => handleMove(index, "down")}
+                          className="p-1 rounded text-brand-muted hover:text-brand-text hover:bg-brand-background disabled:opacity-30 disabled:pointer-events-none"
+                          title="Move Down"
+                        >
+                          <MoveDown className="h-3.5 w-3.5" />
+                        </button>
                       </div>
 
-                      <h3 className="font-heading text-base font-semibold text-brand-text">
-                        {item.question}
-                      </h3>
-
-                      <p className="text-sm text-brand-muted leading-relaxed">
-                        {item.answer}
-                      </p>
+                      <div className="space-y-1 flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs font-semibold text-brand-muted">
+                            #{index + 1}
+                          </span>
+                          <span className="font-heading text-sm font-semibold text-brand-text line-clamp-1">
+                            {faq.question}
+                          </span>
+                          {faq.category && (
+                            <Badge variant="secondary" className="text-[10px] px-2 py-0">
+                              {faq.category}
+                            </Badge>
+                          )}
+                          {faq.isActive === false && (
+                            <Badge variant="outline" className="text-[10px] text-red-500 border-red-200">
+                              Hidden
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-brand-muted line-clamp-2 leading-relaxed">
+                          {faq.answer}
+                        </p>
+                      </div>
                     </div>
 
-                    {/* Action buttons */}
-                    <div className="flex items-center gap-1.5 self-end md:self-start shrink-0 pt-1">
+                    {/* Right: Action Buttons */}
+                    <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
-                        disabled={index === 0}
-                        onClick={() => handleMove(index, "up")}
-                        title="Move Up"
-                        className="h-8 w-8 p-0 text-brand-muted hover:text-brand-text"
+                        onClick={() => handleOpenEdit(faq)}
+                        className="gap-1 rounded-xl text-xs h-8 px-2.5"
                       >
-                        <MoveUp className="h-4 w-4" />
-                      </Button>
-
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        disabled={index === items.length - 1}
-                        onClick={() => handleMove(index, "down")}
-                        title="Move Down"
-                        className="h-8 w-8 p-0 text-brand-muted hover:text-brand-text"
-                      >
-                        <MoveDown className="h-4 w-4" />
+                        <Edit3 className="h-3.5 w-3.5 text-brand-muted" />
+                        <span>Edit</span>
                       </Button>
 
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleToggleActive(item)}
-                        className="h-8 text-xs font-medium rounded-lg"
-                      >
-                        {item.isActive ? "Hide" : "Show"}
-                      </Button>
-
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleOpenEdit(item)}
-                        className="h-8 w-8 p-0 text-brand-text hover:text-brand-primary rounded-lg"
-                        title="Edit Question"
-                      >
-                        <Edit3 className="h-4 w-4" />
-                      </Button>
-
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteItem(item.id, item.question)}
-                        className="h-8 w-8 p-0 text-rose-500 hover:bg-rose-50 hover:text-rose-700 dark:hover:bg-rose-950/30 rounded-lg"
+                        onClick={() => handleDelete(faq.id, faq.question)}
+                        className="rounded-xl text-xs h-8 px-2.5 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 border-red-200"
                         title="Delete Question"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
-      {/* TAB 2: APPEARANCE & DARK/WHITE MODE SETTINGS */}
+      {/* TAB 2: APPEARANCE & DARK MODE SETTINGS */}
       {activeTab === "settings" && (
-        <div className="grid gap-8 lg:grid-cols-3">
-          <div className="lg:col-span-2 space-y-6">
-            {/* Visual Mode Options (Dark Mode vs White/Light Mode) */}
-            <Card className="rounded-2xl border-brand-border">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Sun className="h-5 w-5 text-amber-500" />
-                  Color Mode Options (Dark vs White Mode)
-                </CardTitle>
-                <CardDescription>
-                  Choose how the FAQ section renders on your public website. You can force crisp White mode, sleek Dark mode, or have it follow your clinic theme.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {/* White / Light Mode Option */}
-                  <div
-                    onClick={() => setSettings((s) => ({ ...s, mode: "light" }))}
-                    className={`cursor-pointer rounded-xl border-2 p-4 transition-all duration-200 ${
-                      settings.mode === "light"
-                        ? "border-brand-primary bg-brand-primary/5 shadow-md ring-2 ring-brand-primary/20"
-                        : "border-brand-border bg-card hover:border-brand-primary/40"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <Sun className="h-5 w-5 text-amber-500" />
-                      {settings.mode === "light" && (
-                        <CheckCircle2 className="h-4 w-4 text-brand-primary" />
+        <form onSubmit={handleSaveSettings} className="space-y-6">
+          <Card className="rounded-2xl border-brand-border bg-brand-surface shadow-sm">
+            <CardHeader className="p-6 border-b border-brand-border">
+              <CardTitle className="text-base font-bold text-brand-text flex items-center gap-2">
+                <Sliders className="h-4 w-4 text-brand-primary" />
+                <span>Q&amp;A Section Header &amp; Theme Mode Configuration</span>
+              </CardTitle>
+              <CardDescription className="text-xs text-brand-muted">
+                Control the left-side branding text and switch between Light and Dark mode for the Q&amp;A cards.
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent className="p-6 space-y-6">
+              {/* THEME MODE TOGGLE OPTION */}
+              <div className="rounded-2xl border border-brand-border bg-brand-background/60 p-5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-bold text-brand-text flex items-center gap-2">
+                      {editThemeMode === "dark" ? (
+                        <Moon className="h-4 w-4 text-blue-400" />
+                      ) : (
+                        <Sun className="h-4 w-4 text-amber-500" />
                       )}
-                    </div>
-                    <div className="mt-3">
-                      <h4 className="font-semibold text-foreground text-sm">White / Light Mode</h4>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Clean bright white background, optimal high readability, crisp borders.
-                      </p>
-                    </div>
+                      <span>Q&amp;A Theme Mode (Dark / Light Mode)</span>
+                    </h3>
+                    <p className="text-xs text-brand-muted mt-0.5">
+                      Choose whether the public Q&amp;A section renders in clean white or sleek dark mode.
+                    </p>
                   </div>
 
-                  {/* Dark Mode Option */}
-                  <div
-                    onClick={() => setSettings((s) => ({ ...s, mode: "dark" }))}
-                    className={`cursor-pointer rounded-xl border-2 p-4 transition-all duration-200 ${
-                      settings.mode === "dark"
-                        ? "border-brand-primary bg-brand-primary/5 shadow-md ring-2 ring-brand-primary/20"
-                        : "border-brand-border bg-card hover:border-brand-primary/40"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <Moon className="h-5 w-5 text-indigo-400" />
-                      {settings.mode === "dark" && (
-                        <CheckCircle2 className="h-4 w-4 text-brand-primary" />
-                      )}
-                    </div>
-                    <div className="mt-3">
-                      <h4 className="font-semibold text-foreground text-sm">Dark Mode</h4>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Sleek midnight dark background, glowing neon highlights, premium contrast.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Clinic Brand Theme Option */}
-                  <div
-                    onClick={() => setSettings((s) => ({ ...s, mode: "clinic" }))}
-                    className={`cursor-pointer rounded-xl border-2 p-4 transition-all duration-200 ${
-                      settings.mode === "clinic"
-                        ? "border-brand-primary bg-brand-primary/5 shadow-md ring-2 ring-brand-primary/20"
-                        : "border-brand-border bg-card hover:border-brand-primary/40"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <Sparkles className="h-5 w-5 text-brand-primary" />
-                      {settings.mode === "clinic" && (
-                        <CheckCircle2 className="h-4 w-4 text-brand-primary" />
-                      )}
-                    </div>
-                    <div className="mt-3">
-                      <h4 className="font-semibold text-foreground text-sm">Adaptive Clinic Theme</h4>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Inherits your primary theme palette and current clinic brand settings.
-                      </p>
-                    </div>
+                  <div className="flex items-center gap-2 bg-brand-surface border border-brand-border p-1 rounded-xl">
+                    <button
+                      type="button"
+                      onClick={() => setEditThemeMode("light")}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                        editThemeMode === "light"
+                          ? "bg-white text-neutral-900 shadow-sm border border-neutral-200"
+                          : "text-brand-muted hover:text-brand-text"
+                      }`}
+                    >
+                      <Sun className="h-3.5 w-3.5 text-amber-500" />
+                      <span>Light</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditThemeMode("dark")}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                        editThemeMode === "dark"
+                          ? "bg-neutral-900 text-white shadow-sm border border-neutral-700"
+                          : "text-brand-muted hover:text-brand-text"
+                      }`}
+                    >
+                      <Moon className="h-3.5 w-3.5 text-blue-400" />
+                      <span>Dark</span>
+                    </button>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
 
-            {/* Layout Options */}
-            <Card className="rounded-2xl border-brand-border">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <LayoutGrid className="h-5 w-5 text-brand-primary" />
-                  Accordion Layout Design
-                </CardTitle>
-                <CardDescription>
-                  Switch between 2-column split layout or centered accordion layout.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Grid Layout (2 Columns) */}
-                  <div
-                    onClick={() => setSettings((s) => ({ ...s, layout: "grid" }))}
-                    className={`cursor-pointer rounded-xl border-2 p-4 transition-all duration-200 ${
-                      settings.layout === "grid"
-                        ? "border-brand-primary bg-brand-primary/5 shadow-md ring-2 ring-brand-primary/20"
-                        : "border-brand-border bg-card hover:border-brand-primary/40"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <LayoutGrid className="h-5 w-5 text-brand-primary" />
-                      {settings.layout === "grid" && (
-                        <CheckCircle2 className="h-4 w-4 text-brand-primary" />
-                      )}
-                    </div>
-                    <div className="mt-3">
-                      <h4 className="font-semibold text-foreground text-sm">Two-Column Split (Demo Style)</h4>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Title &amp; description on the left (2 cols), interactive accordion on the right (3 cols).
-                      </p>
-                    </div>
-                  </div>
+              {/* Tag / Badge */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-brand-text">
+                  Tag / Pill Label (Shown at top-left)
+                </label>
+                <Input
+                  value={editTag}
+                  onChange={(e) => setEditTag(e.target.value)}
+                  placeholder="• FAQS"
+                  className="rounded-xl text-xs bg-brand-background border-brand-border"
+                />
+                <p className="text-[11px] text-brand-muted">
+                  Default: <span className="font-mono">• FAQS</span>
+                </p>
+              </div>
 
-                  {/* Centered Layout */}
-                  <div
-                    onClick={() => setSettings((s) => ({ ...s, layout: "centered" }))}
-                    className={`cursor-pointer rounded-xl border-2 p-4 transition-all duration-200 ${
-                      settings.layout === "centered"
-                        ? "border-brand-primary bg-brand-primary/5 shadow-md ring-2 ring-brand-primary/20"
-                        : "border-brand-border bg-card hover:border-brand-primary/40"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <AlignLeft className="h-5 w-5 text-brand-primary" />
-                      {settings.layout === "centered" && (
-                        <CheckCircle2 className="h-4 w-4 text-brand-primary" />
-                      )}
-                    </div>
-                    <div className="mt-3">
-                      <h4 className="font-semibold text-foreground text-sm">Centered Layout (Standard Style)</h4>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Centered title and subtitle at top, with a prominent boxed accordion container below.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Content & Headings */}
-            <Card className="rounded-2xl border-brand-border">
-              <CardHeader>
-                <CardTitle className="text-lg">Section Headings &amp; Support Link</CardTitle>
-                <CardDescription>
-                  Edit the text displayed in the header and support link of the FAQ section.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <label className="text-xs font-semibold text-brand-text">Section Title</label>
+              {/* Two-Line Giant Title */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-brand-text">
+                    Headline Line 1
+                  </label>
                   <Input
-                    value={settings.title}
-                    onChange={(e) => setSettings((s) => ({ ...s, title: e.target.value }))}
-                    placeholder="e.g. Frequently Asked Questions or FAQs"
-                    className="mt-1.5 rounded-xl"
+                    value={editHeading1}
+                    onChange={(e) => setEditHeading1(e.target.value)}
+                    placeholder="QUESTIONS,"
+                    className="rounded-xl text-xs bg-brand-background border-brand-border font-bold uppercase"
                   />
                 </div>
 
-                <div>
-                  <label className="text-xs font-semibold text-brand-text">Section Subtitle / Description</label>
-                  <textarea
-                    rows={2}
-                    value={settings.subtitle}
-                    onChange={(e) => setSettings((s) => ({ ...s, subtitle: e.target.value }))}
-                    placeholder="Brief intro for your patients..."
-                    className="mt-1.5 w-full rounded-xl border border-brand-border bg-brand-surface p-3 text-sm text-brand-text focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-brand-text">
+                    Headline Line 2
+                  </label>
+                  <Input
+                    value={editHeading2}
+                    onChange={(e) => setEditHeading2(e.target.value)}
+                    placeholder="ANSWERED"
+                    className="rounded-xl text-xs bg-brand-background border-brand-border font-bold uppercase"
                   />
                 </div>
+              </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-                  <div>
-                    <label className="text-xs font-semibold text-brand-text">Support Prefix Text</label>
-                    <Input
-                      value={settings.supportText}
-                      onChange={(e) => setSettings((s) => ({ ...s, supportText: e.target.value }))}
-                      placeholder="Can't find answers? Contact our"
-                      className="mt-1.5 rounded-xl"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-semibold text-brand-text">Support Link Label</label>
-                    <Input
-                      value={settings.supportLinkText}
-                      onChange={(e) => setSettings((s) => ({ ...s, supportLinkText: e.target.value }))}
-                      placeholder="clinical support team"
-                      className="mt-1.5 rounded-xl"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-semibold text-brand-text">Support Target Link</label>
-                    <Input
-                      value={settings.supportLinkHref}
-                      onChange={(e) => setSettings((s) => ({ ...s, supportLinkHref: e.target.value }))}
-                      placeholder="/contact or tel:+91..."
-                      className="mt-1.5 rounded-xl"
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Settings Sidebar Actions */}
-          <div className="space-y-6">
-            <Card className="rounded-2xl border-brand-border bg-brand-surface p-6 space-y-5">
-              <h3 className="font-heading text-base font-semibold text-brand-text">Section Visibility</h3>
-
-              <div className="flex items-center justify-between border-b border-brand-border/60 pb-4">
-                <div>
-                  <div className="text-sm font-semibold text-brand-text">Show FAQ Section</div>
-                  <div className="text-xs text-brand-muted">Display on the public website after map</div>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={settings.showFaqSection}
-                  onChange={(e) => setSettings((s) => ({ ...s, showFaqSection: e.target.checked }))}
-                  className="h-5 w-5 rounded border-brand-border text-brand-primary focus:ring-brand-primary"
+              {/* Subtitle Description */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-brand-text">
+                  Subtitle Description
+                </label>
+                <textarea
+                  value={editSubtitle}
+                  onChange={(e) => setEditSubtitle(e.target.value)}
+                  rows={3}
+                  placeholder="Here are the most common questions before starting a project with us."
+                  className="w-full rounded-xl p-3 text-xs bg-brand-background border border-brand-border text-brand-text focus:outline-none focus:ring-2 focus:ring-brand-primary"
                 />
               </div>
 
-              <div className="space-y-3 pt-2">
+              <div className="flex justify-end pt-2">
                 <Button
-                  onClick={handleSaveSettings}
-                  disabled={savingSettings}
-                  className="w-full gap-2 rounded-xl bg-brand-primary text-brand-primary-foreground hover:bg-brand-primary/90 shadow font-semibold"
+                  type="submit"
+                  disabled={saving}
+                  className="gap-1.5 rounded-xl text-xs font-semibold shadow-sm px-6"
                 >
-                  <Save className="h-4 w-4" />
-                  <span>{savingSettings ? "Saving Changes..." : "Save All Settings"}</span>
-                </Button>
-
-                <Button
-                  onClick={handleResetDefaults}
-                  variant="outline"
-                  className="w-full gap-2 rounded-xl text-xs font-medium text-brand-muted hover:text-brand-text"
-                >
-                  <RotateCcw className="h-3.5 w-3.5" />
-                  <span>Reset to Defaults</span>
+                  <Save className="h-3.5 w-3.5" />
+                  <span>{saving ? "Saving Changes..." : "Save Section Settings"}</span>
                 </Button>
               </div>
-            </Card>
-
-            <div className="rounded-2xl border border-brand-border/60 bg-brand-surface/40 p-5 space-y-3">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-brand-muted">
-                Section Location Note
-              </h4>
-              <p className="text-xs text-brand-muted leading-relaxed">
-                As configured, this FAQ accordion automatically renders <strong>immediately after the clinic map section</strong> and right above the footer on your public site. It is not placed in the navigation bar.
-              </p>
-            </div>
-          </div>
-        </div>
+            </CardContent>
+          </Card>
+        </form>
       )}
 
-      {/* TAB 3: LIVE PREVIEW */}
+      {/* TAB 3: LIVE PREVIEW OF FAQ SECTION */}
       {activeTab === "preview" && (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between rounded-xl border border-brand-border bg-brand-surface p-4">
-            <div className="flex items-center gap-2">
-              <Eye className="h-5 w-5 text-brand-primary" />
-              <span className="font-semibold text-sm text-brand-text">Live Interactive Preview</span>
-              <Badge variant="outline" className="text-xs font-mono">
-                {settings.mode.toUpperCase()} MODE | {settings.layout.toUpperCase()} LAYOUT
-              </Badge>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="font-heading text-lg font-bold text-brand-text">
+                Live Interactive Component Preview
+              </h2>
+              <p className="text-xs text-brand-muted">
+                Showing how the section appears with current theme mode (
+                <span className="font-semibold text-brand-primary uppercase">
+                  {config.themeMode}
+                </span>
+                ). You can click questions to test the smooth expand/collapse.
+              </p>
             </div>
 
             <div className="flex items-center gap-2">
               <Button
-                variant={settings.mode === "light" ? "default" : "outline"}
                 size="sm"
-                onClick={() => setSettings((s) => ({ ...s, mode: "light" }))}
-                className="gap-1.5 h-8 text-xs rounded-lg"
+                variant="outline"
+                onClick={() => handleToggleTheme(config.themeMode === "dark" ? "light" : "dark")}
+                className="gap-1.5 rounded-xl text-xs"
               >
-                <Sun className="h-3.5 w-3.5" />
-                White Mode
-              </Button>
-              <Button
-                variant={settings.mode === "dark" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSettings((s) => ({ ...s, mode: "dark" }))}
-                className="gap-1.5 h-8 text-xs rounded-lg"
-              >
-                <Moon className="h-3.5 w-3.5" />
-                Dark Mode
+                {config.themeMode === "dark" ? (
+                  <>
+                    <Sun className="h-3.5 w-3.5 text-amber-500" />
+                    <span>Switch to Light Mode</span>
+                  </>
+                ) : (
+                  <>
+                    <Moon className="h-3.5 w-3.5 text-blue-400" />
+                    <span>Switch to Dark Mode</span>
+                  </>
+                )}
               </Button>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-brand-border overflow-hidden shadow-2xl">
-            <ClinicFaqSection
-              initialSettings={settings}
-              initialItems={items}
-              isPreview={true}
+          <div className="rounded-3xl border border-brand-border overflow-hidden shadow-lg">
+            <FaqSection
+              initialConfig={config}
+              hideOnFaqPage={false}
+              showAll={true}
+              overrideThemeMode={config.themeMode}
             />
           </div>
         </div>
       )}
 
-      {/* ADD / EDIT QUESTION MODAL */}
+      {/* MODAL: ADD / EDIT QUESTION */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-2xl rounded-2xl border border-brand-border bg-card p-6 shadow-2xl space-y-6">
-            <div className="flex items-center justify-between border-b border-border/60 pb-4">
-              <div>
-                <h3 className="font-heading text-lg font-bold text-foreground">
-                  {editingItem ? "Edit FAQ Question" : "Add New FAQ Question"}
-                </h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Questions will appear immediately in your website's FAQ accordion.
-                </p>
-              </div>
+          <div className="w-full max-w-xl rounded-3xl border border-brand-border bg-brand-surface p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between border-b border-brand-border pb-4">
+              <h3 className="font-heading text-base font-bold text-brand-text flex items-center gap-2">
+                <HelpCircle className="h-4 w-4 text-brand-primary" />
+                <span>{editingItem ? "Edit Question" : "Add New Question"}</span>
+              </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                className="text-brand-muted hover:text-brand-text p-1 text-sm font-semibold"
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleSubmitItem} className="space-y-4">
-              <div>
-                <label className="text-xs font-semibold text-foreground">Question</label>
+            <form onSubmit={handleSaveItem} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-brand-text">
+                  Question Text <span className="text-red-500">*</span>
+                </label>
                 <Input
                   required
-                  placeholder="e.g. How long does teeth whitening last?"
-                  value={formData.question}
-                  onChange={(e) => setFormData((f) => ({ ...f, question: e.target.value }))}
-                  className="mt-1.5 rounded-xl"
+                  value={formQuestion}
+                  onChange={(e) => setFormQuestion(e.target.value)}
+                  placeholder="e.g., How long does a full treatment take?"
+                  className="rounded-xl text-xs bg-brand-background border-brand-border"
                 />
               </div>
 
-              <div>
-                <label className="text-xs font-semibold text-foreground">Answer</label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-brand-text">
+                  Answer Text <span className="text-red-500">*</span>
+                </label>
                 <textarea
                   required
                   rows={4}
-                  placeholder="Provide a detailed, patient-friendly medical or practical explanation..."
-                  value={formData.answer}
-                  onChange={(e) => setFormData((f) => ({ ...f, answer: e.target.value }))}
-                  className="mt-1.5 w-full rounded-xl border border-border bg-background p-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-brand-primary/40 leading-relaxed"
+                  value={formAnswer}
+                  onChange={(e) => setFormAnswer(e.target.value)}
+                  placeholder="Provide a clear, detailed, and helpful answer for patients or clients..."
+                  className="w-full rounded-xl p-3 text-xs bg-brand-background border border-brand-border text-brand-text focus:outline-none focus:ring-2 focus:ring-brand-primary"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-semibold text-foreground">Category</label>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-brand-text">Category</label>
                   <Input
-                    placeholder="e.g. Preventive Care, Orthodontics, Billing"
-                    value={formData.category}
-                    onChange={(e) => setFormData((f) => ({ ...f, category: e.target.value }))}
-                    className="mt-1.5 rounded-xl"
+                    value={formCategory}
+                    onChange={(e) => setFormCategory(e.target.value)}
+                    placeholder="General, Treatments, Appointments, Pricing"
+                    className="rounded-xl text-xs bg-brand-background border-brand-border"
                   />
                 </div>
 
                 <div className="flex items-center gap-3 pt-6">
                   <input
                     type="checkbox"
-                    id="isActiveCheck"
-                    checked={formData.isActive}
-                    onChange={(e) => setFormData((f) => ({ ...f, isActive: e.target.checked }))}
-                    className="h-4 w-4 rounded border-border text-brand-primary focus:ring-brand-primary"
+                    id="formIsActive"
+                    checked={formIsActive}
+                    onChange={(e) => setFormIsActive(e.target.checked)}
+                    className="h-4 w-4 rounded border-brand-border text-brand-primary focus:ring-brand-primary"
                   />
-                  <label htmlFor="isActiveCheck" className="text-xs font-medium text-foreground cursor-pointer">
-                    Visible immediately on website
+                  <label htmlFor="formIsActive" className="text-xs font-medium text-brand-text select-none cursor-pointer">
+                    Visible on website (Active)
                   </label>
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-border/60">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-brand-border">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setIsModalOpen(false)}
-                  className="rounded-xl"
+                  className="rounded-xl text-xs"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
-                  className="rounded-xl bg-brand-primary text-brand-primary-foreground hover:bg-brand-primary/90"
+                  disabled={saving}
+                  className="rounded-xl text-xs font-semibold px-5"
                 >
-                  {editingItem ? "Update Question" : "Add Question"}
+                  {saving ? "Saving..." : editingItem ? "Update Question" : "Add Question"}
                 </Button>
               </div>
             </form>

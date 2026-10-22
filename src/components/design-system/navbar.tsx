@@ -35,6 +35,7 @@ export const defaultNavItems: NavItem[] = [
   { label: "Services", href: "/services" },
   { label: "About Us", href: "/about" },
   { label: "Blog", href: "/blog" },
+  { label: "FAQ", href: "/faq" },
 ];
 
 function ToothIcon({ className = "h-5 w-5" }: { className?: string }) {

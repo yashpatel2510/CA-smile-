@@ -1,62 +1,81 @@
 {
-  "settings": {
-    "title": "Frequently Asked Questions",
-    "subtitle": "Discover quick and comprehensive answers about our gentle treatments, pain-free dental procedures, and appointment scheduling.",
-    "supportText": "Can't find what you're looking for? Contact our",
-    "supportLinkText": "clinical support team",
-    "supportLinkHref": "/contact",
-    "mode": "light",
-    "layout": "grid",
-    "showFaqSection": true
-  },
-  "items": [
+  "tag": "• FAQS",
+  "headingLine1": "QUESTIONS,",
+  "headingLine2": "ANSWERED",
+  "subtitle": "Here are the most common questions before starting a project with us.",
+  "themeMode": "light",
+  "faqs": [
     {
       "id": "faq-1",
-      "question": "Are dental procedures and treatments painful?",
-      "answer": "Not at all. At our clinic, patient comfort is our utmost priority. We utilize computerized painless local anesthesia wands, topical numbing gels, and modern rotary instruments so that cleanings, fillings, root canals, and cosmetic treatments remain virtually pain-free.",
-      "category": "Comfort & Pain Relief",
+      "question": "How long does a full project take?",
+      "answer": "A standard project or comprehensive clinical transformation typically takes between 1 to 4 weeks depending on the treatment scope. Minor aesthetic touch-ups or single-visit restorations can often be completed in a single afternoon session, while custom aligners or multi-stage implant procedures are scheduled across comfortable milestones.",
+      "category": "General",
       "isActive": true,
+      "isFeatured": true,
       "order": 1
     },
     {
       "id": "faq-2",
-      "question": "How often should I schedule a dental checkup and cleaning?",
-      "answer": "We recommend a routine preventive examination and ultrasonic scaling every 6 months. Regular visits detect microscopic enamel demineralization before cavities form, remove hardened calculus, and protect your gums from periodontal disease.",
-      "category": "Preventive Care",
+      "question": "Do you offer ongoing support after launch?",
+      "answer": "Yes, absolutely. We provide post-treatment follow-up consultations, preventative maintenance schedules, and ongoing direct communication with our clinical coordinators to ensure lasting results, comfort, and peace of mind.",
+      "category": "General",
       "isActive": true,
+      "isFeatured": true,
       "order": 2
     },
     {
       "id": "faq-3",
-      "question": "What payment methods and financing options do you accept?",
-      "answer": "We accept all major credit and debit cards (Visa, MasterCard, RuPay), UPI, Net Banking, and cash. For comprehensive procedures like dental implants, full smile makeovers, and clear aligners, zero-interest flexible monthly installment plans (EMI) are also available.",
-      "category": "Billing & Payments",
+      "question": "Can we start with only branding or only website?",
+      "answer": "Yes, you can begin with a focused phase such as a comprehensive diagnostic consultation or initial aesthetic smile assessment. Once you're fully satisfied with the blueprint and visualization, you have complete freedom to proceed with subsequent treatments at your own pace.",
+      "category": "General",
       "isActive": true,
+      "isFeatured": true,
       "order": 3
     },
     {
       "id": "faq-4",
-      "question": "What should I do during a sudden dental emergency?",
-      "answer": "If you experience severe unmanageable toothache, facial swelling, a knocked-out tooth, or a broken crown, reach out immediately via our WhatsApp desk or emergency helpline. We reserve dedicated daily emergency slots for immediate relief.",
-      "category": "Emergency Care",
+      "question": "What do we need to provide before starting?",
+      "answer": "For clinical consultations, you simply need your identification and any prior medical or dental records if available. Everything else—including high-resolution 3D digital oral scans, computerized imaging, and diagnostic profiling—is handled on-site during your initial visit.",
+      "category": "General",
       "isActive": true,
+      "isFeatured": true,
       "order": 4
     },
     {
       "id": "faq-5",
-      "question": "How do Clear Aligners work compared to traditional metal braces?",
-      "answer": "Clear aligners are custom-crafted transparent trays that gradually guide your teeth into proper alignment without wires or metal brackets. They are virtually invisible, removable for eating and brushing, and engineered via high-precision 3D digital oral scans.",
-      "category": "Orthodontics",
+      "question": "Do you work with startups or only large companies?",
+      "answer": "We work with patients and clients of all backgrounds—from individual pediatric children and working professionals to entire corporate wellness programs. Our care plans and service packages are customized to fit your specific needs and timeline.",
+      "category": "General",
       "isActive": true,
+      "isFeatured": true,
       "order": 5
     },
     {
       "id": "faq-6",
-      "question": "How do you ensure a calm, fear-free experience for young children?",
-      "answer": "Our pediatric specialists use the proven 'Tell-Show-Do' technique. We introduce each dental instrument with kid-friendly names, encourage curiosity, and perform gentle, tear-free checkups in a warm, welcoming environment with positive rewards.",
-      "category": "Pediatric Dentistry",
+      "question": "How is pricing calculated?",
+      "answer": "Pricing is 100% transparent with zero hidden fees. After an initial clinical evaluation and 3D digital diagnosis, we provide a detailed itemized estimate outlining every phase, material option, and available flexible installment or insurance coverage plan before any work begins.",
+      "category": "General",
       "isActive": true,
+      "isFeatured": true,
       "order": 6
+    },
+    {
+      "id": "faq-7",
+      "question": "Are treatments and procedures painless?",
+      "answer": "Yes. We utilize advanced computerized painless local anesthesia, gentle rotary endodontics, and needle-free techniques designed specifically to eliminate discomfort and dental anxiety. Over 98% of our patients report feeling virtually nothing during procedures.",
+      "category": "Treatments",
+      "isActive": true,
+      "isFeatured": true,
+      "order": 7
+    },
+    {
+      "id": "faq-8",
+      "question": "How do I book or reschedule an appointment?",
+      "answer": "You can schedule instantly using our online booking calendar, message our 24/7 automated WhatsApp desk, or call reception directly. Rescheduling is easy and can be done anytime up to 2 hours prior to your scheduled slot.",
+      "category": "Appointments",
+      "isActive": true,
+      "isFeatured": true,
+      "order": 8
     }
   ]
 }
