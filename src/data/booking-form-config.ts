@@ -54,7 +54,7 @@ export const defaultBookingFormConfig: BookingFormConfig = {
   title: "Book Your Appointment",
   submitButtonText: "Submit Appointment Request",
   clinicName: "CA Smile Dental Clinic",
-  themeMode: "dark",
+  themeMode: "light",
   sideHeadingLine1: "Let's Make That",
   sideHeadingLine2: "Smile Shine!",
   sideWordmark: "brighter",

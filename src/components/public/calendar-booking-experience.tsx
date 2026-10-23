@@ -437,7 +437,7 @@ export function CalendarBookingExperience({
   const clinicEmail = brandConfig?.email || "contact@pediodent.example.com";
 
   // Dark Mode vs White / Light Mode
-  const isDark = (config.themeMode || "dark") === "dark";
+  const isDark = (config.themeMode || "light") === "dark";
 
   // Reusable input styling for Step 2 based on active theme mode
   const inputWrapperClass = `group relative rounded-xl border transition-all px-4 py-2.5 flex items-center justify-between ${
@@ -1016,7 +1016,7 @@ export function CalendarBookingExperience({
                   )}
 
                   {/* Bottom Row: Calendar on LEFT side, Submit on RIGHT side */}
-                  <div className="pt-3 flex items-center justify-between w-full gap-3 border-t border-white/10 dark:border-white/10">
+                  <div className={`pt-3 flex items-center justify-between w-full gap-3 border-t ${isDark ? "border-white/10" : "border-slate-200"}`}>
                     <div className="shrink-0 flex items-center justify-start">
                       <button
                         type="button"

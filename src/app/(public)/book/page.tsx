@@ -24,12 +24,12 @@ export const metadata: Metadata = {
 
 export default function BookAppointmentPage() {
   const config = getBookingFormConfig();
-  const isDark = (config.themeMode || "dark") === "dark";
+  const isDark = config.themeMode === "dark";
 
   return (
     <main
-      className={`min-h-[85vh] py-8 sm:py-12 transition-colors duration-200 ${
-        isDark ? "bg-[#0c0d0f]" : "bg-[#e2e8f0]"
+      className={`min-h-[85vh] py-8 sm:py-12 ${
+        isDark ? "bg-[#0c0d0f]" : "bg-[#f8fafc]"
       }`}
     >
       <SectionWrapper containerSize="default" className="py-0 sm:py-0 lg:py-0">

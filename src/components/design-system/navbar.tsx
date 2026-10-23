@@ -55,7 +55,7 @@ function ToothIcon({ className = "h-5 w-5" }: { className?: string }) {
 export function Navbar({
   clinicName = "PedioDent",
   navItems = defaultNavItems,
-  initialThemeMode = "dark",
+  initialThemeMode = "light",
 }: NavbarProps) {
   const pathname = usePathname();
   const { brandConfig } = useClinicTheme();
@@ -66,19 +66,6 @@ export function Navbar({
   useEffect(() => {
     setThemeMode(initialThemeMode);
   }, [initialThemeMode]);
-
-  useEffect(() => {
-    if (pathname === "/contact" || pathname === "/book") {
-      fetch("/api/booking-form/config")
-        .then((res) => (res.ok ? res.json() : null))
-        .then((data) => {
-          if (data?.config?.themeMode) {
-            setThemeMode(data.config.themeMode);
-          }
-        })
-        .catch(() => {});
-    }
-  }, [pathname]);
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const toggleButtonRef = useRef<HTMLButtonElement>(null);
@@ -157,10 +144,8 @@ export function Navbar({
 
   // Match the page background behind the floating navbar:
   // - In dark mode on /contact or /book: belt is deep black (#0c0d0f)
-  // - In white mode (Dress Gray) on /contact or /book: belt is Dress Gray (#e2e8f0)
-  const headerBeltBgClass = isContactOrBook
-    ? (isDark ? "bg-[#0c0d0f]" : "bg-[#e2e8f0]")
-    : "";
+  // - In light mode: seamless with page background, avoiding flickering between pages
+  const headerBeltBgClass = isContactOrBook && isDark ? "bg-[#0c0d0f]" : "";
 
   const isPillDark =
     !headerBgColor ||
@@ -175,13 +160,13 @@ export function Navbar({
 
   return (
     <header
-      className={`sticky top-0 z-50 relative w-full px-3 py-2.5 sm:px-6 sm:py-3.5 transition-all ${headerBeltBgClass}`}
+      className={`sticky top-0 z-50 relative w-full px-3 py-2.5 sm:px-6 sm:py-3.5 ${headerBeltBgClass}`}
     >
       {/* Floating Pill Container (Matching Sample Design) */}
       <div
-        className={`mx-auto flex h-14 sm:h-16 max-w-6xl items-center justify-between rounded-2xl px-3.5 sm:px-6 shadow-xs backdrop-blur-md transition-all duration-300 ${
-          isContactOrBook
-            ? (isDark ? "border border-white/10" : "border border-black/10 shadow-sm")
+        className={`mx-auto flex h-14 sm:h-16 max-w-6xl items-center justify-between rounded-2xl px-3.5 sm:px-6 shadow-xs backdrop-blur-md ${
+          isPillDark
+            ? "border border-white/10"
             : "border border-zinc-200/90 dark:border-zinc-800"
         }`}
         style={{

@@ -16,7 +16,7 @@ export default function PublicSiteLayout({
 
   return (
     <div className="flex min-h-screen flex-col bg-brand-background text-brand-text">
-      <Navbar initialThemeMode={bookingConfig.themeMode || "dark"} />
+      <Navbar initialThemeMode={bookingConfig.themeMode || "light"} />
       <main className="flex-1">{children}</main>
       <ClinicMapSection />
       <FaqSection initialConfig={faqsConfig} hideOnFaqPage={true} />
