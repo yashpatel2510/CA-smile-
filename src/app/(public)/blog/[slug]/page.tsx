@@ -197,7 +197,7 @@ export default function BlogPostDetailPage({ params }: BlogPostPageProps) {
               plans, and second opinions tailored to your health history.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-              <BookNowButton href="/book" text="Book Now" size="md" />
+              <BookNowButton href="/contact" text="Book Now" size="md" />
               <Link href="/services">
                 <Button variant="outline" size="md">
                   View Related Services

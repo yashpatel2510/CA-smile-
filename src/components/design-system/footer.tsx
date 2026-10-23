@@ -121,7 +121,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/book"
+                  href="/contact"
                   className="font-medium text-brand-primary transition-colors hover:text-brand-primary"
                 >
                   Book Appointment

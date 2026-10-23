@@ -152,7 +152,7 @@ export default function HomePage() {
               24/7 clinical care team for immediate guidance.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
-              <BookNowButton href="/book" text="Book Now" size="lg" />
+              <BookNowButton href="/contact" text="Book Now" size="lg" />
               <Link href="/contact">
                 <Button
                   variant="outline"

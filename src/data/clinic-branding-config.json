@@ -72,7 +72,7 @@
     "subtitleBoxMarginTop": "0px",
     "subtitleBoxMarginBottom": "0px",
     "ctaButtonText": "Book Your Appointment",
-    "ctaButtonUrl": "/book",
+    "ctaButtonUrl": "/contact",
     "ctaButtonBgColor": "#9e0000",
     "ctaButtonTextColor": "#ffffff",
     "ctaButtonBorderRadius": "14px",

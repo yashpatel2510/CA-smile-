@@ -144,7 +144,7 @@ export function DoctorOwnerProfile() {
                   </Button>
                 </a>
                 <BookNowButton
-                  href={`/book?doctor=${encodeURIComponent(doctorName)}`}
+                  href={`/contact?doctor=${encodeURIComponent(doctorName)}`}
                   text={`Consult ${doctorName}`}
                   size="sm"
                 />

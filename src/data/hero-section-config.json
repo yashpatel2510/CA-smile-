@@ -95,7 +95,7 @@
     "ctaButton": {
       "enabled": true,
       "text": "Book Your Appointment",
-      "url": "/book",
+      "url": "/contact",
       "openInNewTab": false,
       "icon": "arrow-up-right",
       "iconPosition": "right",
@@ -282,7 +282,7 @@
     "ctaButton": {
       "enabled": true,
       "text": "Book Your Appointment",
-      "url": "/book",
+      "url": "/contact",
       "openInNewTab": false,
       "icon": "arrow-up-right",
       "iconPosition": "right",

@@ -245,7 +245,7 @@ export default function AdminSettingsPage() {
     initialHero.ctaButtonText || "Book Your Appointment"
   );
   const [heroCtaButtonUrl, setHeroCtaButtonUrl] = useState(
-    initialHero.ctaButtonUrl || "/book"
+    initialHero.ctaButtonUrl || "/contact"
   );
   const [heroCtaButtonBgColor, setHeroCtaButtonBgColor] = useState(
     initialHero.ctaButtonBgColor || "#050505"
@@ -387,7 +387,7 @@ export default function AdminSettingsPage() {
         setHeroSubtitleBoxMarginTop(h.subtitleBoxMarginTop || "0px");
         setHeroSubtitleBoxMarginBottom(h.subtitleBoxMarginBottom || "0px");
         setHeroCtaButtonText(h.ctaButtonText || "Book Your Appointment");
-        setHeroCtaButtonUrl(h.ctaButtonUrl || "/book");
+        setHeroCtaButtonUrl(h.ctaButtonUrl || "/contact");
         setHeroCtaButtonBgColor(h.ctaButtonBgColor || "#050505");
         setHeroCtaButtonTextColor(h.ctaButtonTextColor || "#ffffff");
         setHeroCtaButtonBorderRadius(h.ctaButtonBorderRadius || "14px");
@@ -657,7 +657,7 @@ export default function AdminSettingsPage() {
     setHeroSubtitleBoxMarginTop("0px");
     setHeroSubtitleBoxMarginBottom("0px");
     setHeroCtaButtonText("Book Your Appointment");
-    setHeroCtaButtonUrl("/book");
+    setHeroCtaButtonUrl("/contact");
     setHeroCtaButtonBgColor("#050505");
     setHeroCtaButtonTextColor("#ffffff");
     setHeroCtaButtonBorderRadius("14px");
@@ -1527,7 +1527,7 @@ export default function AdminSettingsPage() {
                   <Input
                     value={heroCtaButtonUrl}
                     onChange={(e) => setHeroCtaButtonUrl(e.target.value)}
-                    placeholder="/book"
+                    placeholder="/contact"
                     className="font-mono text-xs"
                   />
                 </div>

@@ -773,7 +773,7 @@ function ShowcaseBlock({
                             <ArrowUpRight className="h-3.5 w-3.5 stroke-[2.5]" />
                           </Link>
                           <Link
-                            href={`/book?treatment=${encodeURIComponent(item.title)}`}
+                            href={`/contact?treatment=${encodeURIComponent(item.title)}`}
                             className="inline-flex items-center justify-center rounded-full border border-zinc-300/90 px-5 sm:px-6 py-2.5 text-xs sm:text-sm font-normal text-zinc-800 bg-white hover:border-black hover:text-black transition-all duration-200 active:scale-95 shadow-2xs"
                           >
                             Book an appointment
@@ -1057,7 +1057,7 @@ function DiagnosticFramerShowcase({
                             )}
                             <div className="mt-4 sm:mt-5">
                               <Link
-                                href={`/book?treatment=${encodeURIComponent(item.title)}`}
+                                href={`/contact?treatment=${encodeURIComponent(item.title)}`}
                                 className="inline-flex items-center justify-center rounded-full border border-zinc-300/90 px-5 sm:px-6 py-2 text-xs sm:text-sm font-normal text-zinc-800 bg-white hover:border-black hover:bg-black hover:text-white transition-all duration-200 active:scale-95 shadow-2xs"
                               >
                                 Book this diagnostic

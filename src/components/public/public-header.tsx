@@ -81,7 +81,7 @@ export function PublicHeader() {
               Staff Portal
             </Button>
           </Link>
-          <BookNowButton href="/book" text="Book Now" size="sm" />
+          <BookNowButton href="/contact" text="Book Now" size="sm" />
         </div>
       </div>
     </header>

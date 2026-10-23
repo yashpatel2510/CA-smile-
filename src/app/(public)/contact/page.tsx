@@ -19,7 +19,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ContactPage() {
+export default function ContactPage({
+  searchParams,
+}: {
+  searchParams?: {
+    treatment?: string;
+    service?: string;
+    doctor?: string;
+  };
+}) {
   const config = getBookingFormConfig();
   const isDark = config.themeMode === "dark";
 
@@ -30,7 +38,10 @@ export default function ContactPage() {
       }`}
     >
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-        <CalendarBookingExperience initialConfig={config} />
+        <CalendarBookingExperience
+          initialConfig={config}
+          initialService={searchParams?.treatment || searchParams?.service}
+        />
       </div>
     </div>
   );

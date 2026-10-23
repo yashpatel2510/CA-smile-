@@ -238,7 +238,7 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
             className="w-full flex justify-center mb-1"
           >
             <Link
-              href={hero.ctaButtonUrl || "/book"}
+              href={hero.ctaButtonUrl || "/contact"}
               className={`group relative inline-flex items-center font-medium shadow-lg transition-all duration-200 select-none hover:scale-[1.02] active:scale-[0.98] w-full max-w-[280px] sm:max-w-[300px] ${
                 hero.ctaButtonStyle !== "classic"
                   ? "h-11 sm:h-12 pl-5 pr-2 gap-3.5 text-xs sm:text-sm justify-between"
@@ -500,7 +500,7 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
             {/* Appointment CTA Button (Placed ON the image) */}
             <div className="w-full flex justify-center md:justify-start">
               <Link
-                href={hero.ctaButtonUrl || "/book"}
+                href={hero.ctaButtonUrl || "/contact"}
                 className={`group relative inline-flex items-center font-medium shadow-lg transition-all duration-200 select-none hover:scale-[1.02] hover:opacity-95 active:scale-[0.98] ${
                   hero.ctaButtonStyle !== "classic"
                     ? "h-11 sm:h-12 pl-5 pr-2 gap-3.5 text-xs sm:text-sm justify-between"

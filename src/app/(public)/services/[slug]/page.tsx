@@ -192,7 +192,7 @@ export default function ServiceDetailPage({ params }: ServicePageProps) {
                   </div>
 
                   <BookNowButton
-                    href={`/book?service=${encodeURIComponent(service.name)}`}
+                    href={`/contact?service=${encodeURIComponent(service.name)}`}
                     text="Book Now"
                     size="lg"
                     fullWidth

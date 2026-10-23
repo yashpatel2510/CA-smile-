@@ -114,7 +114,7 @@ export default function DoctorsPage() {
                     <span>Accepting New Patients</span>
                   </div>
                   <BookNowButton
-                    href={`/book?doctor=${encodeURIComponent(doctor.name)}`}
+                    href={`/contact?doctor=${encodeURIComponent(doctor.name)}`}
                     text="Book Now"
                     size="sm"
                   />

@@ -46,7 +46,7 @@ export default function NotFound() {
             </Button>
           </Link>
           <div className="grid grid-cols-2 gap-2">
-            <Link href="/book" className="block w-full">
+            <Link href="/contact" className="block w-full">
               <Button
                 variant="outline"
                 size="sm"

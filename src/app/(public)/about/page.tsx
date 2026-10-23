@@ -276,7 +276,7 @@ export default function AboutPage() {
                     Focus: {physician.specialty}
                   </span>
                   <BookNowButton
-                    href={`/book?doctor=${encodeURIComponent(physician.name)}`}
+                    href={`/contact?doctor=${encodeURIComponent(physician.name)}`}
                     text="Book Now"
                     size="sm"
                   />
