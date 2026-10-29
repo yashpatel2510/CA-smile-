@@ -5,8 +5,6 @@ import { ClinicThemeProvider } from "@/components/theme/clinic-theme-provider";
 import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
 import { getClinicBrandingConfig } from "@/lib/clinic-branding-store";
 
-import prisma from "@/lib/prisma";
-
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
@@ -15,23 +13,12 @@ export const metadata: Metadata = {
     "Modern pediatric & family dental clinic management and patient booking platform",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  let initialBranding = getClinicBrandingConfig();
-  try {
-    const clinic = await prisma.clinic.findFirst();
-    if (clinic?.brandingConfig && typeof clinic.brandingConfig === "object") {
-      initialBranding = {
-        ...initialBranding,
-        ...(clinic.brandingConfig as any),
-      };
-    }
-  } catch (err) {
-    console.warn("Could not read initial branding from database in RootLayout:", err);
-  }
+  const initialBranding = getClinicBrandingConfig();
 
   return (
     <html lang="en" className={inter.variable}>
