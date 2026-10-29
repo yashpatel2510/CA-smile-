@@ -3,9 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ClinicThemeProvider } from "@/components/theme/clinic-theme-provider";
 import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
-import { getClinicBrandingConfigAsync } from "@/lib/clinic-branding-store";
-
-export const dynamic = "force-dynamic";
+import { getClinicBrandingConfig } from "@/lib/clinic-branding-store";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -15,12 +13,12 @@ export const metadata: Metadata = {
     "Modern pediatric & family dental clinic management and patient booking platform",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const initialBranding = await getClinicBrandingConfigAsync();
+  const initialBranding = getClinicBrandingConfig();
 
   return (
     <html lang="en" className={inter.variable}>

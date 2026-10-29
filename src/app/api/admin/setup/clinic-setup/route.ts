@@ -2,13 +2,16 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import {
-  getClinicBrandingConfigAsync,
-  updateClinicBrandingConfigAsync,
-} from "@/lib/clinic-branding-store";
+import { getClinicBrandingConfig } from "@/lib/clinic-branding-store";
+import fs from "fs";
+import path from "path";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+const CONFIG_FILE_PATH = path.join(
+  process.cwd(),
+  "src",
+  "data",
+  "clinic-branding-config.json"
+);
 
 export async function GET() {
   try {
@@ -17,7 +20,7 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const branding = await getClinicBrandingConfigAsync();
+    const branding = getClinicBrandingConfig();
     const clinic = await prisma.clinic.findFirst().catch(() => null);
 
     const clinicName =
@@ -131,51 +134,63 @@ export async function POST(req: Request) {
       });
     }
 
-    // 2. Sync to branding store & PostgreSQL
+    // 2. Sync to JSON configuration file
     try {
-      const branding = await getClinicBrandingConfigAsync();
-      const partialUpdates: any = {};
-      if (clinicName) partialUpdates.clinicName = clinicName;
-      if (phone) partialUpdates.phone = phone;
-      if (emergencyPhone) partialUpdates.emergencyPhone = emergencyPhone;
-      if (email) partialUpdates.email = email;
-      if (address) partialUpdates.address = address;
-      if (city) partialUpdates.city = city;
-      if (state) partialUpdates.state = state;
-      if (postalCode) partialUpdates.postalCode = postalCode;
-      if (workingHours) partialUpdates.workingHours = workingHours;
-      if (doctorName) partialUpdates.doctorName = doctorName;
-      if (doctorTitle) partialUpdates.doctorTitle = doctorTitle;
-      if (doctorPhone) partialUpdates.doctorPhone = doctorPhone;
-      if (doctorBio) partialUpdates.doctorBio = doctorBio;
-      if (ownerName) partialUpdates.ownerName = ownerName;
-      if (ownerTitle) partialUpdates.ownerTitle = ownerTitle;
+      if (fs.existsSync(CONFIG_FILE_PATH)) {
+        const raw = fs.readFileSync(CONFIG_FILE_PATH, "utf-8");
+        const parsed = JSON.parse(raw);
 
-      if (branding.logo || clinicName || tagline) {
-        partialUpdates.logo = {
-          ...(branding.logo || {}),
-          ...(clinicName ? { clinicDisplayName: clinicName } : {}),
-          ...(tagline ? { tagline } : {}),
-        };
+        if (clinicName) parsed.clinicName = clinicName;
+        if (phone) parsed.phone = phone;
+        if (emergencyPhone) parsed.emergencyPhone = emergencyPhone;
+        if (email) parsed.email = email;
+        if (address) parsed.address = address;
+        if (city) parsed.city = city;
+        if (state) parsed.state = state;
+        if (postalCode) parsed.postalCode = postalCode;
+        if (workingHours) parsed.workingHours = workingHours;
+        if (doctorName) parsed.doctorName = doctorName;
+        if (doctorTitle) parsed.doctorTitle = doctorTitle;
+        if (doctorPhone) parsed.doctorPhone = doctorPhone;
+        if (doctorBio) parsed.doctorBio = doctorBio;
+        if (ownerName) parsed.ownerName = ownerName;
+        if (ownerTitle) parsed.ownerTitle = ownerTitle;
+
+        if (parsed.logo) {
+          if (clinicName) {
+            parsed.logo.clinicDisplayName = clinicName;
+          }
+          if (tagline) {
+            parsed.logo.tagline = tagline;
+          }
+        }
+
+        if (parsed.hero) {
+          if (workingHours) {
+            parsed.hero.topInfoWorkingHoursValue = workingHours;
+          }
+          if (city || address) {
+            parsed.hero.topInfoLocationValue = city
+              ? `ABOVE HDFC BANK, ${city.toUpperCase()}`
+              : parsed.hero.topInfoLocationValue;
+          }
+        }
+
+        fs.writeFileSync(
+          CONFIG_FILE_PATH,
+          JSON.stringify(parsed, null, 2),
+          "utf-8"
+        );
+
+        if (global.__clinicBrandingCache) {
+          global.__clinicBrandingCache = {
+            ...global.__clinicBrandingCache,
+            ...parsed,
+          };
+        }
       }
-
-      if (branding.hero || workingHours || city || address) {
-        partialUpdates.hero = {
-          ...(branding.hero || {}),
-          ...(workingHours ? { topInfoWorkingHoursValue: workingHours } : {}),
-          ...(city || address
-            ? {
-                topInfoLocationValue: city
-                  ? `ABOVE HDFC BANK, ${city.toUpperCase()}`
-                  : branding.hero?.topInfoLocationValue,
-              }
-            : {}),
-        };
-      }
-
-      await updateClinicBrandingConfigAsync(partialUpdates);
     } catch (fsErr) {
-      console.warn("Failed to sync branding config:", fsErr);
+      console.warn("Failed to sync branding config json:", fsErr);
     }
 
     return NextResponse.json({

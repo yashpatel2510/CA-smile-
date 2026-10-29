@@ -1,7 +1,5 @@
 import fs from "fs";
 import path from "path";
-import { prisma } from "@/lib/prisma";
-import { persistMediaAsync } from "@/lib/media-storage";
 
 export interface TreatmentItem {
   id: string;
@@ -158,58 +156,35 @@ const DATA_FILE_PATH = path.join(
   "treatments-data.json"
 );
 
-function parseStoreData(parsed: any): TreatmentsStoreData {
-  return {
-    settings: {
-      showDiagnostics:
-        parsed.settings?.showDiagnostics !== undefined
-          ? Boolean(parsed.settings.showDiagnostics)
-          : true,
-      showTreatments:
-        parsed.settings?.showTreatments !== undefined
-          ? Boolean(parsed.settings.showTreatments)
-          : true,
-      treatmentHeading: parsed.settings?.treatmentHeading || "Treatment",
-      treatmentSubtitle:
-        parsed.settings?.treatmentSubtitle ||
-        "Each tailored treatment is an investment in your health and aesthetics. We deliver results that not only heal — but impress.",
-      diagnosticHeading: parsed.settings?.diagnosticHeading || "Diagnostic",
-      diagnosticSubtitle:
-        parsed.settings?.diagnosticSubtitle ||
-        "Diagnostic methods allow us to accurately assess the condition of teeth, detect issues at early stages, and develop a personalized treatment plan",
-      transitionSpeed: parsed.settings?.transitionSpeed || "slow",
-    },
-    treatments: Array.isArray(parsed.treatments) ? parsed.treatments : [],
-    diagnostics: Array.isArray(parsed.diagnostics) ? parsed.diagnostics : [],
-  };
-}
-
-/**
- * Loads treatments & diagnostics data asynchronously from Supabase PostgreSQL.
- * Falls back to local JSON file if DB query fails.
- */
-export async function getTreatmentsStoreDataAsync(): Promise<TreatmentsStoreData> {
-  // 1. Try reading from Supabase PostgreSQL (survives Vercel deployments)
-  try {
-    const clinic = await prisma.clinic.findFirst({
-      select: { treatmentsData: true },
-    });
-    if (clinic && clinic.treatmentsData) {
-      const loaded = parseStoreData(clinic.treatmentsData);
-      global.__treatmentsStoreData = loaded;
-      return loaded;
-    }
-  } catch (dbErr) {
-    console.warn("Could not load treatments store data from database, falling back to disk:", dbErr);
-  }
-
-  // 2. Fallback to local JSON file
+export function getTreatmentsStoreData(): TreatmentsStoreData {
   try {
     if (fs.existsSync(DATA_FILE_PATH)) {
       const content = fs.readFileSync(DATA_FILE_PATH, "utf-8");
       const parsed = JSON.parse(content);
       if (parsed && Array.isArray(parsed.treatments)) {
-        const storeData = parseStoreData(parsed);
+        const storeData: TreatmentsStoreData = {
+          settings: {
+            showDiagnostics:
+              parsed.settings?.showDiagnostics !== undefined
+                ? Boolean(parsed.settings.showDiagnostics)
+                : true,
+            showTreatments:
+              parsed.settings?.showTreatments !== undefined
+                ? Boolean(parsed.settings.showTreatments)
+                : true,
+            treatmentHeading: parsed.settings?.treatmentHeading || "Treatment",
+            treatmentSubtitle:
+              parsed.settings?.treatmentSubtitle ||
+              "Each tailored treatment is an investment in your health and aesthetics. We deliver results that not only heal — but impress.",
+            diagnosticHeading: parsed.settings?.diagnosticHeading || "Diagnostic",
+            diagnosticSubtitle:
+              parsed.settings?.diagnosticSubtitle ||
+              "Diagnostic methods allow us to accurately assess the condition of teeth, detect issues at early stages, and develop a personalized treatment plan",
+            transitionSpeed: parsed.settings?.transitionSpeed || "slow",
+          },
+          treatments: parsed.treatments,
+          diagnostics: Array.isArray(parsed.diagnostics) ? parsed.diagnostics : [],
+        };
         global.__treatmentsStoreData = storeData;
         return storeData;
       }
@@ -239,111 +214,17 @@ export async function getTreatmentsStoreDataAsync(): Promise<TreatmentsStoreData
   };
 }
 
-/**
- * Synchronous getter: returns in-memory cache or loads from disk.
- * Kicks off background DB sync.
- */
-export function getTreatmentsStoreData(): TreatmentsStoreData {
-  if (global.__treatmentsStoreData) {
-    return global.__treatmentsStoreData;
-  }
-
-  try {
-    if (fs.existsSync(DATA_FILE_PATH)) {
-      const content = fs.readFileSync(DATA_FILE_PATH, "utf-8");
-      const parsed = JSON.parse(content);
-      if (parsed && Array.isArray(parsed.treatments)) {
-        const storeData = parseStoreData(parsed);
-        global.__treatmentsStoreData = storeData;
-        return storeData;
-      }
-    }
-  } catch {
-    // fallback
-  }
-
-  getTreatmentsStoreDataAsync().catch(() => {});
-
-  return {
-    settings: {
-      showDiagnostics: true,
-      showTreatments: true,
-      treatmentHeading: "Treatment",
-      treatmentSubtitle:
-        "Each tailored treatment is an investment in your health and aesthetics.",
-      diagnosticHeading: "Diagnostic",
-      diagnosticSubtitle:
-        "Diagnostic methods allow us to accurately assess the condition of teeth.",
-      transitionSpeed: "slow",
-    },
-    treatments: [],
-    diagnostics: [],
-  };
-}
-
-/**
- * Persists treatments data to Supabase database (and local file if writable).
- */
-export async function saveTreatmentsStoreDataAsync(data: TreatmentsStoreData): Promise<void> {
+export function saveTreatmentsStoreData(data: TreatmentsStoreData): void {
   global.__treatmentsStoreData = data;
-
-  // 1. Persist to Supabase PostgreSQL
-  try {
-    const existing = await prisma.clinic.findFirst({ select: { id: true } });
-    if (existing) {
-      await prisma.clinic.update({
-        where: { id: existing.id },
-        data: {
-          treatmentsData: data as any,
-        },
-      });
-    } else {
-      await prisma.clinic.create({
-        data: {
-          name: "CA Smile",
-          slug: "pediodent-main",
-          treatmentsData: data as any,
-        },
-      });
-    }
-  } catch (err) {
-    console.error("Failed to persist treatments store data to Supabase database:", err);
-  }
-
-  // 2. Best-effort write to local file if writable
   try {
     const dir = path.dirname(DATA_FILE_PATH);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
     fs.writeFileSync(DATA_FILE_PATH, JSON.stringify(data, null, 2), "utf-8");
-  } catch {
-    // Ignore read-only filesystem errors on Vercel
+  } catch (err) {
+    console.error("Failed to persist treatments store data to file:", err);
   }
-}
-
-export function saveTreatmentsStoreData(data: TreatmentsStoreData): void {
-  saveTreatmentsStoreDataAsync(data).catch((err) => {
-    console.error("Error in background saveTreatmentsStoreData:", err);
-  });
-}
-
-/**
- * Updates treatments & diagnostics settings (e.g. showDiagnostics toggle)
- * Persisted to Supabase DB.
- */
-export async function updateTreatmentsSettingsAsync(
-  newSettings: Partial<TreatmentsSettings>
-): Promise<TreatmentsSettings> {
-  const store = await getTreatmentsStoreDataAsync();
-  const current = store.settings || { showDiagnostics: true, showTreatments: true };
-  const updatedSettings: TreatmentsSettings = {
-    ...current,
-    ...newSettings,
-  };
-  store.settings = updatedSettings;
-  await saveTreatmentsStoreDataAsync(store);
-  return updatedSettings;
 }
 
 export function updateTreatmentsSettings(
@@ -358,49 +239,6 @@ export function updateTreatmentsSettings(
   store.settings = updatedSettings;
   saveTreatmentsStoreData(store);
   return updatedSettings;
-}
-
-export async function addTreatmentItemAsync(
-  type: "treatments" | "diagnostics",
-  item: Omit<TreatmentItem, "id"> & { id?: string }
-): Promise<TreatmentItem> {
-  const store = await getTreatmentsStoreDataAsync();
-  const slug = item.title
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)+/g, "");
-
-  // Persist base64 images to Supabase media table
-  let imageUrl = item.image || "/images/treatments/teeth-whitening.jpg";
-  if (imageUrl && imageUrl.startsWith("data:image/")) {
-    imageUrl = (await persistMediaAsync(imageUrl, "treatment")) || imageUrl;
-  }
-
-  const newItem: TreatmentItem = {
-    id: item.id || slug || `item-${Date.now()}`,
-    title: item.title,
-    subtitle: item.subtitle,
-    price: item.price,
-    category: item.category || (type === "treatments" ? "Treatment" : "Diagnostic"),
-    image: imageUrl,
-    whatItIs: item.whatItIs || item.paragraphs?.[0] || "",
-    howItWorks: item.howItWorks || item.paragraphs?.[1] || "",
-    benefits: item.benefits || "",
-    procedure: item.procedure || [],
-    result: item.result || "",
-    whatIfNotDone: item.whatIfNotDone || "",
-    paragraphs:
-      item.paragraphs && item.paragraphs.length > 0
-        ? item.paragraphs
-        : [item.whatItIs || "High-precision clinical care.", item.howItWorks || ""].filter(Boolean),
-    isActive: item.isActive !== undefined ? item.isActive : true,
-    order: (store[type]?.length || 0) + 1,
-  };
-
-  store[type] = [...store[type], newItem];
-  await saveTreatmentsStoreDataAsync(store);
-  return newItem;
 }
 
 export function addTreatmentItem(
@@ -427,10 +265,9 @@ export function addTreatmentItem(
     procedure: item.procedure || [],
     result: item.result || "",
     whatIfNotDone: item.whatIfNotDone || "",
-    paragraphs:
-      item.paragraphs && item.paragraphs.length > 0
-        ? item.paragraphs
-        : [item.whatItIs || "High-precision clinical care.", item.howItWorks || ""].filter(Boolean),
+    paragraphs: item.paragraphs && item.paragraphs.length > 0
+      ? item.paragraphs
+      : [item.whatItIs || "High-precision clinical care delivered with advanced dental technology.", item.howItWorks || ""].filter(Boolean),
     isActive: item.isActive !== undefined ? item.isActive : true,
     order: (store[type]?.length || 0) + 1,
   };
@@ -438,42 +275,6 @@ export function addTreatmentItem(
   store[type] = [...store[type], newItem];
   saveTreatmentsStoreData(store);
   return newItem;
-}
-
-export async function updateTreatmentItemAsync(
-  type: "treatments" | "diagnostics",
-  id: string,
-  updatedFields: Partial<TreatmentItem>
-): Promise<TreatmentItem | null> {
-  const store = await getTreatmentsStoreDataAsync();
-  const index = store[type].findIndex((it) => it.id === id);
-  if (index === -1) return null;
-
-  const current = store[type][index];
-
-  // Persist base64 images if updated
-  let finalImage = updatedFields.image !== undefined ? updatedFields.image : current.image;
-  if (finalImage && finalImage.startsWith("data:image/")) {
-    finalImage = (await persistMediaAsync(finalImage, "treatment")) || finalImage;
-  }
-
-  const updated: TreatmentItem = {
-    ...current,
-    ...updatedFields,
-    image: finalImage,
-    id: current.id,
-  };
-
-  if (updatedFields.whatItIs || updatedFields.howItWorks) {
-    updated.paragraphs = [
-      updated.whatItIs || current.whatItIs || current.paragraphs[0] || "",
-      updated.howItWorks || current.howItWorks || current.paragraphs[1] || "",
-    ].filter(Boolean);
-  }
-
-  store[type][index] = updated;
-  await saveTreatmentsStoreDataAsync(store);
-  return updated;
 }
 
 export function updateTreatmentItem(
@@ -489,9 +290,10 @@ export function updateTreatmentItem(
   const updated: TreatmentItem = {
     ...current,
     ...updatedFields,
-    id: current.id,
+    id: current.id, // Immutable ID for routing integrity
   };
 
+  // Keep paragraphs synced if whatItIs or howItWorks is updated
   if (updatedFields.whatItIs || updatedFields.howItWorks) {
     updated.paragraphs = [
       updated.whatItIs || current.whatItIs || current.paragraphs[0] || "",
@@ -502,20 +304,6 @@ export function updateTreatmentItem(
   store[type][index] = updated;
   saveTreatmentsStoreData(store);
   return updated;
-}
-
-export async function deleteTreatmentItemAsync(
-  type: "treatments" | "diagnostics",
-  id: string
-): Promise<boolean> {
-  const store = await getTreatmentsStoreDataAsync();
-  const initialLen = store[type].length;
-  store[type] = store[type].filter((it) => it.id !== id);
-  if (store[type].length !== initialLen) {
-    await saveTreatmentsStoreDataAsync(store);
-    return true;
-  }
-  return false;
 }
 
 export function deleteTreatmentItem(
@@ -532,18 +320,11 @@ export function deleteTreatmentItem(
   return false;
 }
 
-export async function getTreatmentByIdAsync(id: string): Promise<TreatmentItem | null> {
-  const store = await getTreatmentsStoreDataAsync();
-  const item = store.treatments.find((t) => t.id === id || t.id.toLowerCase() === id.toLowerCase());
-  if (item) return item;
-  const diag = store.diagnostics.find((d) => d.id === id || d.id.toLowerCase() === id.toLowerCase());
-  return diag || null;
-}
-
 export function getTreatmentById(id: string): TreatmentItem | null {
   const store = getTreatmentsStoreData();
   const item = store.treatments.find((t) => t.id === id || t.id.toLowerCase() === id.toLowerCase());
   if (item) return item;
+  // Fallback to check diagnostics as well if queried
   const diag = store.diagnostics.find((d) => d.id === id || d.id.toLowerCase() === id.toLowerCase());
   return diag || null;
 }
