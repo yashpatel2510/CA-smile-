@@ -21,7 +21,7 @@ import {
   Layers,
   Award,
 } from "lucide-react";
-import { getTreatmentsStoreData, getTreatmentById } from "@/lib/treatments-store";
+import { getTreatmentsStoreDataAsync, getTreatmentByIdAsync } from "@/lib/treatments-store";
 import { SectionWrapper } from "@/components/design-system/section-wrapper";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -38,7 +38,7 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata({
   params,
 }: TreatmentPageProps): Promise<Metadata> {
-  const treatment = getTreatmentById(params.slug);
+  const treatment = await getTreatmentByIdAsync(params.slug);
   if (!treatment) {
     return {
       title: "Treatment Not Found | White Dental Clinic",
@@ -59,9 +59,9 @@ export async function generateMetadata({
   };
 }
 
-export default function TreatmentDetailPage({ params }: TreatmentPageProps) {
-  const treatment = getTreatmentById(params.slug);
-  const store = getTreatmentsStoreData();
+export default async function TreatmentDetailPage({ params }: TreatmentPageProps) {
+  const treatment = await getTreatmentByIdAsync(params.slug);
+  const store = await getTreatmentsStoreDataAsync();
   const allTreatments = store.treatments.filter((t) => t.isActive !== false);
 
   if (!treatment) {

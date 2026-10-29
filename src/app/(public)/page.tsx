@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ClinicJsonLd } from "@/components/seo/clinic-json-ld";
 import { getAllPosts, getBlogSectionConfig } from "@/lib/blog";
-import { getTreatmentsStoreData } from "@/lib/treatments-store";
+import { getTreatmentsStoreDataAsync } from "@/lib/treatments-store";
 import { BlogResponsiveShowcase } from "@/components/public/blog-responsive-showcase";
 
 export const metadata: Metadata = {
@@ -39,14 +39,14 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default function HomePage() {
+export default async function HomePage() {
   const blogConfig = getBlogSectionConfig();
   const allBlogPosts = getAllPosts();
   const featuredPosts = allBlogPosts
     .filter((p) => p.featured)
     .concat(allBlogPosts.filter((p) => !p.featured))
     .slice(0, blogConfig.maxFeaturedCount || 3);
-  const store = getTreatmentsStoreData();
+  const store = await getTreatmentsStoreDataAsync();
   const showDiagnostics = store.settings?.showDiagnostics !== false;
   const showTreatments = store.settings?.showTreatments !== false;
 

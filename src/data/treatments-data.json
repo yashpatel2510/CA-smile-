@@ -1,6 +1,6 @@
 {
   "settings": {
-    "showDiagnostics": true,
+    "showDiagnostics": false,
     "showTreatments": true,
     "treatmentHeading": "Treatment",
     "treatmentSubtitle": "Each tailored treatment is an investment in your health and aesthetics. We deliver results that not only heal — but impress.",

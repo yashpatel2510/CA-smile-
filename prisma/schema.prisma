@@ -24,11 +24,13 @@ model Clinic {
   city        String?
   state       String?
   postalCode  String?
-  themeKey    String   @default("teal-serenity") // Links to theme.config.ts preset
-  logoUrl     String?
-  description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  themeKey       String   @default("teal-serenity") // Links to theme.config.ts preset
+  logoUrl        String?
+  description    String?
+  brandingConfig Json?
+  treatmentsData Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   // Relationships
   staffUsers            StaffUser[]
@@ -432,6 +434,14 @@ model ChatMessage {
 
   @@index([sessionId])
   @@index([createdAt])
+}
+
+model ClinicMedia {
+  key       String   @id
+  data      String   @db.Text
+  mimeType  String
+  size      Int
+  updatedAt DateTime @updatedAt
 }
 
 

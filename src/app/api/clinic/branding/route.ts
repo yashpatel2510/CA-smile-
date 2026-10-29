@@ -2,18 +2,28 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import {
-  getClinicBrandingConfig,
-  updateClinicBrandingConfig,
+  getClinicBrandingConfigAsync,
+  updateClinicBrandingConfigAsync,
   resetClinicBrandingConfig,
 } from "@/lib/clinic-branding-store";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET() {
   try {
-    const branding = getClinicBrandingConfig();
-    return NextResponse.json({
-      success: true,
-      branding,
-    });
+    const branding = await getClinicBrandingConfigAsync();
+    return NextResponse.json(
+      {
+        success: true,
+        branding,
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        },
+      }
+    );
   } catch (error) {
     console.error("Error retrieving clinic branding:", error);
     return NextResponse.json(
@@ -41,7 +51,7 @@ export async function PUT(req: NextRequest) {
     const body = await req.json();
 
     if (body.action === "reset") {
-      const resetConfig = resetClinicBrandingConfig();
+      const resetConfig = await resetClinicBrandingConfig();
       return NextResponse.json({
         success: true,
         message: "Clinic branding reset to defaults.",
@@ -56,13 +66,20 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const updated = updateClinicBrandingConfig(body);
+    const updated = await updateClinicBrandingConfigAsync(body);
 
-    return NextResponse.json({
-      success: true,
-      message: "Clinic branding and logo updated successfully.",
-      branding: updated,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Clinic branding and logo updated successfully.",
+        branding: updated,
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+        },
+      }
+    );
   } catch (error) {
     console.error("Error updating clinic branding:", error);
     return NextResponse.json(

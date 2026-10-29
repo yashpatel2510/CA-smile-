@@ -1,17 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  getTreatmentsStoreData,
-  addTreatmentItem,
-  updateTreatmentItem,
-  deleteTreatmentItem,
+  getTreatmentsStoreDataAsync,
+  addTreatmentItemAsync,
+  updateTreatmentItemAsync,
+  deleteTreatmentItemAsync,
+  updateTreatmentsSettingsAsync,
   AVAILABLE_CLINIC_IMAGES,
 } from "@/lib/treatments-store";
 
-import { updateTreatmentsSettings } from "@/lib/treatments-store";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function GET() {
   try {
-    const data = getTreatmentsStoreData();
+    const data = await getTreatmentsStoreDataAsync();
     return NextResponse.json({
       success: true,
       settings: data.settings || { showDiagnostics: true, showTreatments: true },
@@ -66,7 +68,7 @@ export async function PATCH(req: NextRequest) {
       newSettings.transitionSpeed = transitionSpeed;
     }
 
-    const updated = updateTreatmentsSettings(newSettings);
+    const updated = await updateTreatmentsSettingsAsync(newSettings);
 
     return NextResponse.json({
       success: true,
@@ -108,7 +110,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const item = addTreatmentItem(type === "diagnostics" ? "diagnostics" : "treatments", {
+    const item = await addTreatmentItemAsync(type === "diagnostics" ? "diagnostics" : "treatments", {
       title: title.trim(),
       subtitle: subtitle ? subtitle.trim() : undefined,
       price: price ? price.trim() : undefined,
@@ -171,7 +173,7 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const updated = updateTreatmentItem(
+    const updated = await updateTreatmentItemAsync(
       type === "diagnostics" ? "diagnostics" : "treatments",
       id,
       {
@@ -232,7 +234,7 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    const deleted = deleteTreatmentItem(type, id);
+    const deleted = await deleteTreatmentItemAsync(type, id);
 
     if (!deleted) {
       return NextResponse.json(

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { AboutVideoPlayer } from "@/components/public/about-video-player";
-import { getClinicBrandingConfig } from "@/lib/clinic-branding-store";
+import { getClinicBrandingConfigAsync } from "@/lib/clinic-branding-store";
 
 export const metadata: Metadata = {
   title: "About Us | CA Smile Dental Clinic Bilimora",
@@ -13,8 +13,8 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default function AboutPage() {
-  const brandConfig = getClinicBrandingConfig();
+export default async function AboutPage() {
+  const brandConfig = await getClinicBrandingConfigAsync();
   const aboutConfig = brandConfig?.aboutSection || {
     videoUrl: brandConfig?.aboutVideoUrl || "https://www.youtube.com/watch?v=mbBugyspbPE",
     videoTitle: "Take a Look Inside Our Clinic",

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { WhiteDentalTreatmentShowcase } from "@/components/public/white-dental-treatment-showcase";
-import { getTreatmentsStoreData } from "@/lib/treatments-store";
+import { getTreatmentsStoreDataAsync } from "@/lib/treatments-store";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Diagnostics & Dental Treatments | White Dental Clinic",
@@ -19,10 +20,8 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-import Link from "next/link";
-
-export default function ServicesPage() {
-  const store = getTreatmentsStoreData();
+export default async function ServicesPage() {
+  const store = await getTreatmentsStoreDataAsync();
   const showDiagnostics = store.settings?.showDiagnostics !== false;
   const showTreatments = store.settings?.showTreatments !== false;
 
