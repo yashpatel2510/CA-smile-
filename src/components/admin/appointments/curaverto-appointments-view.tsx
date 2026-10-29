@@ -1160,7 +1160,7 @@ export function CuravertoAppointmentsView() {
               </button>
             </div>
             <p className="mt-1 text-[13px] text-slate-500">
-              Manage today's patient flow, billing, and clinical notes.
+              Manage today&apos;s patient flow, billing, and clinical notes.
             </p>
           </div>
 
