@@ -10,6 +10,12 @@ import {
 } from "@/lib/database/database-backup-store";
 import { getExcelBackupStorageStats } from "@/lib/database/excel-backup-engine";
 import { getRecentHealthLogs } from "@/lib/database/health-logger";
+import {
+  getDatabaseModeConfig,
+  getActiveDatabaseMode,
+  maskDatabaseUrl,
+} from "@/lib/database/test-database-config";
+import { getTestDatabaseStats } from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
   try {
@@ -63,6 +69,25 @@ export async function GET(req: NextRequest) {
       diagnosticTip: primaryDb.diagnosticAdvice,
     };
 
+    const modeConfig = getDatabaseModeConfig();
+    const activeMode = getActiveDatabaseMode();
+    const testStats = await getTestDatabaseStats();
+
+    const testDbObj = {
+      id: "test",
+      name: "Test & Sandbox Database",
+      purpose: "Isolated testing environment for website bookings and form tests (real clinic records protected)",
+      provider: "Supabase / PostgreSQL",
+      databaseService: maskDatabaseUrl(modeConfig.testDatabaseUrl),
+      databaseName: "postgres",
+      status: modeConfig.testDatabaseConnected ? "CONNECTED" : (modeConfig.testDatabaseUrl ? "DISCONNECTED" : "NOT_CONFIGURED"),
+      activity: activeMode === "test" ? "ACTIVE" : "STANDBY",
+      isConnected: modeConfig.testDatabaseConnected,
+      hasUrl: Boolean(modeConfig.testDatabaseUrl),
+      lastPurgedAt: modeConfig.lastPurgedAt,
+      stats: testStats,
+    };
+
     return NextResponse.json({
       success: true,
       isAdmin,
@@ -72,10 +97,12 @@ export async function GET(req: NextRequest) {
         primaryDb.status === "CONNECTED"
           ? "Clinic PostgreSQL database connected and healthy"
           : primaryDb.message,
+      activeMode,
       overview: {
-        totalDatabases: 1,
-        connectedCount,
-        activeCount,
+        totalDatabases: modeConfig.testDatabaseUrl ? 2 : 1,
+        connectedCount: connectedCount + (modeConfig.testDatabaseConnected ? 1 : 0),
+        activeCount: 1,
+        activeMode,
         overallStatus: primaryDb.status === "CONNECTED" ? "HEALTHY" : "CRITICAL",
         lastChecked: lastCheckedFormatted,
         lastCheckedIso: now.toISOString(),
@@ -84,6 +111,14 @@ export async function GET(req: NextRequest) {
       databases: {
         primary: databaseObj,
         main: databaseObj,
+        test: testDbObj,
+      },
+      testDatabase: testDbObj,
+      modeConfig: {
+        activeMode,
+        testDatabaseConnected: modeConfig.testDatabaseConnected,
+        testDatabaseUrlMasked: maskDatabaseUrl(modeConfig.testDatabaseUrl),
+        lastPurgedAt: modeConfig.lastPurgedAt,
       },
       storage: healthReport.storage,
       recentLogs,

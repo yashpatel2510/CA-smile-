@@ -357,9 +357,9 @@ export default function AdminStaffPage() {
           </div>
 
           <div className="flex items-center justify-center gap-3 pt-2">
-            <Link href="/admin">
+            <Link href="/admin/today">
               <Button variant="outline" size="sm" className="text-xs">
-                Return to Dashboard
+                Return to Bookings
               </Button>
             </Link>
             <Link href="/admin/login">
@@ -669,7 +669,7 @@ export default function AdminStaffPage() {
                   Invite New Staff Member
                 </CardTitle>
                 <CardDescription className="text-xs">
-                  Grant access to the clinical admin dashboard and assign role
+                  Grant access to the clinical admin panel and assign role
                   privileges.
                 </CardDescription>
               </div>

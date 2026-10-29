@@ -108,7 +108,7 @@ export const TestimonialsColumn = (props: {
           ease: "linear",
           repeatType: "loop",
         }}
-        className="flex flex-col gap-6 pb-6 bg-transparent transition-colors duration-300 list-none m-0 p-0"
+        className="flex flex-col gap-4 pb-4 bg-transparent transition-colors duration-300 list-none m-0 p-0"
       >
         {[
           ...new Array(2).fill(0).map((_, index) => (
@@ -141,13 +141,13 @@ export const TestimonialsColumn = (props: {
                         damping: 17,
                       },
                     }}
-                    className="p-8 sm:p-10 rounded-3xl border border-neutral-200 dark:border-neutral-800 shadow-lg shadow-black/5 max-w-xs sm:max-w-sm w-full bg-white dark:bg-neutral-900 transition-all duration-300 cursor-default select-none group focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    className="p-5 sm:p-6 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-md shadow-black/5 w-full bg-white dark:bg-neutral-900 transition-all duration-300 cursor-default select-none group focus:outline-none focus:ring-2 focus:ring-primary/30"
                   >
                     <blockquote className="m-0 p-0">
                       {rating ? (
-                        <div className="flex items-center gap-1 text-amber-400 mb-4">
+                        <div className="flex items-center gap-1 text-amber-400 mb-2.5">
                           {[...Array(rating)].map((_, r) => (
-                            <Star key={r} className="h-4 w-4 fill-current" />
+                            <Star key={r} className="h-3.5 w-3.5 fill-current" />
                           ))}
                           {source === "GOOGLE" && (
                             <span className="ml-2 inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 bg-blue-50 dark:bg-blue-950/40 dark:text-blue-400 px-2 py-0.5 rounded-full">
@@ -175,10 +175,10 @@ export const TestimonialsColumn = (props: {
                         </div>
                       ) : null}
 
-                      <p className="text-neutral-600 dark:text-neutral-300 leading-relaxed font-normal m-0 transition-colors duration-300 text-sm sm:text-base italic">
+                      <p className="text-neutral-600 dark:text-neutral-300 leading-relaxed font-normal m-0 transition-colors duration-300 text-xs sm:text-sm italic">
                         &ldquo;{text}&rdquo;
                       </p>
-                      <footer className="flex items-center gap-3 mt-6 pt-4 border-t border-neutral-100 dark:border-neutral-800">
+                      <footer className="flex items-center gap-2.5 mt-4 pt-3 border-t border-neutral-100 dark:border-neutral-800">
                         {image ? (
                           <img
                             width={40}
@@ -216,6 +216,7 @@ export const TestimonialsColumn = (props: {
 export interface TestimonialsSectionProps {
   testimonialsList?: Testimonial[];
   title?: string;
+  logoUrl?: string;
   googleMapsUrl?: string;
   showToggle?: boolean;
   defaultDark?: boolean;
@@ -224,6 +225,7 @@ export interface TestimonialsSectionProps {
 export const TestimonialsSection = ({
   testimonialsList,
   title = "What Our Patients Say",
+  logoUrl,
   googleMapsUrl = "https://share.google/KRr7QvSMEB4CjYaYN",
   showToggle = false,
   defaultDark = false,
@@ -233,6 +235,10 @@ export const TestimonialsSection = ({
   useEffect(() => {
     setIsDark(defaultDark);
   }, [defaultDark]);
+
+  const logoSrc =
+    logoUrl ||
+    (isDark ? "/images/ca-smile-logo-dark.png" : "/images/ca-smile-logo-light.png");
 
   const activeList =
     testimonialsList && testimonialsList.length > 0
@@ -251,8 +257,9 @@ export const TestimonialsSection = ({
   return (
     <div className={isDark ? "dark" : ""}>
       <section
+        id="testimonials-section-inner"
         aria-labelledby="testimonials-heading"
-        className="bg-background dark:bg-neutral-950 text-brand-text dark:text-neutral-100 py-16 sm:py-24 relative overflow-hidden transition-colors duration-300 border-t border-border/40 dark:border-neutral-900"
+        className="relative overflow-hidden bg-background dark:bg-neutral-950 text-brand-text dark:text-neutral-100 pt-8 sm:pt-12 md:pt-14 pb-14 sm:pb-20 transition-colors duration-300 scroll-mt-28 border-0"
       >
         {/* Floating Dark Mode Toggle (optional) */}
         {showToggle && (
@@ -266,27 +273,30 @@ export const TestimonialsSection = ({
           </button>
         )}
 
+        {/* Ambient Top Vignette for seamless dark atmosphere */}
+        <div className="pointer-events-none absolute top-0 inset-x-0 h-8 bg-gradient-to-b from-neutral-950 via-neutral-950/60 to-transparent z-10" />
+
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.15 }}
           transition={{
-            duration: 0.8,
+            duration: 0.6,
             ease: [0.16, 1, 0.3, 1],
           }}
-          className="container px-4 z-10 mx-auto"
+          className="w-full max-w-6xl px-3.5 sm:px-6 z-10 mx-auto"
         >
-          <div className="flex flex-col items-center justify-center max-w-[620px] mx-auto mb-10 text-center">
+          <div className="flex flex-col items-center justify-center max-w-[620px] mx-auto mb-6 text-center">
             <h2
               id="testimonials-heading"
-              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-center text-neutral-900 dark:text-white transition-colors"
+              className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-center text-neutral-900 dark:text-white transition-colors"
             >
               {title}
             </h2>
 
             {/* Add Google Review Button after Text */}
             {googleMapsUrl && (
-              <div className="mt-5 flex justify-center">
+              <div className="mt-4 sm:mt-5 flex justify-center">
                 <a
                   href={googleMapsUrl}
                   target="_blank"
@@ -319,23 +329,26 @@ export const TestimonialsSection = ({
           </div>
 
           <div
-            className="flex justify-center gap-6 mt-10 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)] max-h-[740px] overflow-hidden"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-6 [mask-image:linear-gradient(to_bottom,transparent,black_8%,black_92%,transparent)] max-h-[460px] sm:max-h-[500px] lg:max-h-[520px] overflow-hidden w-full"
             role="region"
             aria-label="Scrolling Testimonials"
           >
-            <TestimonialsColumn testimonials={finalFirst} duration={16} />
+            <TestimonialsColumn testimonials={finalFirst} duration={16} className="w-full" />
             <TestimonialsColumn
               testimonials={finalSecond}
-              className="hidden md:block"
+              className="hidden md:block w-full"
               duration={21}
             />
             <TestimonialsColumn
               testimonials={finalThird}
-              className="hidden lg:block"
+              className="hidden lg:block w-full"
               duration={18}
             />
           </div>
         </motion.div>
+
+        {/* Ambient Bottom Gradient to ensure zero light leakage */}
+        <div className="pointer-events-none absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-neutral-950 via-neutral-950/60 to-transparent z-10" />
       </section>
     </div>
   );

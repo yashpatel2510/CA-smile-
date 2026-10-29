@@ -26,9 +26,25 @@ export interface ClinicLogoConfig {
   clinicDisplayName: string;
   mobileClinicDisplayName?: string;
   tagline: string;
+  logoHeight?: number;
+  logoSize?: number;
 }
 
+export type HeroVariant = "default" | "blank1" | "blank2";
+
 export interface HeroSectionConfig {
+  // Hero Variant: "default" (Classic Doctor Cutout), "blank1" (Blank Hero 1), "blank2" (Blank Hero 2)
+  heroVariant?: HeroVariant;
+
+  // Blank Hero Customizable Fields (optional)
+  blankHeroTitle?: string;
+  blankHeroSubtitle?: string;
+  blankHeroCtaText?: string;
+  blankHeroCtaUrl?: string;
+  blankHeroMinHeight?: string;
+  blankHeroBgColor?: string;
+  blankHeroTextColor?: string;
+
   // Top Information Row (Working hours on left, Location on right on top of image)
   topInfoEnabled?: boolean;
   topInfoWorkingHoursLabel?: string;
@@ -107,6 +123,14 @@ export interface HeroSectionConfig {
 }
 
 export const DEFAULT_HERO_CONFIG: HeroSectionConfig = {
+  heroVariant: "default",
+  blankHeroTitle: "",
+  blankHeroSubtitle: "",
+  blankHeroCtaText: "",
+  blankHeroCtaUrl: "/contact",
+  blankHeroMinHeight: "520px",
+  blankHeroBgColor: "#ffffff",
+  blankHeroTextColor: "#18181b",
   topInfoEnabled: true,
   topInfoWorkingHoursLabel: "Working hours",
   topInfoWorkingHoursValue: "Mon - Sat 8:00-20:00",
@@ -196,12 +220,55 @@ export interface ClinicBrandConfig {
   headerContactBtnBgColor?: string; // Customizable header contact button background color
   headerContactBtnTextColor?: string; // Customizable header contact button text color
   hero?: HeroSectionConfig; // Customizable Hero Page Section
+  aboutVideoUrl?: string; // YouTube or video URL for About Us page
+  aboutSection?: AboutSectionConfig; // Customizable About Us Video & Page Section
+
+  // Customizable Map & Location Section
+  mapSectionBgColor?: string; // Background color for map section (default #ffffff)
+  mapStyle?: "dark" | "light"; // Visual styling for map (dark road vs standard light)
+  whatsappPhone?: string; // WhatsApp number or link
+  instagramUrl?: string; // Instagram profile link
+  googleMapsUrl?: string; // Direct link for Get Directions / Open Map
+  mapExactAddress?: string; // Full address string for pin positioning and speech bubble
+  mapSectionTitle?: string; // Header title (default "ADDRESS")
+  mapCardTitle?: string; // Clinic name shown on speech bubble (default "CA Smile Dental Clinic")
+  mapCardImage?: string; // Thumbnail image for clinic card
+  mapPinPulse?: boolean; // Enable/disable pulsing halo animation
+  mapPinColor?: string; // Custom pin color (default "#E53935")
 }
+
+export interface AboutSectionConfig {
+  videoUrl?: string; // YouTube or MP4 video URL
+  videoTitle?: string; // Main heading in About Us video section
+  videoSubtitle?: string; // Small badge/tag above heading
+  badgeText?: string; // Live status caption
+  autoplayOnScroll?: boolean; // Autoplays when scrolled into view
+  videoSize?: "max-w-4xl" | "max-w-5xl" | "max-w-6xl" | "max-w-full"; // Container size
+  defaultQuality?: "hd1080" | "hd720" | "medium" | "auto"; // Playback quality
+  hideYouTubeBranding?: boolean; // Crop/shield YouTube channel avatar & watermark
+  startMuted?: boolean; // Start video muted (required for browser autoplay)
+  showStatusPill?: boolean; // Show playing/paused pill
+}
+
+export const DEFAULT_ABOUT_CONFIG: AboutSectionConfig = {
+  videoUrl: "https://www.youtube.com/watch?v=mbBugyspbPE",
+  videoTitle: "Take a Look Inside Our Clinic",
+  videoSubtitle: "Clinic Tour & Experience",
+  badgeText: "Autoplays on scroll • Interactive play & pause",
+  autoplayOnScroll: true,
+  videoSize: "max-w-4xl",
+  defaultQuality: "hd1080",
+  hideYouTubeBranding: true,
+  startMuted: true,
+  showStatusPill: true,
+};
 
 export const DEFAULT_CLINIC_BRANDING: ClinicBrandConfig = {
   themeKey: "teal-serenity",
   clinicName: "PedioDent",
   slug: "pediodent-main",
+  aboutVideoUrl: "https://www.youtube.com/watch?v=mbBugyspbPE",
+  aboutSection: DEFAULT_ABOUT_CONFIG,
   email: "contact@pediodent.example.com",
   phone: "(800) 555-CLINIC",
   emergencyPhone: "(800) 555-CLINIC",
@@ -226,6 +293,19 @@ export const DEFAULT_CLINIC_BRANDING: ClinicBrandConfig = {
   headerTextColor: "#18181b",
   headerContactBtnBgColor: "#000000",
   headerContactBtnTextColor: "#ffffff",
+  mapSectionBgColor: "#ffffff",
+  mapStyle: "dark",
+  whatsappPhone: "+91 72260 98074",
+  instagramUrl: "https://instagram.com",
+  googleMapsUrl:
+    "https://www.google.com/maps/place/CA+Smile+Multispeciality+Dental+Clinic/data=!4m2!3m1!1s0x0:0x3a288255f324c8de?sa=X&ved=1t:2428&ictx=111",
+  mapExactAddress:
+    "1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society, Bilimora, Gujarat 396321",
+  mapSectionTitle: "ADDRESS",
+  mapCardTitle: "CA Smile Dental Clinic",
+  mapCardImage: "/images/ca-smile-clinic-building.jpg",
+  mapPinPulse: true,
+  mapPinColor: "#E53935",
   logo: {
     type: "ICON",
     iconName: "Smile",
@@ -236,6 +316,8 @@ export const DEFAULT_CLINIC_BRANDING: ClinicBrandConfig = {
     showClinicName: true,
     clinicDisplayName: "PedioDent",
     tagline: "Dental Clinic",
+    logoHeight: 36,
+    logoSize: 36,
   },
   hero: DEFAULT_HERO_CONFIG,
 };

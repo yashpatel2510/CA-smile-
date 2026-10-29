@@ -36,7 +36,7 @@ export function TreatmentReviewsShowcase({
   }));
 
   return (
-    <div id="patient-reviews" className="w-full">
+    <div id="patient-reviews" className="w-full scroll-mt-28">
       <Testimonials
         testimonialsList={testimonialsList}
         title={title}

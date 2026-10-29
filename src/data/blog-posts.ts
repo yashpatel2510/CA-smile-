@@ -5,10 +5,13 @@ export interface BlogPost {
   publishedAt: string;
   readTime: string;
   category: string;
+  image: string;
+  featured?: boolean;
   author: {
     name: string;
     role: string;
     credentials: string;
+    avatar?: string;
   };
   tags: string[];
   content: string[];
@@ -24,6 +27,8 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "October 8, 2026",
     readTime: "5 min read",
     category: "Pediatric Dentistry",
+    image: "/images/treatments/children-dentistry.jpg",
+    featured: true,
     author: {
       name: "Dr. Sankar, BDS, MDS",
       role: "Chief Dental Surgeon & Pediatric Specialist",
@@ -48,6 +53,8 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "October 2, 2026",
     readTime: "6 min read",
     category: "Orthodontics",
+    image: "/images/treatments/orthodontics.jpg",
+    featured: true,
     author: {
       name: "Dr. Deep, MDS",
       role: "Lead Orthodontist & Dentofacial Specialist",
@@ -72,6 +79,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "September 24, 2026",
     readTime: "4 min read",
     category: "Preventive Care",
+    image: "/images/treatments/tooth-fillings.jpg",
     author: {
       name: "Dr. Sankar, BDS, MDS",
       role: "Chief Dental Surgeon",
@@ -97,6 +105,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "September 16, 2026",
     readTime: "5 min read",
     category: "Cosmetic Dentistry",
+    image: "/images/treatments/teeth-whitening.jpg",
     author: {
       name: "Dr. Deep, MDS",
       role: "Cosmetic Dental Consultant",
@@ -120,6 +129,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "September 10, 2026",
     readTime: "7 min read",
     category: "Restorative Dentistry",
+    image: "/images/treatments/dental-implants.jpg",
     author: {
       name: "Dr. Sankar, BDS, MDS",
       role: "Chief Dental Surgeon & Implantologist",
@@ -143,6 +153,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "August 20, 2026",
     readTime: "5 min read",
     category: "Oral-Systemic Health",
+    image: "/images/treatments/periodontal-examination.jpg",
     author: {
       name: "Dr. Sankar & Medical Associates",
       role: "Director of Dental Surgery",
@@ -171,6 +182,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "August 8, 2026",
     readTime: "6 min read",
     category: "Preventive Cardiology",
+    image: "/images/treatments/computed-tomography.jpg",
     author: {
       name: "Clinical Cardiology Advisory Team",
       role: "Cardiovascular Health Consultant",

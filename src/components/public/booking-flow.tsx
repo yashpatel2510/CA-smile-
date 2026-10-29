@@ -307,7 +307,7 @@ export function BookingFlow() {
             <Link href="/">
               <Button variant="outline">Return to Home</Button>
             </Link>
-            <Link href="/admin/appointments">
+            <Link href="/admin/appointment">
               <Button variant="primary">View in Admin Portal</Button>
             </Link>
           </div>

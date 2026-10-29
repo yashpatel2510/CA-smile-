@@ -34,6 +34,13 @@ export interface DatabaseTargetHealthResult {
   diagnosticAdvice?: string;
 }
 
+export interface TableStorageInfo {
+  tableName: string;
+  totalSize: string;
+  sizeBytes: number;
+  rowCount: number;
+}
+
 export interface StorageMetricsResult {
   available: boolean;
   usedBytes: number | null;
@@ -44,6 +51,7 @@ export interface StorageMetricsResult {
   statusLevel: "NORMAL" | "WARNING" | "HIGH" | "CRITICAL" | "UNAVAILABLE";
   statusLabel: string;
   checkedAt: string;
+  tables?: TableStorageInfo[];
   message?: string;
 }
 
@@ -396,6 +404,37 @@ export async function getDatabaseStorageMetrics(): Promise<StorageMetricsResult>
         statusLabel = "Warning";
       }
 
+      // Query table breakdown for top tables
+      let tables: TableStorageInfo[] = [];
+      try {
+        const tableRes = await withTimeout(
+          primaryClient.$queryRawUnsafe<
+            Array<{ table_name: string; total_size: string; size_bytes: string | number; row_count: string | number }>
+          >(
+            `SELECT 
+              relname as table_name, 
+              pg_size_pretty(pg_total_relation_size(relid)) as total_size, 
+              pg_total_relation_size(relid)::text as size_bytes,
+              n_live_tup::text as row_count 
+            FROM pg_stat_user_tables 
+            WHERE relname NOT LIKE 'pg_%'
+            ORDER BY pg_total_relation_size(relid) DESC
+            LIMIT 8;`
+          ),
+          2500
+        );
+        if (Array.isArray(tableRes)) {
+          tables = tableRes.map((t) => ({
+            tableName: t.table_name,
+            totalSize: t.total_size,
+            sizeBytes: Number(t.size_bytes),
+            rowCount: Number(t.row_count || 0),
+          }));
+        }
+      } catch {
+        // Table breakdown query optional
+      }
+
       return {
         available: true,
         usedBytes: bytes,
@@ -406,6 +445,7 @@ export async function getDatabaseStorageMetrics(): Promise<StorageMetricsResult>
         statusLevel,
         statusLabel,
         checkedAt: now,
+        tables,
       };
     }
   } catch {

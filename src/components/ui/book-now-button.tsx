@@ -1,7 +1,11 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useContactModal } from "@/components/public/contact-modal";
 
 export interface BookNowButtonProps {
   href?: string;
@@ -13,6 +17,7 @@ export interface BookNowButtonProps {
   rel?: string;
   type?: "button" | "submit" | "reset";
   disabled?: boolean;
+  loading?: boolean;
   fullWidth?: boolean;
   "aria-label"?: string;
 }
@@ -32,11 +37,40 @@ export const BookNowButton = React.forwardRef<
       rel,
       type = "button",
       disabled = false,
+      loading = false,
       fullWidth = false,
       "aria-label": ariaLabel,
     },
     ref
   ) => {
+    const pathname = usePathname();
+    const { openContactModal } = useContactModal();
+
+    const handleInterceptClick = (e: React.MouseEvent) => {
+      if (onClick) {
+        onClick(e);
+      }
+      if (
+        !e.defaultPrevented &&
+        href &&
+        (href === "/contact" || href.startsWith("/contact?"))
+      ) {
+        if (pathname !== "/contact") {
+          e.preventDefault();
+          let service: string | undefined;
+          try {
+            if (href.includes("?")) {
+              const params = new URLSearchParams(href.split("?")[1]);
+              service =
+                params.get("treatment") ||
+                params.get("service") ||
+                undefined;
+            }
+          } catch (_) {}
+          openContactModal({ service });
+        }
+      }
+    };
     const sizeConfig = {
       sm: {
         container: "h-9 pl-4 pr-1.5 gap-2.5 text-xs rounded-xl",
@@ -63,7 +97,7 @@ export const BookNowButton = React.forwardRef<
       "bg-[#881318] hover:bg-[#99171d] active:scale-[0.98]",
       "border border-[#5c080d]/60 shadow-red-950/30",
       fullWidth ? "w-full" : "w-auto",
-      disabled && "opacity-50 pointer-events-none",
+      (disabled || loading) && "opacity-60 pointer-events-none cursor-not-allowed",
       currentSize.container,
       className
     );
@@ -80,12 +114,21 @@ export const BookNowButton = React.forwardRef<
           )}
           aria-hidden="true"
         >
-          <ArrowRight
-            className={cn(
-              "stroke-[2.2] text-[#881318] transition-colors",
-              currentSize.icon
-            )}
-          />
+          {loading ? (
+            <Loader2
+              className={cn(
+                "animate-spin stroke-[2.2] text-[#881318]",
+                currentSize.icon
+              )}
+            />
+          ) : (
+            <ArrowRight
+              className={cn(
+                "stroke-[2.2] text-[#881318] transition-colors",
+                currentSize.icon
+              )}
+            />
+          )}
         </span>
       </>
     );
@@ -116,7 +159,7 @@ export const BookNowButton = React.forwardRef<
         <Link
           ref={ref as React.Ref<HTMLAnchorElement>}
           href={href}
-          onClick={onClick}
+          onClick={handleInterceptClick}
           target={target}
           rel={rel}
           className={baseClasses}
@@ -131,8 +174,8 @@ export const BookNowButton = React.forwardRef<
       <button
         ref={ref as React.Ref<HTMLButtonElement>}
         type={type}
-        onClick={onClick}
-        disabled={disabled}
+        onClick={handleInterceptClick}
+        disabled={disabled || loading}
         className={baseClasses}
         aria-label={ariaLabel || text}
       >

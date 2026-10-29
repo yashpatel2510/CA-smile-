@@ -90,23 +90,42 @@ export async function PATCH(
     const {
       notes,
       preferredDoctor,
+      serviceName,
+      serviceId,
+      reason,
       totalAmount,
       paidAmount,
       paymentStatus,
       timeRange,
+      startTime,
+      endTime,
     } = body;
 
     let updated: any;
     try {
+      let resolvedServiceId = serviceId;
+      if (!resolvedServiceId && serviceName) {
+        const foundService = await prisma.service.findFirst({
+          where: { name: { contains: serviceName, mode: "insensitive" } },
+        });
+        if (foundService) {
+          resolvedServiceId = foundService.id;
+        }
+      }
+
       updated = await prisma.appointment.update({
         where: { id: appointmentId },
         data: {
           notes: notes || undefined,
           preferredDoctor: preferredDoctor || undefined,
+          reason: reason || serviceName || undefined,
+          serviceId: resolvedServiceId || undefined,
           totalAmount: typeof totalAmount === "number" ? totalAmount : undefined,
           paidAmount: typeof paidAmount === "number" ? paidAmount : undefined,
           paymentStatus: paymentStatus || undefined,
           timeRange: timeRange || undefined,
+          startTime: startTime ? new Date(startTime) : undefined,
+          endTime: endTime ? new Date(endTime) : undefined,
         },
         include: {
           patient: true,
@@ -120,10 +139,17 @@ export async function PATCH(
       if (existing) {
         if (notes) existing.notes = notes;
         if (preferredDoctor) existing.preferredDoctor = preferredDoctor;
+        if (serviceName) {
+          existing.reason = serviceName;
+          if (existing.service) existing.service.name = serviceName;
+          else existing.service = { name: serviceName };
+        }
         if (typeof totalAmount === "number") existing.totalAmount = totalAmount;
         if (typeof paidAmount === "number") existing.paidAmount = paidAmount;
         if (paymentStatus) existing.paymentStatus = paymentStatus;
         if (timeRange) existing.timeRange = timeRange;
+        if (startTime) existing.startTime = startTime;
+        if (endTime) existing.endTime = endTime;
         inMemoryStore.saveAppointment(existing);
         updated = existing;
       }

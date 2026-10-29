@@ -1,0 +1,12 @@
+{
+  "currentToken": 0,
+  "currentPatient": null,
+  "doctorName": "Dr. Deep Patel",
+  "service": "General Dental Consultation & Checkup",
+  "roomName": "Consultation Room 1",
+  "status": "WAITING",
+  "upcoming": [],
+  "callTimestamp": 1793263715798,
+  "dateStr": "2026-10-29",
+  "updatedAt": "2026-10-29T08:48:35.798Z"
+}

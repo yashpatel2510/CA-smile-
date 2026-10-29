@@ -1,5 +1,6 @@
 import React from "react";
 import { AdminSessionProvider } from "@/components/admin/admin-session-provider";
+import { AdminSidebarProvider } from "@/components/admin/admin-sidebar-context";
 import { AdminShell } from "@/components/admin/admin-shell";
 
 export default function AdminLayout({
@@ -9,7 +10,9 @@ export default function AdminLayout({
 }) {
   return (
     <AdminSessionProvider>
-      <AdminShell>{children}</AdminShell>
+      <AdminSidebarProvider>
+        <AdminShell>{children}</AdminShell>
+      </AdminSidebarProvider>
     </AdminSessionProvider>
   );
 }

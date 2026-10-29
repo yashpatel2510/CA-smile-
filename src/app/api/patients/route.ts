@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { inMemoryStore } from "@/lib/in-memory-store";
+import { getPatientCode } from "@/lib/patient-numbering-store";
 
 export async function GET(req: NextRequest) {
   try {
@@ -61,6 +62,7 @@ export async function GET(req: NextRequest) {
 
         return {
           id: p.id,
+          patientCode: getPatientCode(p.id, p.createdAt),
           firstName: p.firstName,
           lastName: p.lastName,
           name: fullName,

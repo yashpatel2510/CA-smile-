@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   motion,
   AnimatePresence,
@@ -17,6 +17,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useClinicTheme } from "@/components/theme/clinic-theme-provider";
+import { useContactModal } from "@/components/public/contact-modal";
 
 export interface NavItem {
   label: string;
@@ -58,8 +59,28 @@ export function Navbar({
   initialThemeMode = "light",
 }: NavbarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { brandConfig } = useClinicTheme();
+  const { openContactModal } = useContactModal();
   const shouldReduceMotion = useReducedMotion();
+
+  // Proactively prefetch all navigation routes on mount so route transitions are instant
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      navItems.forEach((item) => {
+        if (item.href?.startsWith("/")) {
+          router.prefetch(item.href);
+        }
+      });
+      router.prefetch("/");
+      router.prefetch("/services");
+      router.prefetch("/about");
+      router.prefetch("/blog");
+      router.prefetch("/faq");
+    }, 150);
+
+    return () => clearTimeout(timer);
+  }, [navItems, router]);
 
   const [themeMode, setThemeMode] = useState<"dark" | "light">(initialThemeMode);
 
@@ -158,6 +179,9 @@ export function Navbar({
     ? "/images/ca-smile-logo-dark.png"
     : (brandConfig?.logo?.imageUrl || "/images/ca-smile-logo-light.png");
 
+  const showClinicName = brandConfig?.logo?.showClinicName !== false;
+  const logoHeight = brandConfig?.logo?.logoHeight || brandConfig?.logo?.logoSize || 36;
+
   return (
     <header
       className={`sticky top-0 z-50 relative w-full px-3 py-2.5 sm:px-6 sm:py-3.5 ${headerBeltBgClass}`}
@@ -176,42 +200,66 @@ export function Navbar({
         {/* Left: Tooth / Custom Logo Badge + Brand Title */}
         <Link
           href="/"
+          prefetch={true}
+          onMouseEnter={() => router.prefetch("/")}
+          onTouchStart={() => router.prefetch("/")}
+          onFocus={() => router.prefetch("/")}
           className="group flex items-center gap-2.5 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900"
           aria-label={`${displayName} homepage`}
         >
           {effectiveLogoUrl ? (
-            <div className="flex h-9 sm:h-10 w-auto max-w-[140px] items-center justify-center overflow-hidden transition-transform duration-200 group-hover:scale-105">
+            <div
+              className="flex w-auto items-center justify-center overflow-hidden transition-all duration-200 group-hover:scale-105"
+              style={{
+                height: `${logoHeight}px`,
+                maxHeight: `${Math.max(logoHeight, 48)}px`,
+              }}
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={effectiveLogoUrl}
                 alt={displayName}
-                className="h-8 sm:h-9 w-auto max-w-[130px] object-contain"
+                className="w-auto object-contain transition-all duration-200"
+                style={{
+                  height: `${logoHeight}px`,
+                  maxHeight: "100%",
+                }}
               />
             </div>
           ) : (
-            <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-black text-white shadow-xs transition-transform duration-200 group-hover:scale-105 dark:bg-white dark:text-black">
+            <div
+              className="flex items-center justify-center rounded-xl bg-black text-white shadow-xs transition-transform duration-200 group-hover:scale-105 dark:bg-white dark:text-black"
+              style={{
+                height: `${logoHeight}px`,
+                width: `${logoHeight}px`,
+              }}
+            >
               <ToothIcon className="h-5 w-5" />
             </div>
           )}
 
-          {/* Mobile Brand Name: ONLY SHOW "CA SMILE" */}
-          <span
-            className="font-heading text-base sm:text-lg font-bold tracking-tight transition-colors group-hover:opacity-85 md:hidden"
-            style={{ color: headerTextColor }}
-          >
-            {mobileDisplayName}
-          </span>
+          {/* Mobile Brand Name: ONLY SHOW WHEN showClinicName is TRUE */}
+          {showClinicName && (
+            <span
+              className="font-heading text-base sm:text-lg font-bold tracking-tight transition-colors group-hover:opacity-85 md:hidden"
+              style={{ color: headerTextColor }}
+            >
+              {mobileDisplayName}
+            </span>
+          )}
 
-          {/* Desktop / Tablet Brand Name */}
-          <span
-            className="font-heading text-lg font-bold tracking-tight transition-colors group-hover:opacity-85 hidden md:inline sm:text-xl"
-            style={{ color: headerTextColor }}
-          >
-            {displayName}
-          </span>
+          {/* Desktop / Tablet Brand Name: ONLY SHOW WHEN showClinicName is TRUE */}
+          {showClinicName && (
+            <span
+              className="font-heading text-lg font-bold tracking-tight transition-colors group-hover:opacity-85 hidden md:inline sm:text-xl"
+              style={{ color: headerTextColor }}
+            >
+              {displayName}
+            </span>
+          )}
         </Link>
 
-        {/* Center: 4 Desktop Nav Links (Home, Services, About Us, Blog) */}
+        {/* Center: 5 Desktop Nav Links (Home, Services, About Us, Blog, FAQ) */}
         <nav
           className="hidden items-center gap-6 md:flex lg:gap-8"
           aria-label="Main Navigation"
@@ -226,6 +274,10 @@ export function Navbar({
               <Link
                 key={item.href}
                 href={item.href}
+                prefetch={true}
+                onMouseEnter={() => router.prefetch(item.href)}
+                onTouchStart={() => router.prefetch(item.href)}
+                onFocus={() => router.prefetch(item.href)}
                 className={`text-sm transition-opacity hover:opacity-75 ${
                   isActive ? "font-bold underline decoration-2 underline-offset-4" : "font-medium opacity-90"
                 }`}
@@ -243,7 +295,13 @@ export function Navbar({
           {/* Desktop Contact Button with Arrow Badge */}
           <Link
             href="/contact"
-            className="group hidden md:inline-flex items-center justify-between gap-2.5 rounded-xl pl-4 pr-1.5 py-1.5 text-xs sm:text-sm font-semibold shadow-xs transition-all duration-200 hover:opacity-95 hover:shadow-md select-none"
+            onClick={(e) => {
+              if (pathname !== "/contact") {
+                e.preventDefault();
+                openContactModal();
+              }
+            }}
+            className="group hidden md:inline-flex items-center justify-between gap-2.5 rounded-xl pl-4 pr-1.5 py-1.5 text-xs sm:text-sm font-semibold shadow-xs transition-all duration-200 hover:opacity-95 hover:shadow-md select-none cursor-pointer"
             style={{
               backgroundColor: headerContactBtnBgColor,
               color: headerContactBtnTextColor,
@@ -326,6 +384,10 @@ export function Navbar({
                     <Link
                       key={item.href}
                       href={item.href}
+                      prefetch={true}
+                      onMouseEnter={() => router.prefetch(item.href)}
+                      onTouchStart={() => router.prefetch(item.href)}
+                      onFocus={() => router.prefetch(item.href)}
                       onClick={() => setMobileMenuOpen(false)}
                       style={{ color: headerTextColor }}
                       className={`flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors ${
@@ -348,8 +410,15 @@ export function Navbar({
               <div className="mt-3 pt-3 border-t border-black/10 dark:border-white/10 space-y-2">
                 <Link
                   href="/contact"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="group flex w-full items-center justify-between rounded-xl pl-5 pr-2 py-2.5 text-sm font-semibold shadow-xs transition-opacity hover:opacity-95 select-none"
+                  prefetch={true}
+                  onClick={(e) => {
+                    setMobileMenuOpen(false);
+                    if (pathname !== "/contact") {
+                      e.preventDefault();
+                      openContactModal();
+                    }
+                  }}
+                  className="group flex w-full items-center justify-between rounded-xl pl-5 pr-2 py-2.5 text-sm font-semibold shadow-xs transition-opacity hover:opacity-95 select-none cursor-pointer"
                   style={{
                     backgroundColor: headerContactBtnBgColor,
                     color: headerContactBtnTextColor,
@@ -369,6 +438,7 @@ export function Navbar({
 
                 <Link
                   href="/admin"
+                  prefetch={true}
                   onClick={() => setMobileMenuOpen(false)}
                   className="flex items-center justify-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300 pt-1"
                 >

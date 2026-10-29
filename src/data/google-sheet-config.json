@@ -1,0 +1,10 @@
+{
+  "webhookUrl": "https://script.google.com/macros/s/AKfycbwKzwGWt_UjkQehI-MrUV3u6_GCWW4-7ULjM22zs4cXMJbcsXhYgseSUWcfyPWZXN5GXg/exec",
+  "spreadsheetUrl": "https://docs.google.com/spreadsheets/d/1jFI6mUZWFTC1wuf6fPFHjGLytpbgWK71Oi88OssyGyo/edit?gid=1770894769#gid=1770894769",
+  "spreadsheetId": "1qVZy6blS90dD3-PIK1LH_neDfO1vLy3wV8XMWXy9Rtw",
+  "autoSyncOnBooking": true,
+  "syncStatus": "CONNECTED",
+  "lastSyncedAt": "2026-10-29T06:04:15.746Z",
+  "lastSyncError": null,
+  "totalRowsSynced": 164
+}

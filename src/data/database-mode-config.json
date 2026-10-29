@@ -1,0 +1,6 @@
+{
+  "activeMode": "production",
+  "testDatabaseUrl": "",
+  "testDatabaseConnected": true,
+  "lastPurgedAt": null
+}

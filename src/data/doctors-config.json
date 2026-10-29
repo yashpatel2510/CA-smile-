@@ -1,0 +1,113 @@
+[
+  {
+    "id": "doc-1",
+    "name": "Dr. Deep Patel",
+    "registrationNumber": "DEMO-GJ-SMILE-0001",
+    "personalMobile": "+91 98765 43210",
+    "personalEmail": "doctor@personalemail.com",
+    "clinicPhone": "917226098074",
+    "titlePrefix": "BDS",
+    "qualification": "BDS",
+    "postGraduateSpecialization": "Dental Surgeon",
+    "specialty": "Dental Surgeon",
+    "department": "Dentistry",
+    "doctorType": "In-house Consultant",
+    "dailySlots": 40,
+    "clinicBranch": "Main Clinic",
+    "isActive": true,
+    "digitalSignatureUrl": "",
+    "consultingSchedules": [
+      {
+        "id": "sch-1",
+        "days": [
+          "Mon",
+          "Tue",
+          "Wed",
+          "Thu",
+          "Fri",
+          "Sat",
+          "Sun"
+        ],
+        "timeRanges": [
+          {
+            "from": "09:00 AM",
+            "to": "01:00 PM"
+          }
+        ]
+      }
+    ],
+    "weeklySchedule": {
+      "activeDays": [
+        "MON",
+        "TUE",
+        "WED",
+        "THU",
+        "FRI",
+        "SAT",
+        "SUN"
+      ],
+      "dayShifts": {
+        "MON": [
+          {
+            "id": "shift-MON-1",
+            "startTime": "05:00 PM",
+            "endTime": "08:00 PM",
+            "location": "Main Clinic"
+          }
+        ],
+        "TUE": [
+          {
+            "id": "shift-TUE-1",
+            "startTime": "09:00 AM",
+            "endTime": "07:00 PM",
+            "location": "Main Clinic"
+          }
+        ],
+        "WED": [
+          {
+            "id": "shift-WED-1",
+            "startTime": "09:00 AM",
+            "endTime": "07:00 PM",
+            "location": "Main Clinic"
+          }
+        ],
+        "THU": [
+          {
+            "id": "shift-THU-1",
+            "startTime": "09:00 AM",
+            "endTime": "07:00 PM",
+            "location": "Main Clinic"
+          }
+        ],
+        "FRI": [
+          {
+            "id": "shift-FRI-1",
+            "startTime": "09:00 AM",
+            "endTime": "07:00 PM",
+            "location": "Main Clinic"
+          }
+        ],
+        "SAT": [
+          {
+            "id": "shift-SAT-1",
+            "startTime": "09:00 AM",
+            "endTime": "07:00 PM",
+            "location": "Main Clinic"
+          }
+        ],
+        "SUN": [
+          {
+            "id": "shift-SUN-1",
+            "startTime": "09:00 AM",
+            "endTime": "05:00 PM",
+            "location": "Main Clinic"
+          }
+        ]
+      },
+      "vacationBlocks": []
+    },
+    "vacationBlocks": [],
+    "createdAt": "2026-10-27T10:00:00.000Z",
+    "updatedAt": "2026-10-27T06:16:06.741Z"
+  }
+]

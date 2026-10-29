@@ -5,7 +5,12 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, ArrowUpRight, Star } from "lucide-react";
 import { useClinicTheme } from "@/components/theme/clinic-theme-provider";
+import { useContactModal } from "@/components/public/contact-modal";
 import { DEFAULT_HERO_CONFIG, HeroSectionConfig } from "@/types/branding";
+import { BlankHeroOne } from "@/components/public/heroes/blank-hero-one";
+import { BlankHeroTwo } from "@/components/public/heroes/blank-hero-two";
+
+export { BlankHeroOne, BlankHeroTwo };
 
 export interface HeroProps {
   customConfig?: HeroSectionConfig;
@@ -14,6 +19,7 @@ export interface HeroProps {
 
 export function Hero({ customConfig, previewMode }: HeroProps) {
   const { brandConfig } = useClinicTheme();
+  const { openContactModal } = useContactModal();
   const shouldReduceMotion = useReducedMotion();
 
   // Active configuration (custom override > brandConfig.hero > default factory baseline)
@@ -22,6 +28,15 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
     ...(brandConfig?.hero || {}),
     ...(customConfig || {}),
   };
+
+  // Render Alternate Hero Variants if selected
+  if (hero.heroVariant === "blank1") {
+    return <BlankHeroOne hero={hero} previewMode={previewMode} />;
+  }
+
+  if (hero.heroVariant === "blank2") {
+    return <BlankHeroTwo hero={hero} previewMode={previewMode} />;
+  }
 
   const bgColor = hero.backgroundColor || "#ffffff";
   const doctorImg = hero.imageUrl || "/images/hero-doctor-dental-care.png";
@@ -126,6 +141,8 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
             <img
               src={mobileDoctorImg}
               alt={hero.imageAltText || "Dental Care Specialist Doctor"}
+              loading="eager"
+              fetchPriority="high"
               className={`w-full select-none transition-all duration-300 drop-shadow-xs ${
                 isMobileCover
                   ? "h-full object-cover object-center"
@@ -239,7 +256,13 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
           >
             <Link
               href={hero.ctaButtonUrl || "/contact"}
-              className={`group relative inline-flex items-center font-medium shadow-lg transition-all duration-200 select-none hover:scale-[1.02] active:scale-[0.98] w-full max-w-[280px] sm:max-w-[300px] ${
+              onClick={(e) => {
+                if (!hero.ctaButtonUrl || hero.ctaButtonUrl === "/contact") {
+                  e.preventDefault();
+                  openContactModal();
+                }
+              }}
+              className={`group relative inline-flex items-center font-medium shadow-lg transition-all duration-200 select-none hover:scale-[1.02] active:scale-[0.98] cursor-pointer w-full max-w-[280px] sm:max-w-[300px] ${
                 hero.ctaButtonStyle !== "classic"
                   ? "h-11 sm:h-12 pl-5 pr-2 gap-3.5 text-xs sm:text-sm justify-between"
                   : "py-3.5 px-6 gap-2 text-sm justify-center"
@@ -367,6 +390,8 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
           <img
             src={doctorImg}
             alt={hero.imageAltText || "Dental Care Specialist"}
+            loading="eager"
+            fetchPriority="high"
             className={`w-full h-full select-none transition-all duration-300 ${
               hero.imageFit === "contain"
                 ? "object-contain object-bottom sm:object-center"
@@ -501,7 +526,13 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
             <div className="w-full flex justify-center md:justify-start">
               <Link
                 href={hero.ctaButtonUrl || "/contact"}
-                className={`group relative inline-flex items-center font-medium shadow-lg transition-all duration-200 select-none hover:scale-[1.02] hover:opacity-95 active:scale-[0.98] ${
+                onClick={(e) => {
+                  if (!hero.ctaButtonUrl || hero.ctaButtonUrl === "/contact") {
+                    e.preventDefault();
+                    openContactModal();
+                  }
+                }}
+                className={`group relative inline-flex items-center font-medium shadow-lg transition-all duration-200 select-none hover:scale-[1.02] hover:opacity-95 active:scale-[0.98] cursor-pointer ${
                   hero.ctaButtonStyle !== "classic"
                     ? "h-11 sm:h-12 pl-5 pr-2 gap-3.5 text-xs sm:text-sm justify-between"
                     : "py-3 px-6 gap-2 text-xs sm:text-sm justify-center"

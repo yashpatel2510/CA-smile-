@@ -122,8 +122,9 @@ export async function POST(req: NextRequest) {
         if (fromDb.length > 0) staffList = fromDb;
       } catch {}
       if (staffList.length === 0) {
+        const fallbackOwnerEmail = process.env.OWNER_EMAILS?.split(",")[0] || "admin@casmile.com";
         staffList = [
-          { id: "STF-001", name: "Dr. Sankar", email: "applei74740@gmail.com", role: "ADMIN", phone: "+91 98470 12345", isActive: true },
+          { id: "STF-001", name: "Clinic Admin", email: fallbackOwnerEmail, role: "ADMIN", phone: "+91 72260 98074", isActive: true },
           { id: "STF-002", name: "Dr. Evelyn Reed", email: "evelyn@example.com", role: "STAFF", phone: "+91 98470 54321", isActive: true },
         ];
       }

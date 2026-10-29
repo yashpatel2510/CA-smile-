@@ -28,7 +28,14 @@ import {
   Layers,
   Sliders,
   SlidersHorizontal,
+  Check,
+  Layout,
+  Columns,
+  Video,
+  Loader2,
+  BookOpen,
 } from "lucide-react";
+import { ClinicBrandingBlogManager } from "@/components/admin/blog/clinic-branding-blog-manager";
 import { useClinicTheme } from "@/components/theme/clinic-theme-provider";
 import {
   Card,
@@ -41,7 +48,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Hero } from "@/components/design-system/hero";
-import { DEFAULT_HERO_CONFIG, HeroSectionConfig } from "@/types/branding";
+import { AboutVideoPlayer } from "@/components/public/about-video-player";
+import {
+  DEFAULT_HERO_CONFIG,
+  HeroSectionConfig,
+  HeroVariant,
+  DEFAULT_ABOUT_CONFIG,
+  AboutSectionConfig,
+} from "@/types/branding";
 
 function ToothVectorIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
@@ -99,7 +113,17 @@ export default function AdminSettingsPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Tab State
-  const [activeTab, setActiveTab] = useState<"hero" | "header" | "details">("hero");
+  const [activeTab, setActiveTab] = useState<"hero" | "header" | "about" | "details" | "blog">("hero");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get("tab");
+      if (tabParam && ["hero", "header", "about", "details", "blog"].includes(tabParam)) {
+        setActiveTab(tabParam as any);
+      }
+    }
+  }, []);
 
   // Preview Viewport Mode State
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
@@ -109,6 +133,12 @@ export default function AdminSettingsPage() {
   // =========================================================================
   const [clinicDisplayName, setClinicDisplayName] = useState(
     brandConfig.logo?.clinicDisplayName || brandConfig.clinicName || "PedioDent"
+  );
+  const [showClinicName, setShowClinicName] = useState<boolean>(
+    brandConfig.logo?.showClinicName !== false
+  );
+  const [logoHeight, setLogoHeight] = useState<number>(
+    brandConfig.logo?.logoHeight || brandConfig.logo?.logoSize || 36
   );
   const [headerBgColor, setHeaderBgColor] = useState(
     brandConfig.headerBgColor || "#f4f4f5"
@@ -127,9 +157,70 @@ export default function AdminSettingsPage() {
   );
 
   // =========================================================================
+  // 1-B. ABOUT US & VIDEO PLAYER SETTINGS STATE
+  // =========================================================================
+  const initialAbout = brandConfig.aboutSection || DEFAULT_ABOUT_CONFIG;
+  const [aboutVideoUrl, setAboutVideoUrl] = useState(
+    initialAbout.videoUrl || brandConfig.aboutVideoUrl || "https://www.youtube.com/watch?v=mbBugyspbPE"
+  );
+  const [aboutVideoTitle, setAboutVideoTitle] = useState(
+    initialAbout.videoTitle || "Take a Look Inside Our Clinic"
+  );
+  const [aboutVideoSubtitle, setAboutVideoSubtitle] = useState(
+    initialAbout.videoSubtitle || "Clinic Tour & Experience"
+  );
+  const [aboutBadgeText, setAboutBadgeText] = useState(
+    initialAbout.badgeText || "Autoplays on scroll • Interactive play & pause"
+  );
+  const [aboutAutoplayOnScroll, setAboutAutoplayOnScroll] = useState(
+    initialAbout.autoplayOnScroll !== false
+  );
+  const [aboutVideoSize, setAboutVideoSize] = useState<"max-w-4xl" | "max-w-5xl" | "max-w-6xl" | "max-w-full">(
+    initialAbout.videoSize || "max-w-4xl"
+  );
+  const [aboutDefaultQuality, setAboutDefaultQuality] = useState<"hd1080" | "hd720" | "medium" | "auto">(
+    initialAbout.defaultQuality || "hd1080"
+  );
+  const [aboutHideYouTubeBranding, setAboutHideYouTubeBranding] = useState(
+    initialAbout.hideYouTubeBranding !== false
+  );
+  const [aboutStartMuted, setAboutStartMuted] = useState(
+    initialAbout.startMuted !== false
+  );
+  const [aboutShowStatusPill, setAboutShowStatusPill] = useState(
+    initialAbout.showStatusPill !== false
+  );
+
+  // =========================================================================
   // 2. HERO SECTION STATE
   // =========================================================================
   const initialHero = brandConfig.hero || DEFAULT_HERO_CONFIG;
+
+  // Active Hero Template / Style: "default" | "blank1" | "blank2"
+  const [heroVariant, setHeroVariant] = useState<HeroVariant>(
+    initialHero.heroVariant || "default"
+  );
+  const [blankHeroTitle, setBlankHeroTitle] = useState(
+    initialHero.blankHeroTitle || ""
+  );
+  const [blankHeroSubtitle, setBlankHeroSubtitle] = useState(
+    initialHero.blankHeroSubtitle || ""
+  );
+  const [blankHeroCtaText, setBlankHeroCtaText] = useState(
+    initialHero.blankHeroCtaText || ""
+  );
+  const [blankHeroCtaUrl, setBlankHeroCtaUrl] = useState(
+    initialHero.blankHeroCtaUrl || "/contact"
+  );
+  const [blankHeroMinHeight, setBlankHeroMinHeight] = useState(
+    initialHero.blankHeroMinHeight || "520px"
+  );
+  const [blankHeroBgColor, setBlankHeroBgColor] = useState(
+    initialHero.blankHeroBgColor || "#ffffff"
+  );
+  const [blankHeroTextColor, setBlankHeroTextColor] = useState(
+    initialHero.blankHeroTextColor || "#18181b"
+  );
 
   // 2-top. Top Information Row (Working hours on left, Location on right)
   const [heroTopInfoEnabled, setHeroTopInfoEnabled] = useState(
@@ -312,16 +403,55 @@ export default function AdminSettingsPage() {
     initialHero.doctorBoxMarginBottom || "0px"
   );
 
-  // Optional Clinic Location Fields
+  // Clinic Location & Map Customization Fields
   const [clinicAddress, setClinicAddress] = useState(brandConfig.address || "");
   const [clinicPhone, setClinicPhone] = useState(brandConfig.phone || "");
-  const [latitude, setLatitude] = useState(brandConfig.latitude ?? 10.01586);
-  const [longitude, setLongitude] = useState(brandConfig.longitude ?? 76.34186);
+  const [clinicEmail, setClinicEmail] = useState(brandConfig.email || "");
+  const [latitude, setLatitude] = useState(brandConfig.latitude ?? 20.7636);
+  const [longitude, setLongitude] = useState(brandConfig.longitude ?? 72.9680);
+
+  // Map Section Appearance & Links
+  const [mapSectionBgColor, setMapSectionBgColor] = useState(
+    brandConfig.mapSectionBgColor || "#ffffff"
+  );
+  const [mapStyle, setMapStyle] = useState<"dark" | "light">(
+    brandConfig.mapStyle || "dark"
+  );
+  const [whatsappPhone, setWhatsappPhone] = useState(
+    brandConfig.whatsappPhone || brandConfig.phone || "+91 72260 98074"
+  );
+  const [instagramUrl, setInstagramUrl] = useState(
+    brandConfig.instagramUrl || "https://instagram.com"
+  );
+  const [googleMapsUrl, setGoogleMapsUrl] = useState(
+    brandConfig.googleMapsUrl ||
+      "https://www.google.com/maps/place/CA+Smile+Multispeciality+Dental+Clinic/data=!4m2!3m1!1s0x0:0x3a288255f324c8de?sa=X&ved=1t:2428&ictx=111"
+  );
+  const [mapExactAddress, setMapExactAddress] = useState(
+    brandConfig.mapExactAddress ||
+      "1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society, Bilimora, Gujarat 396321"
+  );
+  const [mapSectionTitle, setMapSectionTitle] = useState(
+    brandConfig.mapSectionTitle || "ADDRESS"
+  );
+  const [mapCardTitle, setMapCardTitle] = useState(
+    brandConfig.mapCardTitle || brandConfig.clinicName || "CA Smile Dental Clinic"
+  );
+  const [mapCardImage, setMapCardImage] = useState(
+    brandConfig.mapCardImage || "/images/ca-smile-clinic-building.jpg"
+  );
+  const [mapPinPulse, setMapPinPulse] = useState(
+    brandConfig.mapPinPulse !== false
+  );
+  const [mapPinColor, setMapPinColor] = useState(
+    brandConfig.mapPinColor || "#E53935"
+  );
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const heroImageInputRef = useRef<HTMLInputElement>(null);
   const mobileHeroImageInputRef = useRef<HTMLInputElement>(null);
   const doctorAvatarInputRef = useRef<HTMLInputElement>(null);
+  const mapCardImageInputRef = useRef<HTMLInputElement>(null);
 
   // Sync state if brandConfig updates from server
   useEffect(() => {
@@ -339,14 +469,62 @@ export default function AdminSettingsPage() {
       setHeaderContactBtnTextColor(
         brandConfig.headerContactBtnTextColor || "#ffffff"
       );
+      setShowClinicName(brandConfig.logo?.showClinicName !== false);
+      setLogoHeight(brandConfig.logo?.logoHeight || brandConfig.logo?.logoSize || 36);
       setLogoImageUrl(brandConfig.logo?.imageUrl || "");
       setClinicAddress(brandConfig.address || "");
       setClinicPhone(brandConfig.phone || "");
-      setLatitude(brandConfig.latitude ?? 10.01586);
-      setLongitude(brandConfig.longitude ?? 76.34186);
+      setClinicEmail(brandConfig.email || "");
+      setLatitude(brandConfig.latitude ?? 20.7636);
+      setLongitude(brandConfig.longitude ?? 72.9680);
+      setMapSectionBgColor(brandConfig.mapSectionBgColor || "#ffffff");
+      setMapStyle(brandConfig.mapStyle || "dark");
+      setWhatsappPhone(
+        brandConfig.whatsappPhone || brandConfig.phone || "+91 72260 98074"
+      );
+      setInstagramUrl(brandConfig.instagramUrl || "https://instagram.com");
+      setAboutVideoUrl(
+        brandConfig.aboutSection?.videoUrl || brandConfig.aboutVideoUrl || "https://www.youtube.com/watch?v=mbBugyspbPE"
+      );
+      setAboutVideoTitle(brandConfig.aboutSection?.videoTitle || "Take a Look Inside Our Clinic");
+      setAboutVideoSubtitle(brandConfig.aboutSection?.videoSubtitle || "Clinic Tour & Experience");
+      setAboutBadgeText(brandConfig.aboutSection?.badgeText || "Autoplays on scroll • Interactive play & pause");
+      setAboutAutoplayOnScroll(brandConfig.aboutSection?.autoplayOnScroll !== false);
+      setAboutVideoSize(brandConfig.aboutSection?.videoSize || "max-w-4xl");
+      setAboutDefaultQuality(brandConfig.aboutSection?.defaultQuality || "hd1080");
+      setAboutHideYouTubeBranding(brandConfig.aboutSection?.hideYouTubeBranding !== false);
+      setAboutStartMuted(brandConfig.aboutSection?.startMuted !== false);
+      setAboutShowStatusPill(brandConfig.aboutSection?.showStatusPill !== false);
+      setGoogleMapsUrl(
+        brandConfig.googleMapsUrl ||
+          "https://www.google.com/maps/place/CA+Smile+Multispeciality+Dental+Clinic/data=!4m2!3m1!1s0x0:0x3a288255f324c8de?sa=X&ved=1t:2428&ictx=111"
+      );
+      setMapExactAddress(
+        brandConfig.mapExactAddress ||
+          "1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society, Bilimora, Gujarat 396321"
+      );
+      setMapSectionTitle(brandConfig.mapSectionTitle || "ADDRESS");
+      setMapCardTitle(
+        brandConfig.mapCardTitle ||
+          brandConfig.clinicName ||
+          "CA Smile Dental Clinic"
+      );
+      setMapCardImage(
+        brandConfig.mapCardImage || "/images/ca-smile-clinic-building.jpg"
+      );
+      setMapPinPulse(brandConfig.mapPinPulse !== false);
+      setMapPinColor(brandConfig.mapPinColor || "#E53935");
 
       if (brandConfig.hero) {
         const h = brandConfig.hero;
+        setHeroVariant(h.heroVariant || "default");
+        setBlankHeroTitle(h.blankHeroTitle || "");
+        setBlankHeroSubtitle(h.blankHeroSubtitle || "");
+        setBlankHeroCtaText(h.blankHeroCtaText || "");
+        setBlankHeroCtaUrl(h.blankHeroCtaUrl || "/contact");
+        setBlankHeroMinHeight(h.blankHeroMinHeight || "520px");
+        setBlankHeroBgColor(h.blankHeroBgColor || "#ffffff");
+        setBlankHeroTextColor(h.blankHeroTextColor || "#18181b");
         setHeroTopInfoEnabled(h.topInfoEnabled !== false);
         setHeroTopInfoWorkingHoursLabel(h.topInfoWorkingHoursLabel || "Working hours");
         setHeroTopInfoWorkingHoursValue(h.topInfoWorkingHoursValue || "Mon - Sat 8:00-20:00");
@@ -505,8 +683,30 @@ export default function AdminSettingsPage() {
     reader.readAsDataURL(file);
   };
 
+  // Handle Map Speech Bubble Clinic Thumbnail Upload
+  const handleMapCardImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      setMapCardImage(dataUrl);
+      setErrorMessage(null);
+    };
+    reader.readAsDataURL(file);
+  };
+
   // Live Hero Config Object for real-time preview
   const liveHeroConfig: HeroSectionConfig = {
+    heroVariant,
+    blankHeroTitle,
+    blankHeroSubtitle,
+    blankHeroCtaText,
+    blankHeroCtaUrl,
+    blankHeroMinHeight,
+    blankHeroBgColor,
+    blankHeroTextColor,
     topInfoEnabled: heroTopInfoEnabled,
     topInfoWorkingHoursLabel: heroTopInfoWorkingHoursLabel,
     topInfoWorkingHoursValue: heroTopInfoWorkingHoursValue,
@@ -565,7 +765,7 @@ export default function AdminSettingsPage() {
     doctorBoxMarginBottom: heroDoctorBoxMarginBottom,
   };
 
-  // Save All Changes (Header + Hero)
+  // Save All Changes (Header + Hero + Map Location)
   const handleSaveAll = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setSaving(true);
@@ -578,14 +778,42 @@ export default function AdminSettingsPage() {
       headerTextColor: headerTextColor.trim() || "#18181b",
       headerContactBtnBgColor: headerContactBtnBgColor.trim() || "#000000",
       headerContactBtnTextColor: headerContactBtnTextColor.trim() || "#ffffff",
-      address: clinicAddress,
-      phone: clinicPhone,
-      latitude: parseFloat(String(latitude)) || 10.01586,
-      longitude: parseFloat(String(longitude)) || 76.34186,
+      address: clinicAddress.trim(),
+      phone: clinicPhone.trim(),
+      email: clinicEmail.trim(),
+      latitude: parseFloat(String(latitude)) || 20.7636,
+      longitude: parseFloat(String(longitude)) || 72.9680,
+      mapSectionBgColor: mapSectionBgColor.trim() || "#ffffff",
+      mapStyle: mapStyle,
+      whatsappPhone: whatsappPhone.trim(),
+      instagramUrl: instagramUrl.trim(),
+      aboutVideoUrl: aboutVideoUrl.trim(),
+      aboutSection: {
+        videoUrl: aboutVideoUrl.trim(),
+        videoTitle: aboutVideoTitle.trim(),
+        videoSubtitle: aboutVideoSubtitle.trim(),
+        badgeText: aboutBadgeText.trim(),
+        autoplayOnScroll: aboutAutoplayOnScroll,
+        videoSize: aboutVideoSize,
+        defaultQuality: aboutDefaultQuality,
+        hideYouTubeBranding: aboutHideYouTubeBranding,
+        startMuted: aboutStartMuted,
+        showStatusPill: aboutShowStatusPill,
+      },
+      googleMapsUrl: googleMapsUrl.trim(),
+      mapExactAddress: mapExactAddress.trim(),
+      mapSectionTitle: mapSectionTitle.trim() || "ADDRESS",
+      mapCardTitle: mapCardTitle.trim() || "CA Smile Dental Clinic",
+      mapCardImage: mapCardImage.trim() || "/images/ca-smile-clinic-building.jpg",
+      mapPinPulse: mapPinPulse,
+      mapPinColor: mapPinColor.trim() || "#E53935",
       logo: {
         ...brandConfig.logo,
         type: logoImageUrl ? "IMAGE" : "ICON",
         imageUrl: logoImageUrl,
+        showClinicName: showClinicName,
+        logoHeight: Number(logoHeight) || 36,
+        logoSize: Number(logoHeight) || 36,
         clinicDisplayName: clinicDisplayName.trim() || "PedioDent",
         altText: `${clinicDisplayName.trim() || "PedioDent"} Clinic Logo`,
       },
@@ -598,7 +826,7 @@ export default function AdminSettingsPage() {
       setTimeout(() => setSavedSuccess(false), 4500);
     } else {
       setErrorMessage(
-        "Failed to persist branding & hero settings. Please verify administrator rights."
+        "Failed to persist branding, hero & location settings. Please verify administrator rights."
       );
     }
   };
@@ -607,20 +835,49 @@ export default function AdminSettingsPage() {
   const handleResetDefaults = async () => {
     if (
       !confirm(
-        "Reset both Header Branding and Hero Section to factory reference defaults?"
+        "Reset Header Branding, Hero Section, and Map Location to factory reference defaults?"
       )
     ) {
       return;
     }
     setSaving(true);
-    setClinicDisplayName("PedioDent");
-    setHeaderBgColor("#f4f4f5");
-    setHeaderTextColor("#18181b");
-    setHeaderContactBtnBgColor("#000000");
+    setClinicDisplayName("CA Smile Dental Clinic");
+    setHeaderBgColor("#18181b");
+    setHeaderTextColor("#ffffff");
+    setHeaderContactBtnBgColor("#8a0000");
     setHeaderContactBtnTextColor("#ffffff");
-    setLogoImageUrl("");
+    setLogoImageUrl("/images/ca-smile-logo-light.png");
+    setClinicAddress("1ST FLOOR LABDHI ARCADE, ABOVE HDFC BANK, BILIMORA");
+    setClinicPhone("+91 72260 98074");
+    setClinicEmail("casmileatbilimora@gmail.com");
+    setLatitude(20.7636);
+    setLongitude(72.9680);
+    setMapSectionBgColor("#ffffff");
+    setMapStyle("dark");
+    setWhatsappPhone("+91 72260 98074");
+    setInstagramUrl("https://instagram.com");
+    setAboutVideoUrl("https://youtu.be/mbBugyspbPE");
+    setGoogleMapsUrl(
+      "https://www.google.com/maps/place/CA+Smile+Multispeciality+Dental+Clinic/data=!4m2!3m1!1s0x0:0x3a288255f324c8de?sa=X&ved=1t:2428&ictx=111"
+    );
+    setMapExactAddress(
+      "1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society, Bilimora, Gujarat 396321"
+    );
+    setMapSectionTitle("ADDRESS");
+    setMapCardTitle("CA Smile Dental Clinic");
+    setMapCardImage("/images/ca-smile-clinic-building.jpg");
+    setMapPinPulse(true);
+    setMapPinColor("#E53935");
 
     // Reset Hero states
+    setHeroVariant("default");
+    setBlankHeroTitle("");
+    setBlankHeroSubtitle("");
+    setBlankHeroCtaText("");
+    setBlankHeroCtaUrl("/contact");
+    setBlankHeroMinHeight("520px");
+    setBlankHeroBgColor("#ffffff");
+    setBlankHeroTextColor("#18181b");
     setHeroTopInfoEnabled(true);
     setHeroTopInfoWorkingHoursLabel("Working hours");
     setHeroTopInfoWorkingHoursValue("Mon - Sat 8:00-20:00");
@@ -833,27 +1090,36 @@ export default function AdminSettingsPage() {
                 }}
               >
                 {/* Logo & Clinic Name */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5">
                   {logoImageUrl ? (
-                    <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg bg-black/5 p-1">
+                    <div
+                      className="flex items-center justify-center overflow-hidden rounded-lg bg-black/5 p-0.5 transition-all"
+                      style={{ height: `${logoHeight}px`, width: "auto" }}
+                    >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={logoImageUrl}
                         alt={clinicDisplayName}
-                        className="h-full w-full object-contain rounded-md"
+                        className="object-contain rounded-md transition-all"
+                        style={{ height: `${logoHeight}px`, width: "auto" }}
                       />
                     </div>
                   ) : (
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-black text-white shadow-xs">
+                    <div
+                      className="flex items-center justify-center rounded-lg bg-black text-white shadow-xs transition-all"
+                      style={{ height: `${logoHeight}px`, width: `${logoHeight}px` }}
+                    >
                       <ToothVectorIcon className="h-4 w-4" />
                     </div>
                   )}
-                  <span
-                    className="font-heading text-sm sm:text-base font-bold tracking-tight truncate max-w-[130px] sm:max-w-[180px]"
-                    style={{ color: headerTextColor }}
-                  >
-                    {clinicDisplayName || "PedioDent"}
-                  </span>
+                  {showClinicName && (
+                    <span
+                      className="font-heading text-sm sm:text-base font-bold tracking-tight truncate max-w-[130px] sm:max-w-[180px]"
+                      style={{ color: headerTextColor }}
+                    >
+                      {clinicDisplayName || "PedioDent"}
+                    </span>
+                  )}
                 </div>
 
                 {/* Nav Links (Hidden in mobile view) */}
@@ -908,11 +1174,11 @@ export default function AdminSettingsPage() {
       {/* ========================================================================= */}
       {/* NAVIGATION TABS FOR CUSTOMIZATION PANELS                                  */}
       {/* ========================================================================= */}
-      <div className="flex items-center border-b border-brand-border">
+      <div className="flex items-center border-b border-brand-border overflow-x-auto whitespace-nowrap">
         <button
           type="button"
           onClick={() => setActiveTab("hero")}
-          className={`flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-semibold transition-colors ${
+          className={`flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-semibold transition-colors shrink-0 ${
             activeTab === "hero"
               ? "border-brand-primary text-brand-primary"
               : "border-transparent text-brand-muted hover:text-brand-text"
@@ -925,7 +1191,7 @@ export default function AdminSettingsPage() {
         <button
           type="button"
           onClick={() => setActiveTab("header")}
-          className={`flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-semibold transition-colors ${
+          className={`flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-semibold transition-colors shrink-0 ${
             activeTab === "header"
               ? "border-brand-primary text-brand-primary"
               : "border-transparent text-brand-muted hover:text-brand-text"
@@ -937,8 +1203,21 @@ export default function AdminSettingsPage() {
 
         <button
           type="button"
+          onClick={() => setActiveTab("about")}
+          className={`flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-semibold transition-colors shrink-0 ${
+            activeTab === "about"
+              ? "border-brand-primary text-brand-primary"
+              : "border-transparent text-brand-muted hover:text-brand-text"
+          }`}
+        >
+          <Video className="h-4 w-4" />
+          <span>About Us &amp; Video Player</span>
+        </button>
+
+        <button
+          type="button"
           onClick={() => setActiveTab("details")}
-          className={`flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-semibold transition-colors ${
+          className={`flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-semibold transition-colors shrink-0 ${
             activeTab === "details"
               ? "border-brand-primary text-brand-primary"
               : "border-transparent text-brand-muted hover:text-brand-text"
@@ -947,6 +1226,19 @@ export default function AdminSettingsPage() {
           <MapPin className="h-4 w-4" />
           <span>Location &amp; Clinic Details</span>
         </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("blog")}
+          className={`flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-semibold transition-colors shrink-0 ${
+            activeTab === "blog"
+              ? "border-brand-primary text-brand-primary"
+              : "border-transparent text-brand-muted hover:text-brand-text"
+          }`}
+        >
+          <BookOpen className="h-4 w-4" />
+          <span>Blog &amp; Articles (Add, Edit, Categories &amp; Section)</span>
+        </button>
       </div>
 
       {/* ========================================================================= */}
@@ -954,6 +1246,247 @@ export default function AdminSettingsPage() {
       {/* ========================================================================= */}
       {activeTab === "hero" && (
         <div className="space-y-6">
+          {/* 0. ACTIVE HERO SECTION SELECTOR */}
+          <Card className="border-2 border-brand-primary/30 shadow-xs bg-linear-to-b from-brand-surface to-brand-surface/40">
+            <CardHeader className="pb-3">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-primary text-white shadow-xs">
+                    <Layers className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base font-bold text-brand-text">
+                      Select Active Hero Section Style
+                    </CardTitle>
+                    <CardDescription className="text-xs">
+                      Choose which Hero Section variant displays on your public website. Switch instantly with real-time preview above.
+                    </CardDescription>
+                  </div>
+                </div>
+
+                <Badge
+                  variant="outline"
+                  className="w-fit text-xs font-semibold px-2.5 py-1 bg-brand-primary/10 text-brand-primary border-brand-primary/30"
+                >
+                  Active:{" "}
+                  {heroVariant === "default"
+                    ? "Classic Doctor Hero"
+                    : heroVariant === "blank1"
+                    ? "Blank Hero Section 1"
+                    : "Blank Hero Section 2 (Split)"}
+                </Badge>
+              </div>
+            </CardHeader>
+
+            <CardContent className="space-y-4 pt-1">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                {/* Option 1: Classic Doctor Cutout */}
+                <div
+                  onClick={() => setHeroVariant("default")}
+                  className={`group relative flex cursor-pointer flex-col justify-between rounded-xl border-2 p-4 transition-all hover:shadow-md ${
+                    heroVariant === "default"
+                      ? "border-brand-primary bg-brand-primary/5 shadow-xs"
+                      : "border-brand-border bg-brand-surface hover:border-brand-primary/50"
+                  }`}
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-primary/10 text-brand-primary">
+                        <ImageIcon className="h-4 w-4" />
+                      </div>
+                      {heroVariant === "default" ? (
+                        <span className="flex items-center gap-1 rounded-full bg-brand-primary px-2 py-0.5 text-[11px] font-semibold text-white">
+                          <Check className="h-3 w-3 stroke-[3]" /> Selected
+                        </span>
+                      ) : (
+                        <span className="text-[11px] font-medium text-brand-muted">Click to select</span>
+                      )}
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-brand-text">
+                        1. Classic Doctor Hero
+                      </h4>
+                      <p className="mt-1 text-xs text-brand-muted leading-relaxed">
+                        Full-featured doctor cutout portrait, grand typography title, floating info badge, working hours &amp; location tags.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-brand-border/60 flex items-center justify-between text-[11px] text-brand-muted">
+                    <span className="font-semibold text-brand-primary">Full Design</span>
+                    <span>Factory Default</span>
+                  </div>
+                </div>
+
+                {/* Option 2: Blank Hero 1 */}
+                <div
+                  onClick={() => setHeroVariant("blank1")}
+                  className={`group relative flex cursor-pointer flex-col justify-between rounded-xl border-2 p-4 transition-all hover:shadow-md ${
+                    heroVariant === "blank1"
+                      ? "border-brand-primary bg-brand-primary/5 shadow-xs"
+                      : "border-brand-border bg-brand-surface hover:border-brand-primary/50"
+                  }`}
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-200/80 text-zinc-700">
+                        <Layout className="h-4 w-4" />
+                      </div>
+                      {heroVariant === "blank1" ? (
+                        <span className="flex items-center gap-1 rounded-full bg-brand-primary px-2 py-0.5 text-[11px] font-semibold text-white">
+                          <Check className="h-3 w-3 stroke-[3]" /> Selected
+                        </span>
+                      ) : (
+                        <span className="text-[11px] font-medium text-brand-muted">Click to select</span>
+                      )}
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-brand-text">
+                        2. Blank Hero Section 1
+                      </h4>
+                      <p className="mt-1 text-xs text-brand-muted leading-relaxed">
+                        Clean, pristine minimalist blank hero container. Ideal for clean banners, minimalistic introductions, or fresh custom designs.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-brand-border/60 flex items-center justify-between text-[11px] text-brand-muted">
+                    <span className="font-semibold text-emerald-600">Blank Page / Minimal</span>
+                    <span>Option 2</span>
+                  </div>
+                </div>
+
+                {/* Option 3: Blank Hero 2 (Split) */}
+                <div
+                  onClick={() => setHeroVariant("blank2")}
+                  className={`group relative flex cursor-pointer flex-col justify-between rounded-xl border-2 p-4 transition-all hover:shadow-md ${
+                    heroVariant === "blank2"
+                      ? "border-brand-primary bg-brand-primary/5 shadow-xs"
+                      : "border-brand-border bg-brand-surface hover:border-brand-primary/50"
+                  }`}
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-200/80 text-zinc-700">
+                        <Columns className="h-4 w-4" />
+                      </div>
+                      {heroVariant === "blank2" ? (
+                        <span className="flex items-center gap-1 rounded-full bg-brand-primary px-2 py-0.5 text-[11px] font-semibold text-white">
+                          <Check className="h-3 w-3 stroke-[3]" /> Selected
+                        </span>
+                      ) : (
+                        <span className="text-[11px] font-medium text-brand-muted">Click to select</span>
+                      )}
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-brand-text">
+                        3. Blank Hero Section 2
+                      </h4>
+                      <p className="mt-1 text-xs text-brand-muted leading-relaxed">
+                        Modern two-column split blank hero layout. Left panel for text/brand introduction, right panel for media/imagery.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-brand-border/60 flex items-center justify-between text-[11px] text-brand-muted">
+                    <span className="font-semibold text-purple-600">Split Canvas</span>
+                    <span>Option 3</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sub-settings if Blank Hero 1 or 2 is active */}
+              {(heroVariant === "blank1" || heroVariant === "blank2") && (
+                <div className="mt-4 rounded-xl border border-brand-border/80 bg-brand-surface/70 p-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Sliders className="h-4 w-4 text-brand-primary" />
+                      <span className="text-xs font-bold text-brand-text">
+                        {heroVariant === "blank1" ? "Blank Hero 1 Customization" : "Blank Hero 2 (Split) Customization"}
+                      </span>
+                    </div>
+                    <span className="text-[11px] text-brand-muted">Leave text blank to display empty canvas</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-brand-text">Optional Headline / Title</label>
+                      <Input
+                        value={blankHeroTitle}
+                        onChange={(e) => setBlankHeroTitle(e.target.value)}
+                        placeholder="Leave blank for empty canvas"
+                        className="text-xs"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-brand-text">Optional Subtitle</label>
+                      <Input
+                        value={blankHeroSubtitle}
+                        onChange={(e) => setBlankHeroSubtitle(e.target.value)}
+                        placeholder="Leave blank for empty canvas"
+                        className="text-xs"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-brand-text">Optional CTA Button Text</label>
+                      <Input
+                        value={blankHeroCtaText}
+                        onChange={(e) => setBlankHeroCtaText(e.target.value)}
+                        placeholder="Leave blank for no button"
+                        className="text-xs"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-brand-text">Background Color</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={blankHeroBgColor}
+                          onChange={(e) => setBlankHeroBgColor(e.target.value)}
+                          className="h-8 w-8 rounded-lg cursor-pointer border border-brand-border"
+                        />
+                        <Input
+                          value={blankHeroBgColor}
+                          onChange={(e) => setBlankHeroBgColor(e.target.value)}
+                          placeholder="#ffffff"
+                          className="font-mono text-xs"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-brand-text">Text Color</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={blankHeroTextColor}
+                          onChange={(e) => setBlankHeroTextColor(e.target.value)}
+                          className="h-8 w-8 rounded-lg cursor-pointer border border-brand-border"
+                        />
+                        <Input
+                          value={blankHeroTextColor}
+                          onChange={(e) => setBlankHeroTextColor(e.target.value)}
+                          placeholder="#18181b"
+                          className="font-mono text-xs"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-brand-text">Min Height</label>
+                      <Input
+                        value={blankHeroMinHeight}
+                        onChange={(e) => setBlankHeroMinHeight(e.target.value)}
+                        placeholder="520px"
+                        className="font-mono text-xs"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* 1. HERO BACKGROUND IMAGE & CANVAS SETTINGS */}
           <Card className="border border-brand-border shadow-xs">
             <CardHeader className="pb-3">
@@ -2237,52 +2770,180 @@ export default function AdminSettingsPage() {
       {/* ========================================================================= */}
       {activeTab === "header" && (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {/* 1. CLINIC BRAND DISPLAY NAME */}
-          <Card className="border border-brand-border shadow-xs">
+          {/* 1. CLINIC BRAND DISPLAY NAME & LOGO SIZE */}
+          <Card className="border border-brand-border shadow-xs md:col-span-2">
             <CardHeader className="pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-primary/10 text-brand-primary">
-                  <Type className="h-4 w-4" />
+              <div className="flex items-center justify-between gap-2.5">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-primary/10 text-brand-primary">
+                    <Type className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base">1. Clinic Display Name &amp; Logo Size</CardTitle>
+                    <CardDescription className="text-xs">
+                      Manage clinic name visibility in the navbar and adjust the logo size
+                    </CardDescription>
+                  </div>
                 </div>
-                <div>
-                  <CardTitle className="text-base">1. Clinic Display Name</CardTitle>
-                  <CardDescription className="text-xs">
-                    Name shown beside the logo in the header navbar
-                  </CardDescription>
+
+                {/* Show / Remove Toggle Badge */}
+                <div className="flex items-center gap-1.5 rounded-full border border-brand-border bg-brand-surface p-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowClinicName(true)}
+                    className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-all ${
+                      showClinicName
+                        ? "bg-brand-primary text-white shadow-xs"
+                        : "text-brand-muted hover:text-brand-text"
+                    }`}
+                  >
+                    <span>Show Name</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowClinicName(false)}
+                    className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-all ${
+                      !showClinicName
+                        ? "bg-amber-600 text-white shadow-xs"
+                        : "text-brand-muted hover:text-brand-text"
+                    }`}
+                  >
+                    <span>Remove Name</span>
+                  </button>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-5">
+              {/* Visibility Status Alert */}
+              <div
+                className={`flex items-center justify-between rounded-xl border p-3 text-xs transition-colors ${
+                  showClinicName
+                    ? "border-emerald-500/20 bg-emerald-50/50 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-300"
+                    : "border-amber-500/20 bg-amber-50/50 text-amber-800 dark:bg-amber-950/20 dark:text-amber-300"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`h-2 w-2 rounded-full ${
+                      showClinicName ? "bg-emerald-500" : "bg-amber-500"
+                    }`}
+                  />
+                  <span className="font-medium">
+                    {showClinicName
+                      ? "Clinic Display Name is currently visible in the header navbar."
+                      : "Clinic Display Name is removed/hidden. Only the logo will appear in the navbar."}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowClinicName(!showClinicName)}
+                  className="font-bold underline hover:no-underline text-xs"
+                >
+                  {showClinicName ? "Click to Remove" : "Click to Show"}
+                </button>
+              </div>
+
+              {/* Clinic Display Name Input (Only relevant if showClinicName is true) */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-brand-text">
-                  Clinic Display Name
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-brand-text">
+                    Clinic Display Name
+                  </label>
+                  {!showClinicName && (
+                    <span className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">
+                      (Hidden in Navbar)
+                    </span>
+                  )}
+                </div>
                 <Input
                   value={clinicDisplayName}
                   onChange={(e) => setClinicDisplayName(e.target.value)}
-                  placeholder="e.g. PedioDent"
-                  className="text-sm font-medium"
+                  placeholder="e.g. CA Smile"
+                  disabled={!showClinicName}
+                  className={`text-sm font-medium ${
+                    !showClinicName ? "opacity-50 cursor-not-allowed bg-muted/40" : ""
+                  }`}
                 />
               </div>
-              <div className="space-y-1">
-                <span className="text-[11px] text-brand-muted">Quick suggestions:</span>
-                <div className="flex flex-wrap gap-1.5">
-                  {["PedioDent", "CA Smile Dental Clinic", "Smile Care Center"].map(
-                    (name) => (
-                      <button
-                        key={name}
-                        type="button"
-                        onClick={() => setClinicDisplayName(name)}
-                        className={`rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors ${
-                          clinicDisplayName === name
-                            ? "border-brand-primary bg-brand-primary/10 text-brand-primary font-semibold"
-                            : "border-brand-border bg-brand-surface text-brand-muted hover:text-brand-text"
-                        }`}
-                      >
-                        {name}
-                      </button>
-                    )
-                  )}
+
+              {showClinicName && (
+                <div className="space-y-1">
+                  <span className="text-[11px] text-brand-muted">Quick suggestions:</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {["CA Smile", "CA Smile Dental Clinic", "PedioDent", "Smile Care Center"].map(
+                      (name) => (
+                        <button
+                          key={name}
+                          type="button"
+                          onClick={() => setClinicDisplayName(name)}
+                          className={`rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors ${
+                            clinicDisplayName === name
+                              ? "border-brand-primary bg-brand-primary/10 text-brand-primary font-semibold"
+                              : "border-brand-border bg-brand-surface text-brand-muted hover:text-brand-text"
+                          }`}
+                        >
+                          {name}
+                        </button>
+                      )
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Logo Size Control Section */}
+              <div className="border-t border-brand-border/60 pt-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="text-xs font-semibold text-brand-text">
+                      Navbar Logo Size
+                    </label>
+                    <p className="text-[11px] text-brand-muted">
+                      Adjust the physical height and scale of the logo in the header
+                    </p>
+                  </div>
+                  <span className="font-mono text-xs font-bold text-brand-primary bg-brand-primary/10 px-2.5 py-1 rounded-md border border-brand-primary/20">
+                    {logoHeight}px
+                  </span>
+                </div>
+
+                {/* Size Range Slider */}
+                <div className="flex items-center gap-3">
+                  <span className="text-[11px] font-mono text-brand-muted">24px</span>
+                  <input
+                    type="range"
+                    min="24"
+                    max="64"
+                    step="2"
+                    value={logoHeight}
+                    onChange={(e) => setLogoHeight(Number(e.target.value))}
+                    className="w-full accent-brand-primary cursor-pointer h-2 bg-neutral-200 dark:bg-neutral-800 rounded-lg"
+                  />
+                  <span className="text-[11px] font-mono text-brand-muted">64px</span>
+                </div>
+
+                {/* Quick Size Presets */}
+                <div className="flex items-center gap-2 pt-1">
+                  <span className="text-[11px] text-brand-muted">Presets:</span>
+                  {[
+                    { label: "Small (28px)", size: 28 },
+                    { label: "Standard (36px)", size: 36 },
+                    { label: "Medium (42px)", size: 42 },
+                    { label: "Large (48px)", size: 48 },
+                    { label: "X-Large (56px)", size: 56 },
+                  ].map((preset) => (
+                    <button
+                      key={preset.size}
+                      type="button"
+                      onClick={() => setLogoHeight(preset.size)}
+                      className={`rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors ${
+                        logoHeight === preset.size
+                          ? "border-brand-primary bg-brand-primary/10 text-brand-primary font-bold shadow-xs"
+                          : "border-brand-border bg-brand-surface text-brand-muted hover:text-brand-text"
+                      }`}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
                 </div>
               </div>
             </CardContent>
@@ -2537,82 +3198,1052 @@ export default function AdminSettingsPage() {
       )}
 
       {/* ========================================================================= */}
-      {/* TAB 3: LOCATION & CLINIC DETAILS (OPTIONAL)                               */}
+      {/* TAB 3: ABOUT US & VIDEO PLAYER CUSTOMIZER                                 */}
       {/* ========================================================================= */}
-      {activeTab === "details" && (
-        <Card className="border border-brand-border shadow-xs">
-          <CardHeader className="pb-3">
+      {activeTab === "about" && (
+        <div className="space-y-6">
+          {/* Header Banner */}
+          <div className="rounded-2xl border border-brand-border bg-gradient-to-r from-teal-500/10 via-brand-surface to-brand-surface p-5 shadow-xs">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-600 text-white shadow-md">
+                  <Video className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="font-heading text-base font-bold text-brand-text">
+                    About Us Page &amp; Video Player Customizer
+                  </h3>
+                  <p className="text-xs text-brand-muted">
+                    Full administrative control over the clinic tour video, YouTube branding removal, autoplay behavior, size presets, resolution quality, and page headings.
+                  </p>
+                </div>
+              </div>
+              <Badge variant="outline" className="w-fit text-xs px-3 py-1 bg-white font-medium">
+                Live Dynamic Sync
+              </Badge>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {/* 1. VIDEO SOURCE LINK */}
+            <Card className="border border-brand-border shadow-xs">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-500/10 text-teal-600">
+                      <Video className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">1. Video Source &amp; Link</CardTitle>
+                      <CardDescription className="text-xs">
+                        Set YouTube URL or direct MP4/WebM video stream
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <Badge variant="secondary" className="text-[10px] font-bold">
+                    {aboutVideoUrl.endsWith(".mp4") ? "Direct MP4" : "YouTube"}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-brand-text">
+                    Video URL
+                  </label>
+                  <Input
+                    value={aboutVideoUrl}
+                    onChange={(e) => setAboutVideoUrl(e.target.value)}
+                    placeholder="https://www.youtube.com/watch?v=mbBugyspbPE"
+                    className="font-mono text-xs"
+                  />
+                  <p className="text-[11px] text-brand-muted">
+                    Supports standard YouTube links, Shorts, or direct video file URLs (.mp4).
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setAboutVideoUrl("/videos/clinic-tour-1080p.mp4")}
+                    className="text-xs gap-1.5 rounded-lg border-teal-600/40 text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-950/30"
+                  >
+                    <Sparkles className="h-3 w-3 text-teal-600" />
+                    <span>Use 1080p Master File (/videos/clinic-tour-1080p.mp4)</span>
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setAboutVideoUrl("https://www.youtube.com/watch?v=mbBugyspbPE")}
+                    className="text-xs gap-1.5 rounded-lg"
+                  >
+                    <RotateCcw className="h-3 w-3" />
+                    <span>YouTube URL (mbBugyspbPE)</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 2. YOUTUBE BRANDING & WATERMARK SUPPRESSION */}
+            <Card className="border border-brand-border shadow-xs">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600">
+                      <Shield className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">2. YouTube Branding Removal</CardTitle>
+                      <CardDescription className="text-xs">
+                        Hide top channel avatar header and bottom YouTube logo
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setAboutHideYouTubeBranding(!aboutHideYouTubeBranding)}
+                    className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-all ${
+                      aboutHideYouTubeBranding
+                        ? "bg-emerald-600 text-white shadow-xs"
+                        : "bg-neutral-200 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300"
+                    }`}
+                  >
+                    <span>{aboutHideYouTubeBranding ? "Branding Hidden" : "Standard Embed"}</span>
+                  </button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div
+                  className={`rounded-xl border p-3.5 text-xs transition-colors ${
+                    aboutHideYouTubeBranding
+                      ? "border-emerald-500/20 bg-emerald-50/50 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-300"
+                      : "border-neutral-200 bg-neutral-50 text-neutral-600 dark:border-neutral-800 dark:bg-neutral-900"
+                  }`}
+                >
+                  <p className="font-semibold mb-1">
+                    {aboutHideYouTubeBranding
+                      ? "✓ Clean Professional Mask Active"
+                      : "Native YouTube Overlays Allowed"}
+                  </p>
+                  <p className="text-[11px] leading-relaxed opacity-90">
+                    {aboutHideYouTubeBranding
+                      ? "The top channel avatar (\"My Video / yash patel\") and the bottom YouTube watermark logo are cropped and shielded. Users will only see your clean video with realistic white controls."
+                      : "Native YouTube top title bar and bottom watermark will be displayed normally."}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 3. AUTOPLAY & PLAYBACK BEHAVIOR */}
+            <Card className="border border-brand-border shadow-xs">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-500/10 text-teal-600">
+                    <Sliders className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base">3. Autoplay &amp; Playback Controls</CardTitle>
+                    <CardDescription className="text-xs">
+                      Scroll-triggered autoplay and interaction behavior
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Autoplay on Scroll Toggle */}
+                <div className="flex items-center justify-between rounded-xl border border-brand-border p-3">
+                  <div>
+                    <span className="text-xs font-semibold text-brand-text block">
+                      Autoplay on Scroll
+                    </span>
+                    <span className="text-[11px] text-brand-muted">
+                      Video automatically starts playing when scrolled into viewport
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setAboutAutoplayOnScroll(!aboutAutoplayOnScroll)}
+                    className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
+                      aboutAutoplayOnScroll
+                        ? "bg-teal-600 text-white shadow-xs"
+                        : "bg-neutral-200 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300"
+                    }`}
+                  >
+                    {aboutAutoplayOnScroll ? "Enabled" : "Disabled"}
+                  </button>
+                </div>
+
+                {/* Start Muted Toggle */}
+                <div className="flex items-center justify-between rounded-xl border border-brand-border p-3">
+                  <div>
+                    <span className="text-xs font-semibold text-brand-text block">
+                      Start Muted
+                    </span>
+                    <span className="text-[11px] text-brand-muted">
+                      Required by modern browsers (Safari, Chrome) to allow autoplay
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setAboutStartMuted(!aboutStartMuted)}
+                    className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
+                      aboutStartMuted
+                        ? "bg-teal-600 text-white shadow-xs"
+                        : "bg-neutral-200 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300"
+                    }`}
+                  >
+                    {aboutStartMuted ? "Muted" : "Unmuted"}
+                  </button>
+                </div>
+
+                {/* Show Status Pill */}
+                <div className="flex items-center justify-between rounded-xl border border-brand-border p-3">
+                  <div>
+                    <span className="text-xs font-semibold text-brand-text block">
+                      Show Playing Status Pill
+                    </span>
+                    <span className="text-[11px] text-brand-muted">
+                      Pill displaying &quot;Clinic Tour • Playing&quot; or &quot;Paused&quot;
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setAboutShowStatusPill(!aboutShowStatusPill)}
+                    className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
+                      aboutShowStatusPill
+                        ? "bg-teal-600 text-white shadow-xs"
+                        : "bg-neutral-200 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300"
+                    }`}
+                  >
+                    {aboutShowStatusPill ? "Visible" : "Hidden"}
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 4. VIDEO SIZE SETTINGS ("SLIDE CUM" / COMPACT PRESETS) */}
+            <Card className="border border-brand-border shadow-xs">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-500/10 text-teal-600">
+                    <Columns className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base">4. Video Player Size</CardTitle>
+                    <CardDescription className="text-xs">
+                      Adjust container width on the About Us page
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {[
+                    { key: "max-w-4xl", label: "Compact", note: "896px (Slide Cum)" },
+                    { key: "max-w-5xl", label: "Standard", note: "1024px (Medium)" },
+                    { key: "max-w-6xl", label: "Navbar Wide", note: "1152px (Navbar)" },
+                    { key: "max-w-full", label: "Full Width", note: "100% Container" },
+                  ].map((sizeOption) => (
+                    <button
+                      key={sizeOption.key}
+                      type="button"
+                      onClick={() => setAboutVideoSize(sizeOption.key as any)}
+                      className={`flex flex-col items-center justify-center rounded-xl border p-3 text-center transition-all ${
+                        aboutVideoSize === sizeOption.key
+                          ? "border-teal-600 bg-teal-50 dark:bg-teal-950/40 text-teal-900 dark:text-teal-200 font-bold shadow-xs ring-1 ring-teal-500"
+                          : "border-brand-border bg-brand-surface text-brand-muted hover:text-brand-text"
+                      }`}
+                    >
+                      <span className="text-xs">{sizeOption.label}</span>
+                      <span className="text-[10px] text-brand-muted mt-0.5">{sizeOption.note}</span>
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[11px] text-brand-muted pt-1">
+                  Currently selected: <span className="font-bold text-teal-600">{aboutVideoSize}</span>. The Compact size provides comfortable side margins beneath the navbar.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* 5. VIDEO QUALITY CONTROL (INCREASE / DECREASE) */}
+            <Card className="border border-brand-border shadow-xs">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-500/10 text-teal-600">
+                    <SlidersHorizontal className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base">5. Playback Quality Control</CardTitle>
+                    <CardDescription className="text-xs">
+                      Lock video playback resolution (Increase to 1080p Full HD)
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {[
+                    { key: "hd1080", label: "1080p Full HD", desc: "Highest Clarity" },
+                    { key: "hd720", label: "720p HD", desc: "Fast & Sharp" },
+                    { key: "medium", label: "480p SD", desc: "Data Saver" },
+                    { key: "auto", label: "Auto Quality", desc: "Adaptive Bitrate" },
+                  ].map((q) => (
+                    <button
+                      key={q.key}
+                      type="button"
+                      onClick={() => setAboutDefaultQuality(q.key as any)}
+                      className={`flex flex-col items-center justify-center rounded-xl border p-3 text-center transition-all ${
+                        aboutDefaultQuality === q.key
+                          ? "border-teal-600 bg-teal-50 dark:bg-teal-950/40 text-teal-900 dark:text-teal-200 font-bold shadow-xs ring-1 ring-teal-500"
+                          : "border-brand-border bg-brand-surface text-brand-muted hover:text-brand-text"
+                      }`}
+                    >
+                      <span className="text-xs">{q.label}</span>
+                      <span className="text-[10px] text-brand-muted mt-0.5">{q.desc}</span>
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[11px] text-brand-muted pt-1">
+                  Enforces maximum resolution quality via YouTube IFrame API and HTML parameters.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* 6. ABOUT US PAGE HEADINGS & LABELS */}
+            <Card className="border border-brand-border shadow-xs">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-500/10 text-teal-600">
+                    <Type className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base">6. About Page Headings &amp; Badges</CardTitle>
+                    <CardDescription className="text-xs">
+                      Customize titles shown directly above the video player
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-brand-text">
+                    Main Section Heading
+                  </label>
+                  <Input
+                    value={aboutVideoTitle}
+                    onChange={(e) => setAboutVideoTitle(e.target.value)}
+                    placeholder="Take a Look Inside Our Clinic"
+                    className="text-xs font-medium"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-brand-text">
+                    Category Tag / Subtitle
+                  </label>
+                  <Input
+                    value={aboutVideoSubtitle}
+                    onChange={(e) => setAboutVideoSubtitle(e.target.value)}
+                    placeholder="Clinic Tour & Experience"
+                    className="text-xs font-medium"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-brand-text">
+                    Feature Badge Caption
+                  </label>
+                  <Input
+                    value={aboutBadgeText}
+                    onChange={(e) => setAboutBadgeText(e.target.value)}
+                    placeholder="Autoplays on scroll • Interactive play & pause"
+                    className="text-xs font-medium"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* 7. INTERACTIVE LIVE PREVIEW */}
+          <Card className="border border-brand-border shadow-xs">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-base">Interactive Live Video Preview</CardTitle>
+                  <CardDescription className="text-xs">
+                    Test the video, controls, size, and YouTube branding suppression in real-time
+                  </CardDescription>
+                </div>
+                <Badge variant="outline" className="text-xs px-2.5 py-0.5 font-medium">
+                  {aboutVideoSize} • {aboutDefaultQuality}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-2xl bg-neutral-950 p-4 sm:p-8 flex flex-col items-center justify-center">
+                <div className="w-full text-center sm:text-left mb-4 max-w-4xl">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-teal-400">
+                    {aboutVideoSubtitle}
+                  </span>
+                  <h4 className="text-lg sm:text-xl font-bold text-white mt-0.5">
+                    {aboutVideoTitle}
+                  </h4>
+                  <p className="text-xs text-neutral-400 mt-1">
+                    {aboutBadgeText}
+                  </p>
+                </div>
+
+                {/* Render live player with current admin settings */}
+                <AboutVideoPlayer
+                  config={{
+                    videoUrl: aboutVideoUrl,
+                    videoTitle: aboutVideoTitle,
+                    videoSubtitle: aboutVideoSubtitle,
+                    badgeText: aboutBadgeText,
+                    autoplayOnScroll: aboutAutoplayOnScroll,
+                    videoSize: aboutVideoSize,
+                    defaultQuality: aboutDefaultQuality,
+                    hideYouTubeBranding: aboutHideYouTubeBranding,
+                    startMuted: aboutStartMuted,
+                    showStatusPill: aboutShowStatusPill,
+                  }}
+                  videoUrl={aboutVideoUrl}
+                  className="w-full"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Quick Save Bar for About Us & Video Player */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 rounded-2xl border border-teal-500/30 bg-teal-50/50 dark:bg-teal-950/20 p-4">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-primary/10 text-brand-primary">
-                <MapPin className="h-4 w-4" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-600 text-white shadow-xs">
+                <Check className="h-4 w-4" />
               </div>
               <div>
-                <CardTitle className="text-base">Clinic Location &amp; Contact Details</CardTitle>
-                <CardDescription className="text-xs">
-                  Physical address, coordinates for interactive map, and reception phone number
-                </CardDescription>
+                <p className="text-xs font-bold text-brand-text">
+                  Save About Us &amp; Video Player Configuration
+                </p>
+                <p className="text-[11px] text-brand-muted">
+                  Instantly updates public /about page video, autoplay, sizing, quality, and headings.
+                </p>
               </div>
             </div>
-          </CardHeader>
-          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-1">
-              <label className="text-[11px] font-medium text-brand-muted">Clinic Address</label>
-              <Input
-                value={clinicAddress}
-                onChange={(e) => setClinicAddress(e.target.value)}
-                className="text-xs"
-                placeholder="Clinic street address"
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-[11px] font-medium text-brand-muted">Clinic Phone</label>
-              <Input
-                value={clinicPhone}
-                onChange={(e) => setClinicPhone(e.target.value)}
-                className="text-xs"
-                placeholder="+91 98470 12345"
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-[11px] font-medium text-brand-muted">Map Latitude</label>
-              <Input
-                type="number"
-                step="any"
-                value={latitude}
-                onChange={(e) => setLatitude(parseFloat(e.target.value))}
-                className="font-mono text-xs"
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-[11px] font-medium text-brand-muted">Map Longitude</label>
-              <Input
-                type="number"
-                step="any"
-                value={longitude}
-                onChange={(e) => setLongitude(parseFloat(e.target.value))}
-                className="font-mono text-xs"
-              />
-            </div>
-          </CardContent>
-        </Card>
+            <Button
+              type="button"
+              onClick={handleSaveAll}
+              disabled={saving}
+              className="bg-teal-600 hover:bg-teal-700 text-white px-5 py-2 text-xs font-bold rounded-xl shadow-md gap-2"
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <span>Saving Video Settings...</span>
+                </>
+              ) : (
+                <>
+                  <Save className="h-3.5 w-3.5" />
+                  <span>Save About Video Settings</span>
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
       )}
 
-      {/* Save Action Sticky Footer */}
-      <div className="sticky bottom-4 z-30 flex items-center justify-between rounded-2xl border border-brand-border bg-brand-surface/95 backdrop-blur-md p-4 shadow-lg">
-        <div className="text-xs text-brand-muted">
-          Click <strong>Save Branding &amp; Hero</strong> to apply your customizations to the public website immediately.
+      {/* ========================================================================= */}
+      {/* TAB 4: LOCATION & CLINIC DETAILS (MAP SECTION CUSTOMIZATION)              */}
+      {/* ========================================================================= */}
+      {activeTab === "details" && (
+        <div className="space-y-6">
+          {/* Header Banner */}
+          <div className="rounded-2xl border border-brand-border bg-linear-to-r from-brand-primary/10 via-brand-surface to-brand-surface p-5 shadow-xs">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-primary text-white shadow-md">
+                  <MapPin className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="font-heading text-base font-bold text-brand-text">
+                    Clinic Map Section &amp; Location Customizer
+                  </h3>
+                  <p className="text-xs text-brand-muted">
+                    Full control over the public website Map Section: background color, map theme, WhatsApp &amp; Instagram links, address details, and pin styling.
+                  </p>
+                </div>
+              </div>
+              <Badge variant="outline" className="w-fit text-xs px-3 py-1 bg-white font-medium">
+                Live Public Website Connected
+              </Badge>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {/* 1. MAP SECTION VISUAL DESIGN & THEME */}
+            <Card className="border border-brand-border shadow-xs">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2">
+                  <Palette className="h-4 w-4 text-brand-primary" />
+                  <CardTitle className="text-sm font-semibold">Map Section Visual Design &amp; Theme</CardTitle>
+                </div>
+                <CardDescription className="text-xs">
+                  Background color of the map section, road map visual theme, and pin styling
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Background Color */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-brand-text">
+                    Map Section Background Color
+                  </label>
+                  <div className="flex items-center gap-2.5">
+                    <input
+                      type="color"
+                      value={mapSectionBgColor}
+                      onChange={(e) => setMapSectionBgColor(e.target.value)}
+                      className="h-9 w-10 cursor-pointer rounded-lg border border-brand-border bg-transparent p-0.5"
+                    />
+                    <Input
+                      value={mapSectionBgColor}
+                      onChange={(e) => setMapSectionBgColor(e.target.value)}
+                      className="font-mono text-xs max-w-[140px]"
+                      placeholder="#ffffff"
+                    />
+                    <div className="flex items-center gap-1.5">
+                      {[
+                        { name: "White", color: "#ffffff" },
+                        { name: "Cream", color: "#eae6df" },
+                        { name: "Soft Grey", color: "#f8fafc" },
+                        { name: "Beige", color: "#f5f5f4" },
+                        { name: "Dark", color: "#18181b" },
+                      ].map((preset) => (
+                        <button
+                          key={preset.color}
+                          type="button"
+                          onClick={() => setMapSectionBgColor(preset.color)}
+                          className={`h-6 w-6 rounded-full border shadow-2xs transition-transform hover:scale-110 ${
+                            mapSectionBgColor.toLowerCase() === preset.color.toLowerCase()
+                              ? "ring-2 ring-brand-primary ring-offset-1"
+                              : "border-black/20"
+                          }`}
+                          style={{ backgroundColor: preset.color }}
+                          title={preset.name}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Map Design / Style */}
+                <div className="space-y-1.5 pt-1">
+                  <label className="text-xs font-semibold text-brand-text">
+                    Map Design / Theme Style
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setMapStyle("dark")}
+                      className={`flex flex-col items-start gap-1 rounded-xl border p-3 text-left transition-all ${
+                        mapStyle === "dark"
+                          ? "border-brand-primary bg-brand-primary/5 ring-1 ring-brand-primary"
+                          : "border-brand-border bg-brand-surface hover:border-brand-border/80"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span className="text-xs font-bold text-brand-text">Dark Road Map</span>
+                        {mapStyle === "dark" && <Check className="h-3.5 w-3.5 text-brand-primary" />}
+                      </div>
+                      <span className="text-[11px] text-brand-muted">
+                        High-contrast dark monochrome road canvas
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setMapStyle("light")}
+                      className={`flex flex-col items-start gap-1 rounded-xl border p-3 text-left transition-all ${
+                        mapStyle === "light"
+                          ? "border-brand-primary bg-brand-primary/5 ring-1 ring-brand-primary"
+                          : "border-brand-border bg-brand-surface hover:border-brand-border/80"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span className="text-xs font-bold text-brand-text">Standard Light Map</span>
+                        {mapStyle === "light" && <Check className="h-3.5 w-3.5 text-brand-primary" />}
+                      </div>
+                      <span className="text-[11px] text-brand-muted">
+                        Natural crisp daylight Google road map
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Pin Color & Pulse Animation */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-brand-text">
+                      Map Pin Accent Color
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={mapPinColor}
+                        onChange={(e) => setMapPinColor(e.target.value)}
+                        className="h-8 w-9 cursor-pointer rounded-lg border border-brand-border bg-transparent p-0.5"
+                      />
+                      <Input
+                        value={mapPinColor}
+                        onChange={(e) => setMapPinColor(e.target.value)}
+                        className="font-mono text-xs"
+                        placeholder="#E53935"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-brand-text">
+                      Pin Pulsing Radar Halo
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setMapPinPulse(!mapPinPulse)}
+                      className={`flex h-9 w-full items-center justify-between rounded-lg border px-3 text-xs font-medium transition-all ${
+                        mapPinPulse
+                          ? "border-emerald-500/40 bg-emerald-50 text-emerald-800"
+                          : "border-brand-border bg-brand-surface text-brand-muted"
+                      }`}
+                    >
+                      <span>{mapPinPulse ? "Blinking Pulse Enabled" : "Static Pin (No Pulse)"}</span>
+                      <span
+                        className={`h-2.5 w-2.5 rounded-full ${
+                          mapPinPulse ? "bg-emerald-500 animate-pulse" : "bg-stone-300"
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 2. SOCIAL MEDIA & DIRECT CONTACT LINKS */}
+            <Card className="border border-brand-border shadow-xs">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-brand-primary" />
+                  <CardTitle className="text-sm font-semibold">Social Media &amp; Quick Contact Links</CardTitle>
+                </div>
+                <CardDescription className="text-xs">
+                  Buttons displayed directly in the left column of the map section
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3.5">
+                {/* WhatsApp */}
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-brand-text flex items-center gap-1.5">
+                    <span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-600 text-white text-[9px] font-bold">W</span>
+                    WhatsApp Phone Number or Link
+                  </label>
+                  <Input
+                    value={whatsappPhone}
+                    onChange={(e) => setWhatsappPhone(e.target.value)}
+                    className="text-xs font-mono"
+                    placeholder="+91 72260 98074 or https://wa.me/..."
+                  />
+                  <span className="text-[10px] text-brand-muted">
+                    Clicking the WhatsApp button opens direct chat with this phone number.
+                  </span>
+                </div>
+
+                {/* Instagram */}
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-brand-text flex items-center gap-1.5">
+                    <span className="flex h-4 w-4 items-center justify-center rounded-full bg-linear-to-tr from-amber-500 via-rose-500 to-purple-600 text-white text-[9px] font-bold">IG</span>
+                    Instagram Profile Link
+                  </label>
+                  <Input
+                    value={instagramUrl}
+                    onChange={(e) => setInstagramUrl(e.target.value)}
+                    className="text-xs font-mono"
+                    placeholder="https://instagram.com/casmiledental"
+                  />
+                  <span className="text-[10px] text-brand-muted">
+                    Clicking the Instagram icon button opens this URL in a new tab.
+                  </span>
+                </div>
+
+                {/* About Us Video URL */}
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-brand-text flex items-center gap-1.5">
+                    <span className="flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-white text-[9px] font-bold">▶</span>
+                    About Us YouTube Video URL
+                  </label>
+                  <Input
+                    value={aboutVideoUrl}
+                    onChange={(e) => setAboutVideoUrl(e.target.value)}
+                    className="text-xs font-mono"
+                    placeholder="https://youtu.be/mbBugyspbPE"
+                  />
+                  <span className="text-[10px] text-brand-muted">
+                    Plays on loop automatically when scrolled into view on the About Us page (no YouTube badges or profiles).
+                  </span>
+                </div>
+
+                {/* Phone & Email */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold text-brand-text">
+                      Reception Phone Number
+                    </label>
+                    <Input
+                      value={clinicPhone}
+                      onChange={(e) => setClinicPhone(e.target.value)}
+                      className="text-xs font-mono"
+                      placeholder="+91 72260 98074"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold text-brand-text">
+                      Clinic Contact Email
+                    </label>
+                    <Input
+                      value={clinicEmail}
+                      onChange={(e) => setClinicEmail(e.target.value)}
+                      className="text-xs font-mono"
+                      placeholder="casmileatbilimora@gmail.com"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 3. PHYSICAL ADDRESS & GOOGLE MAPS NAVIGATION */}
+            <Card className="border border-brand-border shadow-xs">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-brand-primary" />
+                  <CardTitle className="text-sm font-semibold">Physical Address &amp; Navigation</CardTitle>
+                </div>
+                <CardDescription className="text-xs">
+                  Address strings used for text display, Google Maps pin sticking, and navigation
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-brand-text">
+                    Section Header Label
+                  </label>
+                  <Input
+                    value={mapSectionTitle}
+                    onChange={(e) => setMapSectionTitle(e.target.value)}
+                    className="text-xs"
+                    placeholder="ADDRESS"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-brand-text">
+                    Display Address (Short Header)
+                  </label>
+                  <Input
+                    value={clinicAddress}
+                    onChange={(e) => setClinicAddress(e.target.value)}
+                    className="text-xs"
+                    placeholder="1ST FLOOR LABDHI ARCADE, ABOVE HDFC BANK, BILIMORA"
+                  />
+                  <span className="text-[10px] text-brand-muted">
+                    Shown prominently on the left column and the top floating map pill.
+                  </span>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-brand-text">
+                    Exact Location Address (For Stuck Map Pin &amp; Embed)
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={mapExactAddress}
+                    onChange={(e) => setMapExactAddress(e.target.value)}
+                    className="w-full rounded-lg border border-brand-border bg-brand-surface p-2 text-xs text-brand-text focus:outline-none focus:ring-1 focus:ring-brand-primary"
+                    placeholder="1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society, Bilimora, Gujarat 396321"
+                  />
+                  <span className="text-[10px] text-brand-muted">
+                    Google Maps embed and speech-bubble card stick exactly to this location.
+                  </span>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-brand-text">
+                    Google Maps Place / Directions URL
+                  </label>
+                  <Input
+                    value={googleMapsUrl}
+                    onChange={(e) => setGoogleMapsUrl(e.target.value)}
+                    className="text-xs font-mono"
+                    placeholder="https://www.google.com/maps/place/..."
+                  />
+                  <span className="text-[10px] text-brand-muted">
+                    Target destination when clicking &quot;Get Directions&quot; or &quot;OPEN MAP&quot;.
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-medium text-brand-muted">Latitude</label>
+                    <Input
+                      type="number"
+                      step="any"
+                      value={latitude}
+                      onChange={(e) => setLatitude(parseFloat(e.target.value))}
+                      className="font-mono text-xs"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-medium text-brand-muted">Longitude</label>
+                    <Input
+                      type="number"
+                      step="any"
+                      value={longitude}
+                      onChange={(e) => setLongitude(parseFloat(e.target.value))}
+                      className="font-mono text-xs"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 4. SPEECH-BUBBLE CLINIC CARD */}
+            <Card className="border border-brand-border shadow-xs">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2">
+                  <ImageIcon className="h-4 w-4 text-brand-primary" />
+                  <CardTitle className="text-sm font-semibold">Floating Clinic Speech-Bubble Card</CardTitle>
+                </div>
+                <CardDescription className="text-xs">
+                  Customize the clinic card that points directly to the red pin on the map
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-brand-text">
+                    Clinic Name on Speech Bubble
+                  </label>
+                  <Input
+                    value={mapCardTitle}
+                    onChange={(e) => setMapCardTitle(e.target.value)}
+                    className="text-xs"
+                    placeholder="CA Smile Dental Clinic"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[11px] font-semibold text-brand-text">
+                    Storefront Entrance Thumbnail
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <div className="relative h-16 w-20 shrink-0 overflow-hidden rounded-lg border border-brand-border bg-stone-100">
+                      {mapCardImage ? (
+                        <img
+                          src={mapCardImage}
+                          alt="Clinic thumbnail preview"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-stone-400">
+                          <ImageIcon className="h-6 w-6" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 space-y-1.5">
+                      <Input
+                        value={mapCardImage}
+                        onChange={(e) => setMapCardImage(e.target.value)}
+                        className="text-xs font-mono"
+                        placeholder="/images/ca-smile-clinic-building.jpg"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => mapCardImageInputRef.current?.click()}
+                        className="h-7 gap-1.5 text-[11px]"
+                      >
+                        <Upload className="h-3 w-3" />
+                        <span>Upload Photo</span>
+                      </Button>
+                      <input
+                        ref={mapCardImageInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleMapCardImageUpload}
+                        className="hidden"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick Info Box */}
+                <div className="rounded-xl border border-blue-100 bg-blue-50/70 p-3 text-xs text-blue-950">
+                  <div className="font-semibold mb-0.5">Interactive Map Behavior:</div>
+                  <ul className="list-disc pl-4 space-y-0.5 text-[11px] text-blue-900">
+                    <li>The speech bubble card points down to the teardrop location pin.</li>
+                    <li>Clicking the speech bubble opens your Google Maps page.</li>
+                    <li>Zoom controls are locked to maintain focus on your exact clinic address.</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* 5. LIVE REAL-TIME PREVIEW OF THE MAP SECTION */}
+          <Card className="border border-brand-border shadow-xs overflow-hidden">
+            <CardHeader className="pb-3 border-b border-brand-border bg-stone-50/80">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Eye className="h-4 w-4 text-brand-primary" />
+                  <CardTitle className="text-sm font-semibold">Live Real-Time Map Section Preview</CardTitle>
+                </div>
+                <Badge variant="outline" className="text-[10px] bg-white">
+                  Real-time visual reflection
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-6" style={{ backgroundColor: mapSectionBgColor }}>
+              <div className="rounded-2xl border border-black/10 p-4 sm:p-6 shadow-sm">
+                <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-12">
+                  {/* Left Column Preview */}
+                  <div className="flex flex-col justify-between space-y-4 lg:col-span-5">
+                    <div className="space-y-3">
+                      <div className="text-xs font-black tracking-[0.25em] text-[#18181b] uppercase">
+                        {mapSectionTitle || "ADDRESS"}
+                      </div>
+                      <div className="space-y-1.5 text-xs text-[#18181b]/90">
+                        <div className="font-medium text-[#27272a]">{clinicEmail || "casmileatbilimora@gmail.com"}</div>
+                        <div className="font-bold uppercase tracking-wide text-[#18181b] max-w-sm">
+                          {clinicAddress || "1ST FLOOR LABDHI ARCADE, ABOVE HDFC BANK, BILIMORA"}
+                        </div>
+                        <div className="font-bold text-[#18181b] pt-0.5">{clinicPhone || "+91 72260 98074"}</div>
+                      </div>
+                      <div className="flex items-center gap-2.5 pt-1">
+                        <div
+                          className="flex h-8 w-8 items-center justify-center rounded-full bg-[#18181b] text-white shadow-xs"
+                          title="Instagram Link"
+                        >
+                          <span className="text-[9px] font-bold">IG</span>
+                        </div>
+                        <div
+                          className="flex h-8 w-8 items-center justify-center rounded-full bg-[#18181b] text-white shadow-xs"
+                          title="WhatsApp Link"
+                        >
+                          <span className="text-[9px] font-bold">WA</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="pt-2">
+                      <div className="inline-flex items-center gap-2 rounded-full border-2 border-[#18181b] px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#18181b]">
+                        <span>Get Directions</span>
+                        <ArrowRight className="h-3 w-3" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column Map Canvas Preview */}
+                  <div className="lg:col-span-7">
+                    <div
+                      className="relative w-full h-[260px] sm:h-[300px] overflow-hidden rounded-[20px] border border-black/15 shadow-md flex items-center justify-center"
+                      style={{ backgroundColor: mapStyle === "dark" ? "#2b2d30" : "#e2e8f0" }}
+                    >
+                      {/* Top floating pill */}
+                      <div className="absolute top-2.5 left-2.5 right-2.5 z-20 flex items-center justify-between rounded-full bg-white/95 px-3 py-1.5 shadow-xs border border-black/5 text-[10px]">
+                        <div className="flex items-center gap-1.5 truncate pr-2">
+                          <MapPin className="h-3 w-3 shrink-0" style={{ color: mapPinColor, fill: mapPinColor }} />
+                          <span className="truncate font-bold uppercase text-slate-800">
+                            {clinicAddress || "BILIMORA CLINIC"}
+                          </span>
+                        </div>
+                        <span className="shrink-0 font-black text-[#0891b2] text-[9px]">OPEN MAP &gt;</span>
+                      </div>
+
+                      {/* Map Simulated Streets */}
+                      <div className="absolute inset-0 opacity-40 flex items-center justify-center">
+                        <div className="h-full w-full bg-[radial-gradient(#94a3b8_1px,transparent_1px)] [background-size:16px_16px]" />
+                      </div>
+
+                      {/* Floating Speech Bubble and Pin */}
+                      <div className="relative z-20 flex flex-col items-center">
+                        <div className="rounded-xl bg-white p-2 shadow-lg border border-black/10 max-w-[240px]">
+                          <div className="flex items-center gap-2">
+                            {mapCardImage && (
+                              <img
+                                src={mapCardImage}
+                                alt="Thumb"
+                                className="h-10 w-12 rounded object-cover border border-stone-200"
+                              />
+                            )}
+                            <div className="min-w-0">
+                              <div className="text-[11px] font-bold truncate" style={{ color: mapPinColor }}>
+                                {mapCardTitle || "CA Smile Dental Clinic"}
+                              </div>
+                              <div className="text-[9px] text-stone-600 line-clamp-1">
+                                {mapExactAddress || "Bilimora, Gujarat"}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        {/* Pin with Pulse */}
+                        <div className="relative mt-2 flex flex-col items-center">
+                          {mapPinPulse && (
+                            <span
+                              className="h-10 w-10 rounded-full animate-ping absolute opacity-30"
+                              style={{ backgroundColor: mapPinColor }}
+                            />
+                          )}
+                          <div
+                            className="h-7 w-5 rounded-t-full rounded-b-none relative flex items-center justify-center shadow-md"
+                            style={{ backgroundColor: mapPinColor }}
+                          >
+                            <span className="h-2 w-2 rounded-full bg-white" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-        <Button
-          type="button"
-          variant="primary"
-          onClick={() => handleSaveAll()}
-          disabled={saving}
-          className="gap-2 font-semibold shadow-sm"
-        >
-          <Save className="h-4 w-4" />
-          <span>{saving ? "Saving Changes..." : "Save Branding & Hero"}</span>
-        </Button>
-      </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB 5: BLOG & ARTICLES MANAGEMENT                                         */}
+      {/* ========================================================================= */}
+      {activeTab === "blog" && (
+        <div className="space-y-6">
+          <ClinicBrandingBlogManager />
+        </div>
+      )}
+
+      {/* Save Action Sticky Footer (for Hero, Header, About, and Details tabs) */}
+      {activeTab !== "blog" && (
+        <div className="sticky bottom-4 z-30 flex items-center justify-between rounded-2xl border border-brand-border bg-brand-surface/95 backdrop-blur-md p-4 shadow-lg">
+          <div className="text-xs text-brand-muted">
+            Click <strong>Save Branding &amp; Hero</strong> to apply your customizations to the public website immediately.
+          </div>
+          <Button
+            type="button"
+            variant="primary"
+            onClick={() => handleSaveAll()}
+            disabled={saving}
+            className="gap-2 font-semibold shadow-sm"
+          >
+            <Save className="h-4 w-4" />
+            <span>{saving ? "Saving Changes..." : "Save Branding & Hero"}</span>
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

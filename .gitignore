@@ -41,6 +41,9 @@ cookies.txt
 *.tsbuildinfo
 next-env.d.ts
 
-# archives
+# archives & backups
 *.zip
+src/data/backups/
+*.log
+dev.log
 

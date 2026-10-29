@@ -42,7 +42,7 @@ export function DatabaseHub() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2 text-xs text-brand-muted">
-            <Link href="/admin" className="hover:text-brand-primary">
+            <Link href="/admin/today" className="hover:text-brand-primary">
               Admin Panel
             </Link>
             <ChevronRight className="h-3 w-3" />

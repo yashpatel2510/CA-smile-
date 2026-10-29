@@ -36,10 +36,10 @@ export async function middleware(req: NextRequest) {
       "/admin/staff",
       "/admin/booking-form",
       "/admin/settings",
+      "/admin/blog",
       "/admin/services",
-      "/admin/email-previews",
-      "/admin/analytics",
       "/admin/reviews",
+      "/admin/setup",
     ];
 
     const isAdminOnly = adminOnlyRoutes.some((route) =>
@@ -47,9 +47,9 @@ export async function middleware(req: NextRequest) {
     );
 
     if (isAdminOnly && token.role !== "ADMIN") {
-      const dashboardUrl = new URL("/admin", req.url);
-      dashboardUrl.searchParams.set("error", "admin_only");
-      return NextResponse.redirect(dashboardUrl);
+      const redirectUrl = new URL("/admin/today", req.url);
+      redirectUrl.searchParams.set("error", "admin_only");
+      return NextResponse.redirect(redirectUrl);
     }
   }
 

@@ -16,7 +16,7 @@ async function runDatabaseStatusTests() {
     token: {
       id: "admin-owner-id",
       name: "Clinic Owner",
-      email: "applei74740@gmail.com",
+      email: process.env.OWNER_EMAILS?.split(",")[0] || "admin@casmile.com",
       role: "ADMIN",
     },
     secret,

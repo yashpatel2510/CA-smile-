@@ -104,6 +104,10 @@ export async function POST(
           rescheduledAt: new Date(),
           rescheduledReason: reason || "Patient requested reschedule",
           preferredDoctor: preferredDoctor || existing.preferredDoctor,
+          status: "PENDING",
+          notes: (existing.notes || "").includes("[Rescheduled]")
+            ? existing.notes
+            : `[Rescheduled] ${existing.notes || ""}`.trim(),
         },
         include: {
           patient: true,
@@ -129,6 +133,17 @@ export async function POST(
           },
         },
       });
+
+      try {
+        inMemoryStore.rescheduleAppointment(
+          appointmentId,
+          newStartDate.toISOString(),
+          newEndDate.toISOString(),
+          reason,
+          preferredDoctor,
+          performedBy
+        );
+      } catch {}
     } catch {
       updatedAppointment = inMemoryStore.rescheduleAppointment(
         appointmentId,

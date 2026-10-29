@@ -12,21 +12,25 @@ export const APPOINTMENT_STATUSES = [
   "DECLINED",
   "IN_PROGRESS",
   "COMPLETED",
+  "RESCHEDULED",
+  "FOLLOW_UP",
 ] as const;
 
 export type AppointmentStatusType = (typeof APPOINTMENT_STATUSES)[number];
 
 export const ALLOWED_STATUS_TRANSITIONS: Record<string, string[]> = {
-  PENDING: ["CONFIRMED", "CANCELLED", "DECLINED"],
-  CONFIRMED: ["CHECKED_IN", "CANCELLED", "NO_SHOW"],
-  CHECKED_IN: ["TREATMENT_STARTED", "CANCELLED", "NO_SHOW"],
-  TREATMENT_STARTED: ["TREATMENT_DONE", "CANCELLED"],
-  TREATMENT_DONE: [], // Final for this session
-  CANCELLED: ["PENDING", "CONFIRMED"], // Recovery if needed
-  NO_SHOW: ["PENDING", "CONFIRMED"],
-  DECLINED: ["PENDING", "CONFIRMED"],
-  IN_PROGRESS: ["TREATMENT_DONE", "COMPLETED", "CANCELLED"],
-  COMPLETED: [],
+  PENDING: ["CONFIRMED", "CANCELLED", "DECLINED", "RESCHEDULED", "FOLLOW_UP", "CHECKED_IN"],
+  CONFIRMED: ["CHECKED_IN", "CANCELLED", "NO_SHOW", "RESCHEDULED", "FOLLOW_UP", "TREATMENT_STARTED", "PENDING"],
+  CHECKED_IN: ["TREATMENT_STARTED", "CANCELLED", "NO_SHOW", "RESCHEDULED", "FOLLOW_UP", "CONFIRMED"],
+  TREATMENT_STARTED: ["TREATMENT_DONE", "CANCELLED", "RESCHEDULED", "FOLLOW_UP", "CHECKED_IN", "CONFIRMED"],
+  TREATMENT_DONE: ["FOLLOW_UP", "RESCHEDULED", "CONFIRMED", "PENDING"],
+  CANCELLED: ["PENDING", "CONFIRMED", "RESCHEDULED"],
+  NO_SHOW: ["PENDING", "CONFIRMED", "RESCHEDULED"],
+  DECLINED: ["PENDING", "CONFIRMED", "RESCHEDULED"],
+  IN_PROGRESS: ["TREATMENT_DONE", "COMPLETED", "CANCELLED", "RESCHEDULED"],
+  COMPLETED: ["FOLLOW_UP", "RESCHEDULED"],
+  RESCHEDULED: ["CONFIRMED", "CHECKED_IN", "TREATMENT_STARTED", "TREATMENT_DONE", "CANCELLED", "PENDING", "FOLLOW_UP"],
+  FOLLOW_UP: ["CONFIRMED", "CHECKED_IN", "TREATMENT_STARTED", "TREATMENT_DONE", "CANCELLED", "PENDING", "RESCHEDULED"],
 };
 
 export const createAppointmentSchema = z.object({
@@ -39,8 +43,9 @@ export const createAppointmentSchema = z.object({
   email: z.string().email("Invalid email address").optional().or(z.literal("")),
   phone: z
     .string()
-    .min(7, "Phone number must be at least 7 characters")
-    .max(25, "Phone number cannot exceed 25 characters"),
+    .min(1, "Phone number is required")
+    .max(35, "Phone number cannot exceed 35 characters")
+    .default("0000000000"),
   preferredDoctor: z.string().optional(),
   treatment: z.string().optional(),
   treatmentId: z.string().optional(),
@@ -67,27 +72,15 @@ export const createAppointmentSchema = z.object({
   notes: z.string().max(1000, "Notes cannot exceed 1000 characters").optional(),
   reason: z.string().max(255, "Reason cannot exceed 255 characters").optional(),
   consentAgreed: z.boolean().default(true),
-    source: z
-      .enum([
-        "MANUAL",
-        "AI_BOOKING",
-        "WHATSAPP",
-        "WEB_FORM",
-        "WEBSITE",
-        "CONTACT_PAGE",
-        "PHONE",
-        "WALK_IN",
-        "ADMIN",
-        "OTHER",
-      ])
-      .default("MANUAL"),
-    customFields: z.record(z.string(), z.any()).optional(),
-    clinicSlug: z.string().optional(),
-    patientId: z.string().optional(),
-    totalAmount: z.number().optional(),
-    paidAmount: z.number().optional(),
-    paymentStatus: z.enum(["PENDING", "PAID", "PARTIAL"]).default("PENDING"),
-  }).passthrough();
+  status: z.string().optional(),
+  source: z.string().default("MANUAL"),
+  customFields: z.record(z.string(), z.any()).optional(),
+  clinicSlug: z.string().optional(),
+  patientId: z.string().optional(),
+  totalAmount: z.number().optional(),
+  paidAmount: z.number().optional(),
+  paymentStatus: z.enum(["PENDING", "PAID", "PARTIAL"]).default("PENDING"),
+}).passthrough();
 
 export type CreateAppointmentInput = z.infer<typeof createAppointmentSchema>;
 

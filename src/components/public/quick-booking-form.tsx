@@ -18,6 +18,12 @@ import {
   BookingFormConfig,
   defaultBookingFormConfig,
 } from "@/data/booking-form-config";
+import {
+  getTodayDateString,
+  isDateInPast,
+  isDateToday,
+  isSlotInPast,
+} from "@/lib/booking-time-utils";
 import { BookNowButton } from "@/components/ui/book-now-button";
 
 interface QuickBookingFormProps {
@@ -48,17 +54,27 @@ export function QuickBookingForm({
   const [preferredDoctor, setPreferredDoctor] = useState("Any Available Specialist");
   const [treatment, setTreatment] = useState(defaultService);
 
-  // Date default to tomorrow in YYYY-MM-DD
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const tomorrowIso = tomorrow.toISOString().split("T")[0];
-  const [preferredDate, setPreferredDate] = useState(tomorrowIso);
+  // Date default to today in YYYY-MM-DD
+  const todayIso = getTodayDateString();
+  const [preferredDate, setPreferredDate] = useState(todayIso);
 
   // Time range
   const [timeRange, setTimeRange] = useState("Afternoon (2:00 PM - 5:00 PM)");
   const [contactMethod, setContactMethod] = useState<"PHONE" | "WHATSAPP">("PHONE");
   const [notes, setNotes] = useState("");
   const [consentAgreed, setConsentAgreed] = useState(true);
+
+  // Auto-switch timeRange if currently selected slot is in the past for the chosen date
+  useEffect(() => {
+    if (formConfig.timeSlots.length > 0 && isSlotInPast(timeRange, preferredDate)) {
+      const available = formConfig.timeSlots.find(
+        (slot) => !isSlotInPast(slot, preferredDate)
+      );
+      if (available) {
+        setTimeRange(available);
+      }
+    }
+  }, [preferredDate, formConfig.timeSlots, timeRange]);
 
   // Dynamic custom questions answers
   const [customFields, setCustomFields] = useState<Record<string, any>>({});
@@ -145,6 +161,22 @@ export function QuickBookingForm({
       return;
     }
 
+    // Validate preferredDate is not in past
+    if (isFieldEnabled("preferredDate") && preferredDate) {
+      if (isDateInPast(preferredDate)) {
+        setErrorMessage("Please select today or a future date for your appointment.");
+        return;
+      }
+    }
+
+    // Validate timeRange has not passed today
+    if (isFieldEnabled("timeRange") && timeRange && preferredDate) {
+      if (isSlotInPast(timeRange, preferredDate)) {
+        setErrorMessage("The selected time slot has already passed for today. Please choose an upcoming time slot.");
+        return;
+      }
+    }
+
     // Validate required custom fields
     for (const field of formConfig.fields.filter((f) => f.isCustom && f.enabled && f.required)) {
       if (!customFields[field.id] || customFields[field.id] === "") {
@@ -203,7 +235,7 @@ export function QuickBookingForm({
         preferredDoctor: isFieldEnabled("preferredDoctor") ? preferredDoctor : undefined,
         treatment: isFieldEnabled("treatment") ? treatment : "General Consultation",
         serviceName: isFieldEnabled("treatment") ? treatment : "General Consultation",
-        preferredDate: isFieldEnabled("preferredDate") ? preferredDate : tomorrowIso,
+        preferredDate: isFieldEnabled("preferredDate") ? preferredDate : todayIso,
         timeRange: isFieldEnabled("timeRange") ? timeRange : "Morning",
         contactMethod: isFieldEnabled("contactMethod") ? contactMethod : "PHONE",
         notes: compiledNotes || undefined,
@@ -234,7 +266,7 @@ export function QuickBookingForm({
         id: data.appointment.id,
         patientName: patientDisplayName,
         treatment: isFieldEnabled("treatment") ? treatment : "General Consultation",
-        date: isFieldEnabled("preferredDate") ? preferredDate : tomorrowIso,
+        date: isFieldEnabled("preferredDate") ? preferredDate : todayIso,
         timeRange: isFieldEnabled("timeRange") ? timeRange : "Morning",
         contactMethod,
       });
@@ -341,10 +373,10 @@ export function QuickBookingForm({
 
               <div className="border-t border-slate-100 pt-2 text-center">
                 <a
-                  href="/admin"
+                  href="/admin/today"
                   className="text-[11px] font-semibold text-brand-primary hover:underline"
                 >
-                  Staff Portal: View in Admin Dashboard &rarr;
+                  Staff Portal: View in Admin Panel &rarr;
                 </a>
               </div>
             </div>
@@ -568,7 +600,7 @@ export function QuickBookingForm({
                       <input
                         type="date"
                         required={isFieldRequired("preferredDate")}
-                        min={tomorrowIso}
+                        min={todayIso}
                         value={preferredDate}
                         onChange={(e) => setPreferredDate(e.target.value)}
                         className="h-10 w-full rounded-xl border border-slate-200/90 bg-slate-50/50 px-3.5 text-xs text-slate-800 focus:border-[#10b981] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#10b981]/20 transition-all"
@@ -587,12 +619,21 @@ export function QuickBookingForm({
                       onChange={(e) => setTimeRange(e.target.value)}
                       className="h-10 w-full rounded-xl border border-slate-200/90 bg-slate-50/50 px-3 text-xs text-slate-800 focus:border-[#10b981] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#10b981]/20 transition-all"
                     >
-                      {formConfig.timeSlots.map((slot, idx) => (
-                        <option key={idx} value={slot}>
-                          {slot}
-                        </option>
-                      ))}
+                      {formConfig.timeSlots.map((slot, idx) => {
+                        const isPast = isSlotInPast(slot, preferredDate);
+                        return (
+                          <option key={idx} value={slot} disabled={isPast}>
+                            {slot} {isPast ? "(Passed)" : ""}
+                          </option>
+                        );
+                      })}
                     </select>
+                    {isDateToday(preferredDate) && formConfig.timeSlots.every((s) => isSlotInPast(s, preferredDate)) && (
+                      <p className="text-[11px] text-amber-600 mt-1 flex items-center gap-1 font-medium">
+                        <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                        All slots for today have ended. Please choose a future date.
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
@@ -754,6 +795,7 @@ export function QuickBookingForm({
               <BookNowButton
                 type="submit"
                 disabled={isSubmitting}
+                loading={isSubmitting}
                 text={
                   isSubmitting
                     ? "Submitting Request..."

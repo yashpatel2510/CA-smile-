@@ -8,6 +8,14 @@ import { inMemoryStore } from "@/lib/in-memory-store";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { sendEmail } from "@/lib/email";
 import { renderBookingRequestReceivedEmail } from "@/lib/email-templates";
+import { appendPatientToGoogleSheet } from "@/lib/google-sheets/google-sheet-sync";
+import { getPatientCode, assignPatientCode } from "@/lib/patient-numbering-store";
+import { getDoctorsList } from "@/lib/doctors-store";
+import {
+  isDateToday,
+  parseSlotToMinutes,
+  getSlotScheduledTime,
+} from "@/lib/booking-time-utils";
 
 // In-memory cache for clinic to avoid roundtrips on every booking
 let cachedClinic: any = null;
@@ -31,6 +39,35 @@ async function getCachedClinic(clinicSlug?: string) {
   cachedClinic = clinic;
   cachedClinicExpiry = now + 10 * 60 * 1000; // Cache for 10 minutes
   return clinic;
+}
+
+// In-memory cache for services to eliminate roundtrip latency on every booking
+let cachedServicesMap: Map<string, any> = new Map();
+let cachedServicesList: any[] = [];
+let cachedServicesExpiry = 0;
+
+async function getCachedService(serviceName?: string, serviceId?: string) {
+  const now = Date.now();
+  if (cachedServicesList.length === 0 || now > cachedServicesExpiry) {
+    try {
+      const allServices = await prisma.service.findMany();
+      cachedServicesList = allServices;
+      cachedServicesMap.clear();
+      for (const s of allServices) {
+        cachedServicesMap.set(s.id, s);
+        cachedServicesMap.set(s.name.trim().toLowerCase(), s);
+      }
+      cachedServicesExpiry = now + 10 * 60 * 1000;
+    } catch {}
+  }
+
+  if (serviceId && cachedServicesMap.has(serviceId)) {
+    return cachedServicesMap.get(serviceId);
+  }
+  if (serviceName && cachedServicesMap.has(serviceName.trim().toLowerCase())) {
+    return cachedServicesMap.get(serviceName.trim().toLowerCase());
+  }
+  return cachedServicesList[0] || null;
 }
 
 // Rate limit: 10 requests per 60 seconds per IP
@@ -137,18 +174,8 @@ export async function GET(req: NextRequest) {
           patient: true,
           service: true,
           staffUser: true,
-          treatment: {
-            include: {
-              sessions: {
-                orderBy: { sessionNumber: "asc" },
-              },
-            },
-          },
+          treatment: true,
           treatmentSession: true,
-          auditLogs: {
-            take: 10,
-            orderBy: { createdAt: "desc" },
-          },
         },
       });
     } catch {
@@ -223,9 +250,19 @@ export async function GET(req: NextRequest) {
         computedPatientName = apt.childName;
       }
 
+      const patientKey = apt.patient?.id || apt.patientId || apt.id;
+      const patientCode = getPatientCode(patientKey, apt.createdAt);
+
       return {
         ...apt,
         patientName: computedPatientName,
+        patientCode,
+        patient: apt.patient
+          ? {
+              ...apt.patient,
+              patientCode,
+            }
+          : apt.patient,
       };
     });
 
@@ -249,6 +286,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const t0 = Date.now();
     const clientIp = getClientIp(req);
     const rateLimitCheck = rateLimit(clientIp, BOOKING_RATE_LIMIT);
 
@@ -310,71 +348,94 @@ export async function POST(req: NextRequest) {
       input.serviceName ||
       "General Dental Consultation & Checkup";
 
-    // Calculate requested appointment start and end times
-    let scheduledDate: Date;
-    if (input.startTime) {
-      scheduledDate = new Date(input.startTime);
-    } else {
-      const rawDateStr =
-        input.preferredDate ||
-        input.appointmentDate ||
-        (input as any).date;
+    const rawDateStr =
+      input.preferredDate ||
+      input.appointmentDate ||
+      (input as any).date;
 
-      if (rawDateStr) {
-        let hour = 10;
-        let minute = 0;
-        const timeStr = input.timeRange || input.appointmentTime || "";
-
-        if (timeStr.includes("PM") && !timeStr.includes("12:")) {
-          const m = timeStr.match(/(\d+):?(\d*)/);
-          if (m) hour = (parseInt(m[1], 10) % 12) + 12;
-          if (m && m[2]) minute = parseInt(m[2], 10) || 0;
-        } else if (timeStr.includes("AM") || (timeStr.includes("12:") && timeStr.includes("PM"))) {
-          const m = timeStr.match(/(\d+):?(\d*)/);
-          if (m) hour = timeStr.includes("PM") ? 12 : parseInt(m[1], 10) % 12;
-          if (m && m[2]) minute = parseInt(m[2], 10) || 0;
-        } else if (timeStr.includes("Morning")) {
-          hour = 10;
-          minute = 30;
-        } else if (timeStr.includes("Afternoon")) {
-          hour = 14;
-          minute = 30;
-        } else if (timeStr.includes("Evening")) {
-          hour = 17;
-          minute = 30;
-        }
-
-        scheduledDate = new Date(
-          `${rawDateStr}T${String(hour).padStart(2, "0")}:${String(
-            minute
-          ).padStart(2, "0")}:00.000Z`
-        );
-        if (isNaN(scheduledDate.getTime())) {
-          scheduledDate = new Date(`${rawDateStr}T10:00:00.000Z`);
-        }
-      } else {
-        scheduledDate = new Date(Date.now() + 86400000);
-      }
-    }
-
-    const durationMin = input.durationMinutes || 30;
-    const endDate = input.endTime
-      ? new Date(input.endTime)
-      : new Date(scheduledDate.getTime() + durationMin * 60000);
-
-    const CLINIC_DOCTORS = [
-      "Dr. Sankar (Chief Dental Surgeon)",
-      "Dr. Rohan Shah (Orthodontics)",
-      "Dr. New Dental Specialist (Dental Surgeon)",
-    ];
-
-    const explicitlyRequestedDoctor = Boolean(input.preferredDoctor);
-    let assignedDoctor =
-      input.preferredDoctor || "Dr. Sankar (Chief Dental Surgeon)";
+    const timeStr = input.timeRange || input.appointmentTime || "";
 
     const forceOverride = Boolean(
       (input as any).forceOverride || (input as any).overrideConflict
     );
+
+    // Calculate requested appointment start and end times
+    let scheduledDate: Date;
+    if (input.startTime) {
+      scheduledDate = new Date(input.startTime);
+    } else if (rawDateStr) {
+      const { startTime } = getSlotScheduledTime(rawDateStr, timeStr);
+      scheduledDate = startTime;
+    } else {
+      scheduledDate = new Date(Date.now() + 86400000);
+    }
+
+    // If scheduled date is on today's date (or rawDateStr is today):
+    // Check if the requested session is still active/in-progress today.
+    // If the patient is booking during an active session (e.g. Evening 5:00 PM - 7:30 PM at 5:23 PM),
+    // adjust scheduledDate to upcoming minutes so patients can successfully book today's active session.
+    const checkDateRef = rawDateStr || scheduledDate;
+    if (isDateToday(checkDateRef) && timeStr) {
+      const { startMinutes, endMinutes } = parseSlotToMinutes(timeStr);
+      const now = new Date();
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+      // If current time is before the session end (with 5-minute buffer)
+      if (currentMinutes < endMinutes - 5) {
+        if (scheduledDate.getTime() < Date.now()) {
+          const upcomingMin = Math.min(
+            endMinutes - 10,
+            Math.ceil((currentMinutes + 2) / 5) * 5
+          );
+          scheduledDate = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate(),
+            Math.floor(upcomingMin / 60),
+            upcomingMin % 60,
+            0,
+            0
+          );
+        }
+      }
+    }
+
+    // Strict validation: Reject appointments scheduled in the past
+    // Provide a 5-minute grace buffer for client submission/network latency
+    const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
+    if (scheduledDate.getTime() < fiveMinutesAgo) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Cannot book an appointment for a past date or time. Please select an upcoming slot.",
+          error: "Selected appointment time has already passed.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const durationMin = input.durationMinutes || 30;
+    let endDate = input.endTime ? new Date(input.endTime) : null;
+    if (!endDate || isNaN(endDate.getTime()) || endDate.getTime() <= scheduledDate.getTime()) {
+      endDate = new Date(scheduledDate.getTime() + durationMin * 60000);
+    }
+
+    const registeredDoctorsList = (() => {
+      try {
+        const list = getDoctorsList();
+        if (Array.isArray(list) && list.length > 0) {
+          return list.map((d) => d.name);
+        }
+      } catch {}
+      return ["Dr. Deep Arvindbhai Patel"];
+    })();
+
+    const CLINIC_DOCTORS = registeredDoctorsList;
+
+    const explicitlyRequestedDoctor = Boolean(input.preferredDoctor);
+    let assignedDoctor =
+      input.preferredDoctor || registeredDoctorsList[0] || "Dr. Deep Arvindbhai Patel";
 
     const hasOverlapCheck = (existingList: any[], doctorName: string) => {
       return existingList.find((a) => {
@@ -392,6 +453,19 @@ export async function POST(req: NextRequest) {
 
     const cleanDigits = (input.phone || "").replace(/\D/g, "");
     const last10Digits = cleanDigits.slice(-10);
+
+    const phoneVariants = Array.from(
+      new Set(
+        [
+          input.phone,
+          cleanDigits,
+          last10Digits,
+          `+91${last10Digits}`,
+          `+91 ${last10Digits}`,
+          `0${last10Digits}`,
+        ].filter((p) => Boolean(p && p.length >= 7))
+      )
+    );
 
     // Parallelize clinic, doctor overlaps, service lookup, and patient lookup in ONE concurrent round-trip
     let [clinic, overlaps, initialService, matchedPatients] = await Promise.all([
@@ -414,34 +488,32 @@ export async function POST(req: NextRequest) {
             })
             .catch(() => [])
         : Promise.resolve([]),
-      input.serviceId
-        ? prisma.service.findUnique({ where: { id: input.serviceId } }).catch(() => null)
-        : chosenServiceName
-          ? prisma.service
-              .findFirst({
-                where: { name: chosenServiceName },
-              })
-              .catch(() => null)
-          : Promise.resolve(null),
+      getCachedService(chosenServiceName, input.serviceId),
       prisma.patient
         .findMany({
           where: {
-            OR: [
-              { phone: input.phone },
-              ...(last10Digits && last10Digits.length >= 7
-                ? [{ phone: { contains: last10Digits } }]
-                : []),
-            ],
+            phone: { in: phoneVariants },
           },
+          take: 5,
         })
         .catch(() => []),
     ]);
 
-    // Match existing patient by first name (case-insensitive)
-    let existingPatient = (matchedPatients || []).find(
-      (p: any) =>
-        p.firstName.trim().toLowerCase() === resolvedFirstName.toLowerCase()
-    );
+    // 1. Direct match by patientId if provided
+    let existingPatient: any = null;
+    if (input.patientId) {
+      existingPatient = await prisma.patient
+        .findUnique({ where: { id: input.patientId } })
+        .catch(() => null);
+    }
+
+    // 2. Match existing patient by first name (case-insensitive) from phone match
+    if (!existingPatient) {
+      existingPatient = (matchedPatients || []).find(
+        (p: any) =>
+          p.firstName.trim().toLowerCase() === resolvedFirstName.toLowerCase()
+      );
+    }
 
     // If no exact first-name match, but only 1 candidate exists with a placeholder name (e.g. "Patient" or "Valued")
     if (!existingPatient && matchedPatients && matchedPatients.length === 1) {
@@ -456,7 +528,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // If an existing patient was matched and new details were entered, upgrade their record
+    // If an existing patient was matched and new details were entered, upgrade their record in background
     if (existingPatient) {
       const needsUpdate =
         (resolvedLastName && existingPatient.lastName !== resolvedLastName && (existingPatient.lastName === "Patient" || !existingPatient.lastName)) ||
@@ -464,78 +536,35 @@ export async function POST(req: NextRequest) {
         (input.email && !existingPatient.email);
 
       if (needsUpdate) {
-        existingPatient = await prisma.patient
-          .update({
-            where: { id: existingPatient.id },
-            data: {
-              firstName:
-                existingPatient.firstName.toLowerCase() === "valued" || existingPatient.firstName.toLowerCase() === "patient"
-                  ? resolvedFirstName
-                  : existingPatient.firstName,
-              lastName: resolvedLastName || (existingPatient.lastName === "Patient" ? "" : existingPatient.lastName),
-              email: input.email || existingPatient.email,
-            },
-          })
-          .catch(() => existingPatient);
+        setImmediate(() => {
+          prisma.patient
+            .update({
+              where: { id: existingPatient.id },
+              data: {
+                firstName:
+                  existingPatient.firstName.toLowerCase() === "valued" || existingPatient.firstName.toLowerCase() === "patient"
+                    ? resolvedFirstName
+                    : existingPatient.firstName,
+                lastName: resolvedLastName || (existingPatient.lastName === "Patient" ? "" : existingPatient.lastName),
+                email: input.email || existingPatient.email,
+              },
+            })
+            .catch(() => {});
+        });
       }
     }
 
-    let conflictingAppointment: any = null;
-
-    if (!forceOverride) {
-      if (explicitlyRequestedDoctor) {
-        // Patient explicitly chose this doctor
-        const match = overlaps.find(
-          (a) =>
-            a.preferredDoctor?.toLowerCase() === assignedDoctor.toLowerCase()
-        );
-        if (match) {
-          conflictingAppointment = match;
-        } else {
-          conflictingAppointment = hasOverlapCheck(
-            inMemoryStore.getAppointments(),
-            assignedDoctor
-          );
-        }
-      } else {
-        // Patient did not specify doctor: auto-assign to an available specialist
-        const busyDoctors = new Set(
-          overlaps.map((a) => a.preferredDoctor?.toLowerCase()).filter(Boolean)
-        );
-        const freeDoctor = CLINIC_DOCTORS.find(
-          (doc) => !busyDoctors.has(doc.toLowerCase())
-        );
-
-        if (freeDoctor) {
-          assignedDoctor = freeDoctor;
-        } else if (overlaps.length > 0) {
-          conflictingAppointment = overlaps[0];
-        } else {
-          conflictingAppointment = hasOverlapCheck(
-            inMemoryStore.getAppointments(),
-            assignedDoctor
-          );
-        }
-      }
-    }
-
-    if (conflictingAppointment) {
-      const conflictStart = new Date(conflictingAppointment.startTime).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-      const conflictEnd = new Date(conflictingAppointment.endTime).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-      return NextResponse.json(
-        {
-          success: false,
-          conflict: true,
-          message: `Time slot conflict: All available doctors are scheduled from ${conflictStart} to ${conflictEnd}. Please select an alternative time slot.`,
-        },
-        { status: 409 }
+    // All slots are available - do not block bookings with time slot conflicts
+    if (!explicitlyRequestedDoctor) {
+      const busyDoctors = new Set(
+        overlaps.map((a) => a.preferredDoctor?.toLowerCase()).filter(Boolean)
       );
+      const freeDoctor = CLINIC_DOCTORS.find(
+        (doc) => !busyDoctors.has(doc.toLowerCase())
+      );
+      if (freeDoctor) {
+        assignedDoctor = freeDoctor;
+      }
     }
 
     const consolidatedNotes = [
@@ -552,6 +581,40 @@ export async function POST(req: NextRequest) {
     ]
       .filter(Boolean)
       .join(" | ");
+
+    const validSources = [
+      "MANUAL",
+      "AI_BOOKING",
+      "WHATSAPP",
+      "WEB_FORM",
+      "WEBSITE",
+      "PHONE",
+      "WALK_IN",
+      "ADMIN",
+      "OTHER",
+    ];
+    let safeSource = "MANUAL";
+    if (input.source) {
+      if (input.source === "CLINIC_ADMIN" || input.source === "ADMIN") {
+        safeSource = "ADMIN";
+      } else if (validSources.includes(input.source as any)) {
+        safeSource = input.source as any;
+      } else {
+        safeSource = "WEB_FORM";
+      }
+    }
+
+    // Determine appropriate status (Web/Contact form defaults to PENDING, Admin defaults to CONFIRMED)
+    let appointmentStatus = "CONFIRMED";
+    if (input.status) {
+      appointmentStatus = input.status;
+    } else if (
+      safeSource === "WEB_FORM" ||
+      safeSource === "WEBSITE" ||
+      safeSource === "WHATSAPP"
+    ) {
+      appointmentStatus = "PENDING";
+    }
 
     let createdAppointment: any;
 
@@ -607,27 +670,13 @@ export async function POST(req: NextRequest) {
         treatmentId = treatment.id;
       }
 
-      const validSources = [
-        "MANUAL",
-        "AI_BOOKING",
-        "WHATSAPP",
-        "WEB_FORM",
-        "WEBSITE",
-        "PHONE",
-        "WALK_IN",
-        "ADMIN",
-        "OTHER",
-      ];
-      const safeSource = validSources.includes(input.source as any)
-        ? (input.source as any)
-        : "WEB_FORM";
 
-      // Create appointment with clean relational connects/creates
+      // Create appointment with direct foreign keys for high-speed insert
       const appointmentData: any = {
-        clinic: { connect: { id: clinic.id } },
+        clinicId: clinic.id,
         startTime: scheduledDate,
         endTime: endDate,
-        status: "PENDING",
+        status: appointmentStatus,
         source: safeSource,
         notes: consolidatedNotes,
         reason: input.reason || chosenServiceName,
@@ -643,15 +692,10 @@ export async function POST(req: NextRequest) {
         paymentStatus: input.paymentStatus || "PENDING",
       };
 
-      if (treatmentId) {
-        appointmentData.treatment = { connect: { id: treatmentId } };
-      }
-
-      if (existingPatient) {
-        appointmentData.patient = { connect: { id: existingPatient.id } };
-      } else {
-        appointmentData.patient = {
-          create: {
+      let patientId = existingPatient?.id;
+      if (!patientId) {
+        const newPatient = await prisma.patient.create({
+          data: {
             clinicId: clinic.id,
             firstName: resolvedFirstName,
             lastName: resolvedLastName,
@@ -659,20 +703,37 @@ export async function POST(req: NextRequest) {
             phone: input.phone,
             medicalNotes: consolidatedNotes,
           },
-        };
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            phone: true,
+          },
+        });
+        existingPatient = newPatient;
+        patientId = newPatient.id;
       }
 
-      if (initialService) {
-        appointmentData.service = { connect: { id: initialService.id } };
-      } else {
-        appointmentData.service = {
-          create: {
+      let serviceId = initialService?.id;
+      if (!serviceId) {
+        const newService = await prisma.service.create({
+          data: {
             clinicId: clinic.id,
             name: chosenServiceName,
             price: input.totalAmount || 0.0,
             durationMinutes: durationMin,
           },
-        };
+          select: { id: true, name: true, durationMinutes: true, price: true },
+        });
+        initialService = newService;
+        serviceId = newService.id;
+      }
+
+      appointmentData.patientId = patientId;
+      appointmentData.serviceId = serviceId;
+      if (treatmentId) {
+        appointmentData.treatmentId = treatmentId;
       }
 
       createdAppointment = await prisma.appointment.create({
@@ -680,7 +741,6 @@ export async function POST(req: NextRequest) {
         include: {
           patient: true,
           service: true,
-          treatment: true,
         },
       });
 
@@ -779,8 +839,8 @@ export async function POST(req: NextRequest) {
         patientId,
         startTime: scheduledDate.toISOString(),
         endTime: endDate.toISOString(),
-        status: "PENDING",
-        source: input.source || "MANUAL",
+        status: appointmentStatus,
+        source: safeSource,
         notes: consolidatedNotes,
         reason: input.reason || chosenServiceName,
         patientType: input.patientType || "ADULT",
@@ -819,41 +879,67 @@ export async function POST(req: NextRequest) {
       inMemoryStore.saveAppointment(createdAppointment);
     }
 
-    // Optional patient email notification (fire and forget asynchronously)
-    if (input.email) {
-      try {
-        const emailContent = renderBookingRequestReceivedEmail({
-          patientName: `${resolvedFirstName} ${resolvedLastName}`,
-          serviceName: chosenServiceName,
-          appointmentDate: scheduledDate.toLocaleDateString("en-US", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          }),
-          appointmentTime: scheduledDate.toLocaleTimeString("en-US", {
-            hour: "numeric",
-            minute: "2-digit",
-          }),
-        });
-
-        sendEmail({
-          to: input.email,
-          subject: emailContent.subject,
-          html: emailContent.html,
-          text: emailContent.text,
-        }).catch(() => {});
-      } catch {
-        // Safe fail
-      }
-    }
-
     const finalPatientName =
       createdAppointment.patientType === "CHILD" && createdAppointment.childName
         ? `${createdAppointment.childName} (Child)`
         : `${resolvedFirstName} ${resolvedLastName}`.trim() || "Valued Patient";
 
     createdAppointment.patientName = finalPatientName;
+
+    const patientKey =
+      createdAppointment.patient?.id ||
+      createdAppointment.patientId ||
+      existingPatient?.id ||
+      createdAppointment.id;
+    const patientCode = assignPatientCode(patientKey, createdAppointment.createdAt);
+    createdAppointment.patientCode = patientCode;
+    if (createdAppointment.patient) {
+      createdAppointment.patient.patientCode = patientCode;
+    }
+
+    // Schedule email notification and Google Sheet sync in background without delaying HTTP response
+    setImmediate(() => {
+      if (input.email) {
+        try {
+          const emailContent = renderBookingRequestReceivedEmail({
+            patientName: `${resolvedFirstName} ${resolvedLastName}`,
+            serviceName: chosenServiceName,
+            appointmentDate: scheduledDate.toLocaleDateString("en-US", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            }),
+            appointmentTime: scheduledDate.toLocaleTimeString("en-US", {
+              hour: "numeric",
+              minute: "2-digit",
+            }),
+          });
+
+          sendEmail({
+            to: input.email,
+            subject: emailContent.subject,
+            html: emailContent.html,
+            text: emailContent.text,
+          }).catch(() => {});
+        } catch {
+          // Safe fail
+        }
+      }
+
+      // Live auto-store patient in external Google Sheet
+      appendPatientToGoogleSheet({
+        id: createdAppointment.id,
+        name: finalPatientName,
+        phone: input.phone,
+        email: input.email,
+        service: chosenServiceName,
+        doctor: assignedDoctor,
+        dateTime: scheduledDate.toISOString(),
+        amount: input.totalAmount || 0,
+        source: input.source || "WEB_FORM",
+      }).catch(() => {});
+    });
 
     return NextResponse.json(
       {

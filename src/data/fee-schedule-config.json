@@ -1,0 +1,495 @@
+[
+  {
+    "id": "cat-restorative",
+    "name": "Restorative",
+    "color": "blue",
+    "items": [
+      {
+        "id": "proc-res-1",
+        "name": "Amalgam Filling",
+        "typicalRange": "₹500–₹1,200",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-res-2",
+        "name": "Composite Restoration (Class I/II)",
+        "typicalRange": "₹800–₹2,500",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-res-3",
+        "name": "Composite Restoration (Class III/IV)",
+        "typicalRange": "₹1,000–₹3,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-res-4",
+        "name": "Composite Restoration (Class V)",
+        "typicalRange": "₹800–₹2,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-res-5",
+        "name": "GIC Filling",
+        "typicalRange": "₹500–₹1,500",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-res-6",
+        "name": "Inlay / Onlay",
+        "sessions": "2 sessions typical",
+        "typicalRange": "₹5,000–₹12,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-res-7",
+        "name": "Pit & Fissure Sealant",
+        "typicalRange": "₹500–₹1,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      }
+    ]
+  },
+  {
+    "id": "cat-endo",
+    "name": "Endodontics",
+    "color": "purple",
+    "items": [
+      {
+        "id": "proc-endo-1",
+        "name": "Apicectomy",
+        "typicalRange": "₹5,000–₹10,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-endo-2",
+        "name": "Post & Core Build-up",
+        "typicalRange": "₹2,000–₹5,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-endo-3",
+        "name": "Pulpectomy (Pediatric)",
+        "sessions": "2 sessions typical",
+        "typicalRange": "₹2,000–₹4,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-endo-4",
+        "name": "Pulpotomy (Pediatric)",
+        "typicalRange": "₹1,500–₹3,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-endo-5",
+        "name": "RCT Retreatment",
+        "sessions": "3 sessions typical",
+        "steps": [
+          "Access Opening",
+          "Biomechanical Prep",
+          "Obturation",
+          "Final Restoration"
+        ],
+        "typicalRange": "₹6,000–₹12,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-endo-6",
+        "name": "Root Canal Treatment — Anterior",
+        "sessions": "2 sessions typical",
+        "steps": [
+          "Access Opening",
+          "Biomechanical Prep",
+          "Obturation",
+          "Final Restoration"
+        ],
+        "typicalRange": "₹3,000–₹6,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-endo-7",
+        "name": "Root Canal Treatment — Molar",
+        "sessions": "3 sessions typical",
+        "steps": [
+          "Access Opening",
+          "Biomechanical Prep",
+          "Obturation",
+          "Final Restoration"
+        ],
+        "typicalRange": "₹5,000–₹10,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-endo-8",
+        "name": "Root Canal Treatment — Premolar",
+        "sessions": "2 sessions typical",
+        "steps": [
+          "Access Opening",
+          "Biomechanical Prep",
+          "Obturation",
+          "Final Restoration"
+        ],
+        "typicalRange": "₹4,000–₹7,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      }
+    ]
+  },
+  {
+    "id": "cat-prostho",
+    "name": "Prosthodontics",
+    "color": "amber",
+    "items": [
+      {
+        "id": "proc-pros-1",
+        "name": "Complete Denture (per arch)",
+        "sessions": "3 sessions typical",
+        "steps": [
+          "Primary Impression",
+          "Jaw Relation",
+          "Wax Try-in",
+          "Denture Delivery"
+        ],
+        "typicalRange": "₹8,000–₹20,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-pros-2",
+        "name": "Fixed Bridge (per unit)",
+        "sessions": "3 sessions typical",
+        "steps": [
+          "Abutment Preparation",
+          "Impression",
+          "Metal/Zirconia Try-in",
+          "Cementation"
+        ],
+        "typicalRange": "₹4,000–₹12,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-pros-3",
+        "name": "Implant — Fixture Only",
+        "steps": [
+          "Implant Placement",
+          "Osseointegration",
+          "Abutment Placement",
+          "Crown Impression",
+          "Crown Delivery"
+        ],
+        "typicalRange": "₹15,000–₹35,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-pros-4",
+        "name": "Implant (Fixture + Abutment + Crown)",
+        "sessions": "4 sessions typical",
+        "steps": [
+          "Implant Placement",
+          "Osseointegration",
+          "Abutment Placement",
+          "Crown Impression",
+          "Crown Delivery"
+        ],
+        "typicalRange": "₹20,000–₹50,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-pros-5",
+        "name": "Metal Crown",
+        "sessions": "2 sessions typical",
+        "steps": [
+          "Preparation",
+          "Impression",
+          "Try-in",
+          "Cementation"
+        ],
+        "typicalRange": "₹3,000–₹6,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-pros-6",
+        "name": "Partial Denture (Acrylic)",
+        "sessions": "3 sessions typical",
+        "steps": [
+          "Primary Impression",
+          "Jaw Relation",
+          "Wax Try-in",
+          "Denture Delivery"
+        ],
+        "typicalRange": "₹5,000–₹12,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-pros-7",
+        "name": "Partial Denture (Cast Metal)",
+        "sessions": "3 sessions typical",
+        "steps": [
+          "Primary Impression",
+          "Jaw Relation",
+          "Wax Try-in",
+          "Denture Delivery"
+        ],
+        "typicalRange": "₹8,000–₹18,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-pros-8",
+        "name": "PFM Crown (Porcelain Fused Metal)",
+        "sessions": "2 sessions typical",
+        "steps": [
+          "Preparation",
+          "Impression",
+          "Try-in",
+          "Cementation"
+        ],
+        "typicalRange": "₹4,000–₹8,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-pros-9",
+        "name": "Temporary Crown",
+        "steps": [
+          "Preparation",
+          "Impression",
+          "Try-in",
+          "Cementation"
+        ],
+        "typicalRange": "₹1,000–₹2,500",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-pros-10",
+        "name": "Zirconia Crown",
+        "sessions": "2 sessions typical",
+        "steps": [
+          "Preparation",
+          "Impression",
+          "Try-in",
+          "Cementation"
+        ],
+        "typicalRange": "₹8,000–₹18,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      }
+    ]
+  },
+  {
+    "id": "cat-perio",
+    "name": "Periodontics",
+    "color": "emerald",
+    "items": [
+      {
+        "id": "proc-perio-1",
+        "name": "Scaling & Polishing",
+        "typicalRange": "₹800–₹2,500",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-perio-2",
+        "name": "Gum Depigmentation",
+        "typicalRange": "₹3,000–₹8,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-perio-3",
+        "name": "Root Planing & Deep Curettage",
+        "typicalRange": "₹2,500–₹6,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-perio-4",
+        "name": "Flap Surgery with Bone Graft",
+        "typicalRange": "₹8,000–₹18,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-perio-5",
+        "name": "Gingivectomy / Gingivoplasty",
+        "typicalRange": "₹2,000–₹5,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-perio-6",
+        "name": "Crown Lengthening Procedure",
+        "typicalRange": "₹3,000–₹7,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      }
+    ]
+  },
+  {
+    "id": "cat-surgery",
+    "name": "Oral Surgery",
+    "color": "rose",
+    "items": [
+      {
+        "id": "proc-surg-2",
+        "name": "Impaction Removal — Full Bony",
+        "typicalRange": "₹6,000–₹12,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-surg-3",
+        "name": "Impaction Removal — Partial Bony",
+        "typicalRange": "₹4,000–₹8,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-surg-4",
+        "name": "Impaction Removal — Soft Tissue",
+        "typicalRange": "₹3,000–₹6,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-surg-5",
+        "name": "Simple Extraction",
+        "typicalRange": "₹500–₹1,500",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-surg-6",
+        "name": "Surgical Extraction",
+        "typicalRange": "₹1,500–₹4,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      }
+    ]
+  },
+  {
+    "id": "cat-cosmetic",
+    "name": "Cosmetic",
+    "color": "pink",
+    "items": [
+      {
+        "id": "proc-cosm-1",
+        "name": "Teeth Whitening (In-office)",
+        "typicalRange": "₹5,000–₹12,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-cosm-2",
+        "name": "Composite Veneer",
+        "typicalRange": "₹2,500–₹6,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-cosm-3",
+        "name": "Porcelain Veneer (E-max)",
+        "typicalRange": "₹8,000–₹18,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-cosm-4",
+        "name": "Diastema Closure",
+        "typicalRange": "₹3,000–₹7,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-cosm-5",
+        "name": "Tooth Jewellery / Crystal",
+        "typicalRange": "₹1,000–₹2,500",
+        "clinicPrice": null,
+        "isEnabled": true
+      }
+    ]
+  },
+  {
+    "id": "cat-ortho",
+    "name": "Orthodontics",
+    "color": "indigo",
+    "items": [
+      {
+        "id": "proc-ortho-1",
+        "name": "Ceramic Braces (Full Treatment)",
+        "typicalRange": "₹35,000–₹80,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-ortho-2",
+        "name": "Clear Aligners (Full Treatment)",
+        "typicalRange": "₹50,000–₹1,50,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-ortho-3",
+        "name": "Metal Braces (Full Treatment)",
+        "typicalRange": "₹25,000–₹60,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-ortho-4",
+        "name": "Retainer (per arch)",
+        "typicalRange": "₹2,000–₹5,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-ortho-5",
+        "name": "Space Maintainer",
+        "typicalRange": "₹2,000–₹5,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      }
+    ]
+  },
+  {
+    "id": "cat-pediatric",
+    "name": "Pediatric",
+    "color": "teal",
+    "items": [
+      {
+        "id": "proc-ped-1",
+        "name": "Pulpectomy (Pediatric)",
+        "sessions": "2 sessions typical",
+        "typicalRange": "₹2,000–₹4,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      },
+      {
+        "id": "proc-ped-2",
+        "name": "Pulpotomy (Pediatric)",
+        "typicalRange": "₹1,500–₹3,000",
+        "clinicPrice": null,
+        "isEnabled": true
+      }
+    ]
+  }
+]

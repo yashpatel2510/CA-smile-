@@ -15,6 +15,75 @@
   "history": [
     {
       "type": "daily",
+      "fileName": "smile-dental-daily-2026-10-25.xlsx",
+      "recordCount": 3,
+      "sizeBytes": 10579,
+      "sizePretty": "10.3 KB",
+      "status": "SUCCESS",
+      "createdAt": "2026-10-25T10:09:02.950Z",
+      "startedAt": "2026-10-25T10:09:02.950Z",
+      "completedAt": "2026-10-25T10:09:02.999Z",
+      "durationMs": 49,
+      "executedBy": "Automated Server-Side Cron Engine",
+      "verified": true,
+      "worksheets": [
+        "Patients",
+        "Appointments",
+        "WhatsApp Bookings",
+        "Reviews",
+        "Staff"
+      ],
+      "error": null,
+      "id": "bkp-daily-1792922942999"
+    },
+    {
+      "type": "full",
+      "fileName": "smile-dental-full-2026-10-25.xlsx",
+      "recordCount": 17,
+      "sizeBytes": 11597,
+      "sizePretty": "11.3 KB",
+      "status": "SUCCESS",
+      "createdAt": "2026-10-25T10:09:00.527Z",
+      "startedAt": "2026-10-25T10:09:00.527Z",
+      "completedAt": "2026-10-25T10:09:00.545Z",
+      "durationMs": 18,
+      "executedBy": "Clinic Owner",
+      "verified": true,
+      "worksheets": [
+        "Patients",
+        "Appointments",
+        "WhatsApp Bookings",
+        "Reviews",
+        "Staff"
+      ],
+      "error": null,
+      "id": "bkp-full-1792922940545"
+    },
+    {
+      "type": "daily",
+      "fileName": "smile-dental-daily-2026-10-25.xlsx",
+      "recordCount": 3,
+      "sizeBytes": 10561,
+      "sizePretty": "10.3 KB",
+      "status": "SUCCESS",
+      "createdAt": "2026-10-25T10:09:00.471Z",
+      "startedAt": "2026-10-25T10:09:00.471Z",
+      "completedAt": "2026-10-25T10:09:00.512Z",
+      "durationMs": 41,
+      "executedBy": "Clinic Owner",
+      "verified": true,
+      "worksheets": [
+        "Patients",
+        "Appointments",
+        "WhatsApp Bookings",
+        "Reviews",
+        "Staff"
+      ],
+      "error": null,
+      "id": "bkp-daily-1792922940513"
+    },
+    {
+      "type": "daily",
       "fileName": "smile-dental-daily-2026-10-15.xlsx",
       "recordCount": 11,
       "sizeBytes": 11552,
@@ -888,6 +957,6 @@
       "id": "bkp-daily-1790059472532"
     }
   ],
-  "lastUpdated": "2026-10-15T16:56:38.152Z",
-  "lastAutoHealthCheck": "2026-10-15T16:56:36.031Z"
+  "lastUpdated": "2026-10-25T10:09:02.999Z",
+  "lastAutoHealthCheck": "2026-10-25T10:09:01.165Z"
 }

@@ -1,0 +1,92 @@
+[
+  {
+    "id": "srv-gen-2",
+    "name": "Teeth Whitening (In-office)",
+    "provider": "GENERAL",
+    "providerName": "General (All Doctors)",
+    "price": 6000,
+    "duration": "60m",
+    "isConsult": true
+  },
+  {
+    "id": "srv-doc-1",
+    "name": "Dental Consultation",
+    "provider": "Dr. Deep Arvindbhai Patel",
+    "providerName": "Dr. Deep Arvindbhai Patel",
+    "price": 300,
+    "duration": "15m",
+    "isConsult": true
+  },
+  {
+    "id": "srv-doc-2",
+    "name": "Composite Restoration (Class I/II)",
+    "provider": "Dr. Deep Arvindbhai Patel",
+    "providerName": "Dr. Deep Arvindbhai Patel",
+    "price": 1000,
+    "duration": "30m",
+    "isConsult": true
+  },
+  {
+    "id": "srv-doc-3",
+    "name": "GIC Filling",
+    "provider": "Dr. Deep Arvindbhai Patel",
+    "providerName": "Dr. Deep Arvindbhai Patel",
+    "price": 600,
+    "duration": "20m",
+    "isConsult": true
+  },
+  {
+    "id": "srv-doc-4",
+    "name": "Simple Extraction",
+    "provider": "Dr. Deep Arvindbhai Patel",
+    "providerName": "Dr. Deep Arvindbhai Patel",
+    "price": 600,
+    "duration": "20m",
+    "isConsult": true
+  },
+  {
+    "id": "srv-doc-5",
+    "name": "Root Canal Treatment: Molar",
+    "provider": "Dr. Deep Arvindbhai Patel",
+    "providerName": "Dr. Deep Arvindbhai Patel",
+    "price": 6000,
+    "duration": "45m",
+    "isConsult": true
+  },
+  {
+    "id": "srv-doc-6",
+    "name": "Root Canal Treatment: Anterior",
+    "provider": "Dr. Deep Arvindbhai Patel",
+    "providerName": "Dr. Deep Arvindbhai Patel",
+    "price": 4000,
+    "duration": "45m",
+    "isConsult": true
+  },
+  {
+    "id": "srv-doc-7",
+    "name": "Zirconia Crown",
+    "provider": "Dr. Deep Arvindbhai Patel",
+    "providerName": "Dr. Deep Arvindbhai Patel",
+    "price": 9000,
+    "duration": "30m",
+    "isConsult": true
+  },
+  {
+    "id": "srv-doc-8",
+    "name": "Fluoride Application",
+    "provider": "Dr. Deep Arvindbhai Patel",
+    "providerName": "Dr. Deep Arvindbhai Patel",
+    "price": 500,
+    "duration": "15m",
+    "isConsult": true
+  },
+  {
+    "id": "srv-doc-9",
+    "name": "General Consultation",
+    "provider": "Dr. Deep Arvindbhai Patel",
+    "providerName": "Dr. Deep Arvindbhai Patel",
+    "price": 100,
+    "duration": "0",
+    "isConsult": true
+  }
+]

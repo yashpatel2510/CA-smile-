@@ -169,6 +169,15 @@ export async function PATCH(
           },
         });
 
+        try {
+          inMemoryStore.updateAppointmentStatus(
+            appointmentId,
+            status as any,
+            reason,
+            performedBy
+          );
+        } catch {}
+
         // If Treatment Done, update linked session and Treatment status (Requirement 6, 7, 8)
         if (status === "TREATMENT_DONE") {
           if (existingAppointment.treatmentSession) {
@@ -256,23 +265,36 @@ export async function PATCH(
           }
         }
 
-        // Audit Log entry
-        auditEntry = await prisma.auditLog.create({
-          data: {
-            clinicId: existingAppointment.clinicId,
-            appointmentId: existingAppointment.id,
-            staffUserId: staffUserId || null,
-            action: `APPOINTMENT_${status}`,
-            entityType: "Appointment",
-            entityId: existingAppointment.id,
-            performedBy,
-            details:
-              reason ||
-              `Status transitioned from ${previousStatus} to ${status} by ${performedBy}`,
-            previousValues: { status: previousStatus },
-            newValues: { status, reason: reason || null },
-          },
-        });
+        // Create audit log asynchronously without blocking the client response
+        auditEntry = {
+          clinicId: existingAppointment.clinicId,
+          appointmentId: existingAppointment.id,
+          action: `APPOINTMENT_${status}`,
+          performedBy,
+          details:
+            reason ||
+            `Status transitioned from ${previousStatus} to ${status} by ${performedBy}`,
+          createdAt: nowIso,
+        };
+
+        prisma.auditLog
+          .create({
+            data: {
+              clinicId: existingAppointment.clinicId,
+              appointmentId: existingAppointment.id,
+              staffUserId: staffUserId || null,
+              action: `APPOINTMENT_${status}`,
+              entityType: "Appointment",
+              entityId: existingAppointment.id,
+              performedBy,
+              details:
+                reason ||
+                `Status transitioned from ${previousStatus} to ${status} by ${performedBy}`,
+              previousValues: { status: previousStatus },
+              newValues: { status, reason: reason || null },
+            },
+          })
+          .catch((err) => console.warn("Background audit log error:", err));
       } catch {
         isMemoryFallback = true;
       }
@@ -450,3 +472,6 @@ export async function PATCH(
     );
   }
 }
+
+export const POST = PATCH;
+

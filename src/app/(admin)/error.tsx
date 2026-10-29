@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import Link from "next/link";
-import { ShieldAlert, RefreshCw, LayoutDashboard, Lock } from "lucide-react";
+import { ShieldAlert, RefreshCw, CalendarCheck, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function AdminError({
@@ -51,14 +51,14 @@ export default function AdminError({
           <RefreshCw className="h-3.5 w-3.5" />
           <span>Reload View</span>
         </Button>
-        <Link href="/admin" className="w-full sm:w-auto">
+        <Link href="/admin/today" className="w-full sm:w-auto">
           <Button
             variant="outline"
             size="sm"
             className="h-9 w-full gap-1.5 text-xs sm:w-auto"
           >
-            <LayoutDashboard className="h-3.5 w-3.5" />
-            <span>Return to Dashboard</span>
+            <CalendarCheck className="h-3.5 w-3.5" />
+            <span>Return to Bookings</span>
           </Button>
         </Link>
       </div>

@@ -2,8 +2,8 @@
   "tag": "• FAQS",
   "headingLine1": "QUESTIONS,",
   "headingLine2": "ANSWERED",
-  "subtitle": "Here are the most common questions before starting a project with us.",
-  "themeMode": "light",
+  "subtitle": "Here are the most common questions",
+  "themeMode": "dark",
   "faqs": [
     {
       "id": "faq-1",

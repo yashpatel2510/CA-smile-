@@ -42,7 +42,7 @@ export function PublicHeader() {
       {/* Main navigation */}
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2.5 group">
+          <Link href="/" prefetch={true} className="flex items-center gap-2.5 group">
             <div className="flex h-10 w-10 items-center justify-center rounded-clinic bg-brand-primary text-brand-primary-foreground shadow-sm transition-transform group-hover:scale-105">
               <Stethoscope className="h-5 w-5" />
             </div>
@@ -63,6 +63,7 @@ export function PublicHeader() {
                 <Link
                   key={link.href}
                   href={link.href}
+                  prefetch={true}
                   className={`text-sm font-medium transition-colors hover:text-brand-primary ${
                     isActive ? "text-brand-primary font-semibold" : "text-brand-muted"
                   }`}
@@ -75,7 +76,7 @@ export function PublicHeader() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Link href="/admin" className="hidden sm:inline-flex">
+          <Link href="/admin" prefetch={true} className="hidden sm:inline-flex">
             <Button variant="ghost" size="sm" className="gap-1.5 text-xs text-brand-muted hover:text-brand-text">
               <ShieldCheck className="h-4 w-4" />
               Staff Portal

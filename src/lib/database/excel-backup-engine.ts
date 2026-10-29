@@ -266,7 +266,7 @@ export async function executeExcelBackup(
     {
       id: "STF-001",
       name: "Dr. Sankar",
-      email: "applei74740@gmail.com",
+      email: process.env.OWNER_EMAILS?.split(",")[0] || "admin@casmile.com",
       role: "ADMIN (Owner)",
       department: "Dental Surgery & Implantology",
       status: "ACTIVE",

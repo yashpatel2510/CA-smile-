@@ -7,7 +7,7 @@ export default function AdminCalendarPage() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace("/admin/appointments");
+    router.replace("/admin/appointment");
   }, [router]);
 
   return (

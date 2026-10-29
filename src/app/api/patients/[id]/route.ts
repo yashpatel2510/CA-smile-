@@ -218,3 +218,138 @@ export async function DELETE(
     );
   }
 }
+
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const patientId = params.id;
+    const body = await req.json();
+
+    const {
+      fullName,
+      firstName,
+      lastName,
+      phone,
+      dateOfBirth,
+      gender,
+      sex,
+      bloodGroup,
+      bloodType,
+      leadSource,
+      patientType,
+      address,
+      addressLine,
+      locality,
+      pin,
+      city,
+      state,
+      patientCode,
+      emergencyContact,
+      medicalNotes,
+    } = body;
+
+    let finalFirst = firstName;
+    let finalLast = lastName;
+    if (fullName !== undefined) {
+      const parts = fullName.trim().split(" ");
+      finalFirst = parts[0] || "";
+      finalLast = parts.slice(1).join(" ") || "";
+    }
+
+    const finalGender = sex || gender;
+    const finalBlood = bloodGroup || bloodType;
+
+    let finalAddress = address;
+    if (!finalAddress && (addressLine || locality || city || state || pin)) {
+      finalAddress = [addressLine, locality, city, state, pin].filter(Boolean).join(", ");
+    }
+
+    let updatedPatient: any = null;
+
+    try {
+      const existing = await prisma.patient.findFirst({
+        where: {
+          OR: [{ id: patientId }, { phone: patientId }],
+        },
+      });
+
+      if (existing) {
+        const updateData: any = {};
+        if (finalFirst !== undefined) updateData.firstName = finalFirst;
+        if (finalLast !== undefined) updateData.lastName = finalLast;
+        if (phone !== undefined && phone.trim()) updateData.phone = phone.trim();
+        if (finalGender !== undefined) updateData.gender = finalGender;
+        if (dateOfBirth) updateData.dateOfBirth = new Date(dateOfBirth);
+        if (finalAddress !== undefined) updateData.address = finalAddress;
+        if (emergencyContact !== undefined) updateData.emergencyContact = emergencyContact;
+
+        const notesParts = [
+          existing.medicalNotes,
+          medicalNotes,
+          patientType ? `Patient Type: ${patientType}` : null,
+          finalBlood ? `Blood Group: ${finalBlood}` : null,
+          leadSource ? `Lead Source: ${leadSource}` : null,
+        ].filter(Boolean);
+
+        if (notesParts.length > 0) {
+          updateData.medicalNotes = Array.from(new Set(notesParts)).join(" | ");
+        }
+
+        updatedPatient = await prisma.patient.update({
+          where: { id: existing.id },
+          data: updateData,
+        });
+      }
+    } catch (dbErr) {
+      console.warn("DB update error:", dbErr);
+    }
+
+    inMemoryStore.updatePatient(patientId, {
+      firstName: finalFirst,
+      lastName: finalLast,
+      phone: phone?.trim(),
+      gender: finalGender,
+      dateOfBirth,
+      bloodGroup: finalBlood,
+      leadSource,
+      patientType,
+      address: finalAddress,
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "Patient record updated successfully.",
+      patient: updatedPatient || {
+        id: patientId,
+        firstName: finalFirst,
+        lastName: finalLast,
+        fullName: `${finalFirst || ""} ${finalLast || ""}`.trim(),
+        phone,
+        gender: finalGender,
+        patientType,
+        dateOfBirth,
+        bloodGroup: finalBlood,
+        leadSource,
+        address: finalAddress,
+        patientCode: patientCode || patientId,
+      },
+    });
+  } catch (error: any) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: error.message || "Failed to update patient record.",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(
+  req: NextRequest,
+  params: { params: { id: string } }
+) {
+  return PATCH(req, params);
+}

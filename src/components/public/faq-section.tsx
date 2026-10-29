@@ -82,8 +82,12 @@ export function FaqSection({
   const pathname = usePathname();
   const [openId, setOpenId] = useState<string | null>(null);
 
-  // If on /contact or /faq, hide this section
-  if (pathname === "/contact" || (hideOnFaqPage && pathname === "/faq")) {
+  // If on /contact, /about, or /faq, hide this section
+  if (
+    pathname === "/contact" ||
+    pathname === "/about" ||
+    (hideOnFaqPage && pathname === "/faq")
+  ) {
     return null;
   }
 

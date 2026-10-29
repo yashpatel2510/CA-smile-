@@ -34,6 +34,10 @@ export function getClinicBrandingConfig(): ClinicBrandConfig {
           ...DEFAULT_CLINIC_BRANDING.hero!,
           ...(parsed.hero || {}),
         },
+        aboutSection: {
+          ...DEFAULT_CLINIC_BRANDING.aboutSection!,
+          ...(parsed.aboutSection || {}),
+        },
       };
       global.__clinicBrandingCache = loadedConfig;
       return loadedConfig;
@@ -106,6 +110,10 @@ export function updateClinicBrandingConfig(
     hero: {
       ...(current.hero || DEFAULT_CLINIC_BRANDING.hero!),
       ...incomingHero,
+    },
+    aboutSection: {
+      ...(current.aboutSection || DEFAULT_CLINIC_BRANDING.aboutSection!),
+      ...(newConfig.aboutSection || {}),
     },
   };
 

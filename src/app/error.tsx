@@ -2,8 +2,8 @@
 
 import React, { useEffect } from "react";
 import Link from "next/link";
-import { AlertCircle, RefreshCw, Home, Phone } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { RefreshCw, Home, Phone, MapPin, MessageCircle, Clock } from "lucide-react";
+import brandConfig from "@/data/clinic-branding-config.json";
 
 export default function RootError({
   error,
@@ -13,68 +13,128 @@ export default function RootError({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log error to console / observability service
-    console.error("Root Application Error Boundary Caught:", error);
+    console.error("Root Application Error Caught:", error);
   }, [error]);
 
+  const clinicName = brandConfig.clinicName || "CA Smile Dental Clinic";
+  const phone = brandConfig.phone || "+91 72260 98074";
+  const address =
+    brandConfig.address ||
+    "1ST FLOOR LABDHI ARCADE, ABOVE HDFC BANK, BILIMORA, GUJARAT 396321";
+  const workingHours =
+    brandConfig.workingHours ||
+    "Mon - Sat: 9:00 AM - 8:00 PM | Sunday: Emergency Only";
+  const cleanPhone = phone.replace(/\D/g, "");
+  const whatsappUrl = `https://wa.me/${cleanPhone}`;
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-brand-background p-4 text-brand-text">
-      <div className="w-full max-w-md space-y-6 rounded-2xl border border-brand-border bg-brand-surface p-8 text-center shadow-xl">
-        {/* Error Icon */}
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-500/10 text-rose-500">
-          <AlertCircle className="h-7 w-7" />
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#09090b] px-4 py-12">
+      <div className="w-full max-w-lg space-y-6 rounded-3xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#121316] p-6 sm:p-8 text-center shadow-2xl">
+        {/* Clinic Logo */}
+        <div className="flex justify-center">
+          <img
+            src="/images/ca-smile-logo-light.png"
+            alt={clinicName}
+            className="h-10 sm:h-12 w-auto object-contain dark:hidden"
+          />
+          <img
+            src="/images/ca-smile-logo-dark.png"
+            alt={clinicName}
+            className="h-10 sm:h-12 w-auto object-contain hidden dark:block"
+          />
         </div>
 
-        {/* Error Message */}
+        {/* Friendly Heading */}
         <div className="space-y-2">
-          <span className="font-mono text-xs font-bold uppercase tracking-wider text-rose-500">
-            Application Error
-          </span>
-          <h1 className="font-heading text-xl font-bold tracking-tight text-brand-text sm:text-2xl">
-            Something went unexpectedly wrong
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#18181b] dark:text-white">
+            We&apos;re Here to Help
           </h1>
-          <p className="text-xs leading-relaxed text-brand-muted sm:text-sm">
-            Our clinical software encountered an unexpected issue while loading
-            this page. No patient medical data has been compromised.
+          <p className="text-xs sm:text-sm text-stone-600 dark:text-zinc-400 max-w-sm mx-auto leading-relaxed">
+            Our page experienced a momentary pause. You can refresh or contact our reception directly below.
           </p>
-          {process.env.NODE_ENV !== "production" && error.message && (
-            <div className="mt-2 overflow-x-auto rounded border border-rose-500/20 bg-rose-500/5 p-3 text-left font-mono text-[11px] text-rose-600 dark:text-rose-400">
-              {error.message}
+        </div>
+
+        {/* Flashed Address & Contact Card */}
+        <div className="rounded-2xl border border-teal-500/20 bg-gradient-to-br from-teal-500/5 via-teal-500/10 to-teal-500/5 p-4 sm:p-5 text-left space-y-3 shadow-sm">
+          {/* Direct Phone / Contact No */}
+          <div className="flex items-start gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-600 text-white shadow-md shadow-teal-500/30">
+              <Phone className="h-4 w-4" />
             </div>
-          )}
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-teal-700 dark:text-teal-400">
+                Contact Number
+              </p>
+              <a
+                href={`tel:${cleanPhone}`}
+                className="text-base sm:text-lg font-bold text-[#18181b] dark:text-white hover:text-teal-600 transition-colors"
+              >
+                {phone}
+              </a>
+            </div>
+          </div>
+
+          {/* Physical Address */}
+          <div className="flex items-start gap-3 pt-1 border-t border-teal-500/10">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-600 text-white shadow-md shadow-teal-500/30">
+              <MapPin className="h-4 w-4" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-teal-700 dark:text-teal-400">
+                Clinic Address
+              </p>
+              <p className="text-xs sm:text-sm font-semibold text-[#18181b] dark:text-zinc-100 uppercase leading-snug">
+                {address}
+              </p>
+            </div>
+          </div>
+
+          {/* Working Hours */}
+          <div className="flex items-center gap-2 pt-1 text-[11px] font-medium text-stone-600 dark:text-zinc-400">
+            <Clock className="h-3.5 w-3.5 text-teal-600 dark:text-teal-400 shrink-0" />
+            <span>{workingHours}</span>
+          </div>
         </div>
 
-        {/* Recovery Actions */}
-        <div className="flex flex-col items-center justify-center gap-2 pt-2 sm:flex-row">
-          <Button
-            onClick={() => reset()}
-            variant="primary"
-            size="sm"
-            className="h-9 w-full gap-1.5 text-xs sm:w-auto"
-          >
-            <RefreshCw className="h-3.5 w-3.5" />
-            <span>Try Again</span>
-          </Button>
-          <Link href="/" className="w-full sm:w-auto">
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-9 w-full gap-1.5 text-xs sm:w-auto"
-            >
-              <Home className="h-3.5 w-3.5" />
-              <span>Return Home</span>
-            </Button>
-          </Link>
-        </div>
-
-        <div className="border-t border-brand-border pt-4 text-[11px] text-brand-muted">
-          For urgent clinic operations, call our front desk at{" "}
+        {/* Action Buttons */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
           <a
-            href="tel:5552345678"
-            className="font-semibold text-brand-primary hover:underline"
+            href={`tel:${cleanPhone}`}
+            className="flex items-center justify-center gap-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white px-4 py-2.5 text-xs font-bold transition-all shadow-md active:scale-95"
           >
-            (555) 234-5678
+            <Phone className="h-3.5 w-3.5" />
+            <span>Call Reception</span>
           </a>
+
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white px-4 py-2.5 text-xs font-bold transition-all shadow-md active:scale-95"
+          >
+            <MessageCircle className="h-3.5 w-3.5" />
+            <span>Chat on WhatsApp</span>
+          </a>
+        </div>
+
+        {/* Secondary Navigation */}
+        <div className="flex items-center justify-center gap-3 pt-1 text-xs">
+          <button
+            type="button"
+            onClick={() => reset()}
+            className="inline-flex items-center gap-1.5 font-semibold text-stone-600 dark:text-zinc-400 hover:text-black dark:hover:text-white transition-colors py-1 px-2"
+          >
+            <RefreshCw className="h-3 w-3" />
+            <span>Try Again</span>
+          </button>
+          <span className="text-stone-300 dark:text-zinc-700">•</span>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 font-semibold text-teal-600 dark:text-teal-400 hover:underline py-1 px-2"
+          >
+            <Home className="h-3 w-3" />
+            <span>Return Home</span>
+          </Link>
         </div>
       </div>
     </div>

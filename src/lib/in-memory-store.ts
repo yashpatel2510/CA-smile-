@@ -313,6 +313,10 @@ export const inMemoryStore = {
 
     const updated: StoredAppointment = {
       ...existing,
+      status: "PENDING",
+      notes: (existing.notes || "").includes("[Rescheduled]")
+        ? existing.notes
+        : `[Rescheduled] ${existing.notes || ""}`.trim(),
       originalStartTime: existing.originalStartTime || previousStart,
       startTime: newStartTime,
       endTime: newEndTime,
@@ -364,6 +368,35 @@ export const inMemoryStore = {
       }
     }
     return deleted;
+  },
+
+  updatePatient(patientIdOrPhone: string, updates: Record<string, any>): boolean {
+    const map = getAppointmentsMap();
+    let updated = false;
+    for (const [id, apt] of Array.from(map.entries())) {
+      if (
+        apt.patientId === patientIdOrPhone ||
+        apt.patient?.id === patientIdOrPhone ||
+        apt.patient?.phone === patientIdOrPhone
+      ) {
+        const p = apt.patient || { firstName: "", lastName: "", phone: "" };
+        const newPatient = {
+          ...p,
+          ...updates,
+          firstName: updates.firstName !== undefined ? updates.firstName : p.firstName,
+          lastName: updates.lastName !== undefined ? updates.lastName : p.lastName,
+          phone: updates.phone !== undefined ? updates.phone : p.phone,
+          dateOfBirth: updates.dateOfBirth !== undefined ? updates.dateOfBirth : p.dateOfBirth,
+          gender: updates.gender !== undefined ? updates.gender : p.gender,
+        };
+        map.set(id, {
+          ...apt,
+          patient: newPatient,
+        });
+        updated = true;
+      }
+    }
+    return updated;
   },
 
   // Treatments

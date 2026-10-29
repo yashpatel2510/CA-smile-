@@ -51,7 +51,7 @@
       "label": "Selected Date",
       "type": "date",
       "required": true,
-      "enabled": true,
+      "enabled": false,
       "helpText": "Appointment date picked from calendar"
     },
     {
@@ -59,7 +59,7 @@
       "label": "Preferred Time Slot",
       "type": "select",
       "required": true,
-      "enabled": true,
+      "enabled": false,
       "helpText": "Time slot selected by patient"
     },
     {
@@ -67,7 +67,7 @@
       "label": "Doctor Preference",
       "type": "select",
       "required": false,
-      "enabled": true,
+      "enabled": false,
       "helpText": "Allow patient to request a specific clinical specialist"
     },
     {
@@ -93,6 +93,41 @@
       "required": true,
       "enabled": true,
       "helpText": "I agree to be contacted to confirm my appointment."
+    },
+    {
+      "id": "gender",
+      "label": "Sex / Gender",
+      "type": "select",
+      "required": false,
+      "enabled": false,
+      "options": ["Male", "Female", "Other", "N/A"],
+      "helpText": "Patient gender identification"
+    },
+    {
+      "id": "dateOfBirth",
+      "label": "Date of Birth",
+      "type": "date",
+      "required": false,
+      "enabled": false,
+      "helpText": "Patient date of birth"
+    },
+    {
+      "id": "bloodGroup",
+      "label": "Blood Group",
+      "type": "select",
+      "required": false,
+      "enabled": false,
+      "options": ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Unknown"],
+      "helpText": "Patient blood group"
+    },
+    {
+      "id": "address",
+      "label": "Address & Locality",
+      "type": "text",
+      "required": false,
+      "enabled": false,
+      "placeholder": "Flat / House no., Street, Locality",
+      "helpText": "Residential address"
     }
   ],
   "treatments": [

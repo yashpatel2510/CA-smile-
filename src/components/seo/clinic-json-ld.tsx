@@ -1,9 +1,9 @@
 import React from "react";
-import { env } from "@/lib/env";
 import { clinicalServices } from "@/data/services-data";
 
 export function ClinicJsonLd() {
-  const baseUrl = env.NEXT_PUBLIC_APP_URL || "https://healthsphere.example.com";
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL || "https://healthsphere.example.com";
 
   const schema = {
     "@context": "https://schema.org",

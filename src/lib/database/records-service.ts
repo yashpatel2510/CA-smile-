@@ -176,9 +176,12 @@ export async function getTableRecords(table: AllowedTable, limit = 50): Promise<
         items.push(
           {
             id: "staff-1",
-            displayTitle: "Clinic Admin (applei74740@gmail.com)",
+            displayTitle: "Clinic Admin (Owner)",
             subtitle: "Role: ADMIN | Chief Dental Officer",
-            details: { role: "ADMIN", email: "applei74740@gmail.com" },
+            details: {
+              role: "ADMIN",
+              email: process.env.OWNER_EMAILS?.split(",")[0] || "admin@casmile.com",
+            },
             source: "Auth Roster (Primary Owner)",
           },
           {

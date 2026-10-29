@@ -6,10 +6,10 @@ const theme =
 
 const primaryColor = theme.colors.primary; // e.g. #0d9488
 const accentColor = theme.colors.accent; // e.g. #ccfbf1
-const brandName = "HealthSphere Medical Clinic";
+const brandName = "CA Smile Dental Clinic";
 const clinicAddress =
-  "742 Evergreen Medical Way, Suite 400, Metro City, NY 10001";
-const clinicPhone = "(555) 234-5678";
+  "1ST FLOOR LABDHI ARCADE, ABOVE HDFC BANK, BILIMORA, GUJARAT 396321";
+const clinicPhone = "+91 72260 98074";
 const appUrl = env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 interface BaseEmailData {

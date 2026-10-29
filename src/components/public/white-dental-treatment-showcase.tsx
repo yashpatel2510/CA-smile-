@@ -2,8 +2,10 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
+import { useContactModal } from "@/components/public/contact-modal";
 
 export interface ShowcaseItem {
   id: string;
@@ -485,6 +487,8 @@ function ShowcaseBlock({
   const [showAll, setShowAll] = useState(allOpen);
   const isLaptopOrTablet = useIsLaptopOrTablet();
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pathname = usePathname();
+  const { openContactModal } = useContactModal();
 
   useEffect(() => {
     if (allOpen && items.length > 0) {
@@ -774,7 +778,13 @@ function ShowcaseBlock({
                           </Link>
                           <Link
                             href={`/contact?treatment=${encodeURIComponent(item.title)}`}
-                            className="inline-flex items-center justify-center rounded-full border border-zinc-300/90 px-5 sm:px-6 py-2.5 text-xs sm:text-sm font-normal text-zinc-800 bg-white hover:border-black hover:text-black transition-all duration-200 active:scale-95 shadow-2xs"
+                            onClick={(e) => {
+                              if (pathname !== "/contact") {
+                                e.preventDefault();
+                                openContactModal({ service: item.title });
+                              }
+                            }}
+                            className="inline-flex items-center justify-center rounded-full border border-zinc-300/90 px-5 sm:px-6 py-2.5 text-xs sm:text-sm font-normal text-zinc-800 bg-white hover:border-black hover:text-black transition-all duration-200 active:scale-95 shadow-2xs cursor-pointer"
                           >
                             Book an appointment
                           </Link>
@@ -831,6 +841,8 @@ function DiagnosticFramerShowcase({
   });
   const isLaptopOrTablet = useIsLaptopOrTablet();
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pathname = usePathname();
+  const { openContactModal } = useContactModal();
 
   useEffect(() => {
     if (allOpen && items.length > 0) {
@@ -1058,7 +1070,13 @@ function DiagnosticFramerShowcase({
                             <div className="mt-4 sm:mt-5">
                               <Link
                                 href={`/contact?treatment=${encodeURIComponent(item.title)}`}
-                                className="inline-flex items-center justify-center rounded-full border border-zinc-300/90 px-5 sm:px-6 py-2 text-xs sm:text-sm font-normal text-zinc-800 bg-white hover:border-black hover:bg-black hover:text-white transition-all duration-200 active:scale-95 shadow-2xs"
+                                onClick={(e) => {
+                                  if (pathname !== "/contact") {
+                                    e.preventDefault();
+                                    openContactModal({ service: item.title });
+                                  }
+                                }}
+                                className="inline-flex items-center justify-center rounded-full border border-zinc-300/90 px-5 sm:px-6 py-2 text-xs sm:text-sm font-normal text-zinc-800 bg-white hover:border-black hover:bg-black hover:text-white transition-all duration-200 active:scale-95 shadow-2xs cursor-pointer"
                               >
                                 Book this diagnostic
                               </Link>

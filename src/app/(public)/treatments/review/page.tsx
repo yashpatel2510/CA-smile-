@@ -25,7 +25,7 @@ export default function TreatmentsReviewPage() {
     <div className="min-h-screen bg-background">
       {/* Breadcrumb Navigation */}
       <div className="border-b border-border/60 bg-surface/50 py-4">
-        <div className="container mx-auto px-4 flex items-center gap-2 text-xs sm:text-sm text-brand-muted">
+        <div className="max-w-6xl mx-auto px-3.5 sm:px-6 flex items-center gap-2 text-xs sm:text-sm text-brand-muted">
           <Link
             href="/"
             className="flex items-center gap-1 hover:text-brand-text transition-colors"

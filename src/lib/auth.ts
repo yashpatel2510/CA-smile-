@@ -41,7 +41,7 @@ export const authOptions: NextAuthOptions = {
         email: {
           label: "Email",
           type: "email",
-          placeholder: "applei74740@gmail.com",
+          placeholder: "admin@casmile.com",
         },
         password: { label: "Password", type: "password" },
       },
@@ -53,22 +53,21 @@ export const authOptions: NextAuthOptions = {
         const email = credentials.email.toLowerCase().trim();
         const password = credentials.password;
 
-        // Authorized Owner emails list
-        const ownerEmails = (env.OWNER_EMAILS || process.env.OWNER_EMAILS || "applei74740@gmail.com")
+        // Authorized Owner emails list (strictly from environment)
+        const ownerEmails = (env.OWNER_EMAILS || process.env.OWNER_EMAILS || "")
           .toLowerCase()
           .split(",")
           .map((e) => e.trim())
           .filter(Boolean);
 
-        const isOwner =
-          email === "applei74740@gmail.com" || ownerEmails.includes(email);
+        const isOwner = ownerEmails.length > 0 && ownerEmails.includes(email);
 
         const configuredAdminPassword =
-          env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || "admin123";
+          (env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || "").trim();
 
         // 1. Clinic Owner / Admin Login
         if (isOwner) {
-          if (password !== configuredAdminPassword) {
+          if (!configuredAdminPassword || password !== configuredAdminPassword) {
             throw new Error("Invalid admin password. Access denied.");
           }
 
@@ -131,8 +130,10 @@ export const authOptions: NextAuthOptions = {
           if (staffUser.password) {
             isValidPassword = await verifyPassword(password, staffUser.password);
           } else {
-            // If staff has no custom password yet, allow admin master password
-            isValidPassword = password === configuredAdminPassword;
+            // If staff has no custom password yet, check configured admin password
+            isValidPassword =
+              Boolean(configuredAdminPassword) &&
+              password === configuredAdminPassword;
           }
 
           if (!isValidPassword) {
@@ -165,15 +166,14 @@ export const authOptions: NextAuthOptions = {
         const email = user.email?.toLowerCase().trim();
         if (!email) return false;
 
-        // Configured owner emails
-        const ownerEmails = (env.OWNER_EMAILS || process.env.OWNER_EMAILS || "applei74740@gmail.com")
+        // Configured owner emails (strictly from environment)
+        const ownerEmails = (env.OWNER_EMAILS || process.env.OWNER_EMAILS || "")
           .toLowerCase()
           .split(",")
           .map((e) => e.trim())
           .filter(Boolean);
 
-        const isOwner =
-          email === "applei74740@gmail.com" || ownerEmails.includes(email);
+        const isOwner = ownerEmails.length > 0 && ownerEmails.includes(email);
 
         // Check if user is registered in the Staff roster (e.g., yap050302@gmail.com)
         let existingStaff = null;

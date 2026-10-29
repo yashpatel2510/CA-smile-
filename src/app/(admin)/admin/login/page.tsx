@@ -31,7 +31,7 @@ import { ClinicLogo } from "@/components/ui/clinic-logo";
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/admin";
+  const callbackUrl = searchParams.get("callbackUrl") || "/admin/today";
   const urlError = searchParams.get("error");
 
   const { currentTheme, brandConfig } = useClinicTheme();
@@ -65,7 +65,7 @@ function LoginForm() {
       );
       setLoading(false);
     } else {
-      window.location.href = callbackUrl || "/admin";
+      window.location.href = callbackUrl || "/admin/today";
     }
   };
 
@@ -199,7 +199,7 @@ function LoginForm() {
                 disabled={loading}
                 className="w-full font-semibold shadow-sm"
               >
-                {loading ? "Authenticating..." : "Sign In to Clinic Dashboard"}
+                {loading ? "Authenticating..." : "Sign In to Clinic Portal"}
               </Button>
             </form>
           </CardContent>
