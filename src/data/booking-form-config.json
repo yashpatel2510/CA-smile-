@@ -100,7 +100,12 @@
       "type": "select",
       "required": false,
       "enabled": false,
-      "options": ["Male", "Female", "Other", "N/A"],
+      "options": [
+        "Male",
+        "Female",
+        "Other",
+        "N/A"
+      ],
       "helpText": "Patient gender identification"
     },
     {
@@ -117,7 +122,17 @@
       "type": "select",
       "required": false,
       "enabled": false,
-      "options": ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Unknown"],
+      "options": [
+        "A+",
+        "A-",
+        "B+",
+        "B-",
+        "AB+",
+        "AB-",
+        "O+",
+        "O-",
+        "Unknown"
+      ],
       "helpText": "Patient blood group"
     },
     {

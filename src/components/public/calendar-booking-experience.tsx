@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -127,6 +127,7 @@ export function CalendarBookingExperience({
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, string>>({});
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSubmittingRef = useRef(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const [copiedId, setCopiedId] = useState(false);
@@ -364,6 +365,8 @@ export function CalendarBookingExperience({
       return;
     }
 
+    if (isSubmittingRef.current || isSubmitting) return;
+    isSubmittingRef.current = true;
     setIsSubmitting(true);
 
     try {
@@ -456,6 +459,7 @@ export function CalendarBookingExperience({
         err.message || "An unexpected error occurred. Please try again."
       );
     } finally {
+      isSubmittingRef.current = false;
       setIsSubmitting(false);
     }
   };

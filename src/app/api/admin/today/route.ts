@@ -365,6 +365,45 @@ export async function POST(req: NextRequest) {
     );
     const endTime = new Date(appointmentTime.getTime() + 30 * 60000);
 
+    // Deduplication check: prevent creating duplicate appointment if one exists for this patient today
+    try {
+      const existingTodayApt = await prisma.appointment.findFirst({
+        where: {
+          status: { notIn: ["CANCELLED", "DECLINED"] },
+          patientId: finalPatientId,
+          OR: [
+            {
+              startTime: {
+                gte: new Date(appointmentTime.getTime() - 15 * 60 * 1000),
+                lte: new Date(appointmentTime.getTime() + 15 * 60 * 1000),
+              },
+            },
+            {
+              createdAt: {
+                gte: new Date(Date.now() - 20 * 1000),
+              },
+            },
+          ],
+        },
+        include: {
+          patient: true,
+          service: true,
+        },
+        orderBy: { createdAt: "desc" },
+      });
+
+      if (existingTodayApt) {
+        return NextResponse.json({
+          success: true,
+          message: "Appointment already scheduled in today queue",
+          appointment: existingTodayApt,
+          duplicatePrevented: true,
+        });
+      }
+    } catch (dupErr) {
+      console.warn("Today appointment deduplication check warning:", dupErr);
+    }
+
     // 4. Create the Appointment
     const newAppointment = await prisma.appointment.create({
       data: {

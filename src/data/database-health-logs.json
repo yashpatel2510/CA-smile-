@@ -1,5 +1,113 @@
 [
   {
+    "id": "hl_1793275770348_hcin1",
+    "database": "primary",
+    "status": "CONNECTED",
+    "response_time": 95,
+    "error_type": null,
+    "message": "Connection successful (95 ms)",
+    "checked_at": "2026-10-29T12:09:30.252Z"
+  },
+  {
+    "id": "hl_1793275769708_99izs",
+    "database": "primary",
+    "status": "CONNECTED",
+    "response_time": 73,
+    "error_type": null,
+    "message": "Connection successful (73 ms)",
+    "checked_at": "2026-10-29T12:09:29.634Z"
+  },
+  {
+    "id": "hl_1793275765012_zu1ci",
+    "database": "primary",
+    "status": "CONNECTED",
+    "response_time": 1663,
+    "error_type": null,
+    "message": "Connection successful (1663 ms)",
+    "checked_at": "2026-10-29T12:09:23.347Z"
+  },
+  {
+    "id": "hl_1793275758931_z0bki",
+    "database": "primary",
+    "status": "CONNECTED",
+    "response_time": 170,
+    "error_type": null,
+    "message": "Connection successful (170 ms)",
+    "checked_at": "2026-10-29T12:09:18.760Z"
+  },
+  {
+    "id": "hl_1793275757634_5nl3h",
+    "database": "primary",
+    "status": "CONNECTED",
+    "response_time": 347,
+    "error_type": null,
+    "message": "Connection successful (347 ms)",
+    "checked_at": "2026-10-29T12:09:17.286Z"
+  },
+  {
+    "id": "hl_1793275741265_tm42d",
+    "database": "primary",
+    "status": "CONNECTED",
+    "response_time": 1603,
+    "error_type": null,
+    "message": "Connection successful (1603 ms)",
+    "checked_at": "2026-10-29T12:08:59.661Z"
+  },
+  {
+    "id": "hl_1793275730561_2wugc",
+    "database": "primary",
+    "status": "CONNECTED",
+    "response_time": 76,
+    "error_type": null,
+    "message": "Connection successful (76 ms)",
+    "checked_at": "2026-10-29T12:08:50.485Z"
+  },
+  {
+    "id": "hl_1793275729835_tah1a",
+    "database": "primary",
+    "status": "CONNECTED",
+    "response_time": 234,
+    "error_type": null,
+    "message": "Connection successful (234 ms)",
+    "checked_at": "2026-10-29T12:08:49.599Z"
+  },
+  {
+    "id": "hl_1793274556270_va1b9",
+    "database": "primary",
+    "status": "CONNECTED",
+    "response_time": 772,
+    "error_type": null,
+    "message": "Connection successful (772 ms)",
+    "checked_at": "2026-10-29T11:49:15.495Z"
+  },
+  {
+    "id": "hl_1793274535217_rs1fr",
+    "database": "primary",
+    "status": "CONNECTED",
+    "response_time": 2804,
+    "error_type": null,
+    "message": "Connection successful (2804 ms)",
+    "checked_at": "2026-10-29T11:48:52.411Z"
+  },
+  {
+    "id": "hl_1793274512168_kmfxv",
+    "database": "primary",
+    "status": "CONNECTED",
+    "response_time": 154,
+    "error_type": null,
+    "message": "Connection successful (154 ms)",
+    "checked_at": "2026-10-29T11:48:32.014Z"
+  },
+  {
+    "id": "hl_1793274511216_nb9ly",
+    "database": "primary",
+    "status": "CONNECTED",
+    "response_time": 153,
+    "error_type": null,
+    "message": "Connection successful (153 ms)",
+    "checked_at": "2026-10-29T11:48:31.036Z"
+  },
+  {
     "id": "hl_1793272792401_915yu",
     "database": "primary",
     "status": "CONNECTED",

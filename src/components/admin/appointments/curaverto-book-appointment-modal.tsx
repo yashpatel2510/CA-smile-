@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   Search,
   X,
@@ -150,6 +150,8 @@ export function CuravertoBookAppointmentModal({
   >("select-patient");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSubmittingRef = useRef(false);
+  const isCreatingPatientRef = useRef(false);
 
   // Live Patients List & Selected Patient
   const [patientsList, setPatientsList] = useState<Patient[]>(DEFAULT_PATIENTS);
@@ -427,6 +429,8 @@ export function CuravertoBookAppointmentModal({
 
   const handleCreatePatientSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isCreatingPatientRef.current || isCreatingPatient) return;
+
     if (!newFullName.trim()) {
       setAddPatientError("Patient name is mandatory.");
       return;
@@ -443,6 +447,7 @@ export function CuravertoBookAppointmentModal({
       return;
     }
 
+    isCreatingPatientRef.current = true;
     setIsCreatingPatient(true);
     setAddPatientError("");
 
@@ -500,6 +505,7 @@ export function CuravertoBookAppointmentModal({
     } catch {
       // Continue anyway
     } finally {
+      isCreatingPatientRef.current = false;
       setIsCreatingPatient(false);
     }
 
@@ -509,6 +515,8 @@ export function CuravertoBookAppointmentModal({
   };
 
   const handleConfirmBooking = async () => {
+    // Guard against multiple concurrent or rapid clicks
+    if (isSubmittingRef.current || isSubmitting) return;
     if (!selectedDoctor || !selectedService || !selectedTimeSlot) return;
 
     if (isDateInPast(selectedDayIso)) {
@@ -520,6 +528,7 @@ export function CuravertoBookAppointmentModal({
       return;
     }
 
+    isSubmittingRef.current = true;
     setIsSubmitting(true);
 
     try {
@@ -572,16 +581,16 @@ export function CuravertoBookAppointmentModal({
       const resData = await res.json().catch(() => null);
       if (!res.ok || resData?.success === false) {
         alert(resData?.message || resData?.error || "Failed to book appointment. Please verify the date and time.");
+        isSubmittingRef.current = false;
         setIsSubmitting(false);
         return;
       }
     } catch (err) {
       console.error("Booking API error:", err);
       alert("Booking error. Please try again.");
+      isSubmittingRef.current = false;
       setIsSubmitting(false);
       return;
-    } finally {
-      setIsSubmitting(false);
     }
 
     if (onBookingComplete) {
@@ -597,7 +606,9 @@ export function CuravertoBookAppointmentModal({
     setModalView("success");
     setTimeout(() => {
       onClose();
-      // Reset view for next open
+      // Reset view and guards for next open
+      isSubmittingRef.current = false;
+      setIsSubmitting(false);
       setModalView("select-patient");
       setSelectedDoctor(null);
       setSelectedService(null);
@@ -1759,10 +1770,16 @@ export function CuravertoBookAppointmentModal({
             ) : (
               <button
                 type="button"
+                disabled={isSubmitting}
                 onClick={handleConfirmBooking}
-                className="rounded-xl bg-[#2563eb] px-6 py-2.5 text-xs font-bold text-white hover:bg-blue-700 shadow-2xs transition-colors"
+                className={`rounded-xl px-6 py-2.5 text-xs font-bold text-white shadow-2xs transition-all flex items-center gap-2 ${
+                  isSubmitting
+                    ? "bg-blue-400 cursor-not-allowed opacity-80"
+                    : "bg-[#2563eb] hover:bg-blue-700 active:scale-95 cursor-pointer"
+                }`}
               >
-                Confirm Booking
+                {isSubmitting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                <span>{isSubmitting ? "Booking Appointment..." : "Confirm Booking"}</span>
               </button>
             )}
           </div>

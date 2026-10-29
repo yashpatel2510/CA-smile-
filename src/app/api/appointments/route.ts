@@ -17,6 +17,9 @@ import {
   getSlotScheduledTime,
 } from "@/lib/booking-time-utils";
 
+// Concurrency mutex to serialize rapid concurrent bookings for the same patient/phone & date
+const activeBookingPromises = new Map<string, Promise<any>>();
+
 // In-memory cache for clinic to avoid roundtrips on every booking
 let cachedClinic: any = null;
 let cachedClinicExpiry = 0;
@@ -467,7 +470,23 @@ export async function POST(req: NextRequest) {
       )
     );
 
-    // Parallelize clinic, doctor overlaps, service lookup, and patient lookup in ONE concurrent round-trip
+    // Concurrency Lock: Serialize rapid simultaneous requests for the same patient on this date
+    const bookingLockKey = `${last10Digits || input.phone}_${scheduledDate.toISOString().slice(0, 10)}`;
+    const pendingFlight = activeBookingPromises.get(bookingLockKey);
+    if (pendingFlight) {
+      try {
+        await pendingFlight;
+      } catch {}
+    }
+
+    let releaseLock: () => void = () => {};
+    const lockPromise = new Promise<void>((resolve) => {
+      releaseLock = resolve;
+    });
+    activeBookingPromises.set(bookingLockKey, lockPromise);
+
+    try {
+      // Parallelize clinic, doctor overlaps, service lookup, and patient lookup in ONE concurrent round-trip
     let [clinic, overlaps, initialService, matchedPatients] = await Promise.all([
       getCachedClinic(input.clinicSlug),
       !forceOverride
@@ -526,6 +545,89 @@ export async function POST(req: NextRequest) {
       if (isPlaceholder) {
         existingPatient = single;
       }
+    }
+
+    // -------------------------------------------------------------------------
+    // DEDUPLICATION / IDEMPOTENCY GUARD:
+    // If an appointment was already created for this exact patient (or same phone)
+    // within 15 minutes of the requested slot, or created in the last 20 seconds,
+    // return the existing appointment idempotently to prevent duplicate bookings!
+    // -------------------------------------------------------------------------
+    try {
+      const candidatePatientIds = [
+        existingPatient?.id,
+        input.patientId,
+        ...(matchedPatients || []).map((p: any) => p.id),
+      ].filter(Boolean);
+
+      const recentDuplicate = await prisma.appointment.findFirst({
+        where: {
+          status: { notIn: ["CANCELLED", "DECLINED"] },
+          OR: [
+            ...(candidatePatientIds.length > 0
+              ? [
+                  {
+                    patientId: { in: candidatePatientIds },
+                    startTime: {
+                      gte: new Date(scheduledDate.getTime() - 15 * 60 * 1000),
+                      lte: new Date(scheduledDate.getTime() + 15 * 60 * 1000),
+                    },
+                  },
+                  {
+                    patientId: { in: candidatePatientIds },
+                    createdAt: {
+                      gte: new Date(Date.now() - 20 * 1000),
+                    },
+                  },
+                ]
+              : []),
+            {
+              patient: { phone: { in: phoneVariants } },
+              startTime: {
+                gte: new Date(scheduledDate.getTime() - 15 * 60 * 1000),
+                lte: new Date(scheduledDate.getTime() + 15 * 60 * 1000),
+              },
+            },
+            {
+              patient: { phone: { in: phoneVariants } },
+              createdAt: {
+                gte: new Date(Date.now() - 20 * 1000),
+              },
+            },
+          ],
+        },
+        include: {
+          patient: true,
+          service: true,
+          staffUser: true,
+          treatment: true,
+          treatmentSession: true,
+        },
+        orderBy: { createdAt: "desc" },
+      });
+
+      if (recentDuplicate) {
+        console.log(
+          `[Deduplication] Prevented duplicate appointment creation for phone ${input.phone}. Returning existing appointment ${recentDuplicate.id}`
+        );
+        const patientKey = recentDuplicate.patient?.id || recentDuplicate.patientId || recentDuplicate.id;
+        const patientCode = getPatientCode(patientKey, recentDuplicate.createdAt);
+        return NextResponse.json(
+          {
+            success: true,
+            message: "Appointment already scheduled",
+            appointment: {
+              ...recentDuplicate,
+              patientName: `${resolvedFirstName} ${resolvedLastName}`.trim() || "Valued Patient",
+              patientCode,
+            },
+            duplicatePrevented: true,
+          },
+          { status: 200 }
+        );
+      }
+    } catch (dupErr) {
+      console.warn("Deduplication lookup check failed, continuing:", dupErr);
     }
 
     // If an existing patient was matched and new details were entered, upgrade their record in background
@@ -941,14 +1043,18 @@ export async function POST(req: NextRequest) {
       }).catch(() => {});
     });
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Appointment successfully scheduled",
-        appointment: createdAppointment,
-      },
-      { status: 201 }
-    );
+      return NextResponse.json(
+        {
+          success: true,
+          message: "Appointment successfully scheduled",
+          appointment: createdAppointment,
+        },
+        { status: 201 }
+      );
+    } finally {
+      releaseLock();
+      activeBookingPromises.delete(bookingLockKey);
+    }
   } catch (error: any) {
     return NextResponse.json(
       {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Zap,
@@ -81,6 +81,7 @@ export function QuickBookingForm({
 
   // Submission State
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSubmittingRef = useRef(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successData, setSuccessData] = useState<{
     id: string;
@@ -190,6 +191,8 @@ export function QuickBookingForm({
       return;
     }
 
+    if (isSubmittingRef.current || isSubmitting) return;
+    isSubmittingRef.current = true;
     setIsSubmitting(true);
 
     try {
@@ -279,6 +282,7 @@ export function QuickBookingForm({
         err.message || "An unexpected error occurred while booking. Please try again."
       );
     } finally {
+      isSubmittingRef.current = false;
       setIsSubmitting(false);
     }
   };
