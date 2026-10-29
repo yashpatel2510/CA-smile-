@@ -7,7 +7,7 @@
   "digitWidth": 5,
   "separator": "Dash ( - )",
   "startingNumber": 1,
-  "currentCounter": 65,
+  "currentCounter": 66,
   "lastYearReset": "2026",
   "patientCodeMap": {
     "cmvksykbd0002ncb10u4tg27i": "CA-0001",
@@ -73,6 +73,7 @@
     "PAT-839": "00061",
     "cmvsh9er9004nge8fykh4xvvf": "00062",
     "cmvt3j7v90001b9lwl1qmkr5f": "00063",
-    "cmvt9hemt001tb9lwg50qeeo5": "00064"
+    "cmvt9hemt001tb9lwg50qeeo5": "00064",
+    "cmvtdm3je0001jnc5oq0po8pq": "00065"
   }
 }
