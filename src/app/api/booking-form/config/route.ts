@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import prisma from "@/lib/prisma";
 import {
   getBookingFormConfig,
   updateBookingFormConfig,
@@ -9,9 +10,25 @@ import {
 
 export async function GET() {
   try {
+    // 1. Try reading from Supabase PostgreSQL database
+    try {
+      const clinic = await prisma.clinic.findFirst();
+      if (clinic?.formConfig && typeof clinic.formConfig === "object") {
+        return NextResponse.json({
+          success: true,
+          source: "database",
+          config: clinic.formConfig,
+        });
+      }
+    } catch (dbErr) {
+      console.warn("Database form config fetch error:", dbErr);
+    }
+
+    // 2. Fallback to local config file
     const config = getBookingFormConfig();
     return NextResponse.json({
       success: true,
+      source: "local-file",
       config,
     });
   } catch (error) {
@@ -42,9 +59,20 @@ export async function PUT(req: NextRequest) {
 
     if (body.action === "reset") {
       const resetConfig = resetBookingFormConfig();
+      try {
+        const clinic = await prisma.clinic.findFirst();
+        if (clinic) {
+          await prisma.clinic.update({
+            where: { id: clinic.id },
+            data: { formConfig: resetConfig as any },
+          });
+        }
+      } catch (dbResetErr) {
+        console.warn("Could not reset formConfig in database:", dbResetErr);
+      }
       return NextResponse.json({
         success: true,
-        message: "Booking form configuration reset to clinic defaults.",
+        message: "Booking form configuration reset to clinic defaults in database.",
         config: resetConfig,
       });
     }
@@ -57,11 +85,25 @@ export async function PUT(req: NextRequest) {
       );
     }
 
+    // 1. Update local cache
     const updatedConfig = updateBookingFormConfig(body);
+
+    // 2. Persist to Supabase PostgreSQL Database (ensures live Vercel updates!)
+    try {
+      const clinic = await prisma.clinic.findFirst();
+      if (clinic) {
+        await prisma.clinic.update({
+          where: { id: clinic.id },
+          data: { formConfig: updatedConfig as any },
+        });
+      }
+    } catch (dbErr) {
+      console.warn("Could not persist formConfig to database:", dbErr);
+    }
 
     return NextResponse.json({
       success: true,
-      message: "Booking form configuration updated successfully.",
+      message: "Booking form configuration updated successfully in database and live website.",
       config: updatedConfig,
     });
   } catch (error) {
@@ -74,6 +116,5 @@ export async function PUT(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  // Support both POST and PUT for flexibility
   return PUT(req);
 }

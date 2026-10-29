@@ -188,6 +188,16 @@ export async function POST(req: Request) {
             ...parsed,
           };
         }
+
+        // Persist to database brandingConfig
+        if (clinic) {
+          await prisma.clinic.update({
+            where: { id: clinic.id },
+            data: {
+              brandingConfig: parsed,
+            },
+          });
+        }
       }
     } catch (fsErr) {
       console.warn("Failed to sync branding config json:", fsErr);
