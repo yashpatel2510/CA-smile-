@@ -54,14 +54,22 @@ export const authOptions: NextAuthOptions = {
         const email = credentials.email.toLowerCase().trim();
         const password = credentials.password;
 
-        // Authorized Owner emails list (strictly from environment)
-        const ownerEmails = (env.OWNER_EMAILS || process.env.OWNER_EMAILS || "")
+        // Authorized Owner emails list (environment + clinic owner fallbacks)
+        const envOwnerList = (env.OWNER_EMAILS || process.env.OWNER_EMAILS || "")
           .toLowerCase()
           .split(",")
           .map((e) => e.trim())
           .filter(Boolean);
 
-        const isOwner = ownerEmails.length > 0 && ownerEmails.includes(email);
+        const DEFAULT_OWNERS = [
+          "casmileatbilimora@gmail.com",
+          "applei74740@gmail.com",
+          "yap532002@gmail.com",
+          "yap050302@gmail.com",
+        ];
+
+        const ownerEmails = Array.from(new Set([...DEFAULT_OWNERS, ...envOwnerList]));
+        const isOwner = ownerEmails.includes(email);
 
         const configuredAdminPassword =
           (env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || "").trim();
@@ -167,14 +175,22 @@ export const authOptions: NextAuthOptions = {
         const email = user.email?.toLowerCase().trim();
         if (!email) return false;
 
-        // Configured owner emails (strictly from environment)
-        const ownerEmails = (env.OWNER_EMAILS || process.env.OWNER_EMAILS || "")
+        // Configured owner emails (environment + clinic owner fallbacks)
+        const envOwnerList = (env.OWNER_EMAILS || process.env.OWNER_EMAILS || "")
           .toLowerCase()
           .split(",")
           .map((e) => e.trim())
           .filter(Boolean);
 
-        const isOwner = ownerEmails.length > 0 && ownerEmails.includes(email);
+        const DEFAULT_OWNERS = [
+          "casmileatbilimora@gmail.com",
+          "applei74740@gmail.com",
+          "yap532002@gmail.com",
+          "yap050302@gmail.com",
+        ];
+
+        const ownerEmails = Array.from(new Set([...DEFAULT_OWNERS, ...envOwnerList]));
+        const isOwner = ownerEmails.includes(email);
 
         // Check if user is registered in the Staff roster (e.g., yap050302@gmail.com)
         let existingStaff = null;

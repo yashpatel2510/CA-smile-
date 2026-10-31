@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ClinicThemeProvider } from "@/components/theme/clinic-theme-provider";
 import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
+import { FaviconSwitcher } from "@/components/theme/favicon-switcher";
 import { getClinicBrandingConfig } from "@/lib/clinic-branding-store";
 
 const inter = Inter({
@@ -21,23 +22,31 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: "/favicon-light.png?v=ca3",
-        media: "(prefers-color-scheme: light)",
-        type: "image/png",
+        url: "/favicon.svg?v=ca5",
+        type: "image/svg+xml",
       },
       {
-        url: "/favicon-dark.png?v=ca3",
+        url: "/favicon-dark.png?v=ca5",
         media: "(prefers-color-scheme: dark)",
         type: "image/png",
       },
       {
-        url: "/favicon.ico?v=ca3",
-        sizes: "any",
+        url: "/favicon-light.png?v=ca5",
+        media: "(prefers-color-scheme: light)",
+        type: "image/png",
+      },
+      {
+        url: "/favicon-dark.ico?v=ca5",
+        media: "(prefers-color-scheme: dark)",
+      },
+      {
+        url: "/favicon-light.ico?v=ca5",
+        media: "(prefers-color-scheme: light)",
       },
     ],
-    shortcut: "/favicon.ico?v=ca3",
+    shortcut: "/favicon.svg?v=ca5",
     apple: [
-      { url: "/apple-icon.png?v=ca3", sizes: "180x180", type: "image/png" },
+      { url: "/apple-icon.png?v=ca5", sizes: "180x180", type: "image/png" },
     ],
   },
 };
@@ -66,68 +75,10 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://www.youtube.com" />
         <link rel="dns-prefetch" href="https://i.ytimg.com" />
-        {/* Dynamic theme favicons: White tooth on dark tabs, Black tooth on light tabs */}
-        <link
-          rel="icon"
-          href="/favicon-light.png?v=ca3"
-          media="(prefers-color-scheme: light)"
-          type="image/png"
-        />
-        <link
-          rel="icon"
-          href="/favicon-dark.png?v=ca3"
-          media="(prefers-color-scheme: dark)"
-          type="image/png"
-        />
-        <link rel="icon" href="/favicon.ico?v=ca3" sizes="any" />
-        <link rel="shortcut icon" href="/favicon.ico?v=ca3" />
-        <link rel="apple-touch-icon" href="/apple-icon.png?v=ca3" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                function applyDynamicFavicon() {
-                  try {
-                    var isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-                    var iconUrl = isDark ? '/favicon-dark.png?v=ca3' : '/favicon-light.png?v=ca3';
-                    
-                    var links = document.querySelectorAll("link[rel*='icon']");
-                    links.forEach(function(el) {
-                      if (el.parentNode) el.parentNode.removeChild(el);
-                    });
-                    
-                    var newIcon = document.createElement('link');
-                    newIcon.rel = 'icon';
-                    newIcon.type = 'image/png';
-                    newIcon.href = iconUrl;
-                    document.head.appendChild(newIcon);
-
-                    var newShortcut = document.createElement('link');
-                    newShortcut.rel = 'shortcut icon';
-                    newShortcut.type = 'image/png';
-                    newShortcut.href = iconUrl;
-                    document.head.appendChild(newShortcut);
-                  } catch (e) {}
-                }
-                applyDynamicFavicon();
-                if (window.matchMedia) {
-                  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyDynamicFavicon);
-                }
-              })();
-            `,
-          }}
-        />
-        {heroImg && (
-          <link
-            rel="preload"
-            as="image"
-            href={heroImg}
-            fetchPriority="high"
-          />
-        )}
       </head>
       <body className="min-h-screen bg-brand-background text-brand-text antialiased">
         <ClinicThemeProvider initialBrandConfig={initialBranding}>
+          <FaviconSwitcher />
           <AnalyticsProvider>{children}</AnalyticsProvider>
         </ClinicThemeProvider>
       </body>
