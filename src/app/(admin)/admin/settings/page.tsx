@@ -36,6 +36,7 @@ import {
   BookOpen,
 } from "lucide-react";
 import { ClinicBrandingBlogManager } from "@/components/admin/blog/clinic-branding-blog-manager";
+import { ClinicBrandingGalleryManager } from "@/components/admin/gallery/clinic-branding-gallery-manager";
 import { useClinicTheme } from "@/components/theme/clinic-theme-provider";
 import {
   Card,
@@ -55,6 +56,7 @@ import {
   HeroVariant,
   DEFAULT_ABOUT_CONFIG,
   AboutSectionConfig,
+  DEFAULT_GALLERY_CONFIG,
 } from "@/types/branding";
 
 function ToothVectorIcon({ className = "h-5 w-5" }: { className?: string }) {
@@ -113,13 +115,13 @@ export default function AdminSettingsPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Tab State
-  const [activeTab, setActiveTab] = useState<"hero" | "header" | "about" | "details" | "blog">("hero");
+  const [activeTab, setActiveTab] = useState<"hero" | "header" | "about" | "details" | "blog" | "gallery">("hero");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       const tabParam = params.get("tab");
-      if (tabParam && ["hero", "header", "about", "details", "blog"].includes(tabParam)) {
+      if (tabParam && ["hero", "header", "about", "details", "blog", "gallery"].includes(tabParam)) {
         setActiveTab(tabParam as any);
       }
     }
@@ -818,6 +820,7 @@ export default function AdminSettingsPage() {
         altText: `${clinicDisplayName.trim() || "PedioDent"} Clinic Logo`,
       },
       hero: liveHeroConfig,
+      gallery: brandConfig.gallery || DEFAULT_GALLERY_CONFIG,
     });
 
     setSaving(false);
@@ -1237,7 +1240,20 @@ export default function AdminSettingsPage() {
           }`}
         >
           <BookOpen className="h-4 w-4" />
-          <span>Blog &amp; Articles (Add, Edit, Categories &amp; Section)</span>
+          <span>Blog &amp; Articles (Hide / Unhide &amp; Manage)</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("gallery")}
+          className={`flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-semibold transition-colors shrink-0 ${
+            activeTab === "gallery"
+              ? "border-brand-primary text-brand-primary"
+              : "border-transparent text-brand-muted hover:text-brand-text"
+          }`}
+        >
+          <Layers className="h-4 w-4" />
+          <span>Space Gallery &amp; Polaroids (Photos, Story, Address &amp; Mascot)</span>
         </button>
       </div>
 
@@ -4226,8 +4242,17 @@ export default function AdminSettingsPage() {
         </div>
       )}
 
+      {/* ========================================================================= */}
+      {/* TAB 6: CLINIC SPACE GALLERY & POLAROIDS SHOWCASE                          */}
+      {/* ========================================================================= */}
+      {activeTab === "gallery" && (
+        <div className="space-y-6">
+          <ClinicBrandingGalleryManager />
+        </div>
+      )}
+
       {/* Save Action Sticky Footer (for Hero, Header, About, and Details tabs) */}
-      {activeTab !== "blog" && (
+      {activeTab !== "blog" && activeTab !== "gallery" && (
         <div className="sticky bottom-4 z-30 flex items-center justify-between rounded-2xl border border-brand-border bg-brand-surface/95 backdrop-blur-md p-4 shadow-lg">
           <div className="text-xs text-brand-muted">
             Click <strong>Save Branding &amp; Hero</strong> to apply your customizations to the public website immediately.

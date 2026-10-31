@@ -8,6 +8,7 @@ export interface BlogSectionConfig {
   badgeText: string;
   enabled: boolean;
   maxFeaturedCount: number;
+  hideFromNavigation?: boolean;
 }
 
 export interface BlogStoreData {
@@ -23,6 +24,7 @@ const DEFAULT_BLOG_CONFIG: BlogSectionConfig = {
   badgeText: "EVIDENCE-BASED DENTAL INSIGHTS",
   enabled: true,
   maxFeaturedCount: 3,
+  hideFromNavigation: false,
 };
 
 const DATA_DIR = path.join(process.cwd(), "src", "data");

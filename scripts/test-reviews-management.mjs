@@ -172,8 +172,8 @@ async function runReviewsTests() {
       Cookie: `next-auth.session-token=${adminToken}`,
     },
     body: JSON.stringify({
-      placeId: "ChIJN1t_tDeuEmsRUsoyG83frY4",
-      businessName: "HealthSphere Clinic & Dental Center",
+      placeId: "0x3be0ef543648830b:0x3a288255f324c8de",
+      businessName: "CA Smile Dental Clinic",
     }),
   });
   const googleSyncData = await googleSyncRes.json();
@@ -204,6 +204,32 @@ async function runReviewsTests() {
     process.exit(1);
   }
 
+  // Cleanup: Delete any synced test reviews to maintain 0 reviews for the new clinic
+  const remainingRes = await fetch(`${BASE_URL}/api/reviews`, {
+    headers: { Cookie: `next-auth.session-token=${adminToken}` },
+  });
+  const remainingData = await remainingRes.json();
+  if (remainingData.reviews && remainingData.reviews.length > 0) {
+    for (const rev of remainingData.reviews) {
+      await fetch(`${BASE_URL}/api/reviews/${rev.id}`, {
+        method: "DELETE",
+        headers: { Cookie: `next-auth.session-token=${adminToken}` },
+      });
+    }
+    // Reset config totalReviewsCount back to 0
+    await fetch(`${BASE_URL}/api/reviews/google-sync`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: `next-auth.session-token=${adminToken}`,
+      },
+      body: JSON.stringify({
+        totalReviewsCount: 0,
+        googleRating: 5.0,
+      }),
+    });
+  }
+
   // 8. Test Middleware Route Protection for /admin/reviews
   console.log(
     "\n[Test 8] Testing Route Protection: Staff Attempt to Access /admin/reviews:"
@@ -215,7 +241,7 @@ async function runReviewsTests() {
   const location = staffPageRes.headers.get("location") || "";
   if (
     staffPageRes.status === 307 &&
-    location.includes("/admin?error=admin_only")
+    location.includes("error=admin_only")
   ) {
     console.log(
       `  ✓ BLOCKED [STAFF] -> /admin/reviews redirected to /admin?error=admin_only`

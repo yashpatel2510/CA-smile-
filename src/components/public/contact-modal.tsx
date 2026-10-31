@@ -12,6 +12,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Sparkles, Clock, ShieldCheck, PhoneCall } from "lucide-react";
 import { CalendarBookingExperience } from "@/components/public/calendar-booking-experience";
 import { useClinicTheme } from "@/components/theme/clinic-theme-provider";
+import {
+  BookingFormConfig,
+  defaultBookingFormConfig,
+} from "@/data/booking-form-config";
 
 interface ContactModalOptions {
   service?: string;
@@ -36,15 +40,56 @@ export function useContactModal() {
 
 export function ContactModalProvider({
   children,
+  initialConfig,
 }: {
   children: React.ReactNode;
+  initialConfig?: BookingFormConfig;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [initialService, setInitialService] = useState<string | undefined>(
     undefined
   );
+  const [modalConfig, setModalConfig] = useState<BookingFormConfig>(
+    initialConfig || defaultBookingFormConfig
+  );
   const modalRef = useRef<HTMLDivElement>(null);
   const { brandConfig } = useClinicTheme();
+
+  // Keep modalConfig synced with initialConfig from props
+  useEffect(() => {
+    if (initialConfig) {
+      setModalConfig(initialConfig);
+    }
+  }, [initialConfig]);
+
+  // Synchronously hydrate from localStorage cache to prevent 1-second white flash
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("casmile_booking_form_config_v1");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && typeof parsed === "object" && parsed.themeMode) {
+            setModalConfig((prev) => ({ ...prev, ...parsed }));
+          }
+        }
+      } catch (err) {
+        console.warn("Could not read cached booking form theme:", err);
+      }
+    }
+  }, []);
+
+  // Listen for real-time admin updates across tabs or within same session
+  useEffect(() => {
+    const handleConfigUpdate = (event: any) => {
+      if (event.detail && typeof event.detail === "object") {
+        setModalConfig((prev) => ({ ...prev, ...event.detail }));
+      }
+    };
+    window.addEventListener("booking-config-updated", handleConfigUpdate);
+    return () =>
+      window.removeEventListener("booking-config-updated", handleConfigUpdate);
+  }, []);
 
   const openContactModal = useCallback((options?: ContactModalOptions) => {
     if (options?.service) {
@@ -79,12 +124,18 @@ export function ContactModalProvider({
     }
   }, [isOpen]);
 
-  // Check URL hash for #contact on mount
+  // Check URL hash for #contact or #book on mount
   useEffect(() => {
     if (typeof window !== "undefined") {
+      const hash = window.location.hash;
+      const search = window.location.search;
       if (
-        window.location.hash === "#contact" ||
-        window.location.search.includes("contact=open")
+        hash === "#contact" ||
+        hash === "#book" ||
+        search.includes("contact=open") ||
+        search.includes("book=true") ||
+        search.includes("book=open") ||
+        search.includes("appointment=open")
       ) {
         setIsOpen(true);
       }
@@ -131,7 +182,11 @@ export function ContactModalProvider({
                 mass: 0.8,
               }}
               onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-5xl my-auto rounded-[24px] sm:rounded-[32px] overflow-hidden shadow-2xl focus:outline-none"
+              className={`relative w-full max-w-5xl my-auto rounded-[24px] sm:rounded-[32px] overflow-hidden shadow-2xl focus:outline-none transition-colors duration-150 ${
+                (modalConfig?.themeMode || initialConfig?.themeMode || "light") === "dark"
+                  ? "bg-[#111215] border border-white/10 text-white"
+                  : "bg-white border border-slate-300 text-stone-900"
+              }`}
             >
               {/* Floating Close Button */}
               <button
@@ -146,6 +201,7 @@ export function ContactModalProvider({
 
               {/* Enhanced Calendar & Contact Experience */}
               <CalendarBookingExperience
+                initialConfig={modalConfig || initialConfig}
                 initialService={initialService}
                 isModal={true}
                 onClose={closeContactModal}

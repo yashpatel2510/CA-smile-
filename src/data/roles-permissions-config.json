@@ -1,0 +1,90 @@
+{
+  "roles": [
+    {
+      "id": "role-admin",
+      "key": "ADMIN",
+      "name": "Super Administrator",
+      "badgeColor": "purple",
+      "description": "Full unconstrained administrative access across all clinical, financial, and system setup configurations.",
+      "isSystem": true,
+      "allowedSections": [
+        "today",
+        "appointments",
+        "patients",
+        "doctor",
+        "services",
+        "billing",
+        "whatsapp",
+        "reviews",
+        "faqs",
+        "database",
+        "setup",
+        "staff"
+      ],
+      "createdAt": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "role-doctor",
+      "key": "DOCTOR",
+      "name": "Doctor / Dentist Specialist",
+      "badgeColor": "emerald",
+      "description": "Full access to live queue, clinical appointments, patient medical records, treatment session charting, and prescriptions.",
+      "isSystem": true,
+      "allowedSections": [
+        "today",
+        "appointments",
+        "patients",
+        "doctor",
+        "services",
+        "reviews"
+      ],
+      "createdAt": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "role-receptionist",
+      "key": "RECEPTIONIST",
+      "name": "Receptionist & Front Desk",
+      "badgeColor": "blue",
+      "description": "Front-desk check-in, token queue, appointment scheduling, patient intake, billing payments, and WhatsApp communication.",
+      "isSystem": true,
+      "allowedSections": [
+        "today",
+        "appointments",
+        "patients",
+        "billing",
+        "whatsapp"
+      ],
+      "createdAt": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "role-staff",
+      "key": "STAFF",
+      "name": "Clinical Assistant / Staff",
+      "badgeColor": "teal",
+      "description": "Assists with patient movement, token queue calls, basic appointments, and clinical procedures.",
+      "isSystem": true,
+      "allowedSections": [
+        "today",
+        "appointments",
+        "patients"
+      ],
+      "createdAt": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "role-nurse",
+      "key": "NURSE",
+      "name": "Dental Nurse & Caregiver",
+      "badgeColor": "amber",
+      "description": "Chairside assistance, patient preparation, sterilization notes, and post-procedure care.",
+      "isSystem": true,
+      "allowedSections": [
+        "today",
+        "appointments",
+        "patients",
+        "doctor"
+      ],
+      "createdAt": "2026-01-01T00:00:00.000Z"
+    }
+  ],
+  "staffSectionOverrides": {}
+}

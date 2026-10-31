@@ -208,7 +208,8 @@
     "sectionTitle": "Latest Dental Health Articles",
     "sectionSubtitle": "Doctor-authored guides on kids dentistry, invisible aligners, pain-free implants, and everyday oral hygiene.",
     "badgeText": "EVIDENCE-BASED DENTAL INSIGHTS",
-    "enabled": true,
-    "maxFeaturedCount": 3
+    "enabled": false,
+    "maxFeaturedCount": 3,
+    "hideFromNavigation": true
   }
 }

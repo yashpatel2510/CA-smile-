@@ -78,6 +78,14 @@ export async function GET() {
             ...DEFAULT_CLINIC_BRANDING.aboutSection!,
             ...(dbConfig.aboutSection || {}),
           },
+          gallery: {
+            ...DEFAULT_CLINIC_BRANDING.gallery!,
+            ...(dbConfig.gallery || {}),
+            photos:
+              Array.isArray(dbConfig.gallery?.photos) && dbConfig.gallery.photos.length > 0
+                ? dbConfig.gallery.photos
+                : DEFAULT_CLINIC_BRANDING.gallery!.photos,
+          },
         };
         global.__clinicBrandingCache = merged;
         return NextResponse.json({
@@ -170,6 +178,32 @@ export async function PUT(req: NextRequest) {
       incomingLogo.imageUrl = (await persistMediaToDatabase(incomingLogo.imageUrl, "clinic-logo")) || "";
     }
 
+    const incomingGallery = { ...(body.gallery || {}) } as Record<string, any>;
+    if (
+      incomingGallery.centerLogoUrl &&
+      typeof incomingGallery.centerLogoUrl === "string" &&
+      incomingGallery.centerLogoUrl.startsWith("data:image/")
+    ) {
+      incomingGallery.centerLogoUrl =
+        (await persistMediaToDatabase(incomingGallery.centerLogoUrl, "gallery-logo")) || "";
+    }
+    if (Array.isArray(incomingGallery.photos)) {
+      const processedPhotos = [];
+      for (let idx = 0; idx < incomingGallery.photos.length; idx++) {
+        const photo = incomingGallery.photos[idx];
+        if (photo && photo.src && typeof photo.src === "string" && photo.src.startsWith("data:image/")) {
+          const persistedSrc = await persistMediaToDatabase(photo.src, `polaroid-${idx + 1}`);
+          processedPhotos.push({
+            ...photo,
+            src: persistedSrc || photo.src,
+          });
+        } else {
+          processedPhotos.push(photo);
+        }
+      }
+      incomingGallery.photos = processedPhotos;
+    }
+
     const processedPayload = {
       ...body,
       hero: {
@@ -179,6 +213,10 @@ export async function PUT(req: NextRequest) {
       logo: {
         ...(body.logo || {}),
         ...incomingLogo,
+      },
+      gallery: {
+        ...(body.gallery || {}),
+        ...incomingGallery,
       },
     };
 

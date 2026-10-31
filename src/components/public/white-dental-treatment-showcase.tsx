@@ -561,7 +561,7 @@ function ShowcaseBlock({
     <div className="w-full">
       {/* Top Header: Title on Left, Subtitle on Right (Exact layout from user image 1:1) */}
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 pb-8 sm:pb-12">
-        <h2 className="text-6xl sm:text-7xl lg:text-[88px] xl:text-[96px] font-bold tracking-tight text-black leading-none font-sans">
+        <h2 className="text-4xl sm:text-6xl lg:text-[88px] xl:text-[96px] font-bold tracking-tight text-black leading-tight sm:leading-none font-sans">
           {title}
         </h2>
         <p className="text-xs sm:text-[13px] text-zinc-500 font-normal leading-relaxed max-w-[320px] md:pt-3 text-left">
@@ -685,12 +685,9 @@ function ShowcaseBlock({
                         <img
                           src={item.image}
                           alt={item.title}
+                          loading="lazy"
+                          decoding="async"
                           className="w-full h-full object-cover object-center lg:absolute lg:inset-0"
-                        />
-                        {/* Focus indicator dot */}
-                        <div
-                          className="absolute bottom-4 left-[64%] -translate-x-1/2 w-5 h-5 rounded-full bg-zinc-800/60 pointer-events-none"
-                          aria-hidden="true"
                         />
                       </motion.div>
 
@@ -768,10 +765,10 @@ function ShowcaseBlock({
                         </div>
 
                         {/* Actions: Full separate treatment page & Book appointment */}
-                        <div className="mt-5 sm:mt-6 flex flex-wrap items-center gap-2.5 sm:gap-3">
+                        <div className="mt-5 sm:mt-6 flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3">
                           <Link
                             href={`/treatments/${item.id}`}
-                            className="inline-flex items-center justify-center gap-1.5 rounded-full bg-black text-white px-5 sm:px-6 py-2.5 text-xs sm:text-sm font-medium hover:bg-zinc-800 transition-all duration-150 active:scale-95 shadow-sm"
+                            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-full bg-black text-white px-5 sm:px-6 py-2.5 text-xs sm:text-sm font-medium hover:bg-zinc-800 transition-all duration-150 active:scale-95 shadow-sm text-center"
                           >
                             <span>View Full Treatment &amp; Timeline</span>
                             <ArrowUpRight className="h-3.5 w-3.5 stroke-[2.5]" />
@@ -784,7 +781,7 @@ function ShowcaseBlock({
                                 openContactModal({ service: item.title });
                               }
                             }}
-                            className="inline-flex items-center justify-center rounded-full border border-zinc-300/90 px-5 sm:px-6 py-2.5 text-xs sm:text-sm font-normal text-zinc-800 bg-white hover:border-black hover:text-black transition-all duration-200 active:scale-95 shadow-2xs cursor-pointer"
+                            className="w-full sm:w-auto inline-flex items-center justify-center rounded-full border border-zinc-300/90 px-5 sm:px-6 py-2.5 text-xs sm:text-sm font-normal text-zinc-800 bg-white hover:border-black hover:text-black transition-all duration-200 active:scale-95 shadow-2xs cursor-pointer text-center"
                           >
                             Book an appointment
                           </Link>
@@ -913,7 +910,7 @@ function DiagnosticFramerShowcase({
     <div className="w-full">
       {/* Top Header: Title on Left, Subtitle on Right */}
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 pb-8 sm:pb-12">
-        <h2 className="text-6xl sm:text-7xl lg:text-[88px] xl:text-[96px] font-bold tracking-tight text-black leading-none font-sans">
+        <h2 className="text-4xl sm:text-6xl lg:text-[88px] xl:text-[96px] font-bold tracking-tight text-black leading-tight sm:leading-none font-sans">
           {title}
         </h2>
         <p className="text-xs sm:text-[13px] text-zinc-500 font-normal leading-relaxed max-w-[320px] md:pt-3 text-left">
@@ -1076,7 +1073,7 @@ function DiagnosticFramerShowcase({
                                     openContactModal({ service: item.title });
                                   }
                                 }}
-                                className="inline-flex items-center justify-center rounded-full border border-zinc-300/90 px-5 sm:px-6 py-2 text-xs sm:text-sm font-normal text-zinc-800 bg-white hover:border-black hover:bg-black hover:text-white transition-all duration-200 active:scale-95 shadow-2xs cursor-pointer"
+                                className="w-full sm:w-auto inline-flex items-center justify-center rounded-full border border-zinc-300/90 px-5 sm:px-6 py-2.5 sm:py-2 text-xs sm:text-sm font-normal text-zinc-800 bg-white hover:border-black hover:bg-black hover:text-white transition-all duration-200 active:scale-95 shadow-2xs cursor-pointer text-center"
                               >
                                 Book this diagnostic
                               </Link>
@@ -1094,6 +1091,8 @@ function DiagnosticFramerShowcase({
                             <img
                               src={item.image}
                               alt={item.title}
+                              loading="lazy"
+                              decoding="async"
                               className="w-full h-full object-cover object-center group-hover/img:scale-105 transition-transform duration-500 ease-out"
                             />
                             <button
@@ -1145,13 +1144,30 @@ export function WhiteDentalTreatmentShowcase({
   allOpen?: boolean;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [cursorPos, setCursorPos] = useState({ x: -100, y: -100, visible: false });
-  const [treatments, setTreatments] = useState<ShowcaseItem[]>(
-    initialTreatments || TREATMENT_ITEMS
-  );
-  const [diagnostics, setDiagnostics] = useState<ShowcaseItem[]>(
-    initialDiagnostics || DIAGNOSTIC_ITEMS
-  );
+  const [treatments, setTreatments] = useState<ShowcaseItem[]>(() => {
+    if (initialTreatments && initialTreatments.length > 0) {
+      return (initialTreatments as any[]).filter((t) => t.isActive !== false);
+    }
+    return TREATMENT_ITEMS;
+  });
+  const [diagnostics, setDiagnostics] = useState<ShowcaseItem[]>(() => {
+    if (initialDiagnostics && initialDiagnostics.length > 0) {
+      return (initialDiagnostics as any[]).filter((d) => d.isActive !== false);
+    }
+    return DIAGNOSTIC_ITEMS;
+  });
+
+  useEffect(() => {
+    if (initialTreatments && initialTreatments.length > 0) {
+      setTreatments((initialTreatments as any[]).filter((t) => t.isActive !== false));
+    }
+  }, [initialTreatments]);
+
+  useEffect(() => {
+    if (initialDiagnostics && initialDiagnostics.length > 0) {
+      setDiagnostics((initialDiagnostics as any[]).filter((d) => d.isActive !== false));
+    }
+  }, [initialDiagnostics]);
 
   const [showDiagnostics, setShowDiagnostics] = useState<boolean>(
     initialShowDiagnostics !== undefined
@@ -1236,50 +1252,12 @@ export function WhiteDentalTreatmentShowcase({
     };
   }, []);
 
-  // Floating cursor follower circle from the video
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      const isInside =
-        e.clientX >= rect.left &&
-        e.clientX <= rect.right &&
-        e.clientY >= rect.top &&
-        e.clientY <= rect.bottom;
-
-      if (isInside) {
-        setCursorPos({
-          x: e.clientX,
-          y: e.clientY,
-          visible: true,
-        });
-      } else {
-        setCursorPos((prev) => ({ ...prev, visible: false }));
-      }
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
-
   return (
     <section
       ref={containerRef}
       id="services-showcase"
       className="relative w-full bg-white text-black selection:bg-black selection:text-white font-sans overflow-hidden"
     >
-      {/* Sleek Floating Cursor Follower Dot (matches the video recording) */}
-      {cursorPos.visible && (
-        <div
-          className="pointer-events-none fixed z-50 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-zinc-500/70 backdrop-blur-[1px] transition-transform duration-75 ease-out hidden md:block"
-          style={{
-            left: `${cursorPos.x}px`,
-            top: `${cursorPos.y}px`,
-          }}
-          aria-hidden="true"
-        />
-      )}
-
       <div className="mx-auto max-w-7xl px-4 sm:px-8 lg:px-12 py-12 sm:py-20 lg:py-24 space-y-20 sm:space-y-28">
         {(mode === "both" || mode === "treatment") && showTreatments && (
           <ShowcaseBlock

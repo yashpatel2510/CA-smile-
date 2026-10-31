@@ -12,6 +12,7 @@
     "test:e2e": "node scripts/test-e2e-patient-flow.mjs",
     "test:whatsapp": "node --import tsx scripts/test-whatsapp-booking-flow.mjs",
     "verify": "node scripts/verify-all-features.mjs",
+    "test:chairs": "node --import tsx scripts/test-queue-manager-chairs.mjs",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "postinstall": "prisma generate"

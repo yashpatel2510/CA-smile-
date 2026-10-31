@@ -18,6 +18,13 @@ export function TreatmentReviewsShowcase({
   const storeData = getReviewsStoreData();
   const approvedReviews = getPublicApprovedReviews();
   const googleConfig = storeData.googleConfig;
+  const showEmptyCard =
+    googleConfig?.showEmptyReviewCard ?? storeData.showEmptyReviewCard ?? true;
+
+  // If there are 0 reviews and admin turned off the empty state card, hide the section
+  if (approvedReviews.length === 0 && !showEmptyCard) {
+    return null;
+  }
 
   // Read dark mode preference from admin review settings
   const isDarkMode =
@@ -43,6 +50,7 @@ export function TreatmentReviewsShowcase({
         googleMapsUrl={googleConfig.googleMapsUrl}
         defaultDark={isDarkMode}
         showToggle={false}
+        showEmptyCard={showEmptyCard}
       />
     </div>
   );

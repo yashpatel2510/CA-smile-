@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import prisma from "@/lib/prisma";
 import {
   BookingFormConfig,
   defaultBookingFormConfig,
@@ -56,6 +57,26 @@ export function getBookingFormConfig(): BookingFormConfig {
   const loaded = loadPersistedConfig();
   global.__bookingFormConfig = loaded;
   return loaded;
+}
+
+export async function getBookingFormConfigAsync(): Promise<BookingFormConfig> {
+  try {
+    const clinic = await prisma.clinic.findFirst();
+    if (clinic?.formConfig && typeof clinic.formConfig === "object") {
+      const dbConfig = clinic.formConfig as any;
+      if (Array.isArray(dbConfig.fields) || dbConfig.themeMode) {
+        const merged = { ...defaultBookingFormConfig, ...dbConfig };
+        global.__bookingFormConfig = merged;
+        return merged;
+      }
+    }
+  } catch (err) {
+    console.warn(
+      "Could not load booking form config from database, falling back to local file:",
+      err
+    );
+  }
+  return getBookingFormConfig();
 }
 
 export function updateBookingFormConfig(

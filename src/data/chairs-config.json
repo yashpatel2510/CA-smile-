@@ -1,0 +1,42 @@
+[
+  {
+    "id": "chair-1",
+    "name": "Dental Chair 1",
+    "room": "ROOM DENTAL CHAIR 1",
+    "doctorName": "Dr. Deep Arvindbhai Patel",
+    "specialty": "General Dentistry & Implants",
+    "description": "Primary Consultation & Operatory Chair",
+    "colorTheme": "blue",
+    "status": "READY",
+    "isActive": true,
+    "isDefault": true,
+    "sortOrder": 1,
+    "currentApptId": null,
+    "currentPatient": "Dental Chair Ready",
+    "currentToken": 1,
+    "currentService": "General Consultation",
+    "seenCount": 0,
+    "createdAt": "2026-10-31T07:30:03.876Z",
+    "updatedAt": "2026-10-31T07:30:03.876Z"
+  },
+  {
+    "id": "chair-2",
+    "name": "Dental Chair 2",
+    "room": "ROOM DENTAL CHAIR 2",
+    "doctorName": "Dr. Sankar (Chief Dental Surgeon)",
+    "specialty": "Oral Surgery & Extractions",
+    "description": "Oral Surgery & Consultations",
+    "colorTheme": "emerald",
+    "status": "AVAILABLE",
+    "isActive": true,
+    "isDefault": false,
+    "sortOrder": 2,
+    "currentApptId": null,
+    "currentPatient": "Ready for Consultations",
+    "currentToken": null,
+    "currentService": "Oral Surgery & Procedures",
+    "seenCount": 0,
+    "createdAt": "2026-10-31T07:30:03.876Z",
+    "updatedAt": "2026-10-31T07:30:03.876Z"
+  }
+]

@@ -1,9 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
+function maskPhoneNumber(p?: string) {
+  if (!p) return "Not provided";
+  const clean = p.replace(/\D/g, "");
+  if (clean.length >= 4) {
+    return `******${clean.slice(-4)}`;
+  }
+  return "***";
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+
+    // Anti-spam honeypot detection: silently drop automated bot spam
+    if (body.patient_hp_trap || body.honeypot || body.website) {
+      return NextResponse.json({
+        success: true,
+        referenceId: `INQ-${Math.floor(100000 + Math.random() * 900000)}`,
+        message:
+          "Thank you for reaching out. Your inquiry has been registered in our patient system.",
+      });
+    }
+
     const { name, email, phone, department, message } = body;
 
     if (!name || !email || !message) {
@@ -33,8 +53,8 @@ export async function POST(req: NextRequest) {
         (await prisma.clinic.findFirst()) ||
         (await prisma.clinic.create({
           data: {
-            name: "VS Multispeciality Dental Clinic",
-            slug: "vs-dental-clinic",
+            name: "CA Smile Dental Clinic",
+            slug: "ca-smile-dental-clinic",
             themeKey: "teal-serenity",
           },
         }));
@@ -114,7 +134,7 @@ export async function POST(req: NextRequest) {
         received: {
           name,
           email,
-          phone: phone || "Not provided",
+          phone: maskPhoneNumber(phone),
           department: department || "General Patient Inquiries",
         },
       },

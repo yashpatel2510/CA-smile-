@@ -37,6 +37,47 @@ export function AdminSidebar() {
   const isAdmin = session?.user?.role === "ADMIN";
 
   const [dbStatus, setDbStatus] = useState<"ONLINE" | "OFFLINE" | "TEST">("ONLINE");
+  const [userPermissions, setUserPermissions] = useState<{
+    allowedSections: string[];
+    role: string;
+    isSuperAdmin: boolean;
+  }>({
+    allowedSections: [
+      "today",
+      "appointments",
+      "patients",
+      "doctor",
+      "services",
+      "billing",
+      "whatsapp",
+      "reviews",
+      "faqs",
+      "database",
+      "setup",
+      "staff",
+    ],
+    role: isAdmin ? "ADMIN" : "STAFF",
+    isSuperAdmin: isAdmin,
+  });
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchPerms = async () => {
+      try {
+        const res = await fetch("/api/admin/roles/my-permissions");
+        if (res.ok) {
+          const data = await res.json();
+          if (mounted && data) {
+            setUserPermissions(data);
+          }
+        }
+      } catch {}
+    };
+    fetchPerms();
+    return () => {
+      mounted = false;
+    };
+  }, [session, isAdmin]);
 
   useEffect(() => {
     let mounted = true;
@@ -66,12 +107,13 @@ export function AdminSidebar() {
     };
   }, []);
 
-  // 1. Daily Clinical Operations (Visible to both Staff and Admin)
+  // 1. Daily Clinical Operations (Visible to both Staff and Admin based on permissions)
   const operationalNav = [
     {
       name: "Appointments",
       href: "/admin/appointment",
       icon: Calendar,
+      sectionId: "appointments",
       badge: dbStatus === "TEST" ? "Test" : dbStatus === "ONLINE" ? "Online" : "Offline",
       isDbBadge: true,
     },
@@ -79,68 +121,89 @@ export function AdminSidebar() {
       name: "CA Smile",
       href: "/admin/today",
       icon: Smile,
+      sectionId: "today",
     },
     {
       name: "Doctor",
       href: "/admin/doctor",
       icon: Stethoscope,
+      sectionId: "doctor",
     },
     {
       name: "Patients",
       href: "/admin/patients",
       icon: Users,
+      sectionId: "patients",
     },
     {
       name: "Google Sheets",
       href: "/admin/google-sheets",
       icon: FileSpreadsheet,
+      sectionId: "setup",
       badge: "Live",
     },
   ];
 
-  // 2. Clinic Owner & Structural Controls (EXCLUSIVELY for Admin/Owner)
+  // 2. Clinic Owner & Structural Controls (Filtered by section permissions for non-admins)
   const ownerAdminNav = [
     {
       name: "Booking Form Config",
       href: "/admin/booking-form",
       icon: SlidersHorizontal,
+      sectionId: "setup",
       badge: "Builder",
     },
-    { name: "Clinic Branding", href: "/admin/settings", icon: Settings },
+    { name: "Clinic Branding", href: "/admin/settings", icon: Settings, sectionId: "setup" },
     {
       name: "Services & Treatments",
       href: "/admin/services",
       icon: BriefcaseMedical,
+      sectionId: "services",
     },
     {
       name: "Staff Management",
       href: "/admin/staff",
       icon: UserCog,
+      sectionId: "staff",
     },
     {
       name: "Patient Reviews",
       href: "/admin/reviews",
       icon: Star,
+      sectionId: "reviews",
       badge: "Google",
     },
     {
       name: "Q&A Management",
       href: "/admin/faqs",
       icon: HelpCircle,
+      sectionId: "faqs",
       badge: "Live",
     },
     {
       name: "Database",
       href: "/admin/database",
       icon: Database,
+      sectionId: "database",
       badge: "Active",
     },
     {
       name: "Setup",
       href: "/admin/setup",
       icon: Cog,
+      sectionId: "setup",
     },
   ];
+
+  const visibleOperationalNav = isAdmin
+    ? operationalNav
+    : operationalNav.filter((item) =>
+        userPermissions.allowedSections.includes(item.sectionId)
+      );
+
+  const permittedManagementNav = ownerAdminNav.filter((item) =>
+    userPermissions.allowedSections.includes(item.sectionId)
+  );
 
   return (
     <aside
@@ -181,8 +244,10 @@ export function AdminSidebar() {
             </div>
 
             <div className="bg-brand-accent/30 border-brand-border/60 mt-3 flex items-center justify-between rounded-clinic border px-2.5 py-1.5 text-[11px] font-medium text-brand-primary">
-              <span className="truncate font-semibold">
-                {isAdmin ? "Role: Clinic Owner (Admin)" : "Role: Clinical Staff"}
+              <span className="truncate font-semibold capitalize">
+                {isAdmin
+                  ? "Role: Clinic Owner (Admin)"
+                  : `Role: ${userPermissions.role.replace(/_/g, " ").toLowerCase()}`}
               </span>
               <span
                 className={`h-2 w-2 shrink-0 rounded-full ${
@@ -192,12 +257,12 @@ export function AdminSidebar() {
             </div>
           </div>
 
-        {/* Operational Navigation (For All Staff & Admin) */}
+        {/* Operational Navigation (Filtered by section permissions) */}
         <nav className="space-y-1 p-4">
           <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-brand-muted">
             Daily Clinical Desk
           </div>
-          {operationalNav.map((item) => {
+          {visibleOperationalNav.map((item) => {
             const Icon = item.icon;
             const isActive =
               pathname === item.href ||
@@ -330,6 +395,53 @@ export function AdminSidebar() {
                 })}
               </div>
             </div>
+          ) : permittedManagementNav.length > 0 ? (
+            /* Staff Mode With Permitted Management Modules */
+            <div className="border-brand-border/60 mt-3 border-t pt-4">
+              <div className="flex items-center justify-between px-3 pb-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-brand-muted">
+                  Authorized Management
+                </span>
+                <span className="py-0.2 rounded bg-blue-100 px-1.5 text-[9px] font-extrabold text-blue-800">
+                  Access
+                </span>
+              </div>
+              <div className="space-y-1">
+                {permittedManagementNav.map((item) => {
+                  const Icon = item.icon;
+                  const isActive =
+                    pathname === item.href ||
+                    (item.href !== "/admin" && pathname.startsWith(item.href));
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={`flex items-center justify-between rounded-clinic px-3 py-2 text-xs font-medium transition-colors ${
+                        isActive
+                          ? "shadow-xs bg-brand-primary font-semibold text-brand-primary-foreground"
+                          : "hover:bg-brand-accent/20 text-brand-muted hover:text-brand-text"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 truncate">
+                        <Icon className="h-4 w-4 shrink-0" />
+                        <span className="truncate">{item.name}</span>
+                      </div>
+                      {item.badge && (
+                        <span
+                          className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase ${
+                            isActive
+                              ? "bg-white/20 text-white"
+                              : "bg-blue-100 text-blue-800"
+                          }`}
+                        >
+                          {item.badge}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
           ) : (
             /* Staff Mode Explanatory Notice */
             <div className="shadow-xs mx-1 mt-4 space-y-1 rounded-xl border border-amber-200 bg-amber-50/90 p-3 text-[11px] text-amber-900">
@@ -338,9 +450,7 @@ export function AdminSidebar() {
                 <span>Staff Access Active</span>
               </div>
               <p className="text-[10px] leading-tight text-amber-700">
-                Daily operational access (Appointments, Phone Verification &amp;
-                Calendar). Website structure, form builder, and branding are
-                restricted to the Clinic Owner.
+                Operational desk access is active. Sections are customized based on your clinic role and privileges.
               </p>
             </div>
           )}

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ChevronRight } from "lucide-react";
 import { ImportClinicDataView } from "@/components/admin/setup/import-clinic-data-view";
 import { DentalDocumentBrandingView } from "@/components/admin/setup/dental-document-branding-view";
+import StaffAccessControlView from "@/components/admin/staff/staff-access-control-view";
 
 interface SetupPageConfig {
   title: string;
@@ -119,6 +120,11 @@ export default function SetupSubPage({
     params.slug.includes("import")
   ) {
     return <ImportClinicDataView />;
+  }
+
+  // Render StaffAccessControlView for roles and staff permissions
+  if (params.slug === "roles-permissions" || params.slug === "team") {
+    return <StaffAccessControlView />;
   }
 
   const pageConfig = SETUP_PAGES[params.slug];

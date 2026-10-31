@@ -5,15 +5,21 @@ import { authOptions } from "@/lib/auth";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 
+import {
+  getStaffEffectiveSections,
+  getRolesPermissionsConfig,
+  setStaffSectionOverrides,
+} from "@/lib/roles-permissions-store";
+import { AdminSectionId } from "@/types/roles-permissions";
+
 const createStaffSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Valid email required"),
-  role: z
-    .enum(["ADMIN", "STAFF", "DOCTOR", "NURSE", "RECEPTIONIST"])
-    .default("STAFF"),
+  role: z.string().default("STAFF"),
   specialty: z.string().optional(),
   phone: z.string().optional(),
   password: z.string().min(4, "Password must be at least 4 characters").optional(),
+  customSections: z.array(z.string()).optional(),
 });
 
 const DEMO_STAFF = [
@@ -75,10 +81,17 @@ export async function GET(req: NextRequest) {
       staffList = DEMO_STAFF;
     }
 
+    const config = getRolesPermissionsConfig();
+    const enrichedStaff = staffList.map((member: any) => ({
+      ...member,
+      customSections: config.staffSectionOverrides[member.id] || null,
+      effectiveSections: getStaffEffectiveSections(member.id, member.role),
+    }));
+
     return NextResponse.json({
       success: true,
-      count: staffList.length,
-      staff: staffList,
+      count: enrichedStaff.length,
+      staff: enrichedStaff,
     });
   } catch (error: any) {
     return NextResponse.json(
@@ -180,11 +193,21 @@ export async function POST(req: NextRequest) {
       };
     }
 
+    if (input.customSections && Array.isArray(input.customSections)) {
+      setStaffSectionOverrides(createdStaff.id, input.customSections as AdminSectionId[]);
+    }
+
+    const enriched = {
+      ...createdStaff,
+      customSections: input.customSections || null,
+      effectiveSections: getStaffEffectiveSections(createdStaff.id, createdStaff.role),
+    };
+
     return NextResponse.json(
       {
         success: true,
         message: `Staff member '${input.name}' added successfully`,
-        staff: createdStaff,
+        staff: enriched,
       },
       { status: 201 }
     );

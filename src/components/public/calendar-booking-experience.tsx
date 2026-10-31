@@ -23,6 +23,8 @@ import {
   Copy,
   CheckCheck,
   X,
+  ShieldCheck,
+  Lock,
 } from "lucide-react";
 import { useClinicTheme } from "@/components/theme/clinic-theme-provider";
 import {
@@ -38,10 +40,12 @@ import {
   getTodayDateString,
 } from "@/lib/booking-time-utils";
 import { trackBookingFunnel } from "@/lib/analytics";
+import { notifyAppointmentUpdate } from "@/lib/client-appointment-sync";
 import { BookNowButton } from "@/components/ui/book-now-button";
 
 export interface CalendarBookingExperienceProps {
   initialService?: string;
+  initialDoctor?: string;
   initialConfig?: BookingFormConfig;
   onSuccess?: (appointmentId: string) => void;
   isModal?: boolean;
@@ -71,10 +75,9 @@ const DEFAULT_TIME_RANGES = [
   "Evening (5:00 PM - 7:30 PM)",
 ];
 
-
-
 export function CalendarBookingExperience({
   initialService,
+  initialDoctor,
   initialConfig,
   onSuccess,
   isModal = false,
@@ -83,9 +86,53 @@ export function CalendarBookingExperience({
   const { brandConfig } = useClinicTheme();
 
   // Dynamic booking form configuration from admin panel (Booking Form Builder & Field Settings)
-  const [config, setConfig] = useState<BookingFormConfig>(
-    initialConfig || defaultBookingFormConfig
-  );
+  const [config, setConfig] = useState<BookingFormConfig>(() => {
+    if (initialConfig) return initialConfig;
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("casmile_booking_form_config_v1");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && typeof parsed === "object" && parsed.themeMode) {
+            return { ...defaultBookingFormConfig, ...parsed };
+          }
+        }
+      } catch (err) {
+        console.warn("Could not read cached booking form theme:", err);
+      }
+    }
+    return defaultBookingFormConfig;
+  });
+
+  // Anti-spam bot honeypot state (invisible to genuine users)
+  const [honeypot, setHoneypot] = useState("");
+
+  // Sync config when initialConfig prop changes
+  useEffect(() => {
+    if (initialConfig) {
+      setConfig((prev) => ({ ...prev, ...initialConfig }));
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem(
+            "casmile_booking_form_config_v1",
+            JSON.stringify(initialConfig)
+          );
+        } catch {}
+      }
+    }
+  }, [initialConfig]);
+
+  // Real-time synchronization when admin changes theme or field settings
+  useEffect(() => {
+    const handleConfigUpdate = (event: any) => {
+      if (event.detail && typeof event.detail === "object") {
+        setConfig((prev) => ({ ...prev, ...event.detail }));
+      }
+    };
+    window.addEventListener("booking-config-updated", handleConfigUpdate);
+    return () =>
+      window.removeEventListener("booking-config-updated", handleConfigUpdate);
+  }, []);
 
   // Booking Flow Steps: 1 = Calendar & Slot, 2 = Image 2 Form Design, 3 = Confirmation
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -121,7 +168,9 @@ export function CalendarBookingExperience({
   const [email, setEmail] = useState("");
   const [treatment, setTreatment] = useState(initialService || "");
   const [preferredTime, setPreferredTime] = useState(DEFAULT_TIME_RANGES[0]);
-  const [doctorPreference, setDoctorPreference] = useState("Any Available Specialist");
+  const [doctorPreference, setDoctorPreference] = useState(
+    initialDoctor || "Any Available Specialist"
+  );
   const [notes, setNotes] = useState("");
   const [consentAgreed, setConsentAgreed] = useState(true);
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, string>>({});
@@ -148,6 +197,16 @@ export function CalendarBookingExperience({
       .then((data) => {
         if (data?.success && data?.config) {
           setConfig(data.config);
+
+          // Cache in localStorage to ensure instantaneous rendering with no white flash
+          if (typeof window !== "undefined") {
+            try {
+              localStorage.setItem(
+                "casmile_booking_form_config_v1",
+                JSON.stringify(data.config)
+              );
+            } catch {}
+          }
 
           // Sync default slot from admin config
           if (data.config.timeSlots && data.config.timeSlots.length > 0) {
@@ -405,7 +464,7 @@ export function CalendarBookingExperience({
         .join(" | ");
 
       const payload = {
-        patientType: "ADULT",
+        patientType: undefined,
         fullName: fullName.trim() || "Valued Patient",
         firstName: fName,
         lastName: lName,
@@ -421,7 +480,8 @@ export function CalendarBookingExperience({
         endTime: calculatedEnd.toISOString(),
         notes: allNotes || undefined,
         customFields: customFieldValues,
-        consentAgreed: true,
+        consentAgreed: Boolean(consentAgreed),
+        patient_hp_trap: honeypot || undefined,
         source: "WEB_FORM",
         forceOverride: true,
       };
@@ -439,6 +499,13 @@ export function CalendarBookingExperience({
       }
 
       const appointmentId = data.appointment?.id || `APT-${Date.now()}`;
+
+      // Notify open admin tabs (Appointments, CA Smile, Doctor) instantly
+      notifyAppointmentUpdate({
+        id: appointmentId,
+        action: "booked",
+        source: "WEBSITE",
+      });
 
       setConfirmedData({
         id: appointmentId,
@@ -538,24 +605,55 @@ export function CalendarBookingExperience({
           {/* =================================================================== */}
           {/* LEFT COLUMN: Customizable Headline + Contact Us + Brand Logo        */}
           {/* =================================================================== */}
-          <div className={`flex flex-col justify-between border-b p-5 sm:p-6 lg:p-8 lg:col-span-5 lg:border-b-0 lg:border-r lg:max-h-[640px] lg:overflow-y-auto custom-scrollbar transition-colors duration-200 ${
+          <div className={`flex flex-col justify-between border-b p-4 sm:p-6 lg:p-8 lg:col-span-5 lg:border-b-0 lg:border-r lg:max-h-[640px] lg:overflow-y-auto custom-scrollbar transition-colors duration-200 ${
             isDark
               ? "border-white/10 bg-[#0e0f12] text-white"
               : "border-slate-200 bg-[#f8fafc] text-slate-900"
           }`}>
             <div>
               {/* Main Headline (Configurable via Admin) */}
-              <h2 className={`font-heading text-2xl sm:text-3xl lg:text-[2.35rem] font-bold tracking-tight leading-[1.1] ${
-                isDark ? "text-white" : "text-slate-900"
-              }`}>
-                {config.sideHeadingLine1 || "Let's Make That"}<br />
-                <span className={isDark ? "text-white" : "text-slate-900"}>
-                  {config.sideHeadingLine2 || "Smile Shine!"}
-                </span>
-              </h2>
+              <div className="flex items-start justify-between gap-4">
+                <h2 className={`font-heading text-xl sm:text-2xl lg:text-[2.35rem] font-bold tracking-tight leading-[1.1] ${
+                  isDark ? "text-white" : "text-slate-900"
+                }`}>
+                  <span className="block sm:inline lg:block">{config.sideHeadingLine1 || "Let's Make That"}</span>{" "}
+                  <span className={isDark ? "text-white" : "text-slate-900"}>
+                    {config.sideHeadingLine2 || "Smile Shine!"}
+                  </span>
+                </h2>
 
-              {/* Contact Us Block (Configurable via Admin) */}
-              <div className={`mt-4 sm:mt-5 space-y-1.5 text-xs ${isDark ? "text-zinc-400" : "text-slate-600"}`}>
+                {/* Mobile Close Button in Modal */}
+                {isModal && onClose && (
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="lg:hidden p-1.5 rounded-full text-stone-400 hover:text-stone-700 dark:hover:text-white"
+                    aria-label="Close booking modal"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                )}
+              </div>
+
+              {/* Mobile Compact Quick Contact Bar (One-line address & Call Reception pill) */}
+              <div className="lg:hidden mt-2.5 flex items-center justify-between gap-2 text-xs">
+                <div className={`flex items-center gap-1.5 min-w-0 ${isDark ? "text-zinc-400" : "text-slate-600"}`}>
+                  <MapPin className="h-3.5 w-3.5 text-brand-primary shrink-0" />
+                  <span className="truncate text-[11px] sm:text-xs">
+                    {config.sideContactAddress || clinicAddress}
+                  </span>
+                </div>
+                <a
+                  href={`tel:${(config.sideContactPhone || clinicPhone).replace(/\D/g, "")}`}
+                  className="shrink-0 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-[10px] px-2.5 py-1 transition-colors shadow-xs inline-flex items-center gap-1"
+                >
+                  <PhoneCall className="h-2.5 w-2.5" />
+                  <span>Call Reception</span>
+                </a>
+              </div>
+
+              {/* Desktop Full Contact Us Block (Configurable via Admin) */}
+              <div className={`hidden lg:block mt-4 sm:mt-5 space-y-1.5 text-xs ${isDark ? "text-zinc-400" : "text-slate-600"}`}>
                 <p className={`font-semibold text-xs tracking-wider uppercase ${isDark ? "text-white/90" : "text-slate-900"}`}>
                   Contact Us
                 </p>
@@ -580,8 +678,8 @@ export function CalendarBookingExperience({
                 </p>
               </div>
 
-              {/* Quick Hotline Helpline Badge */}
-              <div className={`mt-3 rounded-xl border p-2.5 flex items-center justify-between gap-2 text-xs transition-all ${
+              {/* Desktop Quick Hotline Helpline Badge */}
+              <div className={`hidden lg:flex mt-3 rounded-xl border p-2.5 items-center justify-between gap-2 text-xs transition-all ${
                 isDark ? "border-white/10 bg-[#17181c]" : "border-slate-200 bg-slate-100/70"
               }`}>
                 <div className="flex items-center gap-2">
@@ -598,8 +696,36 @@ export function CalendarBookingExperience({
                 </a>
               </div>
 
-              {/* Selected Summary Pills */}
-              <div className="space-y-2 pt-3">
+              {/* Mobile Selected Summary (Only visible when user has picked a date or slot) */}
+              {(selectedDate || selectedSlot) && (
+                <div className="lg:hidden flex items-center gap-2 pt-2.5">
+                  {selectedDate && (
+                    <div className={`flex-1 rounded-lg border px-2.5 py-1.5 text-xs flex items-center gap-1.5 ${
+                      isDark ? "border-white/10 bg-[#1c1d22] text-white" : "border-slate-300 bg-white text-slate-900 shadow-2xs"
+                    }`}>
+                      <CalendarIcon className="h-3.5 w-3.5 text-brand-primary shrink-0" />
+                      <div className="min-w-0">
+                        <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Date</div>
+                        <div className="font-semibold truncate text-[11px] sm:text-xs">{selectedDateShortString}</div>
+                      </div>
+                    </div>
+                  )}
+                  {selectedSlot && (
+                    <div className={`flex-1 rounded-lg border px-2.5 py-1.5 text-xs flex items-center gap-1.5 ${
+                      isDark ? "border-white/10 bg-[#1c1d22] text-white" : "border-slate-300 bg-white text-slate-900 shadow-2xs"
+                    }`}>
+                      <Clock className="h-3.5 w-3.5 text-brand-primary shrink-0" />
+                      <div className="min-w-0">
+                        <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Time</div>
+                        <div className="font-semibold truncate text-[11px] sm:text-xs">{selectedSlot}</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Desktop Selected Summary Pills */}
+              <div className="hidden lg:block space-y-2 pt-3">
                 {/* DATE PILL */}
                 <div
                   className={`rounded-xl border p-2.5 sm:p-3 transition-all ${
@@ -644,8 +770,8 @@ export function CalendarBookingExperience({
               </div>
             </div>
 
-            {/* Bottom: CA Smile Logo (Replaced 'brighter' wordmark) + Follow Us */}
-            <div className="mt-5 sm:mt-6 pt-2">
+            {/* Bottom: CA Smile Logo + Follow Us (Desktop Only) */}
+            <div className="hidden lg:block mt-5 sm:mt-6 pt-2">
               <div className="mb-3 sm:mb-4 flex items-center">
                 <img
                   src={
@@ -948,7 +1074,7 @@ export function CalendarBookingExperience({
                         )}
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                         {availableSlots.map((slot) => {
                           const isSlotSelected = selectedSlot === slot;
                           const isPassed = isSlotInPast(slot, selectedDate);
@@ -1015,6 +1141,7 @@ export function CalendarBookingExperience({
                         onClick={handleContinueToDetails}
                         size="sm"
                         text="Continue to Patient Info"
+                        mobileText="Continue"
                         disabled={!selectedDate || !selectedSlot}
                       />
                     </div>
@@ -1068,11 +1195,10 @@ export function CalendarBookingExperience({
                             onChange={(e) => setFullName(e.target.value)}
                             className={inputClass}
                           />
-                          <ChevronDown className={iconClass} />
                         </div>
                       )}
 
-                      {/* Field 2: Phone Number with Live 10-digit feedback */}
+                      {/* Field 2: Phone Number with Live 10-digit feedback and smart prefix handling */}
                       {isFieldEnabled("mobileNumber") && (
                         <div className="space-y-1">
                           <div className={inputWrapperClass}>
@@ -1083,8 +1209,15 @@ export function CalendarBookingExperience({
                               placeholder={getField("mobileNumber")?.placeholder || "10-digit mobile number"}
                               value={phone}
                               onChange={(e) => {
-                                const numericValue = e.target.value.replace(/\D/g, "").slice(0, 10);
-                                setPhone(numericValue);
+                                let clean = e.target.value.replace(/[^\d+]/g, "");
+                                let digitsOnly = clean.replace(/\D/g, "");
+                                if (digitsOnly.length === 12 && digitsOnly.startsWith("91")) {
+                                  digitsOnly = digitsOnly.slice(2);
+                                } else if (digitsOnly.length === 11 && digitsOnly.startsWith("0")) {
+                                  digitsOnly = digitsOnly.slice(1);
+                                }
+                                digitsOnly = digitsOnly.slice(0, 10);
+                                setPhone(digitsOnly);
                               }}
                               maxLength={10}
                               pattern="[0-9]{10}"
@@ -1097,7 +1230,7 @@ export function CalendarBookingExperience({
                                 <span>Verified</span>
                               </span>
                             ) : (
-                              <ChevronDown className={iconClass} />
+                              <PhoneCall className={iconClass} />
                             )}
                           </div>
                           {phone.length > 0 && phone.length < 10 && (
@@ -1120,7 +1253,6 @@ export function CalendarBookingExperience({
                             onChange={(e) => setEmail(e.target.value)}
                             className={inputClass}
                           />
-                          <ChevronDown className={iconClass} />
                         </div>
                       )}
 
@@ -1225,7 +1357,7 @@ export function CalendarBookingExperience({
                             onChange={(e) => setNotes(e.target.value)}
                             className={inputClass}
                           />
-                          <ChevronDown className={iconClass} />
+                          <MessageCircle className={iconClass} />
                         </div>
                       )}
 
@@ -1248,26 +1380,29 @@ export function CalendarBookingExperience({
                         .map((field) => (
                           <div key={field.id} className={inputWrapperClass}>
                             {field.type === "select" ? (
-                              <select
-                                required={field.required}
-                                value={customFieldValues[field.id] || ""}
-                                onChange={(e) =>
-                                  setCustomFieldValues((prev) => ({
-                                    ...prev,
-                                    [field.id]: e.target.value,
-                                  }))
-                                }
-                                className={inputClass}
-                              >
-                                <option value="" disabled className={selectOptionClass}>
-                                  {field.placeholder || `Select ${field.label}`}
-                                </option>
-                                {(field.options || []).map((opt) => (
-                                  <option key={opt} value={opt} className={selectOptionClass}>
-                                    {opt}
+                              <>
+                                <select
+                                  required={field.required}
+                                  value={customFieldValues[field.id] || ""}
+                                  onChange={(e) =>
+                                    setCustomFieldValues((prev) => ({
+                                      ...prev,
+                                      [field.id]: e.target.value,
+                                    }))
+                                  }
+                                  className={inputClass}
+                                >
+                                  <option value="" disabled className={selectOptionClass}>
+                                    {field.placeholder || `Select ${field.label}`}
                                   </option>
-                                ))}
-                              </select>
+                                  {(field.options || []).map((opt) => (
+                                    <option key={opt} value={opt} className={selectOptionClass}>
+                                      {opt}
+                                    </option>
+                                  ))}
+                                </select>
+                                <ChevronDown className={iconClass} />
+                              </>
                             ) : (
                               <input
                                 type={field.type === "tel" ? "tel" : field.type === "email" ? "email" : "text"}
@@ -1283,9 +1418,22 @@ export function CalendarBookingExperience({
                                 className={inputClass}
                               />
                             )}
-                            <ChevronDown className={iconClass} />
                           </div>
                         ))}
+
+                      {/* Anti-spam honeypot (invisible to humans, catches automated bots) */}
+                      <div className="hidden" aria-hidden="true" tabIndex={-1}>
+                        <label htmlFor="patient_hp_trap">Do not fill this field</label>
+                        <input
+                          type="text"
+                          id="patient_hp_trap"
+                          name="patient_hp_trap"
+                          value={honeypot}
+                          onChange={(e) => setHoneypot(e.target.value)}
+                          tabIndex={-1}
+                          autoComplete="off"
+                        />
+                      </div>
 
                       {/* Checkbox: Agreement */}
                       {isFieldEnabled("consentAgreed") && (
@@ -1308,26 +1456,40 @@ export function CalendarBookingExperience({
                         </div>
                       )}
 
+                      {/* Patient Healthcare Data Privacy & Security Trust Notice */}
+                      <div className={`flex items-center gap-2 rounded-xl px-3 py-2 text-[11px] leading-tight border transition-colors ${
+                        isDark
+                          ? "bg-emerald-950/20 border-emerald-500/20 text-emerald-300"
+                          : "bg-emerald-50/80 border-emerald-200 text-emerald-800"
+                      }`}>
+                        <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-500" />
+                        <span>
+                          <strong className="font-semibold">Confidential Healthcare Protection:</strong> Your appointment request and contact details are encrypted and will never be shared with third parties.
+                        </span>
+                      </div>
+
                       {/* Bottom Row: Calendar on LEFT side, Submit on RIGHT side */}
-                      <div className={`pt-3 flex items-center justify-between w-full gap-3 border-t ${isDark ? "border-white/10" : "border-slate-200"}`}>
+                      <div className={`pt-3 flex items-center justify-between w-full gap-2 sm:gap-3 border-t ${isDark ? "border-white/10" : "border-slate-200"}`}>
                         <div className="shrink-0 flex items-center justify-start">
                           <button
                             type="button"
                             onClick={() => setStep(1)}
-                            className={`inline-flex items-center gap-1.5 text-xs font-semibold transition-colors cursor-pointer ${
+                            className={`inline-flex items-center gap-1 sm:gap-1.5 text-xs font-semibold transition-colors cursor-pointer ${
                               isDark ? "text-zinc-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
                             }`}
                           >
-                            <CalendarIcon className={`h-4 w-4 ${isDark ? "text-zinc-400" : "text-slate-600"}`} />
-                            <span>View Calendar</span>
+                            <CalendarIcon className={`h-4 w-4 shrink-0 ${isDark ? "text-zinc-400" : "text-slate-600"}`} />
+                            <span className="hidden sm:inline">View Calendar</span>
+                            <span className="sm:hidden">Calendar</span>
                           </button>
                         </div>
 
-                        <div className="shrink-0 flex items-center justify-end ml-auto">
+                        <div className="flex items-center justify-end min-w-0">
                           <BookNowButton
                             type="submit"
                             size="sm"
                             text={isSubmitting ? "Confirming..." : (config.submitButtonText || "Submit Appointment Request")}
+                            mobileText={isSubmitting ? "Confirming..." : "Submit"}
                             disabled={isSubmitting}
                             loading={isSubmitting}
                           />

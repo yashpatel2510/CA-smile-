@@ -30,6 +30,7 @@ export interface NavbarProps {
   emergencyPhone?: string;
   navItems?: NavItem[];
   initialThemeMode?: "dark" | "light";
+  hideBlogNav?: boolean;
 }
 
 export const defaultNavItems: NavItem[] = [
@@ -57,7 +58,11 @@ export function Navbar({
   clinicName = "PedioDent",
   navItems = defaultNavItems,
   initialThemeMode = "light",
+  hideBlogNav = false,
 }: NavbarProps) {
+  const effectiveNavItems = (navItems || defaultNavItems).filter(
+    (item) => !hideBlogNav || item.href !== "/blog"
+  );
   const pathname = usePathname();
   const router = useRouter();
   const { brandConfig } = useClinicTheme();
@@ -67,7 +72,7 @@ export function Navbar({
   // Proactively prefetch all navigation routes on mount so route transitions are instant
   useEffect(() => {
     const timer = setTimeout(() => {
-      navItems.forEach((item) => {
+      effectiveNavItems.forEach((item) => {
         if (item.href?.startsWith("/")) {
           router.prefetch(item.href);
         }
@@ -75,12 +80,12 @@ export function Navbar({
       router.prefetch("/");
       router.prefetch("/services");
       router.prefetch("/about");
-      router.prefetch("/blog");
+      if (!hideBlogNav) router.prefetch("/blog");
       router.prefetch("/faq");
     }, 150);
 
     return () => clearTimeout(timer);
-  }, [navItems, router]);
+  }, [effectiveNavItems, hideBlogNav, router]);
 
   const [themeMode, setThemeMode] = useState<"dark" | "light">(initialThemeMode);
 
@@ -264,7 +269,7 @@ export function Navbar({
           className="hidden items-center gap-6 md:flex lg:gap-8"
           aria-label="Main Navigation"
         >
-          {navItems.map((item) => {
+          {effectiveNavItems.map((item) => {
             const isActive =
               item.href === "/"
                 ? pathname === "/"
@@ -374,7 +379,7 @@ export function Navbar({
                 aria-label="Mobile navigation links"
                 className="flex flex-col space-y-1.5"
               >
-                {navItems.map((item) => {
+                {effectiveNavItems.map((item) => {
                   const isActive =
                     item.href === "/"
                       ? pathname === "/"

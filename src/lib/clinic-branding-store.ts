@@ -38,6 +38,13 @@ export function getClinicBrandingConfig(): ClinicBrandConfig {
           ...DEFAULT_CLINIC_BRANDING.aboutSection!,
           ...(parsed.aboutSection || {}),
         },
+        gallery: {
+          ...DEFAULT_CLINIC_BRANDING.gallery!,
+          ...(parsed.gallery || {}),
+          photos: Array.isArray(parsed.gallery?.photos) && parsed.gallery.photos.length > 0
+            ? parsed.gallery.photos
+            : DEFAULT_CLINIC_BRANDING.gallery!.photos,
+        },
       };
       global.__clinicBrandingCache = loadedConfig;
       return loadedConfig;
@@ -100,6 +107,25 @@ export function updateClinicBrandingConfig(
     incomingLogo.imageUrl = persistBase64Image(incomingLogo.imageUrl, "clinic-logo") || "";
   }
 
+  const incomingGallery = { ...(newConfig.gallery || {}) } as Record<string, any>;
+  if (
+    incomingGallery.centerLogoUrl &&
+    typeof incomingGallery.centerLogoUrl === "string" &&
+    incomingGallery.centerLogoUrl.startsWith("data:image/")
+  ) {
+    incomingGallery.centerLogoUrl =
+      persistBase64Image(incomingGallery.centerLogoUrl, "gallery-logo") || "";
+  }
+  if (Array.isArray(incomingGallery.photos)) {
+    incomingGallery.photos = incomingGallery.photos.map((photo: any, idx: number) => {
+      if (photo && photo.src && typeof photo.src === "string" && photo.src.startsWith("data:image/")) {
+        const persisted = persistBase64Image(photo.src, `polaroid-${idx + 1}`);
+        return { ...photo, src: persisted || photo.src };
+      }
+      return photo;
+    });
+  }
+
   const updated: ClinicBrandConfig = {
     ...current,
     ...newConfig,
@@ -114,6 +140,13 @@ export function updateClinicBrandingConfig(
     aboutSection: {
       ...(current.aboutSection || DEFAULT_CLINIC_BRANDING.aboutSection!),
       ...(newConfig.aboutSection || {}),
+    },
+    gallery: {
+      ...(current.gallery || DEFAULT_CLINIC_BRANDING.gallery!),
+      ...incomingGallery,
+      photos: Array.isArray(incomingGallery.photos)
+        ? incomingGallery.photos
+        : (current.gallery?.photos || DEFAULT_CLINIC_BRANDING.gallery!.photos),
     },
   };
 

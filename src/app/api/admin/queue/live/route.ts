@@ -215,6 +215,21 @@ export async function POST(req: NextRequest) {
 
     saveStoredState(newState);
 
+    // If chairId provided, optionally sync chair store state
+    if (body.chairId) {
+      try {
+        const { updateChairStatus } = await import("@/lib/chairs-store");
+        const chairStatus = body.status === "CALLING" || body.status === "CONSULTING" ? "IN_CONSULTATION" : "READY";
+        updateChairStatus(body.chairId, chairStatus, {
+          currentPatient: newState.currentPatient,
+          currentToken: newState.currentToken,
+          currentService: newState.service,
+        });
+      } catch (chairErr) {
+        // Non-critical sync
+      }
+    }
+
     return NextResponse.json({
       success: true,
       message: "Live queue updated successfully.",

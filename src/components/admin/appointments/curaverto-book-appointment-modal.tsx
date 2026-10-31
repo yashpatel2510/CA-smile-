@@ -28,6 +28,7 @@ import {
   BookingFormConfig,
   defaultBookingFormConfig,
 } from "@/data/booking-form-config";
+import { notifyAppointmentUpdate } from "@/lib/client-appointment-sync";
 import {
   getTodayDateString,
   isDateToday,
@@ -82,11 +83,11 @@ interface Patient {
 }
 
 const DEFAULT_PATIENTS: Patient[] = [
-  { id: "p1", name: "Yash Patel", phone: "9664681536", age: "28 yrs" },
-  { id: "p2", name: "Ketan Prajapati", phone: "0000000013", age: "44 yrs" },
-  { id: "p3", name: "Amit Vora", phone: "0000000014", age: "33 yrs" },
-  { id: "p4", name: "Rina Chauhan", phone: "0000000015", age: "39 yrs" },
-  { id: "p5", name: "Vipul Joshi", phone: "0000000016", age: "51 yrs" },
+  { id: "p1", name: "Yash Patel", phone: "9664681536", age: "" },
+  { id: "p2", name: "Ketan Prajapati", phone: "0000000013", age: "" },
+  { id: "p3", name: "Amit Vora", phone: "0000000014", age: "" },
+  { id: "p4", name: "Rina Chauhan", phone: "0000000015", age: "" },
+  { id: "p5", name: "Vipul Joshi", phone: "0000000016", age: "" },
 ];
 
 const DOCTORS = [
@@ -168,12 +169,10 @@ export function CuravertoBookAppointmentModal({
   const [newFullName, setNewFullName] = useState("");
   const [newPhone, setNewPhone] = useState("");
   const [newDob, setNewDob] = useState("");
-  const [newPatientType, setNewPatientType] = useState<"Adult" | "Child">("Adult");
-  const [newSex, setNewSex] = useState<"Male" | "Female" | "Other" | "N/A">(
-    "Female"
-  );
-  const [newBloodGroup, setNewBloodGroup] = useState<string>("B+");
-  const [newLeadSource, setNewLeadSource] = useState("Website Booking");
+  const [newPatientType, setNewPatientType] = useState<"Adult" | "Child" | "">("");
+  const [newSex, setNewSex] = useState<"Male" | "Female" | "Other" | "N/A" | "">("");
+  const [newBloodGroup, setNewBloodGroup] = useState<string>("");
+  const [newLeadSource, setNewLeadSource] = useState("");
   const [isAddressExpanded, setIsAddressExpanded] = useState(true);
   const [newAddressLine, setNewAddressLine] = useState("");
   const [newLocality, setNewLocality] = useState("");
@@ -347,7 +346,7 @@ export function CuravertoBookAppointmentModal({
             id: p.id,
             name: p.name || `${p.firstName || ""} ${p.lastName || ""}`.trim() || "Patient",
             phone: p.phone || "",
-            age: p.age ? `${p.age} yrs` : p.patientCode || "",
+            age: p.age ? `${p.age} yrs` : "",
           }));
           setPatientsList(mapped);
           if (mapped.length > 0) {
@@ -453,7 +452,7 @@ export function CuravertoBookAppointmentModal({
 
     const patientName = newFullName.trim();
     const patientPhone = cleanPhone;
-    let computedAge = newPatientType === "Child" ? "Child" : "Adult";
+    let computedAge = "";
     if (newDob) {
       const birth = new Date(newDob);
       const now = new Date();
@@ -461,6 +460,8 @@ export function CuravertoBookAppointmentModal({
       const m = now.getMonth() - birth.getMonth();
       if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) age--;
       computedAge = newPatientType === "Child" ? "Child" : `${age} yrs`;
+    } else if (newPatientType === "Child") {
+      computedAge = "Child";
     }
 
     const patientId = newPatientNumber.trim()
@@ -482,11 +483,11 @@ export function CuravertoBookAppointmentModal({
           fullName: patientName,
           phone: patientPhone,
           dateOfBirth: newDob || null,
-          patientType: newPatientType,
-          sex: newSex,
-          gender: newSex,
-          bloodGroup: newBloodGroup,
-          leadSource: newLeadSource,
+          patientType: newPatientType || null,
+          sex: newSex || null,
+          gender: newSex || null,
+          bloodGroup: newBloodGroup || null,
+          leadSource: newLeadSource || null,
           addressLine: newAddressLine.trim(),
           locality: newLocality.trim(),
           pin: newPin.trim(),
@@ -531,6 +532,8 @@ export function CuravertoBookAppointmentModal({
     isSubmittingRef.current = true;
     setIsSubmitting(true);
 
+    let bookedAppointmentId: string | undefined;
+
     try {
       // Build start date ISO using selectedDayIso
       const dateStr = selectedDayIso;
@@ -553,47 +556,56 @@ export function CuravertoBookAppointmentModal({
       const finalNotes = `${notesPrefix}${formValues.notes || ""}`.trim();
 
       const res = await fetch("/api/appointments", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          patientId:
-            selectedPatient.id &&
-            !selectedPatient.id.startsWith("p") &&
-            !selectedPatient.id.startsWith("#")
-              ? selectedPatient.id
-              : undefined,
-          fullName: selectedPatient.name,
-          phone: selectedPatient.phone || "0000000000",
-          preferredDoctor: selectedDoctor.name,
-          serviceName: selectedService.name,
-          treatment: selectedService.name,
-          preferredDate: dateStr,
-          startTime: startTimeIso,
-          source: "ADMIN",
-          status: statusVal,
-          isRescheduled,
-          isFollowUp,
-          notes: finalNotes,
-          consentAgreed: true,
-        }),
-      });
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            patientId:
+              selectedPatient.id &&
+              !selectedPatient.id.startsWith("p") &&
+              !selectedPatient.id.startsWith("#")
+                ? selectedPatient.id
+                : undefined,
+            fullName: selectedPatient.name,
+            phone: selectedPatient.phone || "0000000000",
+            preferredDoctor: selectedDoctor.name,
+            serviceName: selectedService.name,
+            treatment: selectedService.name,
+            preferredDate: dateStr,
+            startTime: startTimeIso,
+            source: "ADMIN",
+            status: statusVal,
+            isRescheduled,
+            isFollowUp,
+            notes: finalNotes,
+            consentAgreed: true,
+            patientType: newPatientType || undefined,
+          }),
+        });
 
-      const resData = await res.json().catch(() => null);
-      if (!res.ok || resData?.success === false) {
-        alert(resData?.message || resData?.error || "Failed to book appointment. Please verify the date and time.");
+        const resData = await res.json().catch(() => null);
+        if (!res.ok || resData?.success === false) {
+          alert(resData?.message || resData?.error || "Failed to book appointment. Please verify the date and time.");
+          isSubmittingRef.current = false;
+          setIsSubmitting(false);
+          return;
+        }
+        bookedAppointmentId = resData?.appointment?.id;
+      } catch (err) {
+        console.error("Booking API error:", err);
+        alert("Booking error. Please try again.");
         isSubmittingRef.current = false;
         setIsSubmitting(false);
         return;
       }
-    } catch (err) {
-      console.error("Booking API error:", err);
-      alert("Booking error. Please try again.");
-      isSubmittingRef.current = false;
-      setIsSubmitting(false);
-      return;
-    }
 
-    if (onBookingComplete) {
+      // Notify open admin tabs (Appointments, CA Smile) immediately
+      notifyAppointmentUpdate({
+        id: bookedAppointmentId,
+        action: "booked",
+        source: "ADMIN",
+      });
+
+      if (onBookingComplete) {
       onBookingComplete({
         patientName: selectedPatient.name,
         phone: selectedPatient.phone,
@@ -681,7 +693,8 @@ export function CuravertoBookAppointmentModal({
                         {patient.name}
                       </div>
                       <div className="text-xs text-slate-400">
-                        {patient.phone} · {patient.age}
+                        {patient.phone}
+                        {patient.age ? ` · ${patient.age}` : ""}
                       </div>
                     </div>
                     <span className="text-xs font-semibold text-indigo-600">
@@ -934,7 +947,7 @@ export function CuravertoBookAppointmentModal({
                   </label>
                   <div className="flex items-center gap-1.5">
                     {SEX_OPTIONS.map((opt) => {
-                      const isSelected = newSex.toLowerCase() === opt.toLowerCase();
+                      const isSelected = newSex ? newSex.toLowerCase() === opt.toLowerCase() : false;
                       return (
                         <button
                           key={opt}

@@ -161,6 +161,19 @@ export default function AdminBookingFormBuilderPage() {
       if (data.success) {
         setConfig(data.config);
 
+        // Synchronize in-browser cache and broadcast update event immediately to all components
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.setItem(
+              "casmile_booking_form_config_v1",
+              JSON.stringify(data.config)
+            );
+            window.dispatchEvent(
+              new CustomEvent("booking-config-updated", { detail: data.config })
+            );
+          } catch {}
+        }
+
         // Synchronize logo globally across navbar, footer & platform
         try {
           const chosenLogo =
@@ -195,6 +208,25 @@ export default function AdminBookingFormBuilderPage() {
     } finally {
       setSaving(false);
     }
+  };
+
+  // Immediate theme selection helper that caches instantly to prevent 1-second white flash
+  const handleSelectThemeMode = (mode: "dark" | "light") => {
+    setConfig((prev) => {
+      const updated = { ...prev, themeMode: mode };
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem(
+            "casmile_booking_form_config_v1",
+            JSON.stringify(updated)
+          );
+          window.dispatchEvent(
+            new CustomEvent("booking-config-updated", { detail: updated })
+          );
+        } catch {}
+      }
+      return updated;
+    });
   };
 
   // Reset to default
@@ -877,7 +909,7 @@ export default function AdminBookingFormBuilderPage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {/* DARK MODE CARD */}
                 <div
-                  onClick={() => setConfig((prev) => ({ ...prev, themeMode: "dark" }))}
+                  onClick={() => handleSelectThemeMode("dark")}
                   className={`group relative cursor-pointer rounded-2xl border p-4 transition-all ${
                     (config.themeMode || "dark") === "dark"
                       ? "border-brand-primary bg-stone-900 text-white shadow-md ring-2 ring-brand-primary/30"
@@ -923,7 +955,7 @@ export default function AdminBookingFormBuilderPage() {
 
                 {/* LIGHT / WHITE MODE CARD */}
                 <div
-                  onClick={() => setConfig((prev) => ({ ...prev, themeMode: "light" }))}
+                  onClick={() => handleSelectThemeMode("light")}
                   className={`group relative cursor-pointer rounded-2xl border p-4 transition-all ${
                     config.themeMode === "light"
                       ? "border-brand-primary bg-white text-stone-900 shadow-md ring-2 ring-brand-primary/30"
@@ -2058,10 +2090,9 @@ export default function AdminBookingFormBuilderPage() {
                 <button
                   type="button"
                   onClick={() =>
-                    setConfig((prev) => ({
-                      ...prev,
-                      themeMode: prev.themeMode === "light" ? "dark" : "light",
-                    }))
+                    handleSelectThemeMode(
+                      config.themeMode === "light" ? "dark" : "light"
+                    )
                   }
                   className="inline-flex items-center gap-1.5 rounded-lg border border-brand-border bg-brand-surface px-3 py-1.5 text-xs font-bold text-brand-text shadow-xs hover:bg-brand-background transition-all"
                   title="Toggle theme mode in preview"

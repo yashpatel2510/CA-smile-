@@ -50,6 +50,13 @@ import { CuravertoRescheduleAppointmentModal } from "./curaverto-reschedule-appo
 import { CuravertoCalendarViews } from "./curaverto-calendar-views";
 import { CuravertoDoctorScheduleView } from "./curaverto-doctor-schedule-view";
 import { CuravertoQueueManagerView } from "./curaverto-queue-manager-view";
+import {
+  subscribeToAppointmentUpdates,
+  notifyAppointmentUpdate,
+} from "@/lib/client-appointment-sync";
+
+// Module-level fast cache for zero-delay instant render on mount/tab-switch
+let appointmentsRowsMemoryCache: AppointmentRow[] = [];
 
 interface AppointmentRow {
   id: string;
@@ -67,6 +74,11 @@ interface AppointmentRow {
   rawStatus?: string;
   isRescheduled?: boolean;
   isFollowUp?: boolean;
+  dateOfBirth?: string;
+  gender?: string;
+  sex?: string;
+  patientType?: string;
+  bloodGroup?: string;
 }
 
 const getTodayIsoString = () => {
@@ -113,7 +125,7 @@ export const computePatientAge = (apt: any): string => {
       let age = today.getFullYear() - d.getFullYear();
       const m = today.getMonth() - d.getMonth();
       if (m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
-      if (age > 0 && age < 120) {
+      if (age >= 0 && age < 120) {
         return `${age} yrs`;
       }
     }
@@ -126,34 +138,12 @@ export const computePatientAge = (apt: any): string => {
     if (match) {
       return `${match[0]} yrs`;
     }
+  } else if (typeof explicitAge === "number" && !isNaN(explicitAge)) {
+    return `${explicitAge} yrs`;
   }
 
-  // 3. Child check
-  if (apt.patientType === "CHILD" || (apt.childName && apt.childName.trim())) {
-    return "9 yrs";
-  }
-
-  // 4. Lookup in known patient directory by name
-  const pName = (
-    apt.patientName ||
-    apt.patient?.firstName ||
-    ""
-  ).toLowerCase().trim();
-  for (const [key, val] of Object.entries(KNOWN_PATIENT_AGES)) {
-    if (pName.includes(key)) {
-      return val;
-    }
-  }
-
-  // 5. Deterministic fallback for adult patients (e.g. 34 yrs)
-  const seedString = apt.id || apt.patientId || pName || "patient";
-  let hash = 0;
-  for (let i = 0; i < seedString.length; i++) {
-    hash = (hash << 5) - hash + seedString.charCodeAt(i);
-    hash |= 0;
-  }
-  const derivedAge = 26 + (Math.abs(hash) % 28);
-  return `${derivedAge} yrs`;
+  // Do NOT fabricate fake ages if not entered
+  return "";
 };
 
 export function CuravertoAppointmentsView() {
@@ -171,8 +161,8 @@ export function CuravertoAppointmentsView() {
   const [patientScope, setPatientScope] = useState<"my" | "admin">("admin");
 
   // Appointments data rows
-  const [rows, setRows] = useState<AppointmentRow[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [rows, setRows] = useState<AppointmentRow[]>(() => appointmentsRowsMemoryCache);
+  const [loading, setLoading] = useState(() => appointmentsRowsMemoryCache.length === 0);
   const [refreshing, setRefreshing] = useState(false);
 
   // Date selection state
@@ -334,6 +324,11 @@ export function CuravertoAppointmentsView() {
               rawStatus: apt.status,
               isRescheduled,
               isFollowUp,
+              dateOfBirth: apt.patient?.dateOfBirth ? apt.patient.dateOfBirth.toString().split("T")[0] : apt.dateOfBirth || "",
+              gender: apt.patient?.gender || apt.gender || "",
+              sex: apt.patient?.gender || apt.gender || "",
+              patientType: apt.patientType || "",
+              bloodGroup: apt.patient?.bloodGroup || apt.patient?.bloodType || "",
             };
           });
 
@@ -353,10 +348,9 @@ export function CuravertoAppointmentsView() {
             return parseTime(a.time) - parseTime(b.time);
           });
 
+          appointmentsRowsMemoryCache = mapped;
           setRows(mapped);
-          if (mapped.length > 0 && !activeRowId) {
-            setActiveRowId(mapped[0].id);
-          }
+          setActiveRowId((prev) => (!prev && mapped.length > 0 ? mapped[0].id : prev));
         }
       }
     } catch (err) {
@@ -367,30 +361,22 @@ export function CuravertoAppointmentsView() {
         setTimeout(() => setRefreshing(false), 400);
       }
     }
-  }, [activeRowId]);
+  }, []);
 
-  // Initial load + 10s auto-polling + event synchronization for real-time live synchronization
+  // Initial load + 3s auto-polling + event synchronization for real-time live synchronization
   useEffect(() => {
     fetchAppointments();
-    const interval = setInterval(() => {
-      fetchAppointments();
-    }, 10000);
 
     const handleSync = () => {
       fetchAppointments();
     };
-    window.addEventListener("appointment-status-updated", handleSync);
-    window.addEventListener("focus", handleSync);
-    const handleStorage = (e: StorageEvent) => {
-      if (e.key === "last_appointment_update") handleSync();
-    };
-    window.addEventListener("storage", handleStorage);
+
+    const unsubscribe = subscribeToAppointmentUpdates(handleSync);
+    const interval = setInterval(handleSync, 3000);
 
     return () => {
+      unsubscribe();
       clearInterval(interval);
-      window.removeEventListener("appointment-status-updated", handleSync);
-      window.removeEventListener("focus", handleSync);
-      window.removeEventListener("storage", handleStorage);
     };
   }, [fetchAppointments]);
 
@@ -448,15 +434,14 @@ export function CuravertoAppointmentsView() {
         }),
       });
 
-      // Broadcast real-time sync event across tabs & components (e.g. CA Smile board)
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(
-          new CustomEvent("appointment-status-updated", {
-            detail: { appointmentId, status: backendStatus, reason },
-          })
-        );
-        localStorage.setItem("last_appointment_update", String(Date.now()));
-      }
+      // Broadcast real-time sync event across all tabs & components (e.g. CA Smile board)
+      notifyAppointmentUpdate({
+        id: appointmentId,
+        status: backendStatus,
+        reason,
+        action: "status_changed",
+        source: "APPOINTMENTS",
+      });
 
       fetchAppointments();
     } catch (err) {
@@ -548,14 +533,11 @@ export function CuravertoAppointmentsView() {
       setSelectedRowIds([]);
       setSelectAll(false);
 
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(
-          new CustomEvent("appointment-status-updated", {
-            detail: { status: backendStatus },
-          })
-        );
-        localStorage.setItem("last_appointment_update", String(Date.now()));
-      }
+      notifyAppointmentUpdate({
+        status: backendStatus,
+        action: "bulk_status_changed",
+        source: "APPOINTMENTS",
+      });
 
       await fetchAppointments();
     } catch (err) {
@@ -605,31 +587,30 @@ export function CuravertoAppointmentsView() {
     );
   };
 
-  // Open Edit Patient Modal (Matches Screenshots 1 & 2)
   const openEditPatient = (row: AppointmentRow) => {
-    const numericAge = parseInt(row.age, 10);
+    const numericAge = row.age ? parseInt(row.age, 10) : NaN;
     const isChild =
-      row.age.toLowerCase().includes("child") ||
+      (row.age && row.age.toLowerCase().includes("child")) ||
       (!isNaN(numericAge) && numericAge < 18);
 
     setActivePatientData({
       id: row.id,
-      patientNumber: row.patientId?.replace("#", "") || "00023",
+      patientNumber: row.patientId?.replace("#", "") || "",
       patientId: row.patientId,
       patientName: row.patientName,
       fullName: row.patientName,
-      phone: row.phone || "0000000023",
-      dateOfBirth: "1990-05-15",
-      patientType: isChild ? "Child" : "Adult",
-      age: row.age,
-      sex: isChild ? "Male" : "Female",
-      bloodGroup: "B+",
+      phone: row.phone || "",
+      dateOfBirth: row.dateOfBirth || "",
+      patientType: row.patientType || (isChild ? "Child" : ""),
+      age: row.age || "",
+      sex: row.gender || row.sex || "",
+      bloodGroup: row.bloodGroup || "",
       leadSource:
         row.tag === "WALK-IN"
           ? "Walk-in"
           : row.tag === "WEBSITE"
           ? "Website Booking"
-          : "Not specified",
+          : "",
       addressLine: "",
       locality: "",
       city: "",
@@ -672,7 +653,7 @@ export function CuravertoAppointmentsView() {
             patientName: updated.fullName || updated.patientName || r.patientName,
             phone: updated.phone || r.phone,
             patientId: updated.patientNumber ? `#${updated.patientNumber}` : r.patientId,
-            age: savedAge || (updated.patientType === "Child" ? "9 yrs" : r.age || "34 yrs"),
+            age: savedAge || r.age || "",
             time: updated.appointmentTime || r.time,
             rawDate: updated.appointmentDate || r.rawDate,
           };
@@ -1582,9 +1563,11 @@ export function CuravertoAppointmentsView() {
                                 <span className="text-xs font-medium text-slate-400 whitespace-nowrap">
                                   {row.patientId}
                                 </span>
-                                <span className="text-xs font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full whitespace-nowrap">
-                                  {row.age}
-                                </span>
+                                {row.age ? (
+                                  <span className="text-xs font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full whitespace-nowrap">
+                                    {row.age}
+                                  </span>
+                                ) : null}
 
                                 {/* Edit Patient Icon */}
                                 <button
@@ -1816,9 +1799,11 @@ export function CuravertoAppointmentsView() {
                                   <span className="text-xs font-medium text-slate-400 whitespace-nowrap">
                                     {row.patientId}
                                   </span>
-                                  <span className="text-xs font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full whitespace-nowrap">
-                                    {row.age}
-                                  </span>
+                                  {row.age ? (
+                                    <span className="text-xs font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full whitespace-nowrap">
+                                      {row.age}
+                                    </span>
+                                  ) : null}
                                   <button
                                     type="button"
                                     className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors cursor-pointer"
@@ -1919,7 +1904,7 @@ export function CuravertoAppointmentsView() {
           onClose={() => setIsEditRxOpen(false)}
           patientName={activeRxRow?.patientName || "Ketan Prajapati"}
           patientId={activeRxRow?.patientId || "#00013"}
-          age={activeRxRow?.age || "44 yrs"}
+          age={activeRxRow?.age || ""}
           service={activeRxRow?.service || "Root Canal Treatment: Molar"}
         />
 

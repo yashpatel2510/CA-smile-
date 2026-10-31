@@ -13,6 +13,9 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
+import Link from "next/link";
+import { DoctorIntroSection } from "@/components/public/doctor-intro-section";
+
 export default function AboutPage() {
   const brandConfig = getClinicBrandingConfig();
   const aboutConfig = brandConfig?.aboutSection || {
@@ -28,28 +31,42 @@ export default function AboutPage() {
 
   return (
     <div className="w-full bg-white dark:bg-[#09090b] text-[#18181b] dark:text-zinc-100 transition-colors">
-      {/* 1. Aesthetic Scroll-Controlled Video Player */}
-      <section className="relative pt-6 sm:pt-10 pb-16 sm:pb-24 px-4 sm:px-6">
-        <div className={`mx-auto ${aboutConfig.videoSize || "max-w-4xl sm:max-w-5xl"} space-y-6`}>
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left px-1 sm:px-2">
-            <div>
-              <span className="text-xs font-semibold uppercase tracking-wider text-teal-600 dark:text-teal-400">
-                {aboutConfig.videoSubtitle || "Clinic Tour & Experience"}
-              </span>
-              <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#18181b] dark:text-white">
-                {aboutConfig.videoTitle || "Take a Look Inside Our Clinic"}
-              </h1>
-            </div>
-            <div className="text-xs text-stone-500 dark:text-zinc-400 flex items-center gap-1.5">
-              <span className="inline-block h-2 w-2 rounded-full bg-teal-500 animate-pulse" />
-              <span>{aboutConfig.badgeText || "Autoplays on scroll • Interactive play & pause"}</span>
-            </div>
+      {/* Top Breadcrumb Navigation */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-8 lg:px-12 pt-8 sm:pt-10">
+        <nav
+          aria-label="Breadcrumb"
+          className="flex items-center gap-2 text-xs text-zinc-500 font-medium"
+        >
+          <Link href="/" className="hover:text-black dark:hover:text-white transition-colors">
+            Home
+          </Link>
+          <span>/</span>
+          <span className="text-zinc-900 dark:text-zinc-200 font-semibold">About Us</span>
+        </nav>
+      </div>
+
+      {/* 1. Aesthetic Scroll-Controlled Video Player (Clean, No Upper Logo) */}
+      <section className="relative pt-6 sm:pt-10 pb-12 sm:pb-16 px-4 sm:px-6">
+        <div className={`mx-auto ${aboutConfig.videoSize || "max-w-4xl sm:max-w-5xl"} space-y-6 sm:space-y-8`}>
+          <div className="flex flex-col items-center justify-center text-center px-1 sm:px-2 space-y-3 sm:space-y-4">
+            {/* Title in bold Treatment typography style */}
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-black dark:text-white leading-[1.08] font-sans max-w-4xl">
+              {aboutConfig.videoTitle || "Take a Look Inside Our Clinic"}
+            </h1>
+            {aboutConfig.videoSubtitle && (
+              <p className="text-sm sm:text-base text-zinc-500 dark:text-zinc-400 max-w-xl">
+                {aboutConfig.videoSubtitle}
+              </p>
+            )}
           </div>
 
           {/* Clean Aesthetic Video Player Container */}
           <AboutVideoPlayer config={aboutConfig} videoUrl={aboutConfig.videoUrl} />
         </div>
       </section>
+
+      {/* 2. Doctor Introduction Section (Directly Downside of Video) */}
+      <DoctorIntroSection />
     </div>
   );
 }

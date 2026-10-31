@@ -10,6 +10,7 @@ import {
   Search,
   Filter,
   Eye,
+  EyeOff,
   Check,
   CheckCircle2,
   AlertCircle,
@@ -489,6 +490,66 @@ export function ClinicBrandingBlogManager() {
     }
   };
 
+  // Quick 1-click Toggle Blog Section Visibility (Hide or Unhide) with immediate save
+  const handleToggleBlogVisibility = async (newEnabled: boolean) => {
+    try {
+      setSaving(true);
+      const updatedConfig = { ...config, enabled: newEnabled };
+      const res = await fetch("/api/blog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "update-config",
+          config: updatedConfig,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to update blog visibility");
+      }
+      setConfig(data.config || updatedConfig);
+      showToast(
+        newEnabled
+          ? "Blog section is now VISIBLE (Unhidden) on website homepage!"
+          : "Blog section is now HIDDEN from website homepage!"
+      );
+    } catch (err: any) {
+      showToast(err.message || "Failed to toggle blog visibility", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Toggle hiding blog link from Header Navigation
+  const handleToggleBlogNavigation = async (hideNav: boolean) => {
+    try {
+      setSaving(true);
+      const updatedConfig = { ...config, hideFromNavigation: hideNav };
+      const res = await fetch("/api/blog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "update-config",
+          config: updatedConfig,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to update blog navigation");
+      }
+      setConfig(data.config || updatedConfig);
+      showToast(
+        hideNav
+          ? "'Blog' menu link hidden from website header navbar!"
+          : "'Blog' menu link is now visible in website header navbar!"
+      );
+    } catch (err: any) {
+      showToast(err.message || "Failed to update blog navigation", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center p-12 space-y-3">
@@ -558,6 +619,111 @@ export function ClinicBrandingBlogManager() {
             <Plus className="h-4 w-4" />
             <span>Add New Article</span>
           </Button>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* QUICK VISIBILITY CONTROL: HIDE / UNHIDE BLOG SECTION                      */}
+      {/* ========================================================================= */}
+      <div
+        className={`rounded-2xl border p-4 sm:p-5 transition-all shadow-xs ${
+          config.enabled !== false
+            ? "border-emerald-500/30 bg-emerald-500/5 dark:bg-emerald-950/20"
+            : "border-amber-500/40 bg-amber-500/10 dark:bg-amber-950/30"
+        }`}
+      >
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <div
+              className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl font-bold shadow-xs ${
+                config.enabled !== false
+                  ? "bg-emerald-600 text-white"
+                  : "bg-amber-600 text-white"
+              }`}
+            >
+              {config.enabled !== false ? (
+                <Eye className="h-5 w-5" />
+              ) : (
+                <EyeOff className="h-5 w-5" />
+              )}
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-base font-bold text-brand-text">
+                  Website Blog Section Visibility
+                </h3>
+                <span
+                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                    config.enabled !== false
+                      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300"
+                      : "bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200"
+                  }`}
+                >
+                  {config.enabled !== false
+                    ? "● Visible (Live on Homepage)"
+                    : "○ Hidden from Homepage"}
+                </span>
+              </div>
+              <p className="text-xs text-brand-muted mt-1 leading-relaxed">
+                {config.enabled !== false
+                  ? "The blog section is currently live and displayed on your clinic homepage. Click 'Hide Blog Section' to remove it from public view."
+                  : "The blog section is currently hidden. Patients browsing your website homepage will NOT see any blog articles."}
+              </p>
+            </div>
+          </div>
+
+          {/* Quick Toggle Buttons */}
+          <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+            <div className="inline-flex rounded-xl border border-brand-border bg-brand-surface p-1 shadow-xs">
+              <button
+                type="button"
+                onClick={() => handleToggleBlogVisibility(true)}
+                disabled={saving}
+                className={`flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all ${
+                  config.enabled !== false
+                    ? "bg-emerald-600 text-white shadow-xs"
+                    : "text-brand-muted hover:text-brand-text"
+                }`}
+              >
+                <Eye className="h-3.5 w-3.5" />
+                <span>Show (Unhide)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleToggleBlogVisibility(false)}
+                disabled={saving}
+                className={`flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all ${
+                  config.enabled === false
+                    ? "bg-amber-600 text-white shadow-xs"
+                    : "text-brand-muted hover:text-brand-text"
+                }`}
+              >
+                <EyeOff className="h-3.5 w-3.5" />
+                <span>Hide Blog Section</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Extra option: also hide from header navbar menu */}
+        <div className="mt-3 pt-3 border-t border-brand-border/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
+          <label
+            className="flex items-center gap-2 cursor-pointer text-brand-text font-medium select-none"
+            htmlFor="hideBlogNavCheckbox"
+          >
+            <input
+              id="hideBlogNavCheckbox"
+              type="checkbox"
+              checked={Boolean(config.hideFromNavigation)}
+              onChange={(e) => handleToggleBlogNavigation(e.target.checked)}
+              disabled={saving}
+              className="h-4 w-4 rounded border-brand-border text-brand-primary focus:ring-brand-primary cursor-pointer"
+            />
+            <span>Also remove &ldquo;Blog&rdquo; link from Website Header Navbar</span>
+          </label>
+          <span className="text-[11px] text-brand-muted">
+            Applies instantly to public website
+          </span>
         </div>
       </div>
 

@@ -10,7 +10,8 @@ import { useContactModal } from "@/components/public/contact-modal";
 export interface BookNowButtonProps {
   href?: string;
   onClick?: (e: React.MouseEvent) => void;
-  text?: string;
+  text?: React.ReactNode;
+  mobileText?: string;
   className?: string;
   size?: "sm" | "md" | "lg";
   target?: string;
@@ -31,6 +32,7 @@ export const BookNowButton = React.forwardRef<
       href,
       onClick,
       text = "Book Now",
+      mobileText,
       className,
       size = "md",
       target,
@@ -73,7 +75,7 @@ export const BookNowButton = React.forwardRef<
     };
     const sizeConfig = {
       sm: {
-        container: "h-9 pl-4 pr-1.5 gap-2.5 text-xs rounded-xl",
+        container: "h-9 pl-3.5 sm:pl-4 pr-1.5 gap-2 sm:gap-2.5 text-xs rounded-xl",
         iconBox: "h-6 w-6 rounded-md",
         icon: "h-3.5 w-3.5",
       },
@@ -105,7 +107,14 @@ export const BookNowButton = React.forwardRef<
     const innerContent = (
       <>
         <span className="font-heading font-semibold tracking-wide text-white">
-          {text}
+          {mobileText ? (
+            <>
+              <span className="hidden sm:inline">{text}</span>
+              <span className="sm:hidden">{mobileText}</span>
+            </>
+          ) : (
+            text
+          )}
         </span>
         <span
           className={cn(
@@ -133,6 +142,10 @@ export const BookNowButton = React.forwardRef<
       </>
     );
 
+    const accessibleLabel =
+      ariaLabel ||
+      (typeof text === "string" ? text : mobileText || "Book Now");
+
     if (href) {
       if (
         href.startsWith("#") ||
@@ -148,7 +161,7 @@ export const BookNowButton = React.forwardRef<
             target={target}
             rel={rel}
             className={baseClasses}
-            aria-label={ariaLabel || text}
+            aria-label={accessibleLabel}
           >
             {innerContent}
           </a>
@@ -163,7 +176,7 @@ export const BookNowButton = React.forwardRef<
           target={target}
           rel={rel}
           className={baseClasses}
-          aria-label={ariaLabel || text}
+          aria-label={accessibleLabel}
         >
           {innerContent}
         </Link>
@@ -177,7 +190,7 @@ export const BookNowButton = React.forwardRef<
         onClick={handleInterceptClick}
         disabled={disabled || loading}
         className={baseClasses}
-        aria-label={ariaLabel || text}
+        aria-label={accessibleLabel}
       >
         {innerContent}
       </button>

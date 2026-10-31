@@ -44,6 +44,8 @@ export default function ServicesPage() {
 
       <WhiteDentalTreatmentShowcase
         mode="both"
+        initialTreatments={store.treatments}
+        initialDiagnostics={store.diagnostics}
         initialShowTreatments={showTreatments}
         initialShowDiagnostics={showDiagnostics}
         initialSettings={store.settings}

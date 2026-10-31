@@ -25,6 +25,7 @@ import {
   isSlotInPast,
 } from "@/lib/booking-time-utils";
 import { BookNowButton } from "@/components/ui/book-now-button";
+import { notifyAppointmentUpdate } from "@/lib/client-appointment-sync";
 
 interface QuickBookingFormProps {
   className?: string;
@@ -221,7 +222,7 @@ export function QuickBookingForm({
       }
 
       const payload = {
-        patientType: isFieldEnabled("patientType") ? patientType : "ADULT",
+        patientType: isFieldEnabled("patientType") ? patientType : undefined,
         fullName: patientDisplayName,
         childName:
           patientType === "CHILD" && isFieldEnabled("childName")
@@ -264,6 +265,13 @@ export function QuickBookingForm({
       if (!res.ok || !data.success) {
         throw new Error(data.error || "Failed to create appointment request.");
       }
+
+      // Notify open admin tabs (Appointments, CA Smile) immediately
+      notifyAppointmentUpdate({
+        id: data.appointment?.id,
+        action: "booked",
+        source: "WEBSITE",
+      });
 
       setSuccessData({
         id: data.appointment.id,

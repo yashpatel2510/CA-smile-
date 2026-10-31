@@ -23,82 +23,81 @@
   "fields": [
     {
       "id": "fullName",
-      "label": "Full Name",
       "type": "text",
-      "required": true,
+      "label": "Full Name",
       "enabled": true,
+      "required": true,
       "placeholder": "e.g. Anish Kumar"
     },
     {
       "id": "mobileNumber",
-      "label": "Mobile Number",
       "type": "tel",
-      "required": true,
+      "label": "Mobile Number",
       "enabled": true,
-      "placeholder": "10-digit mobile number",
-      "helpText": "Primary contact phone number for confirmation"
+      "helpText": "Primary contact phone number for confirmation",
+      "required": true,
+      "placeholder": "10-digit mobile number"
     },
     {
       "id": "email",
-      "label": "Email Address",
       "type": "email",
-      "required": false,
+      "label": "Email Address",
       "enabled": true,
+      "required": false,
       "placeholder": "Email Address (Optional)"
     },
     {
       "id": "preferredDate",
-      "label": "Selected Date",
       "type": "date",
-      "required": true,
+      "label": "Selected Date",
       "enabled": false,
-      "helpText": "Appointment date picked from calendar"
+      "helpText": "Appointment date picked from calendar",
+      "required": true
     },
     {
       "id": "timeRange",
-      "label": "Preferred Time Slot",
       "type": "select",
-      "required": true,
+      "label": "Preferred Time Slot",
       "enabled": false,
-      "helpText": "Time slot selected by patient"
+      "helpText": "Time slot selected by patient",
+      "required": true
     },
     {
       "id": "preferredDoctor",
-      "label": "Doctor Preference",
       "type": "select",
-      "required": false,
+      "label": "Doctor Preference",
       "enabled": false,
-      "helpText": "Allow patient to request a specific clinical specialist"
+      "helpText": "Allow patient to request a specific clinical specialist",
+      "required": false
     },
     {
       "id": "treatment",
-      "label": "Treatment or Concern",
       "type": "select",
-      "required": true,
+      "label": "Treatment or Concern",
       "enabled": true,
-      "helpText": "Primary dental procedure or medical symptom"
+      "helpText": "Primary dental procedure or medical symptom",
+      "required": true
     },
     {
       "id": "notes",
-      "label": "Notes / Symptoms",
       "type": "textarea",
-      "required": false,
+      "label": "Notes / Symptoms",
       "enabled": true,
+      "required": false,
       "placeholder": "Describe your symptoms, tooth sensitivity, or clinical background..."
     },
     {
       "id": "consentAgreed",
-      "label": "Consent Agreement",
       "type": "checkbox",
-      "required": true,
+      "label": "Consent Agreement",
       "enabled": true,
-      "helpText": "I agree to be contacted to confirm my appointment."
+      "helpText": "I agree to be contacted to confirm my appointment.",
+      "required": true
     },
     {
       "id": "gender",
-      "label": "Sex / Gender",
       "type": "select",
-      "required": false,
+      "label": "Sex / Gender",
       "enabled": false,
       "options": [
         "Male",
@@ -106,21 +105,21 @@
         "Other",
         "N/A"
       ],
-      "helpText": "Patient gender identification"
+      "helpText": "Patient gender identification",
+      "required": false
     },
     {
       "id": "dateOfBirth",
-      "label": "Date of Birth",
       "type": "date",
-      "required": false,
+      "label": "Date of Birth",
       "enabled": false,
-      "helpText": "Patient date of birth"
+      "helpText": "Patient date of birth",
+      "required": false
     },
     {
       "id": "bloodGroup",
-      "label": "Blood Group",
       "type": "select",
-      "required": false,
+      "label": "Blood Group",
       "enabled": false,
       "options": [
         "A+",
@@ -133,16 +132,17 @@
         "O-",
         "Unknown"
       ],
-      "helpText": "Patient blood group"
+      "helpText": "Patient blood group",
+      "required": false
     },
     {
       "id": "address",
-      "label": "Address & Locality",
       "type": "text",
-      "required": false,
+      "label": "Address & Locality",
       "enabled": false,
-      "placeholder": "Flat / House no., Street, Locality",
-      "helpText": "Residential address"
+      "helpText": "Residential address",
+      "required": false,
+      "placeholder": "Flat / House no., Street, Locality"
     }
   ],
   "treatments": [

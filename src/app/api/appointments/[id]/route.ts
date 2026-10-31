@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { inMemoryStore } from "@/lib/in-memory-store";
+import { invalidateAppointmentsCache } from "@/lib/appointments-cache";
 
 export async function GET(
   req: NextRequest,
@@ -161,6 +162,8 @@ export async function PATCH(
         { status: 404 }
       );
     }
+
+    invalidateAppointmentsCache();
 
     return NextResponse.json({
       success: true,

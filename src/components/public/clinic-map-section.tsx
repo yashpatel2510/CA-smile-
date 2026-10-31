@@ -81,8 +81,8 @@ export function ClinicMapSection({ className = "" }: ClinicMapSectionProps) {
   const pathname = usePathname();
   const { brandConfig } = useClinicTheme();
 
-  // Hide on contact page per user request
-  if (pathname === "/contact") {
+  // Hide on contact and dedicated booking pages per user request
+  if (pathname === "/contact" || pathname === "/book") {
     return null;
   }
 

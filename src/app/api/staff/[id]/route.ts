@@ -5,14 +5,22 @@ import { authOptions } from "@/lib/auth";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 
+import {
+  getStaffEffectiveSections,
+  getRolesPermissionsConfig,
+  setStaffSectionOverrides,
+} from "@/lib/roles-permissions-store";
+import { AdminSectionId } from "@/types/roles-permissions";
+
 const updateStaffSchema = z.object({
-  role: z
-    .enum(["ADMIN", "STAFF", "DOCTOR", "NURSE", "RECEPTIONIST"])
-    .optional(),
+  name: z.string().min(2).optional(),
+  email: z.string().email().optional(),
+  role: z.string().optional(),
   specialty: z.string().optional(),
   phone: z.string().optional(),
   password: z.string().min(4, "Password must be at least 4 characters").optional(),
   isActive: z.boolean().optional(),
+  customSections: z.array(z.string()).nullable().optional(),
 });
 
 export async function PATCH(
@@ -39,10 +47,15 @@ export async function PATCH(
       );
     }
 
-    const updateData: any = { ...parseResult.data };
+    const { customSections, ...dbFields } = parseResult.data;
+    const updateData: any = { ...dbFields };
 
     if (updateData.password) {
       updateData.password = await bcrypt.hash(updateData.password, 10);
+    }
+
+    if (customSections !== undefined) {
+      setStaffSectionOverrides(staffId, customSections as AdminSectionId[] | null);
     }
 
     let updatedStaff;
@@ -74,10 +87,18 @@ export async function PATCH(
       };
     }
 
+    const config = getRolesPermissionsConfig();
+    const effectiveRole = updatedStaff.role || "STAFF";
+    const enriched = {
+      ...updatedStaff,
+      customSections: config.staffSectionOverrides[staffId] || null,
+      effectiveSections: getStaffEffectiveSections(staffId, effectiveRole),
+    };
+
     return NextResponse.json({
       success: true,
       message: "Staff member updated successfully",
-      staff: updatedStaff,
+      staff: enriched,
     });
   } catch (error: any) {
     return NextResponse.json(

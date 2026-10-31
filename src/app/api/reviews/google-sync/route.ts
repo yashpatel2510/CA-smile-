@@ -35,6 +35,7 @@ export async function POST(req: NextRequest) {
       totalReviewsCount,
       autoApprove,
       apiKey,
+      showEmptyReviewCard,
     } = body as any;
 
     let updatedConfig;
@@ -45,7 +46,8 @@ export async function POST(req: NextRequest) {
       googleRating !== undefined ||
       totalReviewsCount !== undefined ||
       typeof autoApprove === "boolean" ||
-      typeof apiKey === "string"
+      typeof apiKey === "string" ||
+      typeof showEmptyReviewCard === "boolean"
     ) {
       updatedConfig = updateGoogleConfig({
         ...(placeId ? { placeId } : {}),
@@ -59,6 +61,7 @@ export async function POST(req: NextRequest) {
           ? { autoApproveGoogleReviews: autoApprove }
           : {}),
         ...(typeof apiKey === "string" ? { apiKey: apiKey.trim() } : {}),
+        ...(typeof showEmptyReviewCard === "boolean" ? { showEmptyReviewCard } : {}),
       });
     }
 
@@ -84,3 +87,61 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export async function PUT(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (session?.user && session.user.role !== "ADMIN") {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "Forbidden: Clinic Owner (Admin) privileges are required to update review settings.",
+        },
+        { status: 403 }
+      );
+    }
+
+    const body = await req.json();
+    const {
+      placeId,
+      businessName,
+      googleMapsUrl,
+      googleRating,
+      totalReviewsCount,
+      autoApprove,
+      apiKey,
+      showEmptyReviewCard,
+      darkMode,
+    } = body as any;
+
+    const updatedConfig = updateGoogleConfig({
+      ...(placeId ? { placeId } : {}),
+      ...(businessName ? { businessName } : {}),
+      ...(googleMapsUrl ? { googleMapsUrl } : {}),
+      ...(googleRating !== undefined ? { googleRating: Number(googleRating) } : {}),
+      ...(totalReviewsCount !== undefined
+        ? { totalReviewsCount: Number(totalReviewsCount) }
+        : {}),
+      ...(typeof autoApprove === "boolean"
+        ? { autoApproveGoogleReviews: autoApprove }
+        : {}),
+      ...(typeof apiKey === "string" ? { apiKey: apiKey.trim() } : {}),
+      ...(typeof showEmptyReviewCard === "boolean" ? { showEmptyReviewCard } : {}),
+      ...(typeof darkMode === "boolean" ? { darkMode } : {}),
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "Review settings updated successfully.",
+      googleConfig: updatedConfig,
+    });
+  } catch (error) {
+    console.error("Error updating review settings:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to update review settings." },
+      { status: 500 }
+    );
+  }
+}
+

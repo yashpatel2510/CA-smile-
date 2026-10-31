@@ -22,13 +22,15 @@ declare global {
 
 const DEFAULT_GOOGLE_CONFIG: GoogleReviewsConfig = {
   placeId: "/g/11kqclnrjh",
-  businessName: "Dr. Preeti Shah Dental Clinic",
-  googleRating: 4.9,
-  totalReviewsCount: 194,
+  businessName: "CA Smile Dental Clinic",
+  googleRating: 5.0,
+  totalReviewsCount: 0,
   autoApproveGoogleReviews: true,
-  googleMapsUrl: "https://share.google/KRr7QvSMEB4CjYaYN",
+  googleMapsUrl:
+    "https://www.google.com/search?q=ca+smile+dental+clinic+reviwe+add+&sca_esv=83f148050a27f47b&rlz=1C5CHFA_enIN1171IN1171&sxsrf=AKL5yDikO_PUx2STXoM9NQgdeFsuQnPmkQ%3A1793449673912&ei=yd7laoSVN7GVhvcPiobT2Qs&biw=1470&bih=723&uact=5&oq=ca+smile+dental+clinic+reviwe+add+&gs_lp=Egxnd3Mtd2l6LXNlcnAiImNhIHNtaWxlIGRlbnRhbCBjbGluaWMgcmV2aXdlIGFkZCAyBxAhGAoYoAEyBxAhGAoYoAEyBxAhGAoYoAEyBxAhGAoYoAFI8ThQ0wNY8S9wAXgBkAEAmAHqAqABtCaqAQYyLTE4LjG4AQPIAQD4AQGYAhSgArgnwgIKEAAYRxjWBBiwA8ICDRAAGEcY1gQYyQMYsAPCAgYQABgWGB7CAgcQABiABBgNwgILEAAYgAQYigUYhgPCAggQABiABBiiBMICBRAAGO8FwgIGEAAYHhgNwgIFECEYnwXCAgUQIRigAcICBBAhGBWYAwCIBgGQBgiSBwgxLjAuMTguMaAH9G6yBwYyLTE4LjG4B7EnwgcGMC45LjExyAdEgAgB&sclient=gws-wiz-serp#lrd=0x3be0ef543648830b:0x3a288255f324c8de,3,,,,",
   lastSyncedAt: new Date().toISOString(),
-  darkMode: false,
+  darkMode: true,
+  showEmptyReviewCard: true,
 };
 
 /**
@@ -40,14 +42,19 @@ export function getReviewsStoreData(): ReviewsStoreData {
       const fileData = fs.readFileSync(REVIEWS_FILE_PATH, "utf-8");
       const parsed = JSON.parse(fileData);
       const isDarkMode = Boolean(parsed.darkMode ?? parsed.googleConfig?.darkMode ?? false);
+      const showEmptyCard =
+        parsed.googleConfig?.showEmptyReviewCard !== false &&
+        parsed.showEmptyReviewCard !== false;
       global.__reviewsCache = {
         googleConfig: {
           ...DEFAULT_GOOGLE_CONFIG,
           ...(parsed.googleConfig || {}),
           darkMode: isDarkMode,
+          showEmptyReviewCard: showEmptyCard,
         },
         reviews: Array.isArray(parsed.reviews) ? parsed.reviews : [],
         darkMode: isDarkMode,
+        showEmptyReviewCard: showEmptyCard,
       };
       return global.__reviewsCache;
     }
@@ -62,7 +69,8 @@ export function getReviewsStoreData(): ReviewsStoreData {
   global.__reviewsCache = {
     googleConfig: DEFAULT_GOOGLE_CONFIG,
     reviews: [],
-    darkMode: false,
+    darkMode: true,
+    showEmptyReviewCard: true,
   };
   return global.__reviewsCache;
 }
@@ -142,6 +150,7 @@ export function deleteReview(id: string): boolean {
   store.reviews = store.reviews.filter((r) => r.id !== id);
 
   if (store.reviews.length !== initialLength) {
+    store.googleConfig.totalReviewsCount = store.reviews.length;
     saveReviewsStoreData(store);
     return true;
   }
@@ -161,6 +170,10 @@ export function updateGoogleConfig(
   };
   if (typeof config.darkMode === "boolean") {
     store.darkMode = config.darkMode;
+  }
+  if (typeof config.showEmptyReviewCard === "boolean") {
+    store.showEmptyReviewCard = config.showEmptyReviewCard;
+    store.googleConfig.showEmptyReviewCard = config.showEmptyReviewCard;
   }
   saveReviewsStoreData(store);
   return store.googleConfig;
@@ -351,10 +364,7 @@ export async function syncGoogleBusinessReviews(
 
   // Update Google metadata
   store.googleConfig.lastSyncedAt = new Date().toISOString();
-  store.googleConfig.totalReviewsCount = Math.max(
-    store.googleConfig.totalReviewsCount,
-    store.reviews.filter((r) => r.source === "GOOGLE").length + 180
-  );
+  store.googleConfig.totalReviewsCount = store.reviews.length;
 
   saveReviewsStoreData(store);
 

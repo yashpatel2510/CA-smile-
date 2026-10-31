@@ -62,3 +62,91 @@ h6 {
     background: rgba(140, 140, 150, 0.5);
   }
 }
+
+/* ========================================================================= */
+/* CA SMILE CENTER LOGO GLOW & DIM BREATHING LOOP ANIMATION                 */
+/* ========================================================================= */
+@keyframes logoGlowBreathe {
+  0%, 100% {
+    opacity: 0.65;
+    transform: scale(0.98);
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.3))
+            drop-shadow(0 0 8px rgba(56, 189, 248, 0.2));
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.035);
+    filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.95))
+            drop-shadow(0 0 28px rgba(56, 189, 248, 0.8))
+            drop-shadow(0 0 45px rgba(45, 212, 191, 0.45));
+  }
+}
+
+@keyframes logoHaloPulse {
+  0%, 100% {
+    opacity: 0.18;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 0.82;
+    transform: scale(1.22);
+  }
+}
+
+@keyframes logoCoreAura {
+  0%, 100% {
+    opacity: 0.25;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.12);
+  }
+}
+
+@keyframes sparkleGlint {
+  0%, 25%, 75%, 100% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15) rotate(45deg);
+  }
+}
+
+.animate-logo-glow-breathe {
+  animation: logoGlowBreathe 3.6s ease-in-out infinite;
+  will-change: transform, filter, opacity;
+}
+
+.animate-logo-halo {
+  animation: logoHaloPulse 3.6s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.animate-logo-core-aura {
+  animation: logoCoreAura 3.6s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.animate-sparkle-glint {
+  animation: sparkleGlint 3.6s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-logo-glow-breathe,
+  .animate-logo-halo,
+  .animate-logo-core-aura,
+  .animate-sparkle-glint {
+    animation: none !important;
+  }
+  .animate-logo-glow-breathe {
+    opacity: 0.95 !important;
+    filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.6)) !important;
+  }
+  .animate-logo-halo {
+    opacity: 0.4 !important;
+  }
+}

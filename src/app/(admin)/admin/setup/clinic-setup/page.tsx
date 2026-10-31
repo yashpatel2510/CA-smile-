@@ -184,6 +184,30 @@ export default function ClinicSetupPage() {
         </Button>
       </div>
 
+      {/* Quick link to Clinic Space Gallery & Polaroids Showcase */}
+      <div className="mb-6 rounded-2xl border border-zinc-200 bg-linear-to-r from-zinc-900 via-zinc-900 to-zinc-950 p-4 text-white shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white backdrop-blur">
+            <Sparkles className="h-5 w-5 text-emerald-400" />
+          </div>
+          <div>
+            <h4 className="text-xs font-bold text-white tracking-wide uppercase">
+              Space Gallery &amp; Polaroids Showcase
+            </h4>
+            <p className="text-xs text-zinc-300 mt-0.5">
+              Add, remove, or replace polaroid photos, change titles, location tags, address card &amp; mascot directly.
+            </p>
+          </div>
+        </div>
+        <Link
+          href="/admin/settings?tab=gallery"
+          className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-white px-4 py-2 text-xs font-bold text-zinc-900 shadow hover:bg-zinc-100 transition shrink-0"
+        >
+          <span>Open Gallery Customizer</span>
+          <ChevronRight className="h-4 w-4" />
+        </Link>
+      </div>
+
       {/* Toast Alert */}
       {toast && (
         <div

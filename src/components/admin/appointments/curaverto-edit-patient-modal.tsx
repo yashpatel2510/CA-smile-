@@ -116,10 +116,10 @@ export function CuravertoEditPatientModal({
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
-  const [patientType, setPatientType] = useState<"Adult" | "Child">("Adult");
-  const [sex, setSex] = useState("Female");
-  const [bloodGroup, setBloodGroup] = useState("B+");
-  const [leadSource, setLeadSource] = useState("Not specified");
+  const [patientType, setPatientType] = useState<"Adult" | "Child" | "">("");
+  const [sex, setSex] = useState("");
+  const [bloodGroup, setBloodGroup] = useState("");
+  const [leadSource, setLeadSource] = useState("");
 
   // Address
   const [isAddressOpen, setIsAddressOpen] = useState(true);
@@ -151,17 +151,23 @@ export function CuravertoEditPatientModal({
   // Populate when patient changes
   useEffect(() => {
     if (patient) {
-      const cleanNum = patient.patientNumber || patient.patientId?.replace("#", "") || "00023";
+      const cleanNum = patient.patientNumber || patient.patientId?.replace("#", "") || "";
       setPatientNumber(cleanNum);
 
-      const name = patient.fullName || patient.patientName || "Anita Rana";
+      const name = patient.fullName || patient.patientName || "";
       setFullName(name);
 
-      setPhone(patient.phone || "0000000023");
-      setDateOfBirth(patient.dateOfBirth || "1966-02-11");
+      setPhone(patient.phone || "");
+      setDateOfBirth(patient.dateOfBirth || "");
 
       if (patient.patientType) {
-        setPatientType(patient.patientType.toLowerCase() === "child" ? "Child" : "Adult");
+        setPatientType(
+          patient.patientType.toLowerCase() === "child"
+            ? "Child"
+            : patient.patientType.toLowerCase() === "adult"
+            ? "Adult"
+            : ""
+        );
       } else if (patient.age && (patient.age.toLowerCase().includes("child") || (parseInt(patient.age, 10) > 0 && parseInt(patient.age, 10) < 18))) {
         setPatientType("Child");
       } else if (patient.dateOfBirth) {
@@ -173,12 +179,12 @@ export function CuravertoEditPatientModal({
           setPatientType("Adult");
         }
       } else {
-        setPatientType("Adult");
+        setPatientType("");
       }
 
-      setSex(patient.sex || "Female");
-      setBloodGroup(patient.bloodGroup || "B+");
-      setLeadSource(patient.leadSource || "Not specified");
+      setSex(patient.sex || "");
+      setBloodGroup(patient.bloodGroup || "");
+      setLeadSource(patient.leadSource || "");
 
       // Address parsing if string
       if (patient.address && !patient.addressLine) {

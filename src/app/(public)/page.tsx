@@ -13,6 +13,7 @@ import { ClinicJsonLd } from "@/components/seo/clinic-json-ld";
 import { getAllPosts, getBlogSectionConfig } from "@/lib/blog";
 import { getTreatmentsStoreData } from "@/lib/treatments-store";
 import { BlogResponsiveShowcase } from "@/components/public/blog-responsive-showcase";
+import { ClinicVideoShowcaseSection } from "@/components/public/clinic-video-showcase-section";
 
 export const metadata: Metadata = {
   title: "HealthSphere Clinic | Board-Certified Physicians & Same-Day Care",
@@ -37,7 +38,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const dynamic = "force-dynamic";
+export const revalidate = 10;
 
 export default function HomePage() {
   const blogConfig = getBlogSectionConfig();
@@ -65,13 +66,16 @@ export default function HomePage() {
         <div id="services-preview">
           <WhiteDentalTreatmentShowcase
             mode="both"
+            initialTreatments={store.treatments}
+            initialDiagnostics={store.diagnostics}
             initialShowTreatments={showTreatments}
             initialShowDiagnostics={showDiagnostics}
             initialSettings={store.settings}
           />
         </div>
 
-
+        {/* Clinic Tour / About Us Video Showcase Section (Directly After Treatments) */}
+        <ClinicVideoShowcaseSection />
 
         {/* Patient Testimonials Section (Live Animated 3-Column Marquee) */}
         <TreatmentReviewsShowcase />

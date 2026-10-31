@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import {
   Search,
   Upload,
@@ -19,6 +19,7 @@ import {
   User,
   MapPin,
   HeartPulse,
+  RefreshCw,
 } from "lucide-react";
 import PATIENTS_DATA from "@/data/patients-records.json";
 import {
@@ -45,6 +46,7 @@ interface PatientRecord {
   gender: string;
   age: string;
   dob: string;
+  patientType?: string;
   isNew: boolean;
   totalVisits: number;
   lastVisit: string;
@@ -75,10 +77,22 @@ interface PatientRecord {
 
 export function CuravertoPatientsWorkspace() {
   const [topTab, setTopTab] = useState<"patients" | "vaccines">("patients");
-  const [patients, setPatients] = useState<PatientRecord[]>(PATIENTS_DATA as PatientRecord[]);
-  const [selectedPatientId, setSelectedPatientId] = useState<string>("pat-22"); // Chirag Lad default
+  
+  // Instant initial load using pre-cached static dataset
+  const [patients, setPatients] = useState<PatientRecord[]>(() => {
+    return (Array.isArray(PATIENTS_DATA) && PATIENTS_DATA.length > 0
+      ? (PATIENTS_DATA as PatientRecord[])
+      : []) as PatientRecord[];
+  });
+  
+  const [selectedPatientId, setSelectedPatientId] = useState<string>(() => {
+    return (PATIENTS_DATA as PatientRecord[])?.[0]?.id || "";
+  });
+
   const [searchQuery, setSearchQuery] = useState("");
   const [clinicalTab, setClinicalTab] = useState<"info" | "history">("info");
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [lastSyncTime, setLastSyncTime] = useState("");
 
   // Modals
   const [isAddPatientOpen, setIsAddPatientOpen] = useState(false);
@@ -89,7 +103,7 @@ export function CuravertoPatientsWorkspace() {
   // New Patient Form
   const [newName, setNewName] = useState("");
   const [newPhone, setNewPhone] = useState("");
-  const [newGender, setNewGender] = useState("male");
+  const [newGender, setNewGender] = useState("");
   const [newAge, setNewAge] = useState("");
   const [newDob, setNewDob] = useState("");
 
@@ -101,6 +115,132 @@ export function CuravertoPatientsWorkspace() {
 
   // Treatment Cost
   const [treatmentCost, setTreatmentCost] = useState("1500");
+
+  // Fetch live patients from /api/patients and merge without data loss
+  const fetchLivePatients = useCallback(async (manual = false) => {
+    try {
+      if (manual) setIsSyncing(true);
+      const res = await fetch("/api/patients");
+      if (!res.ok) return;
+      const data = await res.json();
+
+      if (data.success && Array.isArray(data.patients) && data.patients.length > 0) {
+        const mapped: PatientRecord[] = data.patients.map((p: any, idx: number) => {
+          const lastApt = p.appointments?.[0];
+          const fullName = p.name || `${p.firstName || ""} ${p.lastName || ""}`.trim() || "Patient";
+          const rawAge = p.age !== null && p.age !== undefined ? `${p.age}y` : "";
+
+          const timeline: TimelineItem[] = (p.appointments || []).map((a: any) => ({
+            id: `tl-${a.id}`,
+            type: a.status === "TREATMENT_DONE" ? "VISIT • COMPLETED" : "APPOINTMENT",
+            date: a.startTime
+              ? new Date(a.startTime).toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })
+              : "Recent",
+            doctor: a.preferredDoctor || "Dr. Deep Arvindbhai Patel",
+            reason: a.reason || a.service?.name || "Dental Consultation",
+            notes: a.notes || undefined,
+            dotColor: a.status === "TREATMENT_DONE" ? "emerald" : "blue",
+          }));
+
+          if (timeline.length === 0) {
+            timeline.push({
+              id: `tl-reg-${p.id}`,
+              type: "REGISTERED",
+              date: p.createdAt
+                ? new Date(p.createdAt).toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })
+                : "Recent",
+              doctor: "Dr. Deep Arvindbhai Patel",
+              reason: "Patient registration & active clinical profile",
+              dotColor: "gray",
+            });
+          }
+
+          const visits = Math.max(p.totalVisits || 0, p.appointments?.length || 0, 1);
+
+          return {
+            id: p.id,
+            patientNumber: p.patientCode ? `#${p.patientCode}` : `#${String(100 + idx).padStart(5, "0")}`,
+            name: fullName,
+            phone: p.phone || "",
+            gender: p.gender ? p.gender.toLowerCase() : "male",
+            age: rawAge || "30y",
+            dob: p.dateOfBirth || "",
+            patientType: p.patientType || (p.age && p.age < 18 ? "Child" : "Adult"),
+            isNew: visits <= 1,
+            totalVisits: visits,
+            lastVisit: p.lastVisit || "Recent",
+            avatarColor: "slate",
+            timeline,
+            email: p.email || "",
+            bloodGroup: p.bloodType || p.bloodGroup || "B+",
+            leadSource: p.source || (p.medicalNotes?.includes("WHATSAPP") ? "WhatsApp" : "Walk-in"),
+            addressLine: p.address || "Station Road",
+            locality: "Navsari District",
+            city: "Bilimora",
+            state: "Gujarat",
+            pin: "396321",
+            allergies:
+              p.medicalNotes?.match(/Allergies?:\s*([^|]+)/i)?.[1]?.trim() ||
+              "No drug allergies recorded (NKDA).",
+            medicalConditions: p.condition || p.medicalNotes || "General Dental Care",
+            emergencyContact: p.emergencyContact || "",
+            treatmentCost: "1500",
+          };
+        });
+
+        setPatients((prev) => {
+          // Safeguard: Never lose client-side optimistic additions before DB sync completes
+          const serverIds = new Set(mapped.map((m) => m.id));
+          const serverPhones = new Set(mapped.map((m) => m.phone.replace(/\D/g, "")));
+          const unsynced = prev.filter(
+            (p) => !serverIds.has(p.id) && !serverPhones.has(p.phone.replace(/\D/g, ""))
+          );
+          const combined = [...unsynced, ...mapped];
+          try {
+            localStorage.setItem("casmile_patients_records_cache", JSON.stringify(combined));
+          } catch {}
+          return combined;
+        });
+
+        setSelectedPatientId((cur) => {
+          if (!cur || !mapped.some((m) => m.id === cur)) {
+            return mapped[0]?.id || "";
+          }
+          return cur;
+        });
+
+        setLastSyncTime(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+      }
+    } catch (err) {
+      console.error("Failed to fetch live patients:", err);
+    } finally {
+      setIsSyncing(false);
+    }
+  }, []);
+
+  // Instant hydration on mount from local cache, then background sync
+  useEffect(() => {
+    try {
+      const cached = localStorage.getItem("casmile_patients_records_cache");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setPatients(parsed);
+          setSelectedPatientId((cur) => cur || parsed[0]?.id || "");
+        }
+      }
+    } catch {}
+
+    fetchLivePatients();
+  }, [fetchLivePatients]);
 
   // Filter patients
   const filteredPatients = useMemo(() => {
@@ -116,6 +256,13 @@ export function CuravertoPatientsWorkspace() {
 
   const selectedPatient =
     patients.find((p) => p.id === selectedPatientId) || patients[0];
+
+  // Keep treatment cost in sync with selected patient
+  useEffect(() => {
+    if (selectedPatient?.treatmentCost) {
+      setTreatmentCost(selectedPatient.treatmentCost);
+    }
+  }, [selectedPatient?.id, selectedPatient?.treatmentCost]);
 
   const patientEditData: PatientEditData | null = useMemo(() => {
     if (!selectedPatient) return null;
@@ -153,8 +300,8 @@ export function CuravertoPatientsWorkspace() {
   }, [selectedPatient]);
 
   const handlePatientSaved = (updated: PatientEditData) => {
-    setPatients((prev) =>
-      prev.map((p) => {
+    setPatients((prev) => {
+      const updatedList = prev.map((p) => {
         if (p.id === updated.id) {
           return {
             ...p,
@@ -180,76 +327,176 @@ export function CuravertoPatientsWorkspace() {
           };
         }
         return p;
-      })
-    );
+      });
+      try {
+        localStorage.setItem("casmile_patients_records_cache", JSON.stringify(updatedList));
+      } catch {}
+      return updatedList;
+    });
     setIsEditPatientOpen(false);
   };
 
-  const handleAddPatient = (e: React.FormEvent) => {
+  const handleAddPatient = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newName.trim() || !newPhone.trim()) return;
 
+    const trimmedName = newName.trim();
+    const cleanPhone = newPhone.trim();
+    const parts = trimmedName.split(" ");
+    const firstName = parts[0];
+    const lastName = parts.slice(1).join(" ") || "";
     const nextNum = `#000${patients.length + 1}`.slice(-6);
+
+    const tempId = `pat-${Date.now()}`;
     const newRecord: PatientRecord = {
-      id: `pat-${Date.now()}`,
+      id: tempId,
       patientNumber: nextNum,
-      name: newName.trim(),
-      phone: newPhone.trim(),
-      gender: newGender,
+      name: trimmedName,
+      phone: cleanPhone,
+      gender: newGender ? newGender.toLowerCase() : "male",
       age: newAge ? `${newAge}y` : "30y",
-      dob: newDob || "01/01/1995",
+      dob: newDob || "",
       isNew: true,
       totalVisits: 1,
-      lastVisit: new Date().toLocaleDateString("en-GB"),
+      lastVisit: new Date().toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      }),
       avatarColor: "slate",
       timeline: [
         {
           id: `tl-${Date.now()}`,
           type: "VISIT • COMPLETED",
-          date: new Date().toLocaleDateString("en-GB"),
+          date: new Date().toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          }),
           doctor: "Dr. Deep Arvindbhai Patel",
           reason: "Initial Consultation",
           dotColor: "gray",
         },
       ],
+      leadSource: "Walk-in",
+      addressLine: "Station Road",
+      locality: "Navsari District",
+      city: "Bilimora",
+      state: "Gujarat",
+      pin: "396321",
+      bloodGroup: "B+",
+      treatmentCost: "1500",
+      medicalConditions: "General Dental Care",
+      allergies: "No drug allergies recorded (NKDA).",
     };
 
-    setPatients([newRecord, ...patients]);
+    // Optimistic instant UI update
+    setPatients((prev) => {
+      const updated = [newRecord, ...prev];
+      try {
+        localStorage.setItem("casmile_patients_records_cache", JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
     setSelectedPatientId(newRecord.id);
     setIsAddPatientOpen(false);
     setNewName("");
     setNewPhone("");
     setNewAge("");
     setNewDob("");
+
+    // Persist to Database via POST /api/patients
+    try {
+      const res = await fetch("/api/patients", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          phone: cleanPhone,
+          gender: newGender ? newGender.toLowerCase() : undefined,
+          dateOfBirth: newDob || undefined,
+          source: "ADMIN",
+        }),
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        if (json?.patient?.id) {
+          const realId = json.patient.id;
+          setPatients((prev) =>
+            prev.map((p) =>
+              p.id === tempId
+                ? {
+                    ...p,
+                    id: realId,
+                    patientNumber: json.patient.patientCode
+                      ? `#${json.patient.patientCode}`
+                      : p.patientNumber,
+                  }
+                : p
+            )
+          );
+          setSelectedPatientId((cur) => (cur === tempId ? realId : cur));
+          fetchLivePatients();
+        }
+      }
+    } catch (err) {
+      console.error("Error creating patient in DB:", err);
+    }
   };
 
-  const handleAddEmr = (e: React.FormEvent) => {
+  const handleAddEmr = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedPatient) return;
 
     const newItem: TimelineItem = {
       id: `tl-${Date.now()}`,
       type: emrType,
-      date: new Date().toLocaleDateString("en-GB"),
+      date: new Date().toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      }),
       doctor: "Dr. Deep Arvindbhai Patel",
       reason: emrType === "VISIT • COMPLETED" ? `Reason: ${emrReason}` : undefined,
       diagnosis: emrType === "PRESCRIPTION" ? `Diagnosis: ${emrDiagnosis}` : undefined,
       notes: emrNotes ? `“${emrNotes}”` : undefined,
-      dotColor: emrType === "PRESCRIPTION" ? "blue" : "gray",
+      dotColor: emrType === "PRESCRIPTION" ? "blue" : "emerald",
     };
 
-    setPatients((prev) =>
-      prev.map((p) =>
+    setPatients((prev) => {
+      const updatedList = prev.map((p) =>
         p.id === selectedPatient.id
           ? {
               ...p,
               totalVisits: p.totalVisits + 1,
-              lastVisit: new Date().toLocaleDateString("en-GB"),
+              lastVisit: new Date().toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              }),
               timeline: [newItem, ...(p.timeline || [])],
             }
           : p
-      )
-    );
+      );
+      try {
+        localStorage.setItem("casmile_patients_records_cache", JSON.stringify(updatedList));
+      } catch {}
+      return updatedList;
+    });
+
+    try {
+      await fetch(`/api/patients/${encodeURIComponent(selectedPatient.id)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          medicalNotes: `${selectedPatient.medicalConditions || ""} | [EMR] ${emrType}: ${
+            emrReason || emrDiagnosis || emrNotes || ""
+          }`,
+        }),
+      });
+    } catch {}
 
     setIsNewEmrOpen(false);
     setEmrReason("");
@@ -319,11 +566,26 @@ export function CuravertoPatientsWorkspace() {
                   Patients
                 </h2>
                 <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-bold text-blue-600">
-                  {patients.length}
+                  {searchQuery.trim()
+                    ? `${filteredPatients.length} of ${patients.length}`
+                    : patients.length}
                 </span>
+                {isSyncing && (
+                  <span className="text-[10px] font-medium text-blue-500 animate-pulse">
+                    Syncing...
+                  </span>
+                )}
               </div>
 
               <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => fetchLivePatients(true)}
+                  title={lastSyncTime ? `Last synced at ${lastSyncTime}. Click to refresh` : "Refresh patients list"}
+                  className="h-8 w-8 rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 flex items-center justify-center transition-colors shadow-2xs"
+                >
+                  <RefreshCw className={`h-3.5 w-3.5 ${isSyncing ? "animate-spin text-blue-600" : ""}`} />
+                </button>
                 <button
                   type="button"
                   onClick={() => alert("Exporting patients list to Excel / CSV...")}
@@ -453,12 +715,24 @@ export function CuravertoPatientsWorkspace() {
                           <Phone className="w-3 h-3 text-slate-400" />
                           {selectedPatient.phone}
                         </span>
-                        <span>•</span>
-                        <span>{selectedPatient.gender}</span>
-                        <span>•</span>
-                        <span>{selectedPatient.age}</span>
-                        <span>•</span>
-                        <span>DOB: {selectedPatient.dob}</span>
+                        {selectedPatient.gender ? (
+                          <>
+                            <span>•</span>
+                            <span className="capitalize">{selectedPatient.gender}</span>
+                          </>
+                        ) : null}
+                        {selectedPatient.age ? (
+                          <>
+                            <span>•</span>
+                            <span>{selectedPatient.age}</span>
+                          </>
+                        ) : null}
+                        {selectedPatient.dob ? (
+                          <>
+                            <span>•</span>
+                            <span>DOB: {selectedPatient.dob}</span>
+                          </>
+                        ) : null}
                         <span>•</span>
                         <button
                           type="button"
@@ -590,30 +864,38 @@ export function CuravertoPatientsWorkspace() {
                               {selectedPatient.phone}
                             </span>
                           </div>
-                          <div>
-                            <span className="text-slate-400 block text-[11px]">Gender</span>
-                            <span className="font-semibold text-slate-800 capitalize block mt-0.5">
-                              {selectedPatient.gender}
-                            </span>
-                          </div>
-                          <div>
-                            <span className="text-slate-400 block text-[11px]">Age / DOB</span>
-                            <span className="font-semibold text-slate-800 block mt-0.5">
-                              {selectedPatient.age} ({selectedPatient.dob})
-                            </span>
-                          </div>
-                          <div>
-                            <span className="text-slate-400 block text-[11px]">Blood Group</span>
-                            <span className="inline-flex items-center rounded-md bg-rose-50 px-2 py-0.5 text-xs font-bold text-rose-700 border border-rose-200 mt-0.5">
-                              {selectedPatient.bloodGroup || "B+"}
-                            </span>
-                          </div>
-                          <div>
-                            <span className="text-slate-400 block text-[11px]">Patient Type</span>
-                            <span className="font-semibold text-slate-800 block mt-0.5">
-                              {parseInt(selectedPatient.age.replace(/\D/g, "") || "30", 10) < 18 ? "Child / Pediatric" : "Adult"}
-                            </span>
-                          </div>
+                          {selectedPatient.gender ? (
+                            <div>
+                              <span className="text-slate-400 block text-[11px]">Gender</span>
+                              <span className="font-semibold text-slate-800 capitalize block mt-0.5">
+                                {selectedPatient.gender}
+                              </span>
+                            </div>
+                          ) : null}
+                          {(selectedPatient.age || selectedPatient.dob) ? (
+                            <div>
+                              <span className="text-slate-400 block text-[11px]">Age / DOB</span>
+                              <span className="font-semibold text-slate-800 block mt-0.5">
+                                {[selectedPatient.age, selectedPatient.dob ? `DOB: ${selectedPatient.dob}` : null].filter(Boolean).join(" · ")}
+                              </span>
+                            </div>
+                          ) : null}
+                          {selectedPatient.bloodGroup ? (
+                            <div>
+                              <span className="text-slate-400 block text-[11px]">Blood Group</span>
+                              <span className="inline-flex items-center rounded-md bg-rose-50 px-2 py-0.5 text-xs font-bold text-rose-700 border border-rose-200 mt-0.5">
+                                {selectedPatient.bloodGroup}
+                              </span>
+                            </div>
+                          ) : null}
+                          {(selectedPatient.patientType || (selectedPatient.age && parseInt(selectedPatient.age.replace(/\D/g, ""), 10) < 18)) ? (
+                            <div>
+                              <span className="text-slate-400 block text-[11px]">Patient Type</span>
+                              <span className="font-semibold text-slate-800 block mt-0.5">
+                                {selectedPatient.patientType || (parseInt(selectedPatient.age.replace(/\D/g, ""), 10) < 18 ? "Child / Pediatric" : "Adult")}
+                              </span>
+                            </div>
+                          ) : null}
                         </div>
                       </div>
 
@@ -1095,11 +1377,34 @@ export function CuravertoPatientsWorkspace() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    alert(`Treatment cost ₹${treatmentCost} saved for ${selectedPatient?.name}.`);
+                  onClick={async () => {
+                    if (selectedPatient) {
+                      const updatedCost = treatmentCost || "1500";
+                      setPatients((prev) => {
+                        const updatedList = prev.map((p) =>
+                          p.id === selectedPatient.id
+                            ? { ...p, treatmentCost: updatedCost }
+                            : p
+                        );
+                        try {
+                          localStorage.setItem("casmile_patients_records_cache", JSON.stringify(updatedList));
+                        } catch {}
+                        return updatedList;
+                      });
+
+                      try {
+                        await fetch(`/api/patients/${encodeURIComponent(selectedPatient.id)}`, {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            medicalNotes: `${selectedPatient.medicalConditions || ""} | Agreed Treatment Fee: ₹${updatedCost}`,
+                          }),
+                        });
+                      } catch {}
+                    }
                     setIsSetCostOpen(false);
                   }}
-                  className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold"
+                  className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold cursor-pointer"
                 >
                   Save Cost
                 </button>

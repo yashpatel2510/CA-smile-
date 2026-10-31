@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, CheckCircle2, ExternalLink } from "lucide-react";
 import { clinicalServices } from "@/data/services-data";
+import { notifyAppointmentUpdate } from "@/lib/client-appointment-sync";
 
 export function WhatsAppBookingWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -134,6 +135,13 @@ export function WhatsAppBookingWidget() {
         data.appointment?.id ||
         `APT-${Math.floor(100000 + Math.random() * 900000)}`;
 
+      // Notify open admin tabs (Appointments, CA Smile) immediately
+      notifyAppointmentUpdate({
+        id: refId,
+        action: "booked",
+        source: "WHATSAPP",
+      });
+
       setBookingSuccess({
         id: refId,
         name: patientDisplayName,
@@ -169,7 +177,7 @@ export function WhatsAppBookingWidget() {
   return (
     <>
       {/* Floating WhatsApp Action Button */}
-      <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3">
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-3">
         {/* Helper Pill Banner */}
         <AnimatePresence>
           {!isOpen && (
@@ -228,7 +236,7 @@ export function WhatsAppBookingWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-24 right-4 z-50 w-[calc(100vw-2rem)] max-w-sm overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl sm:right-6"
+            className="fixed bottom-20 right-4 z-50 w-[calc(100vw-2rem)] max-w-sm overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl sm:bottom-24 sm:right-6"
           >
             {/* Header */}
             <div className="bg-[#075E54] p-4 text-white">

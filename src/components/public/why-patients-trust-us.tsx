@@ -20,9 +20,11 @@ export function WhyPatientsTrustUs() {
         <div className="absolute inset-0 z-0 pointer-events-none">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/images/why-patients-trust-us-bg.png"
+            src="/images/why-patients-trust-us-bg.jpg"
             alt="State of the art dental clinic treatment chair and precision overhead illumination"
             className="w-full h-full object-cover object-left xl:object-[left_center]"
+            loading="lazy"
+            decoding="async"
           />
           {/* Gradient blend to ensure seamless black extending to the right edge */}
           <div className="absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-black via-black/80 to-transparent" />
@@ -116,9 +118,11 @@ export function WhyPatientsTrustUs() {
         <div className="relative w-full h-[280px] sm:h-[360px] overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/images/why-patients-trust-us-bg.png"
+            src="/images/why-patients-trust-us-bg.jpg"
             alt="State of the art dental clinic treatment chair"
             className="w-full h-full object-cover object-left"
+            loading="lazy"
+            decoding="async"
           />
           {/* Bottom fade into pure black */}
           <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black via-black/80 to-transparent" />

@@ -40,10 +40,6 @@ const setupSections: SetupSection[] = [
         href: "/admin/setup/branches",
       },
       {
-        title: "Appointment Workflow",
-        href: "/admin/setup/appointment-workflow",
-      },
-      {
         title: "Services & Pricing",
         href: "/admin/setup/services",
       },
@@ -51,23 +47,11 @@ const setupSections: SetupSection[] = [
         title: "Fee Schedule",
         href: "/admin/setup/fee-schedule",
       },
-      {
-        title: "Import Clinic Data",
-        href: "/admin/setup/import-clinic-data",
-      },
-      {
-        title: "Import Data",
-        href: "/admin/setup/import-data",
-      },
     ],
   },
   {
     category: "TEAM & ACCESS",
     items: [
-      {
-        title: "Team",
-        href: "/admin/setup/team",
-      },
       {
         title: "Roles & Permissions",
         href: "/admin/setup/roles-permissions",
@@ -75,19 +59,6 @@ const setupSections: SetupSection[] = [
       {
         title: "Doctors",
         href: "/admin/setup/doctors",
-      },
-    ],
-  },
-  {
-    category: "DATA & MIGRATION",
-    items: [
-      {
-        title: "Import Clinic Data",
-        href: "/admin/setup/import-clinic-data",
-      },
-      {
-        title: "Import Data",
-        href: "/admin/setup/import-data",
       },
     ],
   },

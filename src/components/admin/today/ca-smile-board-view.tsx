@@ -34,6 +34,13 @@ import {
 } from "lucide-react";
 import { CuravertoBookAppointmentModal } from "@/components/admin/appointments/curaverto-book-appointment-modal";
 import { DatabaseStatusBadge } from "@/components/admin/database-status-badge";
+import {
+  subscribeToAppointmentUpdates,
+  notifyAppointmentUpdate,
+} from "@/lib/client-appointment-sync";
+
+// Module-level fast cache for zero-delay instant render on mount/navigation
+const caSmileMemoryCache: Record<string, BoardAppointment[]> = {};
 
 export interface BoardAppointment {
   id: string;
@@ -43,6 +50,9 @@ export interface BoardAppointment {
   phone: string;
   email?: string;
   gender?: string;
+  age?: string;
+  patientType?: string;
+  dateOfBirth?: string;
   serviceId?: string;
   serviceName: string;
   doctor: string;
@@ -110,8 +120,12 @@ export function CASmileBoardView() {
   }, []);
 
   const [selectedDate, setSelectedDate] = useState<string>(todayDateStr);
-  const [appointments, setAppointments] = useState<BoardAppointment[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [appointments, setAppointments] = useState<BoardAppointment[]>(() => {
+    return caSmileMemoryCache[todayDateStr] || [];
+  });
+  const [loading, setLoading] = useState<boolean>(() => {
+    return !caSmileMemoryCache[todayDateStr] || caSmileMemoryCache[todayDateStr].length === 0;
+  });
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
 
@@ -214,6 +228,11 @@ export function CASmileBoardView() {
     return days;
   }, [calendarBaseDate, todayDateStr]);
 
+  // Guard against background auto-polling race conditions reverting optimistic moves
+  const pendingMovesRef = useRef<
+    Map<string, { status: string; targetColumn: ColumnType; timestamp: number }>
+  >(new Map());
+
   // Fetch appointments for selected date
   const fetchAppointments = useCallback(async (date: string, isSilent = false) => {
     if (!isSilent) setLoading(true);
@@ -221,11 +240,42 @@ export function CASmileBoardView() {
       const res = await fetch(`/api/admin/today?date=${date}`);
       const data = await res.json();
       if (data.success && Array.isArray(data.appointments)) {
-        setAppointments(data.appointments);
+        // Reconcile incoming server data with any active pending local moves
+        const now = Date.now();
+        const reconciled: BoardAppointment[] = data.appointments.map(
+          (serverApt: BoardAppointment) => {
+            const pending = pendingMovesRef.current.get(serverApt.id);
+            if (pending) {
+              // Keep user's optimistic status for up to 15 seconds if server hasn't caught up
+              if (now - pending.timestamp < 15000) {
+                const serverColumn = categorizeAppointment(serverApt);
+                if (serverColumn === pending.targetColumn) {
+                  // Server has committed and caught up with our change! Clear lock
+                  pendingMovesRef.current.delete(serverApt.id);
+                  return serverApt;
+                } else {
+                  // Server response is STILL STALE (cache or in-flight query race condition)!
+                  // Retain optimistic status so patient NEVER jumps back to previous section!
+                  return {
+                    ...serverApt,
+                    status: pending.status,
+                  };
+                }
+              } else {
+                pendingMovesRef.current.delete(serverApt.id);
+              }
+            }
+            return serverApt;
+          }
+        );
+
+        caSmileMemoryCache[date] = reconciled;
+        setAppointments(reconciled);
+
         // Safely sync active details modal only if it is CURRENTLY open; never re-open if closed!
         setActivePatientDetails((current) => {
           if (!current) return null;
-          const fresh = data.appointments.find((a: BoardAppointment) => a.id === current.id);
+          const fresh = reconciled.find((a: BoardAppointment) => a.id === current.id);
           return fresh || current;
         });
       } else {
@@ -239,30 +289,29 @@ export function CASmileBoardView() {
     }
   }, []);
 
+  // Real-time synchronization: listeners for appointment updates from website & appointments view + 3s auto-refresh
   useEffect(() => {
-    fetchAppointments(selectedDate);
-  }, [selectedDate, fetchAppointments]);
+    const hasCachedData = Boolean(caSmileMemoryCache[selectedDate]?.length);
+    fetchAppointments(selectedDate, hasCachedData);
 
-  // Real-time synchronization: listeners for appointment updates from Appointments view and auto-refresh
-  useEffect(() => {
-    const handleSync = () => {
+    const handleSync = (detail?: any) => {
+      // If update was broadcast from CA_SMILE on this tab for an appointment we just moved,
+      // skip immediate re-fetch so we don't race against our own database write!
+      if (
+        detail?.source === "CA_SMILE" &&
+        detail?.id &&
+        pendingMovesRef.current.has(detail.id)
+      ) {
+        return;
+      }
       fetchAppointments(selectedDate, true);
     };
-    window.addEventListener("appointment-status-updated", handleSync);
-    window.addEventListener("focus", handleSync);
-    const handleStorage = (e: StorageEvent) => {
-      if (e.key === "last_appointment_update") handleSync();
-    };
-    window.addEventListener("storage", handleStorage);
 
-    const interval = setInterval(() => {
-      fetchAppointments(selectedDate, true);
-    }, 10000);
+    const unsubscribe = subscribeToAppointmentUpdates(handleSync);
+    const interval = setInterval(() => handleSync(), 3000);
 
     return () => {
-      window.removeEventListener("appointment-status-updated", handleSync);
-      window.removeEventListener("focus", handleSync);
-      window.removeEventListener("storage", handleStorage);
+      unsubscribe();
       clearInterval(interval);
     };
   }, [selectedDate, fetchAppointments]);
@@ -301,18 +350,32 @@ export function CASmileBoardView() {
     if (targetColumn === "IN_CLINIC") newStatus = "CHECKED_IN";
     if (targetColumn === "DONE") newStatus = "TREATMENT_DONE";
 
-    // Optimistic UI update
+    // 1. Record in pendingMovesRef to lock against any stale background sync
+    pendingMovesRef.current.set(appointmentId, {
+      status: newStatus,
+      targetColumn,
+      timestamp: Date.now(),
+    });
+
+    // 2. Optimistic UI update in component state
     setAppointments((prev) =>
       prev.map((apt) => (apt.id === appointmentId ? { ...apt, status: newStatus } : apt))
     );
+
+    // 3. Update memory cache immediately
+    if (caSmileMemoryCache[selectedDate]) {
+      caSmileMemoryCache[selectedDate] = caSmileMemoryCache[selectedDate].map((apt) =>
+        apt.id === appointmentId ? { ...apt, status: newStatus } : apt
+      );
+    }
 
     if (activePatientDetails && activePatientDetails.id === appointmentId) {
       setActivePatientDetails((prev) => (prev ? { ...prev, status: newStatus } : null));
     }
 
-    // Call API to persist
+    // 4. Call API to persist
     try {
-      await fetch("/api/admin/today", {
+      const res = await fetch("/api/admin/today", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -323,17 +386,41 @@ export function CASmileBoardView() {
         }),
       });
 
-      // Broadcast event to Appointments section & other open windows
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(
-          new CustomEvent("appointment-status-updated", {
-            detail: { appointmentId, status: newStatus },
-          })
-        );
-        localStorage.setItem("last_appointment_update", String(Date.now()));
+      if (!res.ok) {
+        throw new Error(`Server returned HTTP ${res.status}`);
       }
+
+      const data = await res.json();
+      if (!data.success) {
+        throw new Error(data.error || "Failed to update status on server");
+      }
+
+      // Update confirmed status from server response if provided
+      if (data.appointment) {
+        const confirmedStatus = data.appointment.status || newStatus;
+        setAppointments((prev) =>
+          prev.map((apt) =>
+            apt.id === appointmentId ? { ...apt, status: confirmedStatus } : apt
+          )
+        );
+        if (caSmileMemoryCache[selectedDate]) {
+          caSmileMemoryCache[selectedDate] = caSmileMemoryCache[selectedDate].map((apt) =>
+            apt.id === appointmentId ? { ...apt, status: confirmedStatus } : apt
+          );
+        }
+      }
+
+      // Broadcast event to Appointments section & other open windows/tabs instantly
+      notifyAppointmentUpdate({
+        id: appointmentId,
+        status: newStatus,
+        action: "status_changed",
+        source: "CA_SMILE",
+      });
     } catch (err) {
       console.error("Failed to update status on server:", err);
+      // Remove from pending moves if there was an actual network error
+      pendingMovesRef.current.delete(appointmentId);
       fetchAppointments(selectedDate, true);
     }
   };
@@ -1164,6 +1251,27 @@ export function CASmileBoardView() {
                         <span>&bull;</span>
                         <span className="font-semibold text-slate-700 dark:text-slate-200">{activePatientDetails.timeSlot}</span>
                       </p>
+
+                      {/* Only render filled demographics */}
+                      {(Boolean(activePatientDetails.gender) || Boolean(activePatientDetails.age) || Boolean(activePatientDetails.patientType)) && (
+                        <div className="flex items-center gap-1.5 flex-wrap mt-1 text-[11px] text-slate-500">
+                          {activePatientDetails.gender ? (
+                            <span className="capitalize px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 font-semibold text-slate-700 dark:text-slate-300">
+                              {activePatientDetails.gender}
+                            </span>
+                          ) : null}
+                          {activePatientDetails.age ? (
+                            <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 font-semibold text-slate-700 dark:text-slate-300">
+                              {activePatientDetails.age}
+                            </span>
+                          ) : null}
+                          {activePatientDetails.patientType ? (
+                            <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 font-semibold text-slate-700 dark:text-slate-300">
+                              {activePatientDetails.patientType}
+                            </span>
+                          ) : null}
+                        </div>
+                      )}
                     </div>
                   </div>
 

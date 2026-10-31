@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import {
   Sparkles,
@@ -24,6 +24,7 @@ import {
   RotateCcw,
   Gauge,
   Zap,
+  Upload,
 } from "lucide-react";
 import {
   Card,
@@ -94,6 +95,9 @@ export default function AdminServicesAndTreatmentsPage() {
   // Image picker state
   const [selectedImageToApply, setSelectedImageToApply] = useState("");
   const [customImageUrl, setCustomImageUrl] = useState("");
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const formFileInputRef = useRef<HTMLInputElement>(null);
 
   const [showDiagnostics, setShowDiagnostics] = useState<boolean>(true);
   const [isTogglingVisibility, setIsTogglingVisibility] = useState(false);
@@ -349,6 +353,7 @@ export default function AdminServicesAndTreatmentsPage() {
     setSelectedItem(item);
     setSelectedImageToApply(item.image);
     setCustomImageUrl("");
+    setUploadError(null);
     setIsImagePickerModalOpen(true);
   };
 
@@ -431,6 +436,51 @@ export default function AdminServicesAndTreatmentsPage() {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  // Handle uploading treatment image directly from user computer
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setUploadError("Please select a valid image file (JPG, PNG, WebP).");
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      setUploadError("File size exceeds 8MB. Please choose an image smaller than 8MB.");
+      return;
+    }
+
+    setUploadError(null);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      setSelectedImageToApply(dataUrl);
+      setCustomImageUrl("");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleFormFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      showStatus("error", "Please select a valid image file (JPG, PNG, WebP).");
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      showStatus("error", "File size exceeds 8MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      setFormImage(dataUrl);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleApplyImageChange = async () => {
@@ -600,10 +650,10 @@ export default function AdminServicesAndTreatmentsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-medium text-brand-muted uppercase tracking-wider">
-                  Clinical Imagery
+                  Treatment Photos
                 </p>
                 <p className="mt-1 text-2xl font-bold text-brand-text">
-                  {availableImages.length}
+                  {treatments.length + diagnostics.length}
                 </p>
               </div>
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
@@ -611,7 +661,7 @@ export default function AdminServicesAndTreatmentsPage() {
               </div>
             </div>
             <p className="mt-2 text-xs text-brand-muted">
-              High-res studio photography assets
+              Active treatment &amp; diagnostic procedures
             </p>
           </CardContent>
         </Card>
@@ -1449,50 +1499,35 @@ export default function AdminServicesAndTreatmentsPage() {
                     />
                   </div>
 
-                  <div className="w-full">
-                    <Input
-                      value={formImage}
-                      onChange={(e) => setFormImage(e.target.value)}
-                      placeholder="/images/treatments/teeth-whitening.jpg"
-                      className="text-xs font-mono"
-                    />
-                    <p className="mt-1 text-[11px] text-brand-muted">
-                      Selected asset path from clinic media library
-                    </p>
-                  </div>
-                </div>
-
-                {/* Quick Photo Carousel / Chooser */}
-                <div className="mt-3">
-                  <p className="text-[11px] font-medium text-brand-muted mb-2">
-                    Quick Pick from Clinic Image Library:
-                  </p>
-                  <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-thin">
-                    {availableImages.map((img) => (
-                      <button
-                        key={img.url}
+                  <div className="w-full space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Input
+                        value={formImage}
+                        onChange={(e) => setFormImage(e.target.value)}
+                        placeholder="/images/treatments/teeth-whitening.jpg"
+                        className="text-xs font-mono flex-1"
+                      />
+                      <input
+                        ref={formFileInputRef}
+                        type="file"
+                        accept="image/png,image/jpeg,image/jpg,image/webp"
+                        className="hidden"
+                        onChange={handleFormFileUpload}
+                      />
+                      <Button
                         type="button"
-                        onClick={() => setFormImage(img.url)}
-                        className={`group relative h-16 w-20 shrink-0 overflow-hidden rounded-xl border transition-all ${
-                          formImage === img.url
-                            ? "border-brand-primary ring-2 ring-brand-primary/40 scale-105"
-                            : "border-brand-border opacity-70 hover:opacity-100"
-                        }`}
-                        title={img.name}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => formFileInputRef.current?.click()}
+                        className="gap-1.5 text-xs shrink-0 border-teal-300 text-teal-800 hover:bg-teal-50 dark:border-teal-700 dark:text-teal-200"
                       >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={img.url}
-                          alt={img.name}
-                          className="h-full w-full object-cover"
-                        />
-                        {formImage === img.url && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-brand-primary/40">
-                            <Check className="h-4 w-4 text-white drop-shadow-sm stroke-[3]" />
-                          </div>
-                        )}
-                      </button>
-                    ))}
+                        <Upload className="h-3.5 w-3.5" />
+                        <span>Upload from PC</span>
+                      </Button>
+                    </div>
+                    <p className="text-[11px] text-brand-muted">
+                      Click &ldquo;Upload from PC&rdquo; to choose a photo from your computer, or enter an image URL
+                    </p>
                   </div>
                 </div>
               </div>
@@ -1707,61 +1742,55 @@ export default function AdminServicesAndTreatmentsPage() {
                   Change Photo for &ldquo;{selectedItem.title}&rdquo;
                 </h2>
                 <p className="text-xs text-brand-muted">
-                  Select any high-resolution clinical image or paste a custom image URL.
+                  Upload a photo from your computer or paste a custom image URL.
                 </p>
               </div>
             </div>
 
-            {/* Gallery Grid of 20 Clinical Images */}
+            {/* OPTION 1: Upload from Computer */}
             <div className="mt-6">
-              <label className="text-xs font-semibold text-brand-text uppercase tracking-wider">
-                Clinic Media Library ({availableImages.length} available)
+              <label className="text-xs font-semibold text-brand-text uppercase tracking-wider flex items-center gap-1.5">
+                <Upload className="h-3.5 w-3.5 text-teal-600" />
+                Upload Photo from Your Computer
               </label>
 
-              <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 max-h-[380px] overflow-y-auto pr-1">
-                {availableImages.map((img) => {
-                  const isSelected = selectedImageToApply === img.url && !customImageUrl;
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="mt-2.5 cursor-pointer rounded-2xl border-2 border-dashed border-teal-500/40 bg-teal-50/30 p-5 text-center transition-all hover:border-teal-500 hover:bg-teal-50/60 dark:bg-teal-950/20 dark:hover:bg-teal-950/40"
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/jpg,image/webp"
+                  className="hidden"
+                  onChange={handleFileUpload}
+                />
+                <div className="flex flex-col items-center justify-center gap-2">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300 shadow-xs">
+                    <Upload className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-teal-800 dark:text-teal-200 hover:underline">
+                      Click to browse &amp; upload photo from your computer
+                    </span>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+                      Supports PNG, JPG, JPEG, WebP (Max 8MB)
+                    </p>
+                  </div>
+                </div>
 
-                  return (
-                    <button
-                      key={img.url}
-                      type="button"
-                      onClick={() => {
-                        setSelectedImageToApply(img.url);
-                        setCustomImageUrl("");
-                      }}
-                      className={`group relative flex flex-col overflow-hidden rounded-xl border text-left transition-all ${
-                        isSelected
-                          ? "border-brand-primary ring-2 ring-brand-primary/50 shadow-md scale-[1.02]"
-                          : "border-brand-border hover:border-brand-primary/40 opacity-80 hover:opacity-100"
-                      }`}
-                    >
-                      <div className="relative aspect-[4/3] w-full overflow-hidden bg-zinc-100">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={img.url}
-                          alt={img.name}
-                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                        {isSelected && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg">
-                              <Check className="h-4 w-4 stroke-[3]" />
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                      <div className="p-2 bg-brand-surface">
-                        <p className="truncate text-[11px] font-semibold text-brand-text">
-                          {img.name}
-                        </p>
-                        <p className="text-[10px] text-brand-muted">
-                          {img.category}
-                        </p>
-                      </div>
-                    </button>
-                  );
-                })}
+                {uploadError && (
+                  <p className="mt-2 text-xs font-semibold text-rose-600 dark:text-rose-400">
+                    {uploadError}
+                  </p>
+                )}
+
+                {selectedImageToApply.startsWith("data:") && (
+                  <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    <span>Photo uploaded from computer &amp; ready to apply!</span>
+                  </div>
+                )}
               </div>
             </div>
 

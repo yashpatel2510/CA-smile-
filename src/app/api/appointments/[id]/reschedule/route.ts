@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { inMemoryStore } from "@/lib/in-memory-store";
 import { rescheduleAppointmentSchema } from "@/lib/validations/appointment";
+import { invalidateAppointmentsCache } from "@/lib/appointments-cache";
 
 export async function POST(
   req: NextRequest,
@@ -162,6 +163,8 @@ export async function POST(
       );
     }
 
+
+    invalidateAppointmentsCache();
 
     return NextResponse.json({
       success: true,

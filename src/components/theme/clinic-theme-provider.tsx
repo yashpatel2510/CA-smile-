@@ -110,6 +110,10 @@ export function ClinicThemeProvider({
         ...(brandConfig.aboutSection || DEFAULT_CLINIC_BRANDING.aboutSection!),
         ...(partial.aboutSection || {}),
       },
+      gallery: {
+        ...(brandConfig.gallery || DEFAULT_CLINIC_BRANDING.gallery!),
+        ...(partial.gallery || {}),
+      },
     };
 
     // Update local state and localStorage immediately

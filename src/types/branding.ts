@@ -235,7 +235,139 @@ export interface ClinicBrandConfig {
   mapCardImage?: string; // Thumbnail image for clinic card
   mapPinPulse?: boolean; // Enable/disable pulsing halo animation
   mapPinColor?: string; // Custom pin color (default "#E53935")
+
+  // Customizable Footer Clinic Space Polaroid Gallery
+  gallery?: GallerySectionConfig;
 }
+
+export interface PolaroidPhotoItem {
+  id: string;
+  src: string;
+  alt: string;
+  caption: string;
+  date?: string;
+  initialRotate?: number;
+  hoverRotate?: number;
+  restingY?: number;
+  hoverY?: number;
+  zIndex?: number;
+}
+
+export interface GallerySectionConfig {
+  enabled?: boolean;
+  headingLine1?: string;
+  headingLine2?: string;
+  description?: string;
+  showAddressCard?: boolean;
+  addressLine1?: string;
+  addressLine2?: string;
+  phone?: string;
+  showMascot?: boolean;
+  showCenterLogo?: boolean;
+  centerLogoUrl?: string;
+  centerLogoAlt?: string;
+  centerLogoHeight?: number;
+  centerLogoGlow?: boolean;
+  backgroundColor?: string;
+  textColor?: string;
+  photos: PolaroidPhotoItem[];
+}
+
+export const DEFAULT_GALLERY_PHOTOS: PolaroidPhotoItem[] = [
+  {
+    id: "p1",
+    src: "/images/ca-smile-clinic-building.jpg",
+    alt: "CA Smile Dental Clinic Exterior Space",
+    caption: "The Clinic Space",
+    date: "Bilimora",
+    initialRotate: -6,
+    hoverRotate: -1,
+    restingY: 56,
+    hoverY: -80,
+    zIndex: 11,
+  },
+  {
+    id: "p2",
+    src: "/images/why-trust-us-chair.jpg",
+    alt: "Precision Treatment Suite with Illumination",
+    caption: "Treatment Suite",
+    date: "Operatory 01",
+    initialRotate: 6,
+    hoverRotate: 1,
+    restingY: 50,
+    hoverY: -86,
+    zIndex: 12,
+  },
+  {
+    id: "p3",
+    src: "/images/treatments/digital-smile-design.jpg",
+    alt: "Digital Smile Design Consultation and Diagnostics",
+    caption: "Smile Design Lab",
+    date: "3D Digital Scan",
+    initialRotate: -5,
+    hoverRotate: 0,
+    restingY: 54,
+    hoverY: -82,
+    zIndex: 13,
+  },
+  {
+    id: "p4",
+    src: "/images/dr-deep-patel.jpg",
+    alt: "Dr. Deep Patel - Chief Dental Surgeon",
+    caption: "Dr. Deep Patel",
+    date: "Chief Surgeon",
+    initialRotate: 4,
+    hoverRotate: -1,
+    restingY: 48,
+    hoverY: -88,
+    zIndex: 14,
+  },
+  {
+    id: "p5",
+    src: "/images/hero-desktop.jpg",
+    alt: "CA Smile Clinical Specialists & Team",
+    caption: "Dedicated Team",
+    date: "Together",
+    initialRotate: -4,
+    hoverRotate: 0,
+    restingY: 52,
+    hoverY: -84,
+    zIndex: 15,
+  },
+  {
+    id: "p6",
+    src: "/images/hero-doctor-dental-care.png",
+    alt: "Gentle and Painless Dental Treatment",
+    caption: "Painless Dental Care",
+    date: "Gentle Touch",
+    initialRotate: 6,
+    hoverRotate: 1,
+    restingY: 46,
+    hoverY: -86,
+    zIndex: 16,
+  },
+];
+
+export const DEFAULT_GALLERY_CONFIG: GallerySectionConfig = {
+  enabled: true,
+  headingLine1: "Drop by for a smile.",
+  headingLine2: "At anytime.",
+  description:
+    "... more than that — it is what builds trust and comfort. A space where we welcome each patient with genuine warmth, deliver painless advanced care, and craft healthy, confident smiles. This sense of togetherness is born and nurtured out of our shared space, the clinic.",
+  showAddressCard: true,
+  addressLine1: "1st Floor, Labdhi Arcade, Above HDFC Bank",
+  addressLine2: "Convent Rd, Bilimora, Gujarat 396321",
+  phone: "+91 72260 98074",
+  showMascot: true,
+  showCenterLogo: true,
+  centerLogoUrl: "/images/ca-smile-logo-white-solid.png",
+  centerLogoAlt: "CA Smile Multispeciality Dental Clinic",
+  centerLogoHeight: 60,
+  centerLogoGlow: true,
+  backgroundColor: "#0d0e12",
+  textColor: "#ffffff",
+  photos: DEFAULT_GALLERY_PHOTOS,
+};
 
 export interface AboutSectionConfig {
   videoUrl?: string; // YouTube or MP4 video URL
@@ -320,4 +452,5 @@ export const DEFAULT_CLINIC_BRANDING: ClinicBrandConfig = {
     logoSize: 36,
   },
   hero: DEFAULT_HERO_CONFIG,
+  gallery: DEFAULT_GALLERY_CONFIG,
 };

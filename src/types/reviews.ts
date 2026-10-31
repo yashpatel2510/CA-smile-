@@ -29,11 +29,13 @@ export interface GoogleReviewsConfig {
   lastSyncedAt?: string;
   apiKey?: string;
   darkMode?: boolean;
+  showEmptyReviewCard?: boolean;
 }
 
 export interface ReviewsStoreData {
   googleConfig: GoogleReviewsConfig;
   reviews: ClinicReview[];
   darkMode?: boolean;
+  showEmptyReviewCard?: boolean;
 }
 

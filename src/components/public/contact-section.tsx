@@ -18,8 +18,8 @@ export function ContactSection({
 }: ContactSectionProps) {
   const pathname = usePathname();
 
-  // Hide on standalone contact page to avoid duplicate forms
-  if (hideOnContactPage && pathname === "/contact") {
+  // Hide on standalone contact/booking page to avoid duplicate forms
+  if (hideOnContactPage && (pathname === "/contact" || pathname === "/book")) {
     return null;
   }
 

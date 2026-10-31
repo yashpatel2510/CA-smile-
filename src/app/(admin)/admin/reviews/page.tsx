@@ -76,13 +76,15 @@ export default function AdminReviewsPage() {
   // Google Profile Settings modal state
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [configForm, setConfigForm] = useState({
-    businessName: "",
-    googleMapsUrl: "",
+    businessName: "CA Smile Dental Clinic",
+    googleMapsUrl:
+      "https://www.google.com/search?q=ca+smile+dental+clinic+reviwe+add+&sca_esv=83f148050a27f47b&rlz=1C5CHFA_enIN1171IN1171&sxsrf=AKL5yDikO_PUx2STXoM9NQgdeFsuQnPmkQ%3A1793449673912&ei=yd7laoSVN7GVhvcPiobT2Qs&biw=1470&bih=723&uact=5&oq=ca+smile+dental+clinic+reviwe+add+&gs_lp=Egxnd3Mtd2l6LXNlcnAiImNhIHNtaWxlIGRlbnRhbCBjbGluaWMgcmV2aXdlIGFkZCAyBxAhGAoYoAEyBxAhGAoYoAEyBxAhGAoYoAEyBxAhGAoYoAFI8ThQ0wNY8S9wAXgBkAEAmAHqAqABtCaqAQYyLTE4LjG4AQPIAQD4AQGYAhSgArgnwgIKEAAYRxjWBBiwA8ICDRAAGEcY1gQYyQMYsAPCAgYQABgWGB7CAgcQABiABBgNwgILEAAYgAQYigUYhgPCAggQABiABBiiBMICBRAAGO8FwgIGEAAYHhgNwgIFECEYnwXCAgUQIRigAcICBBAhGBWYAwCIBgGQBgiSBwgxLjAuMTguMaAH9G6yBwYyLTE4LjG4B7EnwgcGMC45LjExyAdEgAgB&sclient=gws-wiz-serp#lrd=0x3be0ef543648830b:0x3a288255f324c8de,3,,,,",
     placeId: "",
-    googleRating: 4.9,
-    totalReviewsCount: 194,
+    googleRating: 5.0,
+    totalReviewsCount: 0,
     autoApprove: true,
     apiKey: "",
+    showEmptyReviewCard: true,
   });
   const [savingConfig, setSavingConfig] = useState(false);
   const [placeIdInput, setPlaceIdInput] = useState("");
@@ -113,6 +115,18 @@ export default function AdminReviewsPage() {
   useEffect(() => {
     fetchReviews();
   }, []);
+
+  // Close open modals when Escape key is pressed
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (isConfigModalOpen) setIsConfigModalOpen(false);
+        if (isModalOpen) setIsModalOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isConfigModalOpen, isModalOpen]);
 
   // Toggle Review Section Dark Mode
   const handleToggleDarkMode = async () => {
@@ -187,14 +201,16 @@ export default function AdminReviewsPage() {
   const handleOpenConfigModal = () => {
     if (googleConfig) {
       setConfigForm({
-        businessName: googleConfig.businessName || "Dr. Preeti Shah Dental Clinic",
+        businessName: googleConfig.businessName || "CA Smile Dental Clinic",
         googleMapsUrl:
-          googleConfig.googleMapsUrl || "https://share.google/KRr7QvSMEB4CjYaYN",
-        placeId: googleConfig.placeId || "/g/11kqclnrjh",
-        googleRating: googleConfig.googleRating || 4.9,
-        totalReviewsCount: googleConfig.totalReviewsCount || 194,
+          googleConfig.googleMapsUrl ||
+          "https://www.google.com/search?q=ca+smile+dental+clinic+reviwe+add+&sca_esv=83f148050a27f47b&rlz=1C5CHFA_enIN1171IN1171&sxsrf=AKL5yDikO_PUx2STXoM9NQgdeFsuQnPmkQ%3A1793449673912&ei=yd7laoSVN7GVhvcPiobT2Qs&biw=1470&bih=723&uact=5&oq=ca+smile+dental+clinic+reviwe+add+&gs_lp=Egxnd3Mtd2l6LXNlcnAiImNhIHNtaWxlIGRlbnRhbCBjbGluaWMgcmV2aXdlIGFkZCAyBxAhGAoYoAEyBxAhGAoYoAEyBxAhGAoYoAEyBxAhGAoYoAFI8ThQ0wNY8S9wAXgBkAEAmAHqAqABtCaqAQYyLTE4LjG4AQPIAQD4AQGYAhSgArgnwgIKEAAYRxjWBBiwA8ICDRAAGEcY1gQYyQMYsAPCAgYQABgWGB7CAgcQABiABBgNwgILEAAYgAQYigUYhgPCAggQABiABBiiBMICBRAAGO8FwgIGEAAYHhgNwgIFECEYnwXCAgUQIRigAcICBBAhGBWYAwCIBgGQBgiSBwgxLjAuMTguMaAH9G6yBwYyLTE4LjG4B7EnwgcGMC45LjExyAdEgAgB&sclient=gws-wiz-serp#lrd=0x3be0ef543648830b:0x3a288255f324c8de,3,,,,",
+        placeId: googleConfig.placeId || "",
+        googleRating: googleConfig.googleRating || 5.0,
+        totalReviewsCount: googleConfig.totalReviewsCount || 0,
         autoApprove: googleConfig.autoApproveGoogleReviews ?? true,
         apiKey: googleConfig.apiKey || "",
+        showEmptyReviewCard: googleConfig.showEmptyReviewCard !== false,
       });
     }
     setIsConfigModalOpen(true);
@@ -732,7 +748,50 @@ export default function AdminReviewsPage() {
       </div>
 
       {/* Reviews Cards List */}
-      {filteredReviews.length === 0 ? (
+      {reviews.length === 0 ? (
+        <Card className="p-8 sm:p-10 border-2 border-dashed border-teal-500/30 bg-teal-50/20 dark:bg-teal-950/10 text-center rounded-2xl">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300 mb-3">
+            <Star className="h-6 w-6 fill-teal-500 text-teal-500" />
+          </div>
+          <h3 className="text-base font-bold text-brand-text">
+            Clinic Has 0 Reviews (New Clinic Mode)
+          </h3>
+          <p className="mt-1.5 text-xs text-brand-muted max-w-md mx-auto leading-relaxed">
+            {googleConfig?.showEmptyReviewCard !== false ? (
+              <>
+                The website is currently showing the single <strong className="text-teal-600 dark:text-teal-400">&ldquo;Be the First to Review Us&rdquo;</strong> card with an <strong className="text-teal-600 dark:text-teal-400">&ldquo;Add Review on Google&rdquo;</strong> button linking directly to your Google profile.
+              </>
+            ) : (
+              <>
+                The review section is currently <strong className="text-zinc-700 dark:text-zinc-300">hidden</strong> on the website.
+              </>
+            )}
+            {" "}As soon as you add reviews here or sync from Google, the real patient reviews will appear automatically!
+          </p>
+
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleOpenAdd}
+              className="gap-1.5 text-xs bg-teal-600 hover:bg-teal-700 text-white"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span>Add First Review Manually</span>
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={handleOpenConfigModal}
+              className="gap-1.5 text-xs"
+            >
+              <Settings className="h-3.5 w-3.5" />
+              <span>Configure Google Link / Hide Card</span>
+            </Button>
+          </div>
+        </Card>
+      ) : filteredReviews.length === 0 ? (
         <Card className="p-12 text-center">
           <MessageSquare className="mx-auto h-8 w-8 text-brand-muted opacity-60" />
           <div className="mt-3 text-sm font-semibold text-brand-text">
@@ -929,21 +988,32 @@ export default function AdminReviewsPage() {
       {/* ADD / EDIT REVIEW MODAL                                                  */}
       {/* ========================================================================= */}
       {isModalOpen && (
-        <div className="backdrop-blur-xs fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-lg space-y-5 rounded-clinic border border-brand-border bg-brand-surface p-6 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-brand-border pb-3">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsModalOpen(false);
+          }}
+        >
+          <div
+            className="relative w-full max-w-lg max-h-[90vh] flex flex-col rounded-2xl border border-brand-border bg-brand-surface shadow-2xl overflow-hidden my-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-brand-border bg-brand-surface px-6 py-4 shrink-0">
               <h3 className="font-heading text-lg font-bold text-brand-text">
                 {editingReviewId ? "Edit Patient Review" : "Add New Review"}
               </h3>
               <button
+                type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="rounded p-1 text-brand-muted hover:text-brand-text"
+                className="rounded-full p-1.5 text-brand-muted hover:bg-brand-background hover:text-brand-text transition-colors"
+                title="Close (Esc)"
               >
-                <X className="h-4 w-4" />
+                <X className="h-5 w-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveForm} className="space-y-4">
+            <form onSubmit={handleSaveForm} className="flex flex-col flex-1 overflow-hidden min-h-0">
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-brand-text">
@@ -1094,18 +1164,30 @@ export default function AdminReviewsPage() {
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 border-t border-brand-border pt-4">
+              </div>
+
+              <div className="sticky bottom-0 z-10 flex items-center justify-between border-t border-brand-border bg-brand-surface px-6 py-3.5 shrink-0 shadow-xs">
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => setIsModalOpen(false)}
                 >
-                  Cancel
+                  Close
                 </Button>
-                <Button type="submit" variant="primary" size="sm">
-                  {editingReviewId ? "Save Changes" : "Create Review"}
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsModalOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" variant="primary" size="sm">
+                    {editingReviewId ? "Save Changes" : "Create Review"}
+                  </Button>
+                </div>
               </div>
             </form>
           </div>
@@ -1115,12 +1197,21 @@ export default function AdminReviewsPage() {
       {/* GOOGLE BUSINESS PROFILE SETTINGS MODAL                                   */}
       {/* ========================================================================= */}
       {isConfigModalOpen && (
-        <div className="backdrop-blur-xs fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-lg space-y-5 rounded-clinic border border-brand-border bg-brand-surface p-6 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-brand-border pb-3">
-              <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-clinic border border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-zinc-900">
-                  <svg className="h-4 w-4" viewBox="0 0 24 24">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-3 sm:p-4 md:p-6 overflow-y-auto"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsConfigModalOpen(false);
+          }}
+        >
+          <div
+            className="relative w-full max-w-xl max-h-[88vh] flex flex-col rounded-2xl border border-brand-border bg-brand-surface shadow-2xl overflow-hidden my-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Sticky Header */}
+            <div className="sticky top-0 z-20 flex items-center justify-between border-b border-brand-border bg-brand-surface px-5 sm:px-6 py-4 shrink-0 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-zinc-900 shadow-xs">
+                  <svg className="h-4.5 w-4.5" viewBox="0 0 24 24">
                     <path
                       fill="#4285F4"
                       d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -1139,19 +1230,27 @@ export default function AdminReviewsPage() {
                     />
                   </svg>
                 </div>
-                <h3 className="font-heading text-lg font-bold text-brand-text">
-                  Google Business Profile Settings
-                </h3>
+                <div>
+                  <h3 className="font-heading text-base sm:text-lg font-bold text-brand-text">
+                    Google Business Profile Settings
+                  </h3>
+                  <p className="text-[11px] text-brand-muted">
+                    Configure Google Maps review link &amp; website display
+                  </p>
+                </div>
               </div>
               <button
+                type="button"
                 onClick={() => setIsConfigModalOpen(false)}
-                className="rounded p-1 text-brand-muted hover:text-brand-text"
+                className="rounded-full p-2 text-brand-muted hover:bg-brand-background hover:text-brand-text transition-colors"
+                title="Close (Esc)"
               >
-                <X className="h-4 w-4" />
+                <X className="h-5 w-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveGoogleConfig} className="space-y-4">
+            <form onSubmit={handleSaveGoogleConfig} className="flex flex-col flex-1 overflow-hidden min-h-0">
+              <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 space-y-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-brand-text">
                   Clinic / Business Name on Google *
@@ -1171,11 +1270,11 @@ export default function AdminReviewsPage() {
 
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-brand-text">
-                  Google Maps / Share Profile Link *
+                  Google Maps / Add Review Profile Link *
                 </label>
                 <Input
                   required
-                  placeholder="e.g. https://share.google/KRr7QvSMEB4CjYaYN"
+                  placeholder="https://www.google.com/search?q=ca+smile+dental+clinic+reviwe+add+..."
                   value={configForm.googleMapsUrl}
                   onChange={(e) =>
                     setConfigForm({
@@ -1185,8 +1284,32 @@ export default function AdminReviewsPage() {
                   }
                 />
                 <p className="text-[11px] text-brand-muted">
-                  Patients clicking &ldquo;Read All Google Reviews&rdquo; on the
+                  Patients clicking &ldquo;Add Review on Google&rdquo; on the
                   website will be directed straight to this link.
+                </p>
+              </div>
+
+              {/* Show / Hide Empty Review Card Toggle */}
+              <div className="rounded-xl border border-teal-200 dark:border-teal-800 bg-teal-50/50 dark:bg-teal-950/20 p-3.5 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-teal-950 dark:text-teal-200 cursor-pointer" htmlFor="showEmptyReviewCard">
+                    Show &ldquo;Add Your Review&rdquo; Card on Website
+                  </label>
+                  <input
+                    id="showEmptyReviewCard"
+                    type="checkbox"
+                    checked={configForm.showEmptyReviewCard}
+                    onChange={(e) =>
+                      setConfigForm({
+                        ...configForm,
+                        showEmptyReviewCard: e.target.checked,
+                      })
+                    }
+                    className="h-4 w-4 rounded border-brand-border text-teal-600 focus:ring-teal-500"
+                  />
+                </div>
+                <p className="text-[11px] text-zinc-600 dark:text-zinc-400">
+                  When your clinic has 0 reviews, the website displays a single card with the &ldquo;Add Review&rdquo; button linking directly to your Google review profile. When reviews are added, that card disappears automatically. Uncheck to hide the review section completely until reviews exist.
                 </p>
               </div>
 
@@ -1319,24 +1442,38 @@ export default function AdminReviewsPage() {
                 </button>
               </div>
 
-              <div className="flex items-center justify-end gap-2 border-t border-brand-border pt-4">
+              </div>
+
+              {/* Sticky Footer */}
+              <div className="sticky bottom-0 z-20 flex items-center justify-between border-t border-brand-border bg-brand-surface px-5 sm:px-6 py-3.5 shrink-0 shadow-lg">
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => setIsConfigModalOpen(false)}
+                  className="font-medium"
                 >
-                  Cancel
+                  Close / Done
                 </Button>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="sm"
-                  disabled={savingConfig}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  {savingConfig ? "Saving..." : "Save & Sync"}
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsConfigModalOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="sm"
+                    disabled={savingConfig}
+                    className="bg-blue-600 hover:bg-blue-700 shadow-sm font-semibold"
+                  >
+                    {savingConfig ? "Saving..." : "Save Settings & Done"}
+                  </Button>
+                </div>
               </div>
             </form>
           </div>

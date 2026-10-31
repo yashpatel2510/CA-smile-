@@ -200,7 +200,9 @@ export async function DELETE(
 
     // Also clean up from inMemoryStore
     inMemoryStore.deletePatient(patientId);
-
+    if (typeof global !== "undefined") {
+      (global as any).__cachedGlobalPatients = undefined;
+    }
 
     return NextResponse.json({
       success: true,
@@ -317,6 +319,10 @@ export async function PATCH(
       patientType,
       address: finalAddress,
     });
+
+    if (typeof global !== "undefined") {
+      (global as any).__cachedGlobalPatients = undefined;
+    }
 
     return NextResponse.json({
       success: true,

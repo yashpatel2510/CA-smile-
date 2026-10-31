@@ -11,6 +11,7 @@ import {
   renderBookingDeclinedEmail,
   renderBookingCancelledEmail,
 } from "@/lib/email-templates";
+import { invalidateAppointmentsCache } from "@/lib/appointments-cache";
 
 export async function PATCH(
   req: NextRequest,
@@ -128,14 +129,22 @@ export async function PATCH(
         if (endTime) updateData.endTime = new Date(endTime);
 
         // Status timestamp updates
-        if (status === "CONFIRMED" && !existingAppointment.confirmedAt) {
-          updateData.confirmedAt = nowDate;
+        if (status === "CONFIRMED") {
+          if (!existingAppointment.confirmedAt) updateData.confirmedAt = nowDate;
+          updateData.cancelledAt = null;
+          updateData.cancellationReason = null;
         } else if (status === "CHECKED_IN") {
           updateData.checkedInAt = nowDate;
+          updateData.cancelledAt = null;
+          updateData.cancellationReason = null;
         } else if (status === "TREATMENT_STARTED") {
           updateData.treatmentStartedAt = nowDate;
+          updateData.cancelledAt = null;
+          updateData.cancellationReason = null;
         } else if (status === "TREATMENT_DONE") {
           updateData.treatmentDoneAt = nowDate;
+          updateData.cancelledAt = null;
+          updateData.cancellationReason = null;
           if (typeof paidAmount === "number" && paidAmount > 0) {
             updateData.paidAmount =
               Number(existingAppointment.paidAmount || 0) + paidAmount;
@@ -148,6 +157,13 @@ export async function PATCH(
               updateData.paymentStatus = "PARTIAL";
             }
           }
+        } else if (status === "PENDING") {
+          updateData.cancelledAt = null;
+          updateData.cancellationReason = null;
+          updateData.confirmedAt = null;
+          updateData.checkedInAt = null;
+          updateData.treatmentStartedAt = null;
+          updateData.treatmentDoneAt = null;
         } else if (status === "CANCELLED") {
           updateData.cancelledAt = nowDate;
           updateData.cancellationReason = reason || "Cancelled by clinic";
@@ -455,13 +471,15 @@ export async function PATCH(
     }
 
 
-    return NextResponse.json({
-      success: true,
-      message: `Appointment successfully transitioned to ${status}.`,
-      appointment: updatedAppointment,
-      nextSessionAppointment: nextCreatedAppointment,
-      auditLog: auditEntry,
-    });
+      invalidateAppointmentsCache();
+
+      return NextResponse.json({
+        success: true,
+        message: `Appointment successfully transitioned to ${status}.`,
+        appointment: updatedAppointment,
+        nextSessionAppointment: nextCreatedAppointment,
+        auditLog: auditEntry,
+      });
   } catch (error: any) {
     return NextResponse.json(
       {

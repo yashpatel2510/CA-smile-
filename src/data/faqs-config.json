@@ -6,18 +6,18 @@
   "themeMode": "dark",
   "faqs": [
     {
-      "id": "faq-1",
-      "question": "deep",
-      "answer": "A standard project or comprehensive clinical transformation typically takes between 1 to 4 weeks depending on the treatment scope. Minor aesthetic touch-ups or single-visit restorations can often be completed in a single afternoon session, while custom aligners or multi-stage implant procedures are scheduled across comfortable milestones.",
+      "id": "faq-2",
+      "question": "What should I expect during my first visit?",
+      "answer": "Your first visit is designed to be comfortable, transparent, and completely stress-free. We start by sitting down to talk about your dental history, any past experiences, and what your specific oral health goals are.\n\nNext, we perform a thorough, gentle clinical examination of your teeth, gums, jaw joints, and oral tissues. If needed, we use modern digital diagnostics to get a crystal-clear view beneath the surface. Once our assessment is complete, we walk you through our findings in plain, easy-to-understand language. We present all available treatment choices so you can make an informed, confident decision about your smile.",
       "category": "General",
       "isActive": true,
       "isFeatured": true,
       "order": 1
     },
     {
-      "id": "faq-2",
-      "question": "Do you offer ongoing support after launch?",
-      "answer": "Yes, absolutely. We provide post-treatment follow-up consultations, preventative maintenance schedules, and ongoing direct communication with our clinical coordinators to ensure lasting results, comfort, and peace of mind.",
+      "id": "faq-1",
+      "question": "How often should I visit the dentist for a routine checkup?",
+      "answer": "We recommend visiting us every six months for a routine checkup and professional cleaning. Even with diligent daily brushing and flossing, microscopic plaque and tartar can build up in hard-to-reach areas.\n\nRegular visits allow us to spot early signs of cavities, gum inflammation, or bite changes long before they turn into painful, expensive dental emergencies. Think of it as routine maintenance for your health—preventing problems early saves you both time and discomfort.",
       "category": "General",
       "isActive": true,
       "isFeatured": true,
@@ -25,8 +25,8 @@
     },
     {
       "id": "faq-3",
-      "question": "Can we start with only branding or only website?",
-      "answer": "Yes, you can begin with a focused phase such as a comprehensive diagnostic consultation or initial aesthetic smile assessment. Once you're fully satisfied with the blueprint and visualization, you have complete freedom to proceed with subsequent treatments at your own pace.",
+      "question": "What options are available for replacing missing teeth?",
+      "answer": "Depending on your oral health, budget, and lifestyle, we offer several reliable solutions for missing teeth:\n\nDental Implants: The gold standard for a permanent, natural-looking replacement that mimics your natural tooth root.\n\nFixed Dental Bridges: A seamless way to fill a gap by anchoring artificial teeth to adjacent natural teeth.\n\nRemovable Dentures: Cost-effective partial or complete denture options to restore your smile and chewing function.",
       "category": "General",
       "isActive": true,
       "isFeatured": true,
@@ -34,48 +34,39 @@
     },
     {
       "id": "faq-4",
-      "question": "What do we need to provide before starting?",
-      "answer": "For clinical consultations, you simply need your identification and any prior medical or dental records if available. Everything else—including high-resolution 3D digital oral scans, computerized imaging, and diagnostic profiling—is handled on-site during your initial visit.",
+      "question": "Are dental implant procedures painful?",
+      "answer": "Patient comfort is our top priority. Implant placement is performed under local anesthesia, ensuring that the procedure itself is completely painless. Mild soreness or gum tenderness is normal for a few days following the procedure, which is easily managed with prescribed post-operative care and mild pain relievers.",
       "category": "General",
       "isActive": true,
       "isFeatured": true,
       "order": 4
     },
     {
-      "id": "faq-5",
-      "question": "Do you work with startups or only large companies?",
-      "answer": "We work with patients and clients of all backgrounds—from individual pediatric children and working professionals to entire corporate wellness programs. Our care plans and service packages are customized to fit your specific needs and timeline.",
+      "id": "faq-1793447251742-iwca",
+      "question": "How often should I visit the dentist for a routine checkup?",
+      "answer": "We recommend scheduling a professional checkup and cleaning every six months. Regular visits allow us to catch early signs of cavities, gum disease, or enamel wear long before they turn into painful or costly dental issues.",
       "category": "General",
       "isActive": true,
       "isFeatured": true,
       "order": 5
     },
     {
-      "id": "faq-6",
-      "question": "How is pricing calculated?",
-      "answer": "Pricing is 100% transparent with zero hidden fees. After an initial clinical evaluation and 3D digital diagnosis, we provide a detailed itemized estimate outlining every phase, material option, and available flexible installment or insurance coverage plan before any work begins.",
+      "id": "faq-1793447276128-e3kt",
+      "question": "How can I help my children maintain good oral hygiene habits early on?",
+      "answer": "Start early by gently wiping your infant's gums with a clean, damp cloth. Once teeth erupt, transition to a pea-sized amount of fluoride toothpaste and brush twice daily with a soft-bristled brush. Encourage a balanced, low-sugar diet and schedule your child's first dental visit by their first birthday or when their first tooth appears.",
       "category": "General",
       "isActive": true,
       "isFeatured": true,
       "order": 6
     },
     {
-      "id": "faq-7",
-      "question": "Are treatments and procedures painless?",
-      "answer": "Yes. We utilize advanced computerized painless local anesthesia, gentle rotary endodontics, and needle-free techniques designed specifically to eliminate discomfort and dental anxiety. Over 98% of our patients report feeling virtually nothing during procedures.",
-      "category": "Treatments",
+      "id": "faq-1793447298543-gcyh",
+      "question": "⁠How can I brighten my smile safely? Is professional whitening better than over-the-counter kits?",
+      "answer": "Professional in-office whitening is significantly safer, faster, and more effective than store-bought strips or trays. We use clinically proven whitening agents combined with protective barriers for your gums, minimizing sensitivity while achieving dramatic, long-lasting results tailored to your natural shade.",
+      "category": "General",
       "isActive": true,
       "isFeatured": true,
       "order": 7
-    },
-    {
-      "id": "faq-8",
-      "question": "How do I book or reschedule an appointment?",
-      "answer": "You can schedule instantly using our online booking calendar, message our 24/7 automated WhatsApp desk, or call reception directly. Rescheduling is easy and can be done anytime up to 2 hours prior to your scheduled slot.",
-      "category": "Appointments",
-      "isActive": true,
-      "isFeatured": true,
-      "order": 8
     }
   ]
 }

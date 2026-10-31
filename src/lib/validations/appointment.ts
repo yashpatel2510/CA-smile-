@@ -34,7 +34,7 @@ export const ALLOWED_STATUS_TRANSITIONS: Record<string, string[]> = {
 };
 
 export const createAppointmentSchema = z.object({
-  patientType: z.enum(["ADULT", "CHILD"]).default("ADULT"),
+  patientType: z.enum(["ADULT", "CHILD"]).optional().nullable().or(z.literal("")),
   fullName: z.string().optional(),
   childName: z.string().optional(),
   guardianName: z.string().optional(),

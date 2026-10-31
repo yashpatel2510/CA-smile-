@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { Play, Pause, VolumeX, Volume2, Sparkles, Check, ChevronUp } from "lucide-react";
+import { Play, Pause, VolumeX, Volume2 } from "lucide-react";
 import { AboutSectionConfig, DEFAULT_ABOUT_CONFIG } from "@/types/branding";
 
 export function getYoutubeVideoId(input?: string): string {
@@ -42,13 +42,13 @@ export function AboutVideoPlayer({
   const containerRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const videoElemRef = useRef<HTMLVideoElement>(null);
-  const qualityMenuRef = useRef<HTMLDivElement>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(activeConfig.startMuted !== false);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [activeQuality, setActiveQuality] = useState<string>(activeConfig.defaultQuality || "hd1080");
-  const [qualityMenuOpen, setQualityMenuOpen] = useState(false);
+
+  // Playback quality is configured and controlled directly via the Admin Panel
+  const activeQuality = activeConfig.defaultQuality || "hd1080";
 
   const effectiveDirectSrc =
     rawUrl.endsWith(".mp4") || rawUrl.endsWith(".webm")
@@ -59,25 +59,6 @@ export function AboutVideoPlayer({
 
   const inViewRef = useRef(false);
   const userPausedRef = useRef(false);
-
-  // Sync active quality whenever config changes from admin settings
-  useEffect(() => {
-    const q = activeConfig.defaultQuality || "hd1080";
-    setActiveQuality(q);
-  }, [activeConfig.defaultQuality]);
-
-  // Close quality menu on outside click
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (qualityMenuRef.current && !qualityMenuRef.current.contains(e.target as Node)) {
-        setQualityMenuOpen(false);
-      }
-    };
-    if (qualityMenuOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
-    }
-  }, [qualityMenuOpen]);
 
   // Send control command to YouTube iframe via postMessage
   const postCommand = useCallback((command: string, ...args: any[]) => {
@@ -171,11 +152,6 @@ export function AboutVideoPlayer({
       postCommand("mute");
       setIsMuted(true);
     }
-  };
-
-  const changeQuality = (q: string) => {
-    setActiveQuality(q);
-    enforceQuality(q);
   };
 
   const [origin, setOrigin] = useState("");
@@ -275,24 +251,6 @@ export function AboutVideoPlayer({
   // Container width class from config
   const sizeClass = activeConfig.videoSize || "max-w-4xl";
 
-  const handleSelectQuality = (q: string) => {
-    setActiveQuality(q);
-    if (isDirectMp4 && videoElemRef.current) {
-      const curTime = videoElemRef.current.currentTime;
-      const wasPlaying = !videoElemRef.current.paused;
-      const newSrc =
-        q === "hd720" ? "/videos/clinic-tour-720p.mp4" : "/videos/clinic-tour-1080p.mp4";
-      videoElemRef.current.src = newSrc;
-      videoElemRef.current.currentTime = curTime;
-      if (wasPlaying) {
-        videoElemRef.current.play().catch(() => {});
-      }
-    } else {
-      enforceQuality(q);
-    }
-    setQualityMenuOpen(false);
-  };
-
   return (
     <div
       ref={containerRef}
@@ -381,97 +339,15 @@ export function AboutVideoPlayer({
           <div className="pointer-events-none absolute inset-0 z-25 rounded-2xl sm:rounded-3xl shadow-[inset_0_0_60px_rgba(0,0,0,0.45)]" />
           <div className="pointer-events-none absolute top-0 inset-x-0 h-14 bg-gradient-to-b from-black/50 via-transparent to-transparent z-25" />
 
-          {/* Bottom Downside Controls Bar */}
-          <div className="absolute bottom-4 inset-x-4 z-30 flex items-center justify-between pointer-events-none">
-            {/* Left Controls: Status Pill & Quality Badge */}
+          {/* Bottom Downside Controls Bar: Play/Pause on mobile, plus Audio on desktop */}
+          <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 z-30 flex items-center justify-end pointer-events-none">
+            {/* Right Controls: Only Play/Pause on mobile; Audio Toggle on desktop */}
             <div className="flex items-center gap-2 pointer-events-auto">
-              {/* Playing Status Pill */}
-              {activeConfig.showStatusPill !== false && (
-                <div className="inline-flex items-center gap-2 rounded-full bg-white text-neutral-900 px-3.5 py-1.5 text-xs font-semibold backdrop-blur-md shadow-[0_4px_16px_rgba(0,0,0,0.25),0_1px_3px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,1),inset_0_-1px_1px_rgba(0,0,0,0.08)] border border-white/80 ring-1 ring-black/5 select-none">
-                  <span
-                    className={`h-2 w-2 rounded-full ${
-                      isPlaying
-                        ? "bg-teal-500 animate-pulse ring-2 ring-teal-500/30"
-                        : "bg-neutral-400"
-                    }`}
-                  />
-                  <span className="text-[11px] font-bold tracking-tight text-neutral-800">
-                    {isPlaying ? "Clinic Tour • Playing" : "Paused"}
-                  </span>
-                </div>
-              )}
-
-              {/* Quality Badge with Interactive Selection dropdown */}
-              <div ref={qualityMenuRef} className="relative">
-                <button
-                  type="button"
-                  onClick={() => setQualityMenuOpen(!qualityMenuOpen)}
-                  className="relative inline-flex items-center gap-1.5 rounded-full bg-white text-neutral-900 px-3 py-1.5 text-xs font-bold shadow-[0_4px_16px_rgba(0,0,0,0.25),0_1px_3px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,1),inset_0_-1px_1px_rgba(0,0,0,0.08)] border border-white/80 ring-1 ring-black/5 select-none cursor-pointer hover:bg-neutral-50 transition-all active:scale-95"
-                  title="Click to change playback quality"
-                  aria-label="Change playback resolution"
-                >
-                  <span className="inline-flex items-center justify-center rounded bg-teal-600 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow-xs leading-none">
-                    HD
-                  </span>
-                  <span className="text-[11px] font-extrabold tracking-tight text-neutral-900">
-                    {activeQuality === "hd1080"
-                      ? "1080p"
-                      : activeQuality === "hd720"
-                      ? "720p"
-                      : activeQuality === "medium"
-                      ? "480p"
-                      : "Auto"}
-                  </span>
-                  <ChevronUp
-                    className={`h-3 w-3 text-neutral-500 transition-transform duration-200 ${
-                      qualityMenuOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-
-                {/* Quality Selection Popup Menu */}
-                {qualityMenuOpen && (
-                  <div className="absolute bottom-full left-0 mb-2 w-44 rounded-2xl bg-neutral-900/95 p-1.5 text-white shadow-2xl backdrop-blur-xl border border-white/10 ring-1 ring-black/40 z-50 animate-in fade-in zoom-in-95 duration-150">
-                    <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-neutral-400 border-b border-white/10 mb-1">
-                      Video Resolution
-                    </div>
-                    {[
-                      { key: "hd1080", label: "1080p Full HD", badge: "Max" },
-                      { key: "hd720", label: "720p HD", badge: "HD" },
-                      { key: "medium", label: "480p SD", badge: "SD" },
-                      { key: "auto", label: "Auto Quality", badge: "Auto" },
-                    ].map((opt) => (
-                      <button
-                        key={opt.key}
-                        type="button"
-                        onClick={() => handleSelectQuality(opt.key)}
-                        className={`flex w-full items-center justify-between rounded-xl px-2.5 py-1.5 text-left text-xs font-semibold transition-colors ${
-                          activeQuality === opt.key
-                            ? "bg-teal-600 text-white"
-                            : "text-neutral-200 hover:bg-white/10"
-                        }`}
-                      >
-                        <span className="flex items-center gap-1.5">
-                          {activeQuality === opt.key && <Check className="h-3.5 w-3.5" />}
-                          <span className={activeQuality === opt.key ? "" : "pl-5"}>
-                            {opt.label}
-                          </span>
-                        </span>
-                        <span className="text-[10px] opacity-75">{opt.badge}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Right Controls: Realistic White Play/Pause & Audio Toggle */}
-            <div className="flex items-center gap-2.5 pointer-events-auto">
-              {/* Realistic White Play/Pause Button */}
+              {/* Realistic White Play/Pause Button (Visible on mobile & desktop) */}
               <button
                 type="button"
                 onClick={togglePlayPause}
-                className="group flex items-center gap-2 rounded-full bg-white text-neutral-900 px-4 py-1.5 text-xs font-bold tracking-tight shadow-[0_4px_16px_rgba(0,0,0,0.3),0_1px_3px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,1),inset_0_-1px_1px_rgba(0,0,0,0.08)] border border-white/80 ring-1 ring-black/10 transition-all duration-200 hover:bg-neutral-50 hover:scale-105 active:scale-95 active:shadow-[0_2px_6px_rgba(0,0,0,0.25)] cursor-pointer"
+                className="group flex items-center gap-1.5 sm:gap-2 rounded-full bg-white text-neutral-900 px-3.5 py-1.5 sm:px-4 sm:py-1.5 text-xs font-bold tracking-tight shadow-[0_4px_16px_rgba(0,0,0,0.3),0_1px_3px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,1),inset_0_-1px_1px_rgba(0,0,0,0.08)] border border-white/80 ring-1 ring-black/10 transition-all duration-200 hover:bg-neutral-50 hover:scale-105 active:scale-95 active:shadow-[0_2px_6px_rgba(0,0,0,0.25)] cursor-pointer"
                 aria-label={isPlaying ? "Pause video" : "Play video"}
                 title={isPlaying ? "Pause video" : "Play video"}
               >
@@ -488,11 +364,11 @@ export function AboutVideoPlayer({
                 )}
               </button>
 
-              {/* Realistic White Audio Toggle Button */}
+              {/* Realistic White Audio Toggle Button (Hidden on mobile, visible on sm+) */}
               <button
                 type="button"
                 onClick={toggleMute}
-                className="group flex items-center gap-1.5 rounded-full bg-white text-neutral-900 px-3.5 py-1.5 text-xs font-semibold shadow-[0_4px_16px_rgba(0,0,0,0.3),0_1px_3px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,1),inset_0_-1px_1px_rgba(0,0,0,0.08)] border border-white/80 ring-1 ring-black/10 transition-all duration-200 hover:bg-neutral-50 hover:scale-105 active:scale-95 active:shadow-[0_2px_6px_rgba(0,0,0,0.25)] cursor-pointer"
+                className="hidden sm:flex group items-center gap-1.5 rounded-full bg-white text-neutral-900 px-3.5 py-1.5 text-xs font-semibold shadow-[0_4px_16px_rgba(0,0,0,0.3),0_1px_3px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,1),inset_0_-1px_1px_rgba(0,0,0,0.08)] border border-white/80 ring-1 ring-black/10 transition-all duration-200 hover:bg-neutral-50 hover:scale-105 active:scale-95 active:shadow-[0_2px_6px_rgba(0,0,0,0.25)] cursor-pointer"
                 aria-label={isMuted ? "Unmute video" : "Mute video"}
                 title={isMuted ? "Click to unmute" : "Click to mute"}
               >

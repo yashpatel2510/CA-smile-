@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useClinicTheme } from "@/components/theme/clinic-theme-provider";
 import { useContactModal } from "@/components/public/contact-modal";
+import { FooterPolaroidsShowcase } from "@/components/public/footer-polaroids-showcase";
 
 function WhatsAppLogo({ className = "h-5 w-5" }: { className?: string }) {
   return (
@@ -62,180 +63,254 @@ export function Footer() {
     "https://www.google.com/maps/place/CA+Smile+Multispeciality+Dental+Clinic/data=!4m2!3m1!1s0x0:0x3a288255f324c8de?sa=X&ved=1t:2428&ictx=111";
 
   return (
-    <footer className="relative w-full overflow-hidden bg-white text-[#18181b] border-t border-black/10 pt-16 sm:pt-20 pb-6 sm:pb-10 transition-colors">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Top Grid: Brand & Socials on the Left, 2 Columns (Treatments & Clinic) on the Right */}
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-12">
-          {/* Left Column: Enlarged Prominent CA Smile Logo + WhatsApp & Instagram + Copyright */}
-          <div className="space-y-4 lg:col-span-6">
-            <Link
-              href="/"
-              prefetch={true}
-              className="inline-block transition-opacity hover:opacity-85"
-              aria-label={`${displayName} Home`}
-            >
-              {/* Clean Large CA Smile Official Logo */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/images/ca-smile-logo-light.png"
-                alt={displayName}
-                className="h-16 sm:h-20 md:h-22 w-auto max-w-[280px] sm:max-w-[340px] object-contain object-left drop-shadow-2xs"
-              />
-            </Link>
+    <footer className="relative w-full overflow-hidden bg-[#0d0e12] text-white selection:bg-white selection:text-black transition-colors">
+      {/* ===================================================================== */}
+      {/* 1. UPPER SECTION: CINEMATIC POLAROID SPACE GALLERY                    */}
+      {/* 1:1 match to reference video:                                         */}
+      {/* - "Drop by for a smile. / At anytime." headline                       */}
+      {/* - Shared space clinic story                                           */}
+      {/* - Dark address card + bird messenger mascot sticker                   */}
+      {/* - 5 polaroid photos: resting submerged across baseline -> lifts way up*/}
+      {/* ===================================================================== */}
+      <FooterPolaroidsShowcase />
 
-            {/* Instagram & WhatsApp Circular Dark Buttons (matching design) */}
-            <div className="flex items-center gap-3 pt-1">
-              {/* Instagram */}
-              <a
-                href={instagramUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Follow on Instagram"
-                className="group flex h-11 w-11 items-center justify-center rounded-full bg-[#18181b] text-white shadow-md transition-all hover:scale-110 hover:bg-black hover:shadow-lg active:scale-95"
+      {/* ===================================================================== */}
+      {/* 2. LOWER SECTION: BRAND STATEMENT & NAVIGATION DIRECTORY               */}
+      {/* Sits at z-20 with top border, masking the bottom half of resting      */}
+      {/* polaroids until hovered                                               */}
+      {/* ===================================================================== */}
+      <div className="relative z-20 w-full bg-[#0d0e12] border-t border-white/10 pt-14 sm:pt-18 pb-8 sm:pb-12">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {/* Top Row: Brand Statement (Left) + 3 Navigation Columns (Right) */}
+          <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-12">
+            {/* Left Column: Official Logo + 3-line statement + Socials + Copyright */}
+            <div className="space-y-6 lg:col-span-5">
+              <Link
+                href="/"
+                prefetch={true}
+                className="inline-block transition-opacity hover:opacity-85"
+                aria-label={`${displayName} Home`}
               >
-                <InstagramLogo className="h-5 w-5 text-white transition-transform group-hover:scale-105" />
-              </a>
+                {/* Clean Large CA Smile Official Logo (White on Dark) */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/images/ca-smile-logo-white-solid.png"
+                  alt={displayName}
+                  className="h-12 sm:h-14 md:h-16 w-auto max-w-[260px] sm:max-w-[320px] object-contain object-left"
+                />
+              </Link>
 
-              {/* WhatsApp */}
-              <a
-                href={whatsappHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Chat on WhatsApp"
-                className="group flex h-11 w-11 items-center justify-center rounded-full bg-[#18181b] text-white shadow-md transition-all hover:scale-110 hover:bg-black hover:shadow-lg active:scale-95"
-              >
-                <WhatsAppLogo className="h-5 w-5 text-white transition-transform group-hover:scale-105" />
-              </a>
+              {/* 3-Line Punchy Typography matching reference video */}
+              <div className="font-heading text-2xl sm:text-3xl lg:text-[34px] font-bold tracking-tight leading-[1.18]">
+                <p className="text-white">Painless. Modern.</p>
+                <p className="text-white">Compassionate. Gentle.</p>
+                <p className="text-zinc-500">Always CA Smile.</p>
+              </div>
+
+              {/* Instagram & WhatsApp Dark Frosted Buttons */}
+              <div className="flex items-center gap-3 pt-1">
+                {/* Instagram */}
+                <a
+                  href={instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Follow CA Smile on Instagram"
+                  className="group flex h-11 w-11 items-center justify-center rounded-full bg-zinc-900 border border-white/15 text-white shadow-md transition-all hover:scale-110 hover:border-white/40 hover:bg-zinc-800 active:scale-95"
+                >
+                  <InstagramLogo className="h-5 w-5 text-zinc-300 group-hover:text-white transition-colors" />
+                </a>
+
+                {/* WhatsApp */}
+                <a
+                  href={whatsappHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Chat with CA Smile on WhatsApp"
+                  className="group flex h-11 w-11 items-center justify-center rounded-full bg-zinc-900 border border-white/15 text-white shadow-md transition-all hover:scale-110 hover:border-emerald-500/50 hover:bg-emerald-950/40 active:scale-95"
+                >
+                  <WhatsAppLogo className="h-5 w-5 text-emerald-400 group-hover:scale-105 transition-transform" />
+                </a>
+              </div>
+
+              {/* Copyright & Location */}
+              <div className="pt-1 text-xs sm:text-[13px] text-zinc-400 space-y-1">
+                <p>&copy; {currentYear} {clinicName}. All rights reserved.</p>
+                <p className="text-zinc-500">Station Road, Near Tower, Bilimora, Gujarat 396321</p>
+              </div>
             </div>
 
-            {/* Copyright */}
-            <p className="text-xs sm:text-sm text-stone-500 max-w-xs leading-relaxed pt-1">
-              &copy; copyright {clinicName} {currentYear}. All rights reserved.
-            </p>
+            {/* Right Columns: 3 Columns (TREATMENTS, CLINIC, CONNECT) matching reference video */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 sm:gap-10 lg:col-span-6 lg:col-start-7">
+              {/* Column 1: Treatments */}
+              <div className="space-y-3.5">
+                <h4 className="font-mono text-xs font-semibold uppercase tracking-widest text-zinc-400">
+                  Treatments
+                </h4>
+                <ul className="space-y-2.5 text-xs sm:text-sm text-zinc-400">
+                  <li>
+                    <Link
+                      href="/services"
+                      prefetch={true}
+                      className="transition-colors hover:text-white hover:underline underline-offset-4"
+                    >
+                      Dental Implants
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/services"
+                      prefetch={true}
+                      className="transition-colors hover:text-white hover:underline underline-offset-4"
+                    >
+                      Root Canal (RCT)
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/services"
+                      prefetch={true}
+                      className="transition-colors hover:text-white hover:underline underline-offset-4"
+                    >
+                      Teeth Whitening
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/services"
+                      prefetch={true}
+                      className="transition-colors hover:text-white hover:underline underline-offset-4"
+                    >
+                      Braces &amp; Aligners
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/services"
+                      prefetch={true}
+                      className="transition-colors hover:text-white hover:underline underline-offset-4"
+                    >
+                      Smile Makeover
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Column 2: Clinic */}
+              <div className="space-y-3.5">
+                <h4 className="font-mono text-xs font-semibold uppercase tracking-widest text-zinc-400">
+                  Clinic
+                </h4>
+                <ul className="space-y-2.5 text-xs sm:text-sm text-zinc-400">
+                  <li>
+                    <Link
+                      href="/"
+                      prefetch={true}
+                      className="transition-colors hover:text-white hover:underline underline-offset-4"
+                    >
+                      Home
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/about"
+                      prefetch={true}
+                      className="transition-colors hover:text-white hover:underline underline-offset-4"
+                    >
+                      About Us
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/about"
+                      prefetch={true}
+                      className="transition-colors hover:text-white hover:underline underline-offset-4"
+                    >
+                      Our Doctors
+                    </Link>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => openContactModal()}
+                      className="text-left transition-colors hover:text-white hover:underline underline-offset-4"
+                    >
+                      Book Appointment
+                    </button>
+                  </li>
+                  <li>
+                    <a
+                      href={googleMapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="transition-colors hover:text-white hover:underline underline-offset-4"
+                    >
+                      Location &amp; Map
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Column 3: Connect */}
+              <div className="space-y-3.5 col-span-2 sm:col-span-1">
+                <h4 className="font-mono text-xs font-semibold uppercase tracking-widest text-zinc-400">
+                  Connect
+                </h4>
+                <ul className="space-y-2.5 text-xs sm:text-sm text-zinc-400">
+                  <li>
+                    <a
+                      href={whatsappHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="transition-colors hover:text-emerald-400 hover:underline underline-offset-4"
+                    >
+                      WhatsApp Chat
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href={instagramUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="transition-colors hover:text-white hover:underline underline-offset-4"
+                    >
+                      Instagram
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href={`tel:${whatsappPhone.replace(/\D/g, "")}`}
+                      className="transition-colors hover:text-white hover:underline underline-offset-4"
+                    >
+                      {whatsappPhone}
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href={googleMapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="transition-colors hover:text-white hover:underline underline-offset-4"
+                    >
+                      Google Maps
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
 
-          {/* Right Columns: Treatments & Clinic (Socials column removed per request) */}
-          <div className="grid grid-cols-2 gap-8 sm:gap-12 lg:col-span-6">
-            {/* Column 1: Treatments */}
-            <div className="space-y-3.5">
-              <h3 className="text-xs sm:text-sm font-bold tracking-tight text-[#18181b] uppercase">
-                Treatments
-              </h3>
-              <ul className="space-y-2.5 text-xs sm:text-sm text-stone-600">
-                <li>
-                  <Link
-                    href="/services"
-                    prefetch={true}
-                    className="transition-colors hover:text-black hover:underline"
-                  >
-                    Dental Implants
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/services"
-                    prefetch={true}
-                    className="transition-colors hover:text-black hover:underline"
-                  >
-                    Root Canal (RCT)
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/services"
-                    prefetch={true}
-                    className="transition-colors hover:text-black hover:underline"
-                  >
-                    Teeth Whitening
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/services"
-                    prefetch={true}
-                    className="transition-colors hover:text-black hover:underline"
-                  >
-                    Braces &amp; Aligners
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/services"
-                    prefetch={true}
-                    className="transition-colors hover:text-black hover:underline"
-                  >
-                    Smile Makeover
-                  </Link>
-                </li>
-              </ul>
+          {/* ================================================================= */}
+          {/* GIANT WATERMARK TYPOGRAPHY (matching reference aesthetic at base) */}
+          {/* ================================================================= */}
+          <div className="relative mt-16 sm:mt-24 select-none pointer-events-none overflow-hidden">
+            <div className="font-heading font-black tracking-tighter text-white/[0.04] uppercase leading-none text-[15vw] whitespace-nowrap text-left -mb-4 sm:-mb-8 sm:-ml-2">
+              CA SMILE
             </div>
-
-            {/* Column 2: Clinic */}
-            <div className="space-y-3.5">
-              <h3 className="text-xs sm:text-sm font-bold tracking-tight text-[#18181b] uppercase">
-                Clinic
-              </h3>
-              <ul className="space-y-2.5 text-xs sm:text-sm text-stone-600">
-                <li>
-                  <Link
-                    href="/"
-                    prefetch={true}
-                    className="transition-colors hover:text-black hover:underline"
-                  >
-                    Home
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/about"
-                    prefetch={true}
-                    className="transition-colors hover:text-black hover:underline"
-                  >
-                    About Us
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/services"
-                    prefetch={true}
-                    className="transition-colors hover:text-black hover:underline"
-                  >
-                    Our Doctors
-                  </Link>
-                </li>
-                <li>
-                  <button
-                    type="button"
-                    onClick={() => openContactModal()}
-                    className="text-left font-medium text-[#18181b] transition-colors hover:underline"
-                  >
-                    Book Appointment
-                  </button>
-                </li>
-                <li>
-                  <a
-                    href={googleMapsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="transition-colors hover:text-black hover:underline"
-                  >
-                    Location &amp; Map
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        {/* ================================================================= */}
-        {/* GIANT WATERMARK TYPOGRAPHY (matching inspiration image at bottom) */}
-        {/* ================================================================= */}
-        <div className="relative mt-16 sm:mt-24 select-none pointer-events-none overflow-hidden">
-          <div className="font-heading font-black tracking-tighter text-black/[0.045] uppercase leading-none text-[15vw] whitespace-nowrap text-left -mb-4 sm:-mb-8 sm:-ml-2">
-            CA SMILE
           </div>
         </div>
       </div>
     </footer>
   );
 }
+
+export default Footer;

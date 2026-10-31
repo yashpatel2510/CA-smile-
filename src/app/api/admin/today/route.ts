@@ -4,15 +4,27 @@ import fs from "fs";
 import path from "path";
 import { appendPatientToGoogleSheet } from "@/lib/google-sheets/google-sheet-sync";
 import { inMemoryStore } from "@/lib/in-memory-store";
+import {
+  getCachedTodayAppointments,
+  setCachedTodayAppointments,
+  invalidateAppointmentsCache,
+  getCachedQueueOrder,
+  setCachedQueueOrder,
+  setAllCachedQueueOrder,
+  getLastCacheInvalidationTime,
+} from "@/lib/appointments-cache";
 
 export const dynamic = "force-dynamic";
 
 const QUEUE_ORDER_FILE = path.join(process.cwd(), "src", "data", "today-queue-order.json");
 
 function getQueueOrder(dateStr: string): string[] {
+  const cached = getCachedQueueOrder(dateStr);
+  if (cached) return cached;
   try {
     if (fs.existsSync(QUEUE_ORDER_FILE)) {
       const data = JSON.parse(fs.readFileSync(QUEUE_ORDER_FILE, "utf-8"));
+      setAllCachedQueueOrder(data);
       return data[dateStr] || [];
     }
   } catch (err) {
@@ -33,6 +45,7 @@ function saveQueueOrder(dateStr: string, order: string[]) {
       } catch {}
     }
     data[dateStr] = order;
+    setCachedQueueOrder(dateStr, order, data);
     fs.writeFileSync(QUEUE_ORDER_FILE, JSON.stringify(data, null, 2), "utf-8");
   } catch (err) {
     console.error("Error saving queue order file:", err);
@@ -54,13 +67,24 @@ export async function GET(req: NextRequest) {
     const defaultDateStr = now.toISOString().split("T")[0];
     const targetDateStr = searchParams.get("date") || localDateStr || defaultDateStr;
 
+    // Fast memory cache check (<2ms response)
+    const cachedResult = getCachedTodayAppointments(targetDateStr);
+    if (cachedResult) {
+      return NextResponse.json(cachedResult, {
+        headers: {
+          "Cache-Control": "private, no-cache, no-transform",
+          "X-Cache": "HIT",
+        },
+      });
+    }
+
+    const queryStartTime = Date.now();
+
     // Buffer query range (+/- 6 hours) to account for UTC vs IST offsets
     const startOfDay = new Date(`${targetDateStr}T00:00:00.000Z`);
     const endOfDay = new Date(`${targetDateStr}T23:59:59.999Z`);
     const bufferedStart = new Date(startOfDay.getTime() - 6 * 3600 * 1000);
     const bufferedEnd = new Date(endOfDay.getTime() + 6 * 3600 * 1000);
-
-    const clinic = await prisma.clinic.findFirst().catch(() => null);
 
     // Fetch appointments from Prisma
     let appointments: any[] = [];
@@ -208,6 +232,18 @@ export async function GET(req: NextRequest) {
         srvLower.includes("follow-up") ||
         srvLower.includes("follow up");
 
+      let ageStr = "";
+      if (apt.patient?.dateOfBirth) {
+        const d = new Date(apt.patient.dateOfBirth);
+        if (!isNaN(d.getTime())) {
+          const today = new Date();
+          let calculatedAge = today.getFullYear() - d.getFullYear();
+          const m = today.getMonth() - d.getMonth();
+          if (m < 0 || (m === 0 && today.getDate() < d.getDate())) calculatedAge--;
+          if (calculatedAge >= 0 && calculatedAge < 120) ageStr = `${calculatedAge} yrs`;
+        }
+      }
+
       return {
         id: apt.id,
         tokenNumber: index + 1,
@@ -215,7 +251,10 @@ export async function GET(req: NextRequest) {
         patientName,
         phone: apt.patient?.phone || "—",
         email: apt.patient?.email || "",
-        gender: apt.patient?.gender || "Not specified",
+        gender: apt.patient?.gender || "",
+        dateOfBirth: apt.patient?.dateOfBirth ? apt.patient.dateOfBirth.toISOString().split("T")[0] : "",
+        age: ageStr,
+        patientType: apt.patientType || "",
         serviceId: apt.serviceId,
         serviceName: apt.service?.name || apt.reason || "General Consultation",
         doctor: apt.preferredDoctor || "Dr. Sankar (Chief Dental Surgeon)",
@@ -250,11 +289,23 @@ export async function GET(req: NextRequest) {
       confirmed: formatted.filter((a) => a.status === "CONFIRMED").length,
     };
 
-    return NextResponse.json({
+    const responseData = {
       success: true,
       date: targetDateStr,
       metrics,
       appointments: formatted,
+    };
+
+    // Only cache if NO invalidation occurred while this query was running to avoid stale race conditions
+    if (getLastCacheInvalidationTime() <= queryStartTime) {
+      setCachedTodayAppointments(targetDateStr, responseData);
+    }
+
+    return NextResponse.json(responseData, {
+      headers: {
+        "Cache-Control": "private, no-cache, no-transform",
+        "X-Cache": "MISS",
+      },
     });
   } catch (err: any) {
     console.error("GET /api/admin/today error:", err);
@@ -421,6 +472,7 @@ export async function POST(req: NextRequest) {
         preferredDoctor: doctor || "Dr. Sankar (Chief Dental Surgeon)",
         reason: serviceName || "General Dental Consultation",
         notes: notes || `Booked via Receptionist Desk (${source})`,
+        patientType: body.patientType || null,
         checkedInAt: status === "CHECKED_IN" || status === "TREATMENT_STARTED" ? new Date() : null,
         treatmentStartedAt: status === "TREATMENT_STARTED" ? new Date() : null,
       },
@@ -456,11 +508,14 @@ export async function POST(req: NextRequest) {
       console.warn("Google Sheet sync notice:", e);
     }
 
-    return NextResponse.json({
-      success: true,
-      message: `Successfully added ${newAppointment.patient.firstName} to Today's Queue!`,
-      appointment: newAppointment,
-    });
+      // Invalidate server-side appointments cache immediately
+      invalidateAppointmentsCache();
+
+      return NextResponse.json({
+        success: true,
+        message: `Successfully added ${newAppointment.patient.firstName} to Today's Queue!`,
+        appointment: newAppointment,
+      });
   } catch (err: any) {
     console.error("POST /api/admin/today error:", err);
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
@@ -476,6 +531,9 @@ export async function PATCH(req: NextRequest) {
     const body = await req.json();
     const { action, appointmentId, status, newOrder, date } = body;
     const targetDateStr = date || new Date().toISOString().split("T")[0];
+
+    // Invalidate today cache on every queue/status change
+    invalidateAppointmentsCache();
 
     // 1. Bulk Reorder Queue
     if (action === "REORDER" && Array.isArray(newOrder)) {
@@ -532,16 +590,32 @@ export async function PATCH(req: NextRequest) {
 
       if (status === "CHECKED_IN") {
         updates.checkedInAt = new Date();
+        updates.cancelledAt = null;
+        updates.cancellationReason = null;
       } else if (status === "TREATMENT_STARTED" || status === "IN_PROGRESS") {
         updates.treatmentStartedAt = new Date();
+        updates.cancelledAt = null;
+        updates.cancellationReason = null;
       } else if (status === "COMPLETED" || status === "TREATMENT_DONE") {
         updates.treatmentDoneAt = new Date();
+        updates.cancelledAt = null;
+        updates.cancellationReason = null;
       } else if (status === "CONFIRMED") {
         updates.confirmedAt = new Date();
+        updates.cancelledAt = null;
+        updates.cancellationReason = null;
       } else if (status === "CANCELLED" || status === "DECLINED") {
         updates.cancelledAt = new Date();
+        updates.cancellationReason = body.reason || "Cancelled from clinic desk";
       } else if (status === "NO_SHOW") {
         updates.noShowAt = new Date();
+      } else if (status === "PENDING") {
+        updates.cancelledAt = null;
+        updates.cancellationReason = null;
+        updates.checkedInAt = null;
+        updates.treatmentStartedAt = null;
+        updates.treatmentDoneAt = null;
+        updates.confirmedAt = null;
       }
 
       try {
@@ -556,6 +630,9 @@ export async function PATCH(req: NextRequest) {
           inMemoryStore.updateAppointmentStatus(appointmentId, status as any);
         } catch {}
 
+        // Invalidate today cache AFTER database write commits so subsequent queries get fresh data
+        invalidateAppointmentsCache();
+
         return NextResponse.json({
           success: true,
           message: `Status updated to ${status}`,
@@ -569,6 +646,9 @@ export async function PATCH(req: NextRequest) {
         if (memUpdated && body.notes !== undefined) {
           memUpdated.notes = body.notes;
         }
+
+        invalidateAppointmentsCache();
+
         return NextResponse.json({
           success: true,
           message: `Status updated to ${status}`,

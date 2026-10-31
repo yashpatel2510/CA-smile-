@@ -160,7 +160,9 @@ async function runTestSuite() {
   }
 
   // 5. WhatsApp Flow Data Exchange: Date Selection (dynamic slot query)
-  const bookingDate = "2026-10-24"; // Future Saturday
+  const bookingDate = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split("T")[0];
   let testSlotTime = "10:30 AM";
   try {
     const exchangeRes = await fetch(`${BASE_URL}/api/whatsapp/flows/data-exchange`, {

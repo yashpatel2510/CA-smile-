@@ -16,61 +16,68 @@ import {
   parseSlotToMinutes,
   getSlotScheduledTime,
 } from "@/lib/booking-time-utils";
+import {
+  getCachedAppointmentsList,
+  setCachedAppointmentsList,
+  invalidateAppointmentsCache,
+} from "@/lib/appointments-cache";
 
 // Concurrency mutex to serialize rapid concurrent bookings for the same patient/phone & date
 const activeBookingPromises = new Map<string, Promise<any>>();
 
-// In-memory cache for clinic to avoid roundtrips on every booking
-let cachedClinic: any = null;
-let cachedClinicExpiry = 0;
+// Global in-memory cache for clinic and services to eliminate roundtrips on every booking
+const globalClinicCache = globalThis as unknown as {
+  __cachedClinic?: any;
+  __cachedClinicExpiry?: number;
+  __cachedServicesMap?: Map<string, any>;
+  __cachedServicesList?: any[];
+  __cachedServicesExpiry?: number;
+};
 
 async function getCachedClinic(clinicSlug?: string) {
   const now = Date.now();
-  if (cachedClinic && now < cachedClinicExpiry) {
-    return cachedClinic;
+  if (globalClinicCache.__cachedClinic && now < (globalClinicCache.__cachedClinicExpiry || 0)) {
+    return globalClinicCache.__cachedClinic;
   }
   let clinic = await prisma.clinic.findFirst();
   if (!clinic) {
     clinic = await prisma.clinic.create({
       data: {
-        name: "VS Multispeciality Dental Clinic",
-        slug: clinicSlug || "vs-dental-clinic",
+        name: "CA Smile Dental Clinic",
+        slug: clinicSlug || "ca-smile-dental-clinic",
         themeKey: "teal-serenity",
       },
     });
   }
-  cachedClinic = clinic;
-  cachedClinicExpiry = now + 10 * 60 * 1000; // Cache for 10 minutes
+  globalClinicCache.__cachedClinic = clinic;
+  globalClinicCache.__cachedClinicExpiry = now + 60 * 60 * 1000; // Cache for 1 hour
   return clinic;
 }
 
-// In-memory cache for services to eliminate roundtrip latency on every booking
-let cachedServicesMap: Map<string, any> = new Map();
-let cachedServicesList: any[] = [];
-let cachedServicesExpiry = 0;
-
 async function getCachedService(serviceName?: string, serviceId?: string) {
   const now = Date.now();
-  if (cachedServicesList.length === 0 || now > cachedServicesExpiry) {
+  if (!globalClinicCache.__cachedServicesList || globalClinicCache.__cachedServicesList.length === 0 || now > (globalClinicCache.__cachedServicesExpiry || 0)) {
     try {
       const allServices = await prisma.service.findMany();
-      cachedServicesList = allServices;
-      cachedServicesMap.clear();
+      globalClinicCache.__cachedServicesList = allServices;
+      const sMap = new Map<string, any>();
       for (const s of allServices) {
-        cachedServicesMap.set(s.id, s);
-        cachedServicesMap.set(s.name.trim().toLowerCase(), s);
+        sMap.set(s.id, s);
+        sMap.set(s.name.trim().toLowerCase(), s);
       }
-      cachedServicesExpiry = now + 10 * 60 * 1000;
+      globalClinicCache.__cachedServicesMap = sMap;
+      globalClinicCache.__cachedServicesExpiry = now + 60 * 60 * 1000; // Cache for 1 hour
     } catch {}
   }
 
-  if (serviceId && cachedServicesMap.has(serviceId)) {
-    return cachedServicesMap.get(serviceId);
+  const sMap = globalClinicCache.__cachedServicesMap;
+  if (serviceId && sMap?.has(serviceId)) {
+    return sMap.get(serviceId);
   }
-  if (serviceName && cachedServicesMap.has(serviceName.trim().toLowerCase())) {
-    return cachedServicesMap.get(serviceName.trim().toLowerCase());
+  if (serviceName && sMap?.has(serviceName.trim().toLowerCase())) {
+    return sMap.get(serviceName.trim().toLowerCase());
   }
-  return cachedServicesList[0] || null;
+  return globalClinicCache.__cachedServicesList?.[0] || null;
 }
 
 // Rate limit: 10 requests per 60 seconds per IP
@@ -79,6 +86,19 @@ const BOOKING_RATE_LIMIT = { limit: 10, windowMs: 60000 };
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
+
+    // Fast cache check for repeated GET requests
+    const cacheKey = req.url;
+    const cachedResponse = getCachedAppointmentsList(cacheKey);
+    if (cachedResponse) {
+      return NextResponse.json(cachedResponse, {
+        headers: {
+          "Cache-Control": "private, no-cache, no-transform",
+          "X-Cache": "HIT",
+        },
+      });
+    }
+
     const queryResult = appointmentQuerySchema.safeParse({
       status: searchParams.get("status") || undefined,
       date: searchParams.get("date") || undefined,
@@ -269,12 +289,21 @@ export async function GET(req: NextRequest) {
       };
     });
 
-    return NextResponse.json({
+    const responseData = {
       success: true,
       count: serializedAppointments.length,
       page,
       limit,
       appointments: serializedAppointments,
+    };
+
+    setCachedAppointmentsList(cacheKey, responseData);
+
+    return NextResponse.json(responseData, {
+      headers: {
+        "Cache-Control": "private, no-cache, no-transform",
+        "X-Cache": "MISS",
+      },
     });
   } catch (error: any) {
     return NextResponse.json(
@@ -306,6 +335,20 @@ export async function POST(req: NextRequest) {
     }
 
     const rawBody = await req.json();
+
+    // Anti-spam bot honeypot detection: silently discard automated bot submissions
+    if (rawBody.patient_hp_trap || rawBody.honeypot || rawBody.website) {
+      return NextResponse.json({
+        success: true,
+        appointment: {
+          id: `APT-${Date.now()}`,
+          patientName: rawBody.fullName || "Valued Patient",
+          status: "PENDING",
+        },
+        message: "Appointment booked successfully",
+      });
+    }
+
     const parseResult = createAppointmentSchema.safeParse(rawBody);
 
     if (!parseResult.success) {
@@ -486,37 +529,38 @@ export async function POST(req: NextRequest) {
     activeBookingPromises.set(bookingLockKey, lockPromise);
 
     try {
+      const tPreParallel = Date.now();
       // Parallelize clinic, doctor overlaps, service lookup, and patient lookup in ONE concurrent round-trip
-    let [clinic, overlaps, initialService, matchedPatients] = await Promise.all([
-      getCachedClinic(input.clinicSlug),
-      !forceOverride
-        ? prisma.appointment
-            .findMany({
-              where: {
-                status: { notIn: ["CANCELLED", "DECLINED", "NO_SHOW"] },
-                startTime: { lt: endDate },
-                endTime: { gt: scheduledDate },
-              },
-              select: {
-                id: true,
-                preferredDoctor: true,
-                startTime: true,
-                endTime: true,
-                status: true,
-              },
-            })
-            .catch(() => [])
-        : Promise.resolve([]),
-      getCachedService(chosenServiceName, input.serviceId),
-      prisma.patient
-        .findMany({
-          where: {
-            phone: { in: phoneVariants },
-          },
-          take: 5,
-        })
-        .catch(() => []),
-    ]);
+      let [clinic, overlaps, initialService, matchedPatients] = await Promise.all([
+        getCachedClinic(input.clinicSlug),
+        !forceOverride
+          ? prisma.appointment
+              .findMany({
+                where: {
+                  status: { notIn: ["CANCELLED", "DECLINED", "NO_SHOW"] },
+                  startTime: { lt: endDate },
+                  endTime: { gt: scheduledDate },
+                },
+                select: {
+                  id: true,
+                  preferredDoctor: true,
+                  startTime: true,
+                  endTime: true,
+                  status: true,
+                },
+              })
+              .catch(() => [])
+          : Promise.resolve([]),
+        getCachedService(chosenServiceName, input.serviceId),
+        prisma.patient
+          .findMany({
+            where: {
+              phone: { in: phoneVariants },
+            },
+            take: 5,
+          })
+          .catch(() => []),
+      ]);
 
     // 1. Direct match by patientId if provided
     let existingPatient: any = null;
@@ -560,71 +604,53 @@ export async function POST(req: NextRequest) {
         ...(matchedPatients || []).map((p: any) => p.id),
       ].filter(Boolean);
 
-      const recentDuplicate = await prisma.appointment.findFirst({
-        where: {
-          status: { notIn: ["CANCELLED", "DECLINED"] },
-          OR: [
-            ...(candidatePatientIds.length > 0
-              ? [
-                  {
-                    patientId: { in: candidatePatientIds },
-                    startTime: {
-                      gte: new Date(scheduledDate.getTime() - 15 * 60 * 1000),
-                      lte: new Date(scheduledDate.getTime() + 15 * 60 * 1000),
-                    },
-                  },
-                  {
-                    patientId: { in: candidatePatientIds },
-                    createdAt: {
-                      gte: new Date(Date.now() - 20 * 1000),
-                    },
-                  },
-                ]
-              : []),
-            {
-              patient: { phone: { in: phoneVariants } },
-              startTime: {
-                gte: new Date(scheduledDate.getTime() - 15 * 60 * 1000),
-                lte: new Date(scheduledDate.getTime() + 15 * 60 * 1000),
+      // Only perform duplicate check if there are known matching patient IDs
+      if (candidatePatientIds.length > 0) {
+        const recentDuplicate = await prisma.appointment.findFirst({
+          where: {
+            patientId: { in: candidatePatientIds },
+            status: { notIn: ["CANCELLED", "DECLINED"] },
+            OR: [
+              {
+                startTime: {
+                  gte: new Date(scheduledDate.getTime() - 15 * 60 * 1000),
+                  lte: new Date(scheduledDate.getTime() + 15 * 60 * 1000),
+                },
               },
-            },
-            {
-              patient: { phone: { in: phoneVariants } },
-              createdAt: {
-                gte: new Date(Date.now() - 20 * 1000),
+              {
+                createdAt: {
+                  gte: new Date(Date.now() - 20 * 1000),
+                },
               },
-            },
-          ],
-        },
-        include: {
-          patient: true,
-          service: true,
-          staffUser: true,
-          treatment: true,
-          treatmentSession: true,
-        },
-        orderBy: { createdAt: "desc" },
-      });
-
-      if (recentDuplicate) {
-        console.log(
-          `[Deduplication] Prevented duplicate appointment creation for phone ${input.phone}. Returning existing appointment ${recentDuplicate.id}`
-        );
-        const patientKey = recentDuplicate.patient?.id || recentDuplicate.patientId || recentDuplicate.id;
-        const patientCode = getPatientCode(patientKey, recentDuplicate.createdAt);
-        return NextResponse.json(
-          {
-            success: true,
-            message: "Appointment already scheduled",
-            appointment: {
-              ...recentDuplicate,
-              patientName: `${resolvedFirstName} ${resolvedLastName}`.trim() || "Valued Patient",
-              patientCode,
-            },
-            duplicatePrevented: true,
+            ],
           },
-          { status: 200 }
-        );
+          include: {
+            patient: true,
+            service: true,
+          },
+          orderBy: { createdAt: "desc" },
+        });
+
+        if (recentDuplicate) {
+          console.log(
+            `[Deduplication] Prevented duplicate appointment creation for phone ${input.phone}. Returning existing appointment ${recentDuplicate.id}`
+          );
+          const patientKey = recentDuplicate.patient?.id || recentDuplicate.patientId || recentDuplicate.id;
+          const patientCode = getPatientCode(patientKey, recentDuplicate.createdAt);
+          return NextResponse.json(
+            {
+              success: true,
+              message: "Appointment already scheduled",
+              appointment: {
+                ...recentDuplicate,
+                patientName: `${resolvedFirstName} ${resolvedLastName}`.trim() || "Valued Patient",
+                patientCode,
+              },
+              duplicatePrevented: true,
+            },
+            { status: 200 }
+          );
+        }
       }
     } catch (dupErr) {
       console.warn("Deduplication lookup check failed, continuing:", dupErr);
@@ -782,7 +808,7 @@ export async function POST(req: NextRequest) {
         source: safeSource,
         notes: consolidatedNotes,
         reason: input.reason || chosenServiceName,
-        patientType: input.patientType || "ADULT",
+        patientType: input.patientType || null,
         childName: input.childName || null,
         guardianName: input.guardianName || null,
         preferredDoctor: assignedDoctor,
@@ -793,29 +819,6 @@ export async function POST(req: NextRequest) {
         totalAmount: input.totalAmount || 0.0,
         paymentStatus: input.paymentStatus || "PENDING",
       };
-
-      let patientId = existingPatient?.id;
-      if (!patientId) {
-        const newPatient = await prisma.patient.create({
-          data: {
-            clinicId: clinic.id,
-            firstName: resolvedFirstName,
-            lastName: resolvedLastName,
-            email: input.email || null,
-            phone: input.phone,
-            medicalNotes: consolidatedNotes,
-          },
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-            phone: true,
-          },
-        });
-        existingPatient = newPatient;
-        patientId = newPatient.id;
-      }
 
       let serviceId = initialService?.id;
       if (!serviceId) {
@@ -832,19 +835,39 @@ export async function POST(req: NextRequest) {
         serviceId = newService.id;
       }
 
+      let patientId = existingPatient?.id;
+      let patientObj = existingPatient;
+
+      if (!patientId) {
+        patientObj = await prisma.patient.create({
+          data: {
+            clinicId: clinic.id,
+            firstName: resolvedFirstName,
+            lastName: resolvedLastName,
+            email: input.email || null,
+            phone: input.phone,
+            medicalNotes: consolidatedNotes,
+          },
+        });
+        patientId = patientObj.id;
+        existingPatient = patientObj;
+      }
+
       appointmentData.patientId = patientId;
       appointmentData.serviceId = serviceId;
       if (treatmentId) {
         appointmentData.treatmentId = treatmentId;
       }
 
-      createdAppointment = await prisma.appointment.create({
+      const rawCreated = await prisma.appointment.create({
         data: appointmentData,
-        include: {
-          patient: true,
-          service: true,
-        },
       });
+
+      createdAppointment = {
+        ...rawCreated,
+        patient: patientObj,
+        service: initialService,
+      };
 
       // If tied to treatment, create treatment session record
       if (treatmentId) {
@@ -945,7 +968,7 @@ export async function POST(req: NextRequest) {
         source: safeSource,
         notes: consolidatedNotes,
         reason: input.reason || chosenServiceName,
-        patientType: input.patientType || "ADULT",
+        patientType: input.patientType || null,
         childName: input.childName || null,
         guardianName: input.guardianName || null,
         preferredDoctor: assignedDoctor,
@@ -1042,6 +1065,9 @@ export async function POST(req: NextRequest) {
         source: input.source || "WEB_FORM",
       }).catch(() => {});
     });
+
+      // Invalidate appointment caches immediately so admin/today and appointments views get fresh data
+      invalidateAppointmentsCache();
 
       return NextResponse.json(
         {

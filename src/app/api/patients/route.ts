@@ -3,12 +3,22 @@ import prisma from "@/lib/prisma";
 import { inMemoryStore } from "@/lib/in-memory-store";
 import { getPatientCode } from "@/lib/patient-numbering-store";
 
+// Global cache references to ensure patient counts never drop or decrease during transient DB locks
+declare global {
+  // eslint-disable-next-line no-var
+  var __cachedGlobalPatients: any[] | undefined;
+  // eslint-disable-next-line no-var
+  var __cachedGlobalPatientsTimestamp: number | undefined;
+}
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const search = searchParams.get("search")?.toLowerCase();
 
     let patients: any[] = [];
+    let dbSuccess = false;
+
     try {
       const dbPatients = await prisma.patient.findMany({
         orderBy: { createdAt: "desc" },
@@ -68,11 +78,11 @@ export async function GET(req: NextRequest) {
           name: fullName,
           phone: p.phone,
           email: p.email || "",
-          gender: p.gender || "Not specified",
+          gender: p.gender || "",
           dateOfBirth: p.dateOfBirth ? p.dateOfBirth.toISOString().split("T")[0] : "",
-          age: age || 32,
-          bloodType: "B+",
-          address: p.address || "Bilimora, Gujarat",
+          age: age !== null ? age : null,
+          bloodType: p.medicalNotes?.match(/Blood Group:\s*([^|]+)/i)?.[1]?.trim() || "",
+          address: p.address || "",
           emergencyContact: p.emergencyContact || "",
           medicalNotes: p.medicalNotes || "",
           condition,
@@ -90,50 +100,109 @@ export async function GET(req: NextRequest) {
           treatments: p.treatments || [],
         };
       });
-    } catch (dbError) {
-      console.warn("DB query failed, using in-memory fallback:", dbError);
-      // In-memory fallback
-      const appointments = inMemoryStore.getAppointments();
-      const patientMap = new Map<string, any>();
 
-      for (const apt of appointments) {
-        const p = apt.patient;
-        const key = p.phone || p.firstName;
-        if (!patientMap.has(key)) {
-          patientMap.set(key, {
-            id: p.id || `PAT-${key.slice(-4) || "001"}`,
-            firstName: p.firstName,
-            lastName: p.lastName,
-            name: `${p.firstName} ${p.lastName}`.trim(),
-            phone: p.phone,
-            email: p.email || "",
-            gender: "Adult",
-            dateOfBirth: "",
-            age: 35,
-            bloodType: "A+",
-            address: "Bilimora, Gujarat",
-            emergencyContact: "",
-            medicalNotes: apt.notes || "",
-            condition: apt.service?.name || apt.reason || "Dental Care",
-            source: apt.source || "WEB_FORM",
-            totalVisits: 1,
-            lastVisit: apt.startTime
-              ? new Date(apt.startTime).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                })
-              : "Recent",
-            createdAt: apt.createdAt || new Date().toISOString(),
-            treatments: apt.treatment ? [apt.treatment] : [],
-          });
-        } else {
-          const item = patientMap.get(key);
-          item.totalVisits += 1;
+      // Also merge any in-memory store patients or appointments if they are not yet in the DB
+      try {
+        const inMemAppointments = inMemoryStore.getAppointments();
+        const existingPhones = new Set(patients.map((p) => p.phone?.replace(/\D/g, "")));
+        const existingIds = new Set(patients.map((p) => p.id));
+
+        for (const apt of inMemAppointments) {
+          const p = apt.patient;
+          if (!p) continue;
+          const cleanPPhone = (p.phone || "").replace(/\D/g, "");
+          if ((!cleanPPhone || !existingPhones.has(cleanPPhone)) && !existingIds.has(p.id)) {
+            existingIds.add(p.id);
+            if (cleanPPhone) existingPhones.add(cleanPPhone);
+
+            patients.push({
+              id: p.id || `PAT-${Date.now()}`,
+              patientCode: getPatientCode(p.id || `PAT-${Date.now()}`),
+              firstName: p.firstName,
+              lastName: p.lastName,
+              name: `${p.firstName} ${p.lastName}`.trim(),
+              phone: p.phone,
+              email: p.email || "",
+              gender: p.gender || "",
+              dateOfBirth: p.dateOfBirth || "",
+              age: null,
+              bloodType: "",
+              address: "",
+              emergencyContact: "",
+              medicalNotes: apt.notes || "",
+              condition: apt.service?.name || apt.reason || "Dental Care",
+              source: apt.source || "WEB_FORM",
+              totalVisits: 1,
+              lastVisit: apt.startTime
+                ? new Date(apt.startTime).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })
+                : "Recent",
+              createdAt: apt.createdAt || new Date().toISOString(),
+              appointments: [apt],
+              treatments: apt.treatment ? [apt.treatment] : [],
+            });
+          }
         }
-      }
+      } catch {}
 
-      patients = Array.from(patientMap.values());
+      dbSuccess = true;
+      global.__cachedGlobalPatients = patients;
+      global.__cachedGlobalPatientsTimestamp = Date.now();
+    } catch (dbError) {
+      console.warn("DB query failed in GET /api/patients, checking resilient cache:", dbError);
+      
+      // If we have a previously cached list, use it to ensure count NEVER drops or decreases
+      if (global.__cachedGlobalPatients && global.__cachedGlobalPatients.length > 0) {
+        patients = [...global.__cachedGlobalPatients];
+      } else {
+        // Fallback to in-memory appointments
+        const appointments = inMemoryStore.getAppointments();
+        const patientMap = new Map<string, any>();
+
+        for (const apt of appointments) {
+          const p = apt.patient;
+          const key = p.phone || p.firstName;
+          if (!patientMap.has(key)) {
+            patientMap.set(key, {
+              id: p.id || `PAT-${key.slice(-4) || "001"}`,
+              patientCode: getPatientCode(p.id || `PAT-${key.slice(-4) || "001"}`),
+              firstName: p.firstName,
+              lastName: p.lastName,
+              name: `${p.firstName} ${p.lastName}`.trim(),
+              phone: p.phone,
+              email: p.email || "",
+              gender: "",
+              dateOfBirth: "",
+              age: null,
+              bloodType: "",
+              address: "",
+              emergencyContact: "",
+              medicalNotes: apt.notes || "",
+              condition: apt.service?.name || apt.reason || "Dental Care",
+              source: apt.source || "WEB_FORM",
+              totalVisits: 1,
+              lastVisit: apt.startTime
+                ? new Date(apt.startTime).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })
+                : "Recent",
+              createdAt: apt.createdAt || new Date().toISOString(),
+              appointments: [apt],
+              treatments: apt.treatment ? [apt.treatment] : [],
+            });
+          } else {
+            const item = patientMap.get(key);
+            item.totalVisits += 1;
+          }
+        }
+
+        patients = Array.from(patientMap.values());
+      }
     }
 
     if (search) {
@@ -143,15 +212,24 @@ export async function GET(req: NextRequest) {
           p.phone?.includes(search) ||
           p.email?.toLowerCase().includes(search) ||
           p.id?.toLowerCase().includes(search) ||
+          p.patientCode?.toLowerCase().includes(search) ||
           p.condition?.toLowerCase().includes(search)
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      count: patients.length,
-      patients,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        count: patients.length,
+        patients,
+      },
+      {
+        headers: {
+          "Cache-Control": "private, no-cache, no-transform",
+          "X-Data-Source": dbSuccess ? "DB" : "CACHE_FALLBACK",
+        },
+      }
+    );
   } catch (error: any) {
     return NextResponse.json(
       { success: false, message: error.message || "Failed to fetch patients" },
@@ -271,6 +349,8 @@ export async function POST(req: NextRequest) {
       };
     }
 
+    // Refresh global patient cache
+    global.__cachedGlobalPatients = undefined;
 
     return NextResponse.json({
       success: true,
@@ -349,7 +429,8 @@ export async function DELETE(req: NextRequest) {
     }
 
     inMemoryStore.deletePatient(id);
-
+    // Invalidate global patient cache
+    global.__cachedGlobalPatients = undefined;
 
     return NextResponse.json({
       success: true,

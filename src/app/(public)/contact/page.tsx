@@ -1,25 +1,25 @@
 import type { Metadata } from "next";
 import { CalendarBookingExperience } from "@/components/public/calendar-booking-experience";
-import { getBookingFormConfig } from "@/lib/booking-form-store";
+import { getBookingFormConfigAsync } from "@/lib/booking-form-store";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Book Appointment & Contact | PedioDent Dental Clinic",
+  title: "Book Appointment & Contact | CA Smile Dental Clinic",
   description:
     "Schedule your dental consultation online with our modern dental booking experience or get in touch with our clinical coordinators. Let's make that smile shine!",
   alternates: {
     canonical: "/contact",
   },
   openGraph: {
-    title: "Book Appointment & Contact - PedioDent Dental Clinic",
+    title: "Book Appointment & Contact - CA Smile Dental Clinic",
     description:
       "Modern dental consultation booking and clinical coordinator contacts. Let's make that smile shine!",
     url: "/contact",
   },
 };
 
-export default function ContactPage({
+export default async function ContactPage({
   searchParams,
 }: {
   searchParams?: {
@@ -28,7 +28,7 @@ export default function ContactPage({
     doctor?: string;
   };
 }) {
-  const config = getBookingFormConfig();
+  const config = await getBookingFormConfigAsync();
   const isDark = config.themeMode === "dark";
 
   return (
@@ -41,6 +41,7 @@ export default function ContactPage({
         <CalendarBookingExperience
           initialConfig={config}
           initialService={searchParams?.treatment || searchParams?.service}
+          initialDoctor={searchParams?.doctor}
         />
       </div>
     </div>
