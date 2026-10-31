@@ -685,6 +685,8 @@ function ShowcaseBlock({
                         <img
                           src={item.image}
                           alt={item.title}
+                          width={800}
+                          height={500}
                           loading="lazy"
                           decoding="async"
                           className="w-full h-full object-cover object-center lg:absolute lg:inset-0"
@@ -1091,6 +1093,8 @@ function DiagnosticFramerShowcase({
                             <img
                               src={item.image}
                               alt={item.title}
+                              width={800}
+                              height={500}
                               loading="lazy"
                               decoding="async"
                               className="w-full h-full object-cover object-center group-hover/img:scale-105 transition-transform duration-500 ease-out"

@@ -95,6 +95,13 @@ export function ClinicLogo({
   const sizeStyles = SIZE_CONFIGS[size] || SIZE_CONFIGS.md;
   const shapeStyle = SHAPE_MAP[activeConfig.shape] || SHAPE_MAP.rounded;
 
+  const PIXEL_SIZES: Record<string, number> = {
+    sm: 28,
+    md: 36,
+    lg: 44,
+    xl: 56,
+  };
+
   // 1. Custom Image Logo
   if (activeConfig.type === "IMAGE" && activeConfig.imageUrl && !imgError) {
     return (
@@ -105,6 +112,8 @@ export function ClinicLogo({
         <img
           src={activeConfig.imageUrl}
           alt={activeConfig.altText || "Clinic Logo"}
+          width={PIXEL_SIZES[size] || 36}
+          height={PIXEL_SIZES[size] || 36}
           className={`object-contain ${sizeStyles.img}`}
           onError={() => setImgError(true)}
         />

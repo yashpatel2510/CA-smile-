@@ -73,6 +73,8 @@ export function WhyPatientsTrustUs() {
           <img
             src={backgroundImageUrl}
             alt="State of the art dental clinic treatment chair and precision overhead illumination"
+            width={1280}
+            height={720}
             className="w-full h-full object-cover object-left xl:object-[left_center]"
             loading="lazy"
             decoding="async"
@@ -166,6 +168,8 @@ export function WhyPatientsTrustUs() {
           <img
             src={backgroundImageUrl}
             alt="State of the art dental clinic treatment chair"
+            width={720}
+            height={360}
             className="w-full h-full object-cover object-left"
             loading="lazy"
             decoding="async"

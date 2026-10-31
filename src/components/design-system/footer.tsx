@@ -98,6 +98,8 @@ export function Footer() {
                 <img
                   src="/images/ca-smile-logo-white-solid.png"
                   alt={displayName}
+                  width={240}
+                  height={64}
                   className="h-12 sm:h-14 md:h-16 w-auto max-w-[260px] sm:max-w-[320px] object-contain object-left"
                 />
               </Link>

@@ -206,6 +206,10 @@ export function ClinicMapSection({ className = "" }: ClinicMapSectionProps) {
                     : (brandConfig.logo?.imageUrl || "/images/ca-smile-logo-light.png")
                 }
                 alt={clinicName}
+                width={54}
+                height={36}
+                loading="lazy"
+                decoding="async"
                 className="h-8 sm:h-9 w-auto max-w-[130px] object-contain transition-transform duration-200 hover:scale-105"
               />
             </div>

@@ -141,10 +141,7 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
 
         {/* 2. MOBILE HERO IMAGE (CUSTOMIZABLE FIT & SIZE: COVER / CONTAIN / FILL) */}
         {mobileDoctorImg && (
-          <motion.div
-            initial={{ opacity: 0, scale: shouldReduceMotion ? 1 : 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
+          <div
             className={`relative w-full ${
               isFullWidth
                 ? "max-w-none px-0"
@@ -159,8 +156,11 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
             <img
               src={mobileDoctorImg}
               alt={hero.imageAltText || "Dental Care Specialist Doctor"}
+              width={750}
+              height={880}
               loading="eager"
               fetchPriority="high"
+              decoding="async"
               onError={(e) => {
                 const target = e.currentTarget;
                 if (!target.dataset.fallbackApplied) {
@@ -202,7 +202,7 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
                 aria-hidden="true"
               />
             )}
-          </motion.div>
+          </div>
         )}
 
         {/* TOP INFO ROW: Rendered after image is completed in mobile view */}
@@ -451,8 +451,11 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
           <img
             src={doctorImg}
             alt={hero.imageAltText || "Dental Care Specialist"}
+            width={1920}
+            height={1080}
             loading="eager"
             fetchPriority="high"
+            decoding="async"
             onError={(e) => {
               const target = e.currentTarget;
               if (!target.dataset.fallbackApplied) {

@@ -62,6 +62,8 @@ export function ClinicVideoShowcaseSection({
                 brandConfig?.clinicName ||
                 "CA Smile Dental Clinic"
               }
+              width={60}
+              height={40}
               loading="lazy"
               decoding="async"
               className="h-9 sm:h-11 md:h-12 w-auto object-contain dark:hidden"
@@ -74,6 +76,8 @@ export function ClinicVideoShowcaseSection({
                 brandConfig?.clinicName ||
                 "CA Smile Dental Clinic"
               }
+              width={60}
+              height={40}
               loading="lazy"
               decoding="async"
               className="h-9 sm:h-11 md:h-12 w-auto object-contain hidden dark:block"

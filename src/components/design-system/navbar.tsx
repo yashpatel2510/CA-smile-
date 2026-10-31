@@ -224,6 +224,8 @@ export function Navbar({
               <img
                 src={effectiveLogoUrl}
                 alt={displayName}
+                width={Math.round((logoHeight || 36) * 1.5)}
+                height={logoHeight || 36}
                 loading="eager"
                 decoding="async"
                 className="w-auto object-contain transition-all duration-200"

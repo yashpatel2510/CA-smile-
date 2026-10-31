@@ -391,6 +391,8 @@ export function FooterPolaroidsShowcase({
               <img
                 src={centerLogoUrl}
                 alt={centerLogoAlt}
+                width={Math.round(centerLogoHeight * 1.5)}
+                height={centerLogoHeight}
                 loading="lazy"
                 decoding="async"
                 style={{ height: `${centerLogoHeight}px` }}
