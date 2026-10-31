@@ -14,6 +14,7 @@ import { getAllPosts, getBlogSectionConfig } from "@/lib/blog";
 import { getTreatmentsStoreData } from "@/lib/treatments-store";
 import { BlogResponsiveShowcase } from "@/components/public/blog-responsive-showcase";
 import { ClinicVideoShowcaseSection } from "@/components/public/clinic-video-showcase-section";
+import { DoctorIntroSection } from "@/components/public/doctor-intro-section";
 
 export const metadata: Metadata = {
   title: "HealthSphere Clinic | Board-Certified Physicians & Same-Day Care",
@@ -74,7 +75,10 @@ export default function HomePage() {
           />
         </div>
 
-        {/* Clinic Tour / About Us Video Showcase Section (Directly After Treatments) */}
+        {/* Doctor Introduction Showcase Section */}
+        <DoctorIntroSection />
+
+        {/* Clinic Tour / About Us Video Showcase Section (Directly After Doctor Intro) */}
         <ClinicVideoShowcaseSection />
 
         {/* Patient Testimonials Section (Live Animated 3-Column Marquee) */}

@@ -7,7 +7,7 @@
   "digitWidth": 5,
   "separator": "Dash ( - )",
   "startingNumber": 1,
-  "currentCounter": 124,
+  "currentCounter": 127,
   "lastYearReset": "2026",
   "patientCodeMap": {
     "cmvksykbd0002ncb10u4tg27i": "CA-0001",
@@ -132,6 +132,9 @@
     "cmvwgyvf2004d47lkf1ksytbn": "00120",
     "cmvwh3nvf004p47lk93kc1ct9": "00121",
     "cmvwhmei1004z47lkmd76h7le": "00122",
-    "cmvwhn1c2005347lkzd6l6x0u": "00123"
+    "cmvwhn1c2005347lkzd6l6x0u": "00123",
+    "cmvwi6e5k005f47lkn16yldgv": "00124",
+    "cmvwi7ehm005r47lk2mqinh9w": "00125",
+    "cmvwi98o70003ss3a9cb6uwp4": "00126"
   }
 }
