@@ -143,6 +143,13 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
               alt={hero.imageAltText || "Dental Care Specialist Doctor"}
               loading="eager"
               fetchPriority="high"
+              onError={(e) => {
+                const target = e.currentTarget;
+                if (!target.dataset.fallbackApplied) {
+                  target.dataset.fallbackApplied = "true";
+                  target.src = "/images/hero-mobile.jpg";
+                }
+              }}
               className={`w-full select-none transition-all duration-300 drop-shadow-xs ${
                 isMobileCover
                   ? "h-full object-cover object-center"
@@ -333,6 +340,13 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
                     <img
                       src={doctorAvatar}
                       alt={hero.doctorBoxName || "Doctor Avatar"}
+                      onError={(e) => {
+                        const target = e.currentTarget;
+                        if (!target.dataset.fallbackApplied) {
+                          target.dataset.fallbackApplied = "true";
+                          target.src = "/images/doctor-avatar-uploaded.jpeg";
+                        }
+                      }}
                       className="h-full w-full object-cover object-top"
                     />
                   </div>
@@ -392,6 +406,13 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
             alt={hero.imageAltText || "Dental Care Specialist"}
             loading="eager"
             fetchPriority="high"
+            onError={(e) => {
+              const target = e.currentTarget;
+              if (!target.dataset.fallbackApplied) {
+                target.dataset.fallbackApplied = "true";
+                target.src = "/images/hero-desktop.jpg";
+              }
+            }}
             className={`w-full h-full select-none transition-all duration-300 ${
               hero.imageFit === "contain"
                 ? "object-contain object-bottom sm:object-center"
@@ -610,6 +631,13 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
                     <img
                       src={doctorAvatar}
                       alt={hero.doctorBoxName || "Doctor Avatar"}
+                      onError={(e) => {
+                        const target = e.currentTarget;
+                        if (!target.dataset.fallbackApplied) {
+                          target.dataset.fallbackApplied = "true";
+                          target.src = "/images/doctor-avatar-uploaded.jpeg";
+                        }
+                      }}
                       className="h-full w-full object-cover object-top"
                     />
                   </div>

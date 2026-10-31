@@ -13,11 +13,25 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 export function getPrimaryDatabaseUrl(): string | undefined {
-  return process.env.PRIMARY_DATABASE_URL || process.env.DATABASE_URL;
+  let url = process.env.PRIMARY_DATABASE_URL || process.env.DATABASE_URL;
+  if (url && url.includes(".pooler.supabase.com:5432")) {
+    url = url.replace(":5432", ":6543");
+    if (!url.includes("pgbouncer=true")) {
+      url += (url.includes("?") ? "&" : "?") + "pgbouncer=true";
+    }
+  }
+  return url;
 }
 
 export function getSecondaryDatabaseUrl(): string | undefined {
-  return process.env.SECONDARY_DATABASE_URL || process.env.AUTH_DATABASE_URL;
+  let url = process.env.SECONDARY_DATABASE_URL || process.env.AUTH_DATABASE_URL;
+  if (url && url.includes(".pooler.supabase.com:5432")) {
+    url = url.replace(":5432", ":6543");
+    if (!url.includes("pgbouncer=true")) {
+      url += (url.includes("?") ? "&" : "?") + "pgbouncer=true";
+    }
+  }
+  return url;
 }
 
 /**
