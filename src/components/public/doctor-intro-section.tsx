@@ -115,7 +115,7 @@ export function DoctorIntroSection({
                   <img
                     src={photoUrl}
                     alt={`${doctorName} - ${degree}`}
-                    loading="eager"
+                    loading="lazy"
                     decoding="async"
                     className="w-full h-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-102"
                   />

@@ -53,6 +53,19 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <head>
+        {/* Preload critical hero image for instant LCP render */}
+        {heroImg && (
+          <link
+            rel="preload"
+            as="image"
+            href={heroImg}
+            fetchPriority="high"
+          />
+        )}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://www.youtube.com" />
+        <link rel="dns-prefetch" href="https://i.ytimg.com" />
         {/* Dynamic theme favicons: White tooth on dark tabs, Black tooth on light tabs */}
         <link
           rel="icon"
