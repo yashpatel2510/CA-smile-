@@ -34,9 +34,13 @@ import {
   Video,
   Loader2,
   BookOpen,
+  Stethoscope,
+  ShieldCheck,
 } from "lucide-react";
 import { ClinicBrandingBlogManager } from "@/components/admin/blog/clinic-branding-blog-manager";
 import { ClinicBrandingGalleryManager } from "@/components/admin/gallery/clinic-branding-gallery-manager";
+import { DoctorIntroSectionManager } from "@/components/admin/branding/doctor-intro-section-manager";
+import { WhyTrustUsSectionManager } from "@/components/admin/branding/why-trust-us-section-manager";
 import { useClinicTheme } from "@/components/theme/clinic-theme-provider";
 import {
   Card,
@@ -115,13 +119,27 @@ export default function AdminSettingsPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Tab State
-  const [activeTab, setActiveTab] = useState<"hero" | "header" | "about" | "details" | "blog" | "gallery">("hero");
+  const [activeTab, setActiveTab] = useState<
+    "hero" | "header" | "doctorIntro" | "whyTrustUs" | "about" | "details" | "blog" | "gallery"
+  >("hero");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       const tabParam = params.get("tab");
-      if (tabParam && ["hero", "header", "about", "details", "blog", "gallery"].includes(tabParam)) {
+      if (
+        tabParam &&
+        [
+          "hero",
+          "header",
+          "doctorIntro",
+          "whyTrustUs",
+          "about",
+          "details",
+          "blog",
+          "gallery",
+        ].includes(tabParam)
+      ) {
         setActiveTab(tabParam as any);
       }
     }
@@ -390,7 +408,7 @@ export default function AdminSettingsPage() {
     initialHero.doctorBoxShowPhoto !== false
   );
   const [heroDoctorBoxBgColor, setHeroDoctorBoxBgColor] = useState(
-    initialHero.doctorBoxBgColor || "rgba(148, 153, 162, 0.92)"
+    initialHero.doctorBoxBgColor || "rgba(15, 23, 42, 0.88)"
   );
   const [heroDoctorBoxTextColor, setHeroDoctorBoxTextColor] = useState(
     initialHero.doctorBoxTextColor || "#ffffff"
@@ -594,7 +612,7 @@ export default function AdminSettingsPage() {
         );
         setHeroDoctorBoxShowPhoto(h.doctorBoxShowPhoto !== false);
         setHeroDoctorBoxBgColor(
-          h.doctorBoxBgColor || "rgba(148, 153, 162, 0.92)"
+          h.doctorBoxBgColor || "rgba(15, 23, 42, 0.88)"
         );
         setHeroDoctorBoxTextColor(h.doctorBoxTextColor || "#ffffff");
         setHeroDoctorBoxBorderRadius(h.doctorBoxBorderRadius || "20px");
@@ -825,6 +843,8 @@ export default function AdminSettingsPage() {
       },
       hero: liveHeroConfig,
       gallery: brandConfig.gallery || DEFAULT_GALLERY_CONFIG,
+      doctorIntroSection: brandConfig.doctorIntroSection,
+      whyTrustUsSection: brandConfig.whyTrustUsSection,
     });
 
     setSaving(false);
@@ -939,7 +959,7 @@ export default function AdminSettingsPage() {
     setHeroDoctorBoxShowExperience(true);
     setHeroDoctorBoxPhotoUrl("/images/hero-doctor-dental-care.png");
     setHeroDoctorBoxShowPhoto(true);
-    setHeroDoctorBoxBgColor("rgba(148, 153, 162, 0.92)");
+    setHeroDoctorBoxBgColor("rgba(15, 23, 42, 0.88)");
     setHeroDoctorBoxTextColor("#ffffff");
     setHeroDoctorBoxBorderRadius("20px");
     setHeroDoctorBoxMarginTop("0px");
@@ -1208,6 +1228,32 @@ export default function AdminSettingsPage() {
         >
           <Palette className="h-4 w-4" />
           <span>Header Navbar &amp; Logo Settings</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("doctorIntro")}
+          className={`flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-semibold transition-colors shrink-0 ${
+            activeTab === "doctorIntro"
+              ? "border-brand-primary text-brand-primary"
+              : "border-transparent text-brand-muted hover:text-brand-text"
+          }`}
+        >
+          <UserCheck className="h-4 w-4" />
+          <span>Doctor Profile &amp; Specialties</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("whyTrustUs")}
+          className={`flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-semibold transition-colors shrink-0 ${
+            activeTab === "whyTrustUs"
+              ? "border-brand-primary text-brand-primary"
+              : "border-transparent text-brand-muted hover:text-brand-text"
+          }`}
+        >
+          <ShieldCheck className="h-4 w-4" />
+          <span>Why Patients Trust Us (Cinematic Showcase)</span>
         </button>
 
         <button
@@ -2490,7 +2536,7 @@ export default function AdminSettingsPage() {
                       <Input
                         value={heroDoctorBoxBgColor}
                         onChange={(e) => setHeroDoctorBoxBgColor(e.target.value)}
-                        placeholder="rgba(148, 153, 162, 0.92)"
+                        placeholder="rgba(15, 23, 42, 0.88)"
                         className="h-9 font-mono text-xs"
                       />
                     </div>
@@ -3216,6 +3262,24 @@ export default function AdminSettingsPage() {
               </div>
             </CardContent>
           </Card>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB: DOCTOR PROFILE & SPECIALTIES                                         */}
+      {/* ========================================================================= */}
+      {activeTab === "doctorIntro" && (
+        <div className="space-y-6">
+          <DoctorIntroSectionManager />
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB: WHY PATIENTS TRUST US                                                */}
+      {/* ========================================================================= */}
+      {activeTab === "whyTrustUs" && (
+        <div className="space-y-6">
+          <WhyTrustUsSectionManager />
         </div>
       )}
 

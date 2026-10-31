@@ -45,6 +45,24 @@ export function getClinicBrandingConfig(): ClinicBrandConfig {
             ? parsed.gallery.photos
             : DEFAULT_CLINIC_BRANDING.gallery!.photos,
         },
+        doctorIntroSection: {
+          ...DEFAULT_CLINIC_BRANDING.doctorIntroSection!,
+          ...(parsed.doctorIntroSection || {}),
+          specialities:
+            Array.isArray(parsed.doctorIntroSection?.specialities) &&
+            parsed.doctorIntroSection.specialities.length > 0
+              ? parsed.doctorIntroSection.specialities
+              : DEFAULT_CLINIC_BRANDING.doctorIntroSection!.specialities,
+        },
+        whyTrustUsSection: {
+          ...DEFAULT_CLINIC_BRANDING.whyTrustUsSection!,
+          ...(parsed.whyTrustUsSection || {}),
+          features:
+            Array.isArray(parsed.whyTrustUsSection?.features) &&
+            parsed.whyTrustUsSection.features.length > 0
+              ? parsed.whyTrustUsSection.features
+              : DEFAULT_CLINIC_BRANDING.whyTrustUsSection!.features,
+        },
       };
       global.__clinicBrandingCache = loadedConfig;
       return loadedConfig;
@@ -126,6 +144,26 @@ export function updateClinicBrandingConfig(
     });
   }
 
+  const incomingDoctorIntro = { ...(newConfig.doctorIntroSection || {}) } as Record<string, any>;
+  if (
+    incomingDoctorIntro.photoUrl &&
+    typeof incomingDoctorIntro.photoUrl === "string" &&
+    incomingDoctorIntro.photoUrl.startsWith("data:image/")
+  ) {
+    incomingDoctorIntro.photoUrl =
+      persistBase64Image(incomingDoctorIntro.photoUrl, "doctor-intro-portrait") || "";
+  }
+
+  const incomingWhyTrustUs = { ...(newConfig.whyTrustUsSection || {}) } as Record<string, any>;
+  if (
+    incomingWhyTrustUs.backgroundImageUrl &&
+    typeof incomingWhyTrustUs.backgroundImageUrl === "string" &&
+    incomingWhyTrustUs.backgroundImageUrl.startsWith("data:image/")
+  ) {
+    incomingWhyTrustUs.backgroundImageUrl =
+      persistBase64Image(incomingWhyTrustUs.backgroundImageUrl, "why-trust-us-bg") || "";
+  }
+
   const updated: ClinicBrandConfig = {
     ...current,
     ...newConfig,
@@ -147,6 +185,20 @@ export function updateClinicBrandingConfig(
       photos: Array.isArray(incomingGallery.photos)
         ? incomingGallery.photos
         : (current.gallery?.photos || DEFAULT_CLINIC_BRANDING.gallery!.photos),
+    },
+    doctorIntroSection: {
+      ...(current.doctorIntroSection || DEFAULT_CLINIC_BRANDING.doctorIntroSection!),
+      ...incomingDoctorIntro,
+      specialities: Array.isArray(incomingDoctorIntro.specialities)
+        ? incomingDoctorIntro.specialities
+        : (current.doctorIntroSection?.specialities || DEFAULT_CLINIC_BRANDING.doctorIntroSection!.specialities),
+    },
+    whyTrustUsSection: {
+      ...(current.whyTrustUsSection || DEFAULT_CLINIC_BRANDING.whyTrustUsSection!),
+      ...incomingWhyTrustUs,
+      features: Array.isArray(incomingWhyTrustUs.features)
+        ? incomingWhyTrustUs.features
+        : (current.whyTrustUsSection?.features || DEFAULT_CLINIC_BRANDING.whyTrustUsSection!.features),
     },
   };
 

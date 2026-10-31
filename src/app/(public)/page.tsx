@@ -17,25 +17,27 @@ import { ClinicVideoShowcaseSection } from "@/components/public/clinic-video-sho
 import { DoctorIntroSection } from "@/components/public/doctor-intro-section";
 
 export const metadata: Metadata = {
-  title: "HealthSphere Clinic | Board-Certified Physicians & Same-Day Care",
+  title: {
+    absolute: "CA Smile Dental Clinic",
+  },
   description:
-    "Experience comprehensive clinical care, preventive cardiology, pediatric wellness, and gentle dental medicine. Schedule your appointment online with instant confirmation.",
+    "Experience comprehensive dental care, painless single-visit endodontics, digital smile designing, dental implants, and clear aligners at CA Smile Multispeciality Dental Clinic Bilimora.",
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "HealthSphere Medical Clinic - Patient-First Healthcare",
+    title: "CA Smile Dental Clinic - Modern Multispeciality Dental Care",
     description:
-      "Modern clinical diagnostics, trusted specialists, and seamless online scheduling. Serving families with compassionate care.",
+      "Modern clinical diagnostics, trusted specialists, and seamless online scheduling. Serving families with compassionate care in Bilimora.",
     url: "/",
-    siteName: "HealthSphere Clinic",
+    siteName: "CA Smile Dental Clinic",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "HealthSphere Clinic | Modern Healthcare Centered Around You",
+    title: "CA Smile Dental Clinic | Modern Dental Care Centered Around You",
     description:
-      "Book an appointment with board-certified physicians in primary care, cardiology, pediatrics, and dental medicine.",
+      "Book an appointment with Dr. Deep Patel at CA Smile Multispeciality Dental Clinic Bilimora.",
   },
 };
 

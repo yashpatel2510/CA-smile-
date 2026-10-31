@@ -59,7 +59,15 @@ export function getBookingFormConfig(): BookingFormConfig {
   return loaded;
 }
 
+let lastBookingConfigFetch = 0;
+const CACHE_TTL_MS = 60000; // 60 seconds
+
 export async function getBookingFormConfigAsync(): Promise<BookingFormConfig> {
+  const now = Date.now();
+  if (global.__bookingFormConfig && now - lastBookingConfigFetch < CACHE_TTL_MS) {
+    return global.__bookingFormConfig;
+  }
+
   try {
     const clinic = await prisma.clinic.findFirst();
     if (clinic?.formConfig && typeof clinic.formConfig === "object") {
@@ -67,6 +75,7 @@ export async function getBookingFormConfigAsync(): Promise<BookingFormConfig> {
       if (Array.isArray(dbConfig.fields) || dbConfig.themeMode) {
         const merged = { ...defaultBookingFormConfig, ...dbConfig };
         global.__bookingFormConfig = merged;
+        lastBookingConfigFetch = now;
         return merged;
       }
     }
@@ -76,7 +85,9 @@ export async function getBookingFormConfigAsync(): Promise<BookingFormConfig> {
       err
     );
   }
-  return getBookingFormConfig();
+  const fallback = getBookingFormConfig();
+  lastBookingConfigFetch = now;
+  return fallback;
 }
 
 export function updateBookingFormConfig(
@@ -95,12 +106,14 @@ export function updateBookingFormConfig(
   };
 
   global.__bookingFormConfig = merged;
+  lastBookingConfigFetch = 0;
   persistConfigToFile(merged);
   return merged;
 }
 
 export function resetBookingFormConfig(): BookingFormConfig {
   global.__bookingFormConfig = { ...defaultBookingFormConfig };
+  lastBookingConfigFetch = 0;
   persistConfigToFile(defaultBookingFormConfig);
   return global.__bookingFormConfig;
 }

@@ -182,7 +182,7 @@ export const DEFAULT_HERO_CONFIG: HeroSectionConfig = {
   doctorBoxShowExperience: true,
   doctorBoxPhotoUrl: "/images/hero-doctor-dental-care.png",
   doctorBoxShowPhoto: true,
-  doctorBoxBgColor: "rgba(148, 153, 162, 0.92)",
+  doctorBoxBgColor: "rgba(15, 23, 42, 0.88)",
   doctorBoxTextColor: "#ffffff",
   doctorBoxBorderRadius: "20px",
   doctorBoxMarginTop: "0px",
@@ -238,6 +238,12 @@ export interface ClinicBrandConfig {
 
   // Customizable Footer Clinic Space Polaroid Gallery
   gallery?: GallerySectionConfig;
+
+  // Customizable Doctor Introduction Section
+  doctorIntroSection?: DoctorIntroSectionConfig;
+
+  // Customizable Why Patients Trust Us Section
+  whyTrustUsSection?: WhyTrustUsSectionConfig;
 }
 
 export interface PolaroidPhotoItem {
@@ -395,6 +401,117 @@ export const DEFAULT_ABOUT_CONFIG: AboutSectionConfig = {
   showStatusPill: true,
 };
 
+export interface DoctorSpecialityItem {
+  id?: string;
+  title: string;
+  subtitle: string;
+  tag?: string;
+}
+
+export interface DoctorIntroSectionConfig {
+  enabled?: boolean;
+  doctorName?: string;
+  degree?: string;
+  clinicTagline?: string;
+  photoUrl?: string;
+  specialityHeading?: string;
+  specialities?: DoctorSpecialityItem[];
+  appointmentButtonText?: string;
+  ctaButtonText?: string;
+  ctaButtonBgColor?: string;
+  ctaButtonTextColor?: string;
+  phone?: string;
+  phoneText?: string;
+  showPhoneCall?: boolean;
+  showPhone?: boolean;
+}
+
+export const DEFAULT_DOCTOR_SPECIALITIES: DoctorSpecialityItem[] = [
+  {
+    title: "Root Canal Treatment",
+    subtitle: "Painless single-visit endodontics & tooth saving",
+    tag: "Endodontics",
+  },
+  {
+    title: "Digital Smile Designing",
+    subtitle: "3D facial harmony & computer smile planning",
+    tag: "Aesthetics",
+  },
+  {
+    title: "Dental Implant",
+    subtitle: "Permanent titanium implants & bone restoration",
+    tag: "Implantology",
+  },
+  {
+    title: "Dental Prosthesis (Crown, Bridge Etc.)",
+    subtitle: "Zirconia crowns, durable bridges & aesthetic caps",
+    tag: "Prosthodontics",
+  },
+  {
+    title: "Orthodontics / Aligners",
+    subtitle: "Invisible clear aligners & gentle tooth straightening",
+    tag: "Orthodontics",
+  },
+];
+
+export const DEFAULT_DOCTOR_INTRO_CONFIG: DoctorIntroSectionConfig = {
+  enabled: true,
+  doctorName: "Dr. DEEP A PATEL",
+  degree: "BDS (DENTAL SURGEON)",
+  clinicTagline: "CA SMILE BILIMORA",
+  photoUrl: "/images/dr-deep-patel-portrait.jpg",
+  specialityHeading: "Speciality :",
+  specialities: DEFAULT_DOCTOR_SPECIALITIES,
+  appointmentButtonText: "Book Your Appointment",
+  ctaButtonText: "Book Your Appointment",
+  ctaButtonBgColor: "#9e0000",
+  ctaButtonTextColor: "#ffffff",
+  phone: "+91 72260 98074",
+  phoneText: "+91 72260 98074",
+  showPhoneCall: true,
+  showPhone: true,
+};
+
+export interface TrustFeatureItem {
+  id?: string;
+  title: string;
+  description: string;
+}
+
+export interface WhyTrustUsSectionConfig {
+  enabled?: boolean;
+  headingLine1?: string;
+  headingLine2?: string;
+  backgroundImageUrl?: string;
+  features?: TrustFeatureItem[];
+}
+
+export const DEFAULT_TRUST_FEATURES: TrustFeatureItem[] = [
+  {
+    title: "Treatment cycle",
+    description:
+      "Thanks to our laboratory, we conduct all analyses and production on-site, ensuring speed, precision, and flawless results while maintaining full control over every stage of treatment.",
+  },
+  {
+    title: "Safety guarantee",
+    description:
+      "We guarantee the quality of our treatment: If complications arise from procedures in our clinic, we'll fix the issue for free or refund your money. Your health is our top priority.",
+  },
+  {
+    title: "Digital technology",
+    description:
+      "By using high-precision equipment such as a microscope, CT scanner and 3D imaging, we ensure accurate assessments and well-structured treatment plans for every case.",
+  },
+];
+
+export const DEFAULT_WHY_TRUST_US_CONFIG: WhyTrustUsSectionConfig = {
+  enabled: true,
+  headingLine1: "Why patients",
+  headingLine2: "trust us?",
+  backgroundImageUrl: "/images/why-patients-trust-us-bg.jpg",
+  features: DEFAULT_TRUST_FEATURES,
+};
+
 export const DEFAULT_CLINIC_BRANDING: ClinicBrandConfig = {
   themeKey: "teal-serenity",
   clinicName: "PedioDent",
@@ -453,4 +570,6 @@ export const DEFAULT_CLINIC_BRANDING: ClinicBrandConfig = {
   },
   hero: DEFAULT_HERO_CONFIG,
   gallery: DEFAULT_GALLERY_CONFIG,
+  doctorIntroSection: DEFAULT_DOCTOR_INTRO_CONFIG,
+  whyTrustUsSection: DEFAULT_WHY_TRUST_US_CONFIG,
 };

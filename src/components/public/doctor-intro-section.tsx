@@ -6,6 +6,7 @@ import { useContactModal } from "@/components/public/contact-modal";
 import { useClinicTheme } from "@/components/theme/clinic-theme-provider";
 
 interface SpecialityDetail {
+  id?: string;
   title: string;
   subtitle: string;
   tag: string;
@@ -47,23 +48,41 @@ interface DoctorIntroSectionProps {
 }
 
 export function DoctorIntroSection({
-  doctorName = "Dr. DEEP A PATEL",
-  degree = "BDS (DENTAL SURGEON)",
-  photoUrl = "/images/dr-deep-patel-portrait.jpg",
+  doctorName: initialDoctorName,
+  degree: initialDegree,
+  photoUrl: initialPhotoUrl,
   className = "",
 }: DoctorIntroSectionProps) {
   const { openContactModal } = useContactModal();
   const { brandConfig } = useClinicTheme();
 
+  const introConfig = brandConfig?.doctorIntroSection;
+
+  if (introConfig?.enabled === false) {
+    return null;
+  }
+
+  const doctorName = introConfig?.doctorName || initialDoctorName || "Dr. DEEP A PATEL";
+  const degree = introConfig?.degree || initialDegree || "BDS (DENTAL SURGEON)";
+  const clinicTagline = introConfig?.clinicTagline ?? "CA Smile Bilimora";
+  const photoUrl = introConfig?.photoUrl || initialPhotoUrl || "/images/dr-deep-patel-portrait.jpg";
+  const specialityHeading = introConfig?.specialityHeading || "Speciality :";
+  const specialities =
+    Array.isArray(introConfig?.specialities) && introConfig.specialities.length > 0
+      ? introConfig.specialities
+      : SPECIALITY_DATA;
+
   // Adopt hero CTA button design & theme palette for visual unity
   const heroConfig = brandConfig?.hero;
-  const btnBg = heroConfig?.ctaButtonBgColor || "#9e0000";
-  const btnTextColor = heroConfig?.ctaButtonTextColor || "#ffffff";
+  const btnBg = introConfig?.ctaButtonBgColor || heroConfig?.ctaButtonBgColor || "#9e0000";
+  const btnTextColor = introConfig?.ctaButtonTextColor || heroConfig?.ctaButtonTextColor || "#ffffff";
   const btnBadgeBg = heroConfig?.ctaButtonBadgeBgColor || "#ffffff";
   const btnBadgeIconColor = heroConfig?.ctaButtonBadgeIconColor || btnBg;
   const btnRadius = heroConfig?.ctaButtonBorderRadius || "14px";
-  const btnText = heroConfig?.ctaButtonText || "Book Your Appointment";
-  const phone = brandConfig?.phone || "+91 72260 98074";
+  const btnText = introConfig?.ctaButtonText || heroConfig?.ctaButtonText || "Book Your Appointment";
+  
+  const showPhone = introConfig?.showPhone !== false;
+  const phone = introConfig?.phoneText || brandConfig?.phone || "+91 72260 98074";
 
   const handleBookAppointment = () => {
     if (typeof openContactModal === "function") {
@@ -74,7 +93,7 @@ export function DoctorIntroSection({
   return (
     <section
       id="doctor-intro"
-      className={`relative w-full py-14 sm:py-18 lg:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white via-zinc-50/50 to-white dark:from-[#09090b] dark:via-zinc-950 dark:to-[#09090b] text-zinc-950 dark:text-zinc-50 transition-colors ${className}`}
+      className={`relative w-full pt-4 sm:pt-6 pb-6 sm:pb-8 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white via-zinc-50/50 to-white dark:from-[#09090b] dark:via-zinc-950 dark:to-[#09090b] text-zinc-950 dark:text-zinc-50 transition-colors ${className}`}
       aria-label="Doctor Profile"
     >
       <div className="mx-auto max-w-6xl">
@@ -116,24 +135,26 @@ export function DoctorIntroSection({
                   <span className="text-zinc-900 dark:text-zinc-100 font-extrabold">
                     {degree}
                   </span>
-                  <span className="text-zinc-300 dark:text-zinc-700">•</span>
-                  <span>Chief Dental Surgeon</span>
-                  <span className="text-zinc-300 dark:text-zinc-700">•</span>
-                  <span>CA Smile Bilimora</span>
+                  {clinicTagline && (
+                    <>
+                      <span className="text-zinc-300 dark:text-zinc-700">•</span>
+                      <span>{clinicTagline}</span>
+                    </>
+                  )}
                 </div>
               </div>
 
               {/* Speciality Bento Micro-Cards Grid */}
               <div className="space-y-3.5 pt-1">
                 <h3 className="text-sm sm:text-base font-bold text-zinc-950 dark:text-white tracking-tight">
-                  Speciality :
+                  {specialityHeading}
                 </h3>
 
                 {/* 2-Column Responsive Bento Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
-                  {SPECIALITY_DATA.map((item, index) => (
+                  {specialities.map((item, index) => (
                     <div
-                      key={index}
+                      key={item.id || index}
                       className="group/card flex items-start gap-3 p-3 sm:p-3.5 rounded-2xl bg-zinc-50/80 dark:bg-zinc-800/40 border border-zinc-200/70 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 hover:bg-white dark:hover:bg-zinc-800/90 transition-all duration-200 shadow-2xs hover:shadow-xs"
                     >
                       {/* Black/White Minimalist Icon Badge */}
@@ -187,7 +208,7 @@ export function DoctorIntroSection({
                 </button>
 
                 {/* Direct Telephone Consultation Pill */}
-                {phone && (
+                {showPhone && phone && (
                   <a
                     href={`tel:${phone.replace(/\s+/g, "")}`}
                     className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"

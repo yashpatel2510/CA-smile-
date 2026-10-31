@@ -11,14 +11,14 @@ export function PublicFooter() {
               <div className="flex h-8 w-8 items-center justify-center rounded-clinic bg-brand-primary text-brand-primary-foreground">
                 <Stethoscope className="h-4 w-4" />
               </div>
-              <span className="font-bold font-heading text-base">HealthSphere Clinic</span>
+              <span className="font-bold font-heading text-base">CA Smile Dental Clinic</span>
             </div>
             <p className="text-sm text-brand-muted">
-              Compassionate, state-of-the-art healthcare tailored to your family&apos;s needs. Providing preventive, diagnostic, and specialty medical care.
+              Compassionate, advanced painless dental care tailored to your family&apos;s needs. Providing endodontics, smile design, implants, and orthodontics in Bilimora.
             </p>
             <div className="flex items-center gap-1.5 text-xs text-brand-muted pt-2">
               <Heart className="h-3.5 w-3.5 text-brand-primary" />
-              <span>Certified Healthcare Quality Provider</span>
+              <span>Certified Dental Healthcare Quality Provider</span>
             </div>
           </div>
 
@@ -38,15 +38,11 @@ export function PublicFooter() {
             <ul className="space-y-2 text-sm text-brand-muted">
               <li className="flex items-center gap-2">
                 <Clock className="h-3.5 w-3.5 text-brand-primary shrink-0" />
-                <span>Mon - Fri: 8:00 AM - 7:00 PM</span>
+                <span>Mon - Sat: 9:00 AM - 8:00 PM</span>
               </li>
               <li className="flex items-center gap-2">
                 <Clock className="h-3.5 w-3.5 text-brand-primary shrink-0" />
-                <span>Saturday: 9:00 AM - 4:00 PM</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Clock className="h-3.5 w-3.5 text-brand-primary shrink-0" />
-                <span>Sunday: Urgent Care Only (10 AM - 2 PM)</span>
+                <span>Sunday: By Prior Appointment</span>
               </li>
             </ul>
           </div>
@@ -56,22 +52,22 @@ export function PublicFooter() {
             <ul className="space-y-2 text-sm text-brand-muted">
               <li className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 text-brand-primary shrink-0 mt-0.5" />
-                <span>742 Evergreen Medical Way, Suite 400, Metro City</span>
+                <span>1st Floor, Labdhi Arcade, Above HDFC Bank, Convent Rd, Bilimora, Gujarat 396321</span>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="h-3.5 w-3.5 text-brand-primary shrink-0" />
-                <span>(800) 555-2546</span>
+                <span>+91 72260 98074</span>
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="h-3.5 w-3.5 text-brand-primary shrink-0" />
-                <span>contact@healthsphere.example.com</span>
+                <span>casmileatbilimora@gmail.com</span>
               </li>
             </ul>
           </div>
         </div>
 
         <div className="mt-8 border-t border-brand-border pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-brand-muted">
-          <p>© {new Date().getFullYear()} VS Multispeciality Dental Clinic. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} CA Smile Dental Clinic. All rights reserved.</p>
           <div className="flex gap-4 mt-2 sm:mt-0">
             <Link href="/privacy" className="hover:underline">Privacy Policy</Link>
             <Link href="/terms" className="hover:underline">Terms of Service</Link>

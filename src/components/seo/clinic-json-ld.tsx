@@ -3,35 +3,35 @@ import { clinicalServices } from "@/data/services-data";
 
 export function ClinicJsonLd() {
   const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL || "https://healthsphere.example.com";
+    process.env.NEXT_PUBLIC_APP_URL || "https://casmilebilimora.com";
 
   const schema = {
     "@context": "https://schema.org",
-    "@type": "MedicalClinic",
+    "@type": "DentalClinic",
     "@id": `${baseUrl}/#clinic`,
-    name: "HealthSphere Medical Clinic",
+    name: "CA Smile Dental Clinic",
     url: baseUrl,
-    logo: `${baseUrl}/favicon.ico`,
-    image: `${baseUrl}/og-clinic.jpg`,
+    logo: `${baseUrl}/icon.png`,
+    image: `${baseUrl}/images/ca-smile-clinic-building.jpg`,
     description:
-      "Comprehensive multi-specialty medical clinic providing general practice, preventive cardiology, pediatrics, and dental care with same-day scheduling.",
-    telephone: "+1-800-555-2546",
-    email: "contact@healthsphere.example.com",
-    currenciesAccepted: "USD",
+      "Modern multispeciality dental clinic in Bilimora providing single-visit painless root canal, digital smile designing, dental implants, and clear aligners.",
+    telephone: "+91 72260 98074",
+    email: "casmileatbilimora@gmail.com",
+    currenciesAccepted: "INR",
     paymentAccepted:
-      "Cash, Credit Card, Health Savings Account (HSA), Flexible Spending Account (FSA)",
+      "Cash, UPI, Credit Card, Debit Card, Net Banking",
     address: {
       "@type": "PostalAddress",
-      streetAddress: "742 Evergreen Medical Way, Suite 400",
-      addressLocality: "Metro City",
-      addressRegion: "NY",
-      postalCode: "10001",
-      addressCountry: "US",
+      streetAddress: "1st Floor, Labdhi Arcade, Above HDFC Bank, Convent Rd",
+      addressLocality: "Bilimora",
+      addressRegion: "Gujarat",
+      postalCode: "396321",
+      addressCountry: "IN",
     },
     geo: {
       "@type": "GeoCoordinates",
-      latitude: "40.7505",
-      longitude: "-73.9934",
+      latitude: "20.7636",
+      longitude: "72.9680",
     },
     openingHoursSpecification: [
       {

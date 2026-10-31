@@ -42,7 +42,7 @@ export function ClinicVideoShowcaseSection({
   return (
     <section
       id="clinic-video"
-      className={`relative w-full py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-brand-background text-brand-text scroll-mt-24 transition-colors ${className}`}
+      className={`relative w-full pt-6 sm:pt-8 md:pt-10 pb-12 sm:pb-16 md:pb-20 px-4 sm:px-6 bg-brand-background text-brand-text scroll-mt-24 transition-colors ${className}`}
       aria-label="Clinic Tour Video"
     >
       <div
@@ -62,6 +62,8 @@ export function ClinicVideoShowcaseSection({
                 brandConfig?.clinicName ||
                 "CA Smile Dental Clinic"
               }
+              loading="lazy"
+              decoding="async"
               className="h-9 sm:h-11 md:h-12 w-auto object-contain dark:hidden"
             />
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -72,6 +74,8 @@ export function ClinicVideoShowcaseSection({
                 brandConfig?.clinicName ||
                 "CA Smile Dental Clinic"
               }
+              loading="lazy"
+              decoding="async"
               className="h-9 sm:h-11 md:h-12 w-auto object-contain hidden dark:block"
             />
           </div>

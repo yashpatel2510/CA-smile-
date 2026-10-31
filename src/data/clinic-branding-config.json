@@ -54,10 +54,10 @@
     "imageUrl": "/images/ca-smile-logo-light.png",
     "monogramText": "CA",
     "shape": "rounded",
-    "altText": "Dental Clinic Clinic Logo",
+    "altText": "CA Smile Dental Clinic Logo",
     "showClinicName": true,
-    "clinicDisplayName": "Dental Clinic",
-    "tagline": "Dental Clinic",
+    "clinicDisplayName": "CA Smile Dental Clinic",
+    "tagline": "CA Smile Dental Clinic",
     "logoHeight": 36,
     "logoSize": 36,
     "mobileClinicDisplayName": "CA SMILE"
@@ -73,7 +73,7 @@
     "blankHeroTextColor": "#18181b",
     "topInfoEnabled": true,
     "topInfoWorkingHoursLabel": "Working hours",
-    "topInfoWorkingHoursValue": "Mon - Sat: 9:00 AM - 8:00 PM | Sunday: Emergency Only",
+    "topInfoWorkingHoursValue": "Mon - Sat: 9:00 AM - 8:00 PM ",
     "topInfoLocationLabel": "Location",
     "topInfoLocationValue": "ABOVE HDFC BANK, BILIMORA",
     "topInfoTextColor": "#18181b",
@@ -115,15 +115,15 @@
     "ctaButtonBadgeBgColor": "#ffffff",
     "doctorBoxEnabled": true,
     "doctorBoxName": "Dr. DEEP A PATEL",
-    "doctorBoxRole": " Dental Specialist",
+    "doctorBoxRole": "Dental Specialist",
     "doctorBoxShowRole": true,
-    "doctorBoxExperience": "8+ Years of Experience (4.9 ★ Rating)",
+    "doctorBoxExperience": "5.0 ★ (500+ Happy Smiles)",
     "doctorBoxShowExperience": false,
     "doctorBoxPhotoUrl": "/api/media/doctor-avatar-1793349491299.jpeg",
     "doctorBoxShowPhoto": true,
-    "doctorBoxBgColor": "rgba(148, 153, 162, 0.92)",
+    "doctorBoxBgColor": "rgba(15, 23, 42, 0.88)",
     "doctorBoxTextColor": "#ffffff",
-    "doctorBoxBorderRadius": "20px",
+    "doctorBoxBorderRadius": "24px",
     "doctorBoxMarginTop": "0px",
     "doctorBoxMarginBottom": "0px",
     "backgroundColor": "#ffffff",
@@ -197,6 +197,69 @@
         "restingY": 48,
         "hoverRotate": -1,
         "initialRotate": 4
+      }
+    ]
+  },
+  "doctorIntroSection": {
+    "enabled": true,
+    "doctorName": "Dr. DEEP A PATEL",
+    "degree": "BDS (DENTAL SURGEON)",
+    "clinicTagline": "CA SMILE BILIMORA",
+    "photoUrl": "/images/dr-deep-patel-portrait.jpg",
+    "specialityHeading": "Speciality :",
+    "specialities": [
+      {
+        "title": "Root Canal Treatment",
+        "subtitle": "Painless single-visit endodontics & tooth saving",
+        "tag": "Endodontics"
+      },
+      {
+        "title": "Digital Smile Designing",
+        "subtitle": "3D facial harmony & computer smile planning",
+        "tag": "Aesthetics"
+      },
+      {
+        "title": "Dental Implant",
+        "subtitle": "Permanent titanium implants & bone restoration",
+        "tag": "Implantology"
+      },
+      {
+        "title": "Dental Prosthesis (Crown, Bridge Etc.)",
+        "subtitle": "Zirconia crowns, durable bridges & aesthetic caps",
+        "tag": "Prosthodontics"
+      },
+      {
+        "title": "Orthodontics / Aligners",
+        "subtitle": "Invisible clear aligners & gentle tooth straightening",
+        "tag": "Orthodontics"
+      }
+    ],
+    "appointmentButtonText": "Book Your Appointment",
+    "ctaButtonText": "Book Your Appointment",
+    "ctaButtonBgColor": "#9e0000",
+    "ctaButtonTextColor": "#ffffff",
+    "phone": "+91 72260 98074",
+    "phoneText": "+91 72260 98074",
+    "showPhoneCall": true,
+    "showPhone": true
+  },
+  "whyTrustUsSection": {
+    "enabled": true,
+    "headingLine1": "Why patients",
+    "headingLine2": "trust us?",
+    "backgroundImageUrl": "/images/why-patients-trust-us-bg.jpg",
+    "features": [
+      {
+        "title": "Treatment cycle",
+        "description": "Thanks to our laboratory, we conduct all analyses and production on-site, ensuring speed, precision, and flawless results while maintaining full control over every stage of treatment."
+      },
+      {
+        "title": "Safety guarantee",
+        "description": "We guarantee the quality of our treatment: If complications arise from procedures in our clinic, we'll fix the issue for free or refund your money. Your health is our top priority."
+      },
+      {
+        "title": "Digital technology",
+        "description": "By using high-precision equipment such as a microscope, CT scanner and 3D imaging, we ensure accurate assessments and well-structured treatment plans for every case."
       }
     ]
   }

@@ -1258,7 +1258,7 @@ export function WhiteDentalTreatmentShowcase({
       id="services-showcase"
       className="relative w-full bg-white text-black selection:bg-black selection:text-white font-sans overflow-hidden"
     >
-      <div className="mx-auto max-w-7xl px-4 sm:px-8 lg:px-12 py-12 sm:py-20 lg:py-24 space-y-20 sm:space-y-28">
+      <div className="mx-auto max-w-7xl px-4 sm:px-8 lg:px-12 pt-12 sm:pt-16 lg:pt-20 pb-4 sm:pb-6 lg:pb-8 space-y-16 sm:space-y-20">
         {(mode === "both" || mode === "treatment") && showTreatments && (
           <ShowcaseBlock
             title={treatmentHeading}

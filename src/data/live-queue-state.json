@@ -1,12 +1,12 @@
 {
-  "currentToken": 99,
-  "currentPatient": "Test Patient Verification",
-  "doctorName": "Dr. Sankar (Chief Dental Surgeon)",
-  "service": "Oral Surgery & Consultation",
-  "roomName": "ROOM DENTAL CHAIR 2",
-  "status": "CALLING",
+  "currentToken": 0,
+  "currentPatient": null,
+  "doctorName": "Dr. Deep Patel",
+  "service": "General Dental Consultation & Checkup",
+  "roomName": "Consultation Room 1",
+  "status": "WAITING",
   "upcoming": [],
-  "callTimestamp": 1793448647756,
+  "callTimestamp": 1793465732606,
   "dateStr": "2026-10-31",
-  "updatedAt": "2026-10-31T12:10:47.756Z"
+  "updatedAt": "2026-10-31T16:55:32.606Z"
 }

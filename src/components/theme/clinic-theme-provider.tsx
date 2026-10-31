@@ -114,6 +114,14 @@ export function ClinicThemeProvider({
         ...(brandConfig.gallery || DEFAULT_CLINIC_BRANDING.gallery!),
         ...(partial.gallery || {}),
       },
+      doctorIntroSection: {
+        ...(brandConfig.doctorIntroSection || DEFAULT_CLINIC_BRANDING.doctorIntroSection!),
+        ...(partial.doctorIntroSection || {}),
+      },
+      whyTrustUsSection: {
+        ...(brandConfig.whyTrustUsSection || DEFAULT_CLINIC_BRANDING.whyTrustUsSection!),
+        ...(partial.whyTrustUsSection || {}),
+      },
     };
 
     // Update local state and localStorage immediately

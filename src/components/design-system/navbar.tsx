@@ -224,6 +224,8 @@ export function Navbar({
               <img
                 src={effectiveLogoUrl}
                 alt={displayName}
+                loading="eager"
+                decoding="async"
                 className="w-auto object-contain transition-all duration-200"
                 style={{
                   height: `${logoHeight}px`,

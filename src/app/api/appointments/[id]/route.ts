@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { inMemoryStore } from "@/lib/in-memory-store";
 import { invalidateAppointmentsCache } from "@/lib/appointments-cache";
@@ -175,6 +177,82 @@ export async function PATCH(
       {
         success: false,
         message: error.message || "Failed to update appointment",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions).catch(() => null);
+    if (session?.user && session.user.role !== "ADMIN" && session.user.role !== "DOCTOR") {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Forbidden: Only Clinic Owners (Admin) and Doctors are authorized to delete appointments.",
+        },
+        { status: 403 }
+      );
+    }
+
+    const appointmentId = params.id;
+    if (!appointmentId) {
+      return NextResponse.json(
+        { success: false, message: "Appointment ID is required" },
+        { status: 400 }
+      );
+    }
+
+    let deletedFromDb = false;
+
+    try {
+      // Disconnect treatment sessions
+      await prisma.treatmentSession.updateMany({
+        where: { appointmentId },
+        data: { appointmentId: null },
+      }).catch(() => null);
+
+      // Delete audit logs
+      await prisma.auditLog.deleteMany({
+        where: { appointmentId },
+      }).catch(() => null);
+
+      // Delete WhatsApp messages
+      await prisma.whatsAppMessage.deleteMany({
+        where: { appointmentId },
+      }).catch(() => null);
+
+      // Delete appointment from DB
+      const res = await prisma.appointment.deleteMany({
+        where: { id: appointmentId },
+      }).catch(() => null);
+
+      if (res && res.count > 0) {
+        deletedFromDb = true;
+      }
+    } catch (dbErr) {
+      console.warn("DB error deleting appointment:", dbErr);
+    }
+
+    // Always clear from inMemoryStore
+    inMemoryStore.deleteAppointment(appointmentId);
+    invalidateAppointmentsCache();
+
+    return NextResponse.json({
+      success: true,
+      message: `Appointment ${appointmentId} was successfully deleted.`,
+      deletedId: appointmentId,
+      deletedFromDb,
+    });
+  } catch (error: any) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: error.message || "Failed to delete appointment",
       },
       { status: 500 }
     );

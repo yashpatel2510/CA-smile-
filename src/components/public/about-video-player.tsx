@@ -271,7 +271,7 @@ export function AboutVideoPlayer({
               muted={isMuted}
               playsInline
               loop
-              preload="metadata"
+              preload="none"
               autoPlay={activeConfig.autoplayOnScroll}
               className="absolute inset-0 h-full w-full object-cover"
               onPlay={() => setIsPlaying(true)}

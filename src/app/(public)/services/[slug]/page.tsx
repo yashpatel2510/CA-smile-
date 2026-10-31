@@ -46,18 +46,18 @@ export async function generateMetadata({
   const service = getServiceBySlug(params.slug);
   if (!service) {
     return {
-      title: "Service Not Found | HealthSphere Clinic",
+      title: "Service Not Found | CA Smile Dental Clinic",
     };
   }
 
   return {
-    title: `${service.name} | HealthSphere Clinic Specialties`,
+    title: `${service.name} | CA Smile Dental Clinic`,
     description: `${service.summary} Learn what to expect, preparation instructions, and schedule your appointment with ${service.leadSpecialist.split(" (")[0]}.`,
     alternates: {
       canonical: `/services/${service.slug}`,
     },
     openGraph: {
-      title: `${service.name} - HealthSphere Medical Clinic`,
+      title: `${service.name} - CA Smile Dental Clinic`,
       description: service.summary,
       url: `/services/${service.slug}`,
       type: "article",

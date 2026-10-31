@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { inMemoryStore } from "@/lib/in-memory-store";
 
@@ -126,6 +128,17 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions).catch(() => null);
+    if (session?.user && session.user.role !== "ADMIN" && session.user.role !== "DOCTOR") {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Forbidden: Only Clinic Owners (Admin) and Doctors are authorized to delete patient records.",
+        },
+        { status: 403 }
+      );
+    }
+
     const patientId = params.id;
     if (!patientId) {
       return NextResponse.json(

@@ -9,7 +9,7 @@ import { BookNowButton } from "@/components/ui/book-now-button";
 
 export function PublicHeader() {
   const pathname = usePathname();
-  const { currentTheme } = useClinicTheme();
+  const { currentTheme, brandConfig } = useClinicTheme();
 
   const navLinks = [
     { href: "/", label: "Home" },
@@ -18,6 +18,9 @@ export function PublicHeader() {
     { href: "/blog", label: "Blog" },
   ];
 
+  const phone = brandConfig?.phone || "+91 72260 98074";
+  const clinicName = brandConfig?.logo?.clinicDisplayName || brandConfig?.clinicName || "CA Smile Dental Clinic";
+
   return (
     <header className="sticky top-0 z-40 w-full border-b border-brand-border bg-brand-surface/90 backdrop-blur-md">
       {/* Top emergency announcement bar */}
@@ -25,16 +28,10 @@ export function PublicHeader() {
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           <div className="flex items-center gap-2">
             <Activity className="h-3.5 w-3.5 animate-pulse" />
-            <span>24/7 Urgent Care Available • Call our emergency triage: <strong>(800) 555-CLINIC</strong></span>
+            <span>Painless Dental Care • Call Clinic: <strong>{phone}</strong></span>
           </div>
           <div className="hidden md:flex items-center gap-3">
-            <span className="opacity-90">Active Theme: <strong>{currentTheme.name}</strong></span>
-            <Link
-              href="/admin/settings"
-              className="underline text-xs hover:opacity-80 transition-opacity"
-            >
-              (Customize Theme)
-            </Link>
+            <span className="opacity-90">CA Smile Dental Care • Bilimora</span>
           </div>
         </div>
       </div>
@@ -48,10 +45,10 @@ export function PublicHeader() {
             </div>
             <div>
               <span className="text-lg font-bold tracking-tight text-brand-text font-heading block">
-                HealthSphere
+                {clinicName}
               </span>
               <span className="text-xs text-brand-muted block -mt-1">
-                {currentTheme.name} Medical Center
+                Multispeciality Dental Clinic
               </span>
             </div>
           </Link>

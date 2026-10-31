@@ -391,6 +391,8 @@ export function FooterPolaroidsShowcase({
               <img
                 src={centerLogoUrl}
                 alt={centerLogoAlt}
+                loading="lazy"
+                decoding="async"
                 style={{ height: `${centerLogoHeight}px` }}
                 className={`w-auto max-w-[200px] sm:max-w-[260px] md:max-w-[320px] object-contain relative z-10 transition-all duration-300 ${
                   centerLogoGlow

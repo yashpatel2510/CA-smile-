@@ -3,7 +3,16 @@
 import React from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, ArrowUpRight, Star } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  CheckCircle2,
+  Clock,
+  MapPin,
+  Smile,
+  Sparkles,
+  Stethoscope,
+} from "lucide-react";
 import { useClinicTheme } from "@/components/theme/clinic-theme-provider";
 import { useContactModal } from "@/components/public/contact-modal";
 import { DEFAULT_HERO_CONFIG, HeroSectionConfig } from "@/types/branding";
@@ -48,6 +57,15 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
   const isMobilePreview = previewMode === "mobile";
   const isTabletPreview = previewMode === "tablet";
   const minHeightVal = hero.heroMinHeight || "620px";
+
+  const isDefaultDarkGlassBg =
+    !hero.doctorBoxBgColor ||
+    hero.doctorBoxBgColor === "rgba(148, 153, 162, 0.92)" ||
+    hero.doctorBoxBgColor === "rgba(15, 23, 42, 0.88)";
+
+  const resolvedBoxBg = isDefaultDarkGlassBg
+    ? "linear-gradient(135deg, rgba(15, 23, 42, 0.92) 0%, rgba(30, 41, 59, 0.88) 100%)"
+    : hero.doctorBoxBgColor;
 
   // Top information row colors and values
   const isDarkBg =
@@ -203,12 +221,18 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
           >
             {/* Left side: Working hours */}
             <div className="text-left space-y-0.5">
-              <p
-                className="text-[11px] sm:text-xs font-normal"
-                style={{ color: topInfoLabelColor }}
-              >
-                {workingHoursLabel}
-              </p>
+              <div className="flex items-center gap-1.5">
+                <Clock
+                  className="h-3 w-3 shrink-0"
+                  style={{ color: topInfoLabelColor }}
+                />
+                <p
+                  className="text-[11px] sm:text-xs font-normal"
+                  style={{ color: topInfoLabelColor }}
+                >
+                  {workingHoursLabel}
+                </p>
+              </div>
               <p
                 className="text-xs sm:text-sm font-semibold tracking-tight"
                 style={{ color: topInfoTextColor }}
@@ -219,12 +243,18 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
 
             {/* Right side: Location */}
             <div className="text-right space-y-0.5">
-              <p
-                className="text-[11px] sm:text-xs font-normal"
-                style={{ color: topInfoLabelColor }}
-              >
-                {locationLabel}
-              </p>
+              <div className="flex items-center justify-end gap-1.5">
+                <MapPin
+                  className="h-3 w-3 shrink-0"
+                  style={{ color: topInfoLabelColor }}
+                />
+                <p
+                  className="text-[11px] sm:text-xs font-normal"
+                  style={{ color: topInfoLabelColor }}
+                >
+                  {locationLabel}
+                </p>
+              </div>
               <p
                 className="text-xs sm:text-sm font-semibold tracking-tight"
                 style={{ color: topInfoTextColor }}
@@ -263,7 +293,7 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
           >
             <Link
               href={hero.ctaButtonUrl || "/contact"}
-              onClick={(e) => {
+              onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                 if (!hero.ctaButtonUrl || hero.ctaButtonUrl === "/contact") {
                   e.preventDefault();
                   openContactModal();
@@ -315,7 +345,7 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
               initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.2 }}
-              className="w-full max-w-[310px] mx-auto mt-5 sm:mt-6"
+              className="w-full max-w-[360px] mx-auto mt-5 sm:mt-6"
               style={{
                 marginTop:
                   hero.doctorBoxMarginTop && hero.doctorBoxMarginTop !== "0px"
@@ -325,54 +355,71 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
               }}
             >
               <div
-                className="flex items-center gap-3 p-3 shadow-lg backdrop-blur-md border border-white/30 dark:border-white/15 transition-transform hover:-translate-y-0.5"
+                className="group relative flex items-center justify-between gap-3 p-3 sm:p-3.5 shadow-[0_16px_36px_rgba(0,0,0,0.35)] backdrop-blur-xl border border-white/20 ring-1 ring-white/10 transition-all duration-300 hover:-translate-y-0.5"
                 style={{
-                  backgroundColor:
-                    hero.doctorBoxBgColor || "rgba(148, 153, 162, 0.92)",
+                  background: resolvedBoxBg,
                   color: hero.doctorBoxTextColor || "#ffffff",
-                  borderRadius: hero.doctorBoxBorderRadius || "20px",
+                  borderRadius: hero.doctorBoxBorderRadius || "22px",
                 }}
               >
-                {/* Doctor Avatar Thumbnail */}
-                {hero.doctorBoxShowPhoto !== false && (
-                  <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-white/25 bg-black/10">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={doctorAvatar}
-                      alt={hero.doctorBoxName || "Doctor Avatar"}
-                      onError={(e) => {
-                        const target = e.currentTarget;
-                        if (!target.dataset.fallbackApplied) {
-                          target.dataset.fallbackApplied = "true";
-                          target.src = "/images/doctor-avatar-uploaded.jpeg";
-                        }
-                      }}
-                      className="h-full w-full object-cover object-top"
-                    />
-                  </div>
-                )}
-
-                {/* Doctor Text Information */}
-                <div className="min-w-0 flex-1 text-left">
-                  <h4 className="font-heading text-xs sm:text-sm font-bold leading-snug tracking-tight text-white drop-shadow-xs truncate">
-                    {hero.doctorBoxName || "Dr. Alex Mercer"}
-                  </h4>
-
-                  {hero.doctorBoxShowRole !== false && hero.doctorBoxRole && (
-                    <p className="text-[10px] sm:text-[11px] font-medium text-slate-100/90 leading-tight truncate mt-0.5">
-                      {hero.doctorBoxRole}
-                    </p>
+                {/* Doctor Avatar Thumbnail with Active Beacon */}
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  {hero.doctorBoxShowPhoto !== false && (
+                    <div className="relative shrink-0">
+                      <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-2xl ring-2 ring-emerald-400/50 shadow-md border border-white/25 bg-slate-900">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={doctorAvatar}
+                          alt={hero.doctorBoxName || "Dr. DEEP A PATEL"}
+                          onError={(e) => {
+                            const target = e.currentTarget;
+                            if (!target.dataset.fallbackApplied) {
+                              target.dataset.fallbackApplied = "true";
+                              target.src = "/images/doctor-avatar-uploaded.jpeg";
+                            }
+                          }}
+                          className="h-full w-full object-cover object-top"
+                        />
+                      </div>
+                      <span
+                        className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center"
+                        title="Available in Clinic"
+                      >
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500 border border-slate-900"></span>
+                      </span>
+                    </div>
                   )}
 
-                  {hero.doctorBoxShowExperience !== false &&
-                    hero.doctorBoxExperience && (
-                      <div className="mt-1 flex items-center gap-1 text-[9px] sm:text-[10px] font-normal text-slate-200/85">
-                        <Star className="h-3 w-3 fill-amber-300 text-amber-300 shrink-0" />
-                        <span className="truncate">
-                          {hero.doctorBoxExperience}
-                        </span>
-                      </div>
+                  {/* Doctor Text Information */}
+                  <div className="min-w-0 flex-1 text-left">
+                    <div className="flex items-center gap-1">
+                      <h4 className="font-heading text-xs sm:text-sm font-extrabold leading-snug tracking-tight text-white drop-shadow-xs truncate">
+                        {hero.doctorBoxName || "Dr. DEEP A PATEL"}
+                      </h4>
+                      <CheckCircle2 className="h-3 w-3 text-sky-400 shrink-0" />
+                    </div>
+
+                    {hero.doctorBoxShowRole !== false && hero.doctorBoxRole && (
+                      <p className="text-[10px] sm:text-[11px] font-semibold text-emerald-400/95 leading-tight truncate mt-0.5 flex items-center gap-1">
+                        <Sparkles className="h-2.5 w-2.5 text-emerald-400 shrink-0" />
+                        <span>{hero.doctorBoxRole.trim()}</span>
+                      </p>
                     )}
+
+                    <div className="mt-0.5 flex items-center gap-1 text-[9px] sm:text-[10px] font-medium text-slate-300/85">
+                      <span className="h-1 w-1 rounded-full bg-emerald-400 shrink-0" />
+                      <span>BDS (Dental Surgeon)</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right: CA Smile Clinic Badge */}
+                <div className="shrink-0 flex items-center pl-2.5 border-l border-white/15">
+                  <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-[10px] font-bold text-emerald-300">
+                    <Smile className="h-3 w-3 text-emerald-400 shrink-0" />
+                    <span>CA Smile</span>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -465,14 +512,20 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
           >
             {/* Left side: Working hours */}
             <div className="text-left space-y-0.5">
-              <p
-                className="text-xs sm:text-sm font-normal tracking-normal transition-colors"
-                style={{
-                  color: topInfoLabelColor,
-                }}
-              >
-                {workingHoursLabel}
-              </p>
+              <div className="flex items-center gap-1.5">
+                <Clock
+                  className="h-3.5 w-3.5 shrink-0 transition-colors"
+                  style={{ color: topInfoLabelColor }}
+                />
+                <p
+                  className="text-xs sm:text-sm font-normal tracking-normal transition-colors"
+                  style={{
+                    color: topInfoLabelColor,
+                  }}
+                >
+                  {workingHoursLabel}
+                </p>
+              </div>
               <p
                 className="text-sm sm:text-base font-semibold tracking-tight transition-colors"
                 style={{
@@ -485,14 +538,20 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
 
             {/* Right side: Location */}
             <div className="text-right sm:text-left space-y-0.5">
-              <p
-                className="text-xs sm:text-sm font-normal tracking-normal transition-colors"
-                style={{
-                  color: topInfoLabelColor,
-                }}
-              >
-                {locationLabel}
-              </p>
+              <div className="flex items-center justify-end sm:justify-start gap-1.5">
+                <MapPin
+                  className="h-3.5 w-3.5 shrink-0 transition-colors"
+                  style={{ color: topInfoLabelColor }}
+                />
+                <p
+                  className="text-xs sm:text-sm font-normal tracking-normal transition-colors"
+                  style={{
+                    color: topInfoLabelColor,
+                  }}
+                >
+                  {locationLabel}
+                </p>
+              </div>
               <p
                 className="text-sm sm:text-base font-semibold tracking-tight transition-colors"
                 style={{
@@ -547,7 +606,7 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
             <div className="w-full flex justify-center md:justify-start">
               <Link
                 href={hero.ctaButtonUrl || "/contact"}
-                onClick={(e) => {
+                onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                   if (!hero.ctaButtonUrl || hero.ctaButtonUrl === "/contact") {
                     e.preventDefault();
                     openContactModal();
@@ -607,8 +666,8 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
               transition={{ duration: 0.5, delay: 0.2 }}
               className={`${
                 isTabletPreview
-                  ? "shrink-0 max-w-[320px]"
-                  : "w-full max-w-[340px] md:max-w-none md:col-span-5 lg:col-span-5 flex justify-center md:justify-end"
+                  ? "shrink-0 max-w-[340px]"
+                  : "w-full max-w-[420px] md:col-span-5 lg:col-span-5 flex justify-center md:justify-end"
               }`}
               style={{
                 marginTop: hero.doctorBoxMarginTop || "0px",
@@ -616,54 +675,74 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
               }}
             >
               <div
-                className="flex items-center gap-3.5 p-3.5 sm:p-4 shadow-xl backdrop-blur-md border border-white/30 dark:border-white/15 transition-transform hover:-translate-y-1 w-full"
+                className="group relative flex items-center justify-between gap-3.5 sm:gap-4 p-3.5 sm:p-4 shadow-[0_20px_50px_rgba(0,0,0,0.38)] backdrop-blur-xl border border-white/25 ring-1 ring-white/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_25px_60px_rgba(0,0,0,0.48)] w-full"
                 style={{
-                  backgroundColor:
-                    hero.doctorBoxBgColor || "rgba(148, 153, 162, 0.92)",
+                  background: resolvedBoxBg,
                   color: hero.doctorBoxTextColor || "#ffffff",
-                  borderRadius: hero.doctorBoxBorderRadius || "20px",
+                  borderRadius: hero.doctorBoxBorderRadius || "24px",
                 }}
               >
-                {/* Doctor Avatar Thumbnail */}
-                {hero.doctorBoxShowPhoto !== false && (
-                  <div className="relative h-12 w-12 sm:h-14 sm:w-14 shrink-0 overflow-hidden rounded-xl border border-white/25 bg-black/10">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={doctorAvatar}
-                      alt={hero.doctorBoxName || "Doctor Avatar"}
-                      onError={(e) => {
-                        const target = e.currentTarget;
-                        if (!target.dataset.fallbackApplied) {
-                          target.dataset.fallbackApplied = "true";
-                          target.src = "/images/doctor-avatar-uploaded.jpeg";
-                        }
-                      }}
-                      className="h-full w-full object-cover object-top"
-                    />
-                  </div>
-                )}
-
-                {/* Doctor Text Information */}
-                <div className="min-w-0 flex-1 text-left">
-                  <h4 className="font-heading text-sm sm:text-base font-bold leading-snug tracking-tight text-white drop-shadow-xs truncate">
-                    {hero.doctorBoxName || "Dr. Alex Mercer"}
-                  </h4>
-
-                  {hero.doctorBoxShowRole !== false && hero.doctorBoxRole && (
-                    <p className="text-[11px] sm:text-xs font-medium text-slate-100/90 leading-tight truncate mt-0.5">
-                      {hero.doctorBoxRole}
-                    </p>
+                {/* Left: Avatar with glowing emerald ring & live status pulse */}
+                <div className="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
+                  {hero.doctorBoxShowPhoto !== false && (
+                    <div className="relative shrink-0">
+                      <div className="relative h-13 w-13 sm:h-14 sm:w-14 overflow-hidden rounded-2xl ring-2 ring-emerald-400/50 shadow-md border border-white/30 bg-slate-900">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={doctorAvatar}
+                          alt={hero.doctorBoxName || "Dr. DEEP A PATEL"}
+                          onError={(e) => {
+                            const target = e.currentTarget;
+                            if (!target.dataset.fallbackApplied) {
+                              target.dataset.fallbackApplied = "true";
+                              target.src = "/images/doctor-avatar-uploaded.jpeg";
+                            }
+                          }}
+                          className="h-full w-full object-cover object-top transition-transform duration-300 group-hover:scale-105"
+                        />
+                      </div>
+                      {/* Active In-Clinic Pulse Beacon */}
+                      <span
+                        className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center"
+                        title="Available in Clinic"
+                      >
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 border-2 border-slate-900"></span>
+                      </span>
+                    </div>
                   )}
 
-                  {hero.doctorBoxShowExperience !== false &&
-                    hero.doctorBoxExperience && (
-                      <div className="mt-1 flex items-center gap-1 text-[10px] sm:text-[11px] font-normal text-slate-200/85">
-                        <Star className="h-3 w-3 fill-amber-300 text-amber-300 shrink-0" />
-                        <span className="truncate">
-                          {hero.doctorBoxExperience}
-                        </span>
-                      </div>
+                  {/* Doctor Text Information */}
+                  <div className="min-w-0 flex-1 text-left">
+                    <div className="flex items-center gap-1.5">
+                      <h4 className="font-heading text-sm sm:text-base font-extrabold leading-tight tracking-tight text-white drop-shadow-md truncate">
+                        {hero.doctorBoxName || "Dr. DEEP A PATEL"}
+                      </h4>
+                      <span title="Verified Specialist" className="inline-flex items-center">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-sky-400 shrink-0" />
+                      </span>
+                    </div>
+
+                    {hero.doctorBoxShowRole !== false && hero.doctorBoxRole && (
+                      <p className="text-[11px] sm:text-xs font-semibold text-emerald-400/95 leading-tight truncate mt-0.5 flex items-center gap-1">
+                        <Sparkles className="h-3 w-3 text-emerald-400 shrink-0" />
+                        <span>{hero.doctorBoxRole.trim()}</span>
+                      </p>
                     )}
+
+                    <div className="mt-1 flex items-center gap-1.5 text-[10px] sm:text-[10.5px] font-medium text-slate-300/90 truncate">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400/80 shrink-0" />
+                      <span className="truncate">BDS (Dental Surgeon)</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right: CA Smile Clinic Badge */}
+                <div className="shrink-0 flex items-center pl-3 sm:pl-3.5 border-l border-white/15">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-[11px] sm:text-xs font-bold text-emerald-300 shadow-2xs tracking-tight">
+                    <Smile className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                    <span>CA Smile</span>
+                  </div>
                 </div>
               </div>
             </motion.div>

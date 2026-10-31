@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import {
   createAppointmentSchema,
@@ -1086,6 +1088,97 @@ export async function POST(req: NextRequest) {
       {
         success: false,
         message: error.message || "Failed to schedule appointment",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions).catch(() => null);
+    if (session?.user && session.user.role !== "ADMIN" && session.user.role !== "DOCTOR") {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Forbidden: Only Clinic Owners (Admin) and Doctors are authorized to delete appointments.",
+        },
+        { status: 403 }
+      );
+    }
+
+    const { searchParams } = new URL(req.url);
+    const queryId = searchParams.get("id");
+
+    let idsToDelete: string[] = [];
+    if (queryId) {
+      idsToDelete.push(queryId);
+    } else {
+      try {
+        const body = await req.json();
+        if (Array.isArray(body.ids)) {
+          idsToDelete = body.ids.filter(Boolean);
+        } else if (body.id) {
+          idsToDelete.push(body.id);
+        }
+      } catch {
+        // no body
+      }
+    }
+
+    if (idsToDelete.length === 0) {
+      return NextResponse.json(
+        { success: false, message: "Appointment ID or array of IDs is required." },
+        { status: 400 }
+      );
+    }
+
+    let deletedFromDbCount = 0;
+    try {
+      // 1. Unlink treatment sessions
+      await prisma.treatmentSession.updateMany({
+        where: { appointmentId: { in: idsToDelete } },
+        data: { appointmentId: null },
+      }).catch(() => null);
+
+      // 2. Delete audit logs
+      await prisma.auditLog.deleteMany({
+        where: { appointmentId: { in: idsToDelete } },
+      }).catch(() => null);
+
+      // 3. Delete WhatsApp messages
+      await prisma.whatsAppMessage.deleteMany({
+        where: { appointmentId: { in: idsToDelete } },
+      }).catch(() => null);
+
+      // 4. Delete appointments
+      const dbRes = await prisma.appointment.deleteMany({
+        where: { id: { in: idsToDelete } },
+      }).catch(() => ({ count: 0 }));
+
+      deletedFromDbCount = dbRes.count;
+    } catch (dbErr) {
+      console.warn("DB error deleting appointments:", dbErr);
+    }
+
+    // 5. Clean from inMemoryStore
+    for (const id of idsToDelete) {
+      inMemoryStore.deleteAppointment(id);
+    }
+    invalidateAppointmentsCache();
+
+    return NextResponse.json({
+      success: true,
+      message: `Successfully deleted ${idsToDelete.length} appointment(s).`,
+      deletedCount: idsToDelete.length,
+      deletedIds: idsToDelete,
+      deletedFromDbCount,
+    });
+  } catch (error: any) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: error.message || "Failed to delete appointments",
       },
       { status: 500 }
     );

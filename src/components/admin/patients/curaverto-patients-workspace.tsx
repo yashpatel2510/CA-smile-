@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useState, useMemo, useEffect, useCallback } from "react";
+import { useSession } from "next-auth/react";
 import {
   Search,
   Upload,
   UserPlus,
   Phone,
   Edit2,
+  Trash2,
   Stethoscope,
   FileText,
   Clock,
@@ -76,6 +78,10 @@ interface PatientRecord {
 }
 
 export function CuravertoPatientsWorkspace() {
+  const { data: session } = useSession();
+  const userRole = (session?.user as any)?.role;
+  const canDelete = !userRole || userRole === "ADMIN" || userRole === "DOCTOR";
+
   const [topTab, setTopTab] = useState<"patients" | "vaccines">("patients");
   
   // Instant initial load using pre-cached static dataset
@@ -99,6 +105,8 @@ export function CuravertoPatientsWorkspace() {
   const [isEditPatientOpen, setIsEditPatientOpen] = useState(false);
   const [isNewEmrOpen, setIsNewEmrOpen] = useState(false);
   const [isSetCostOpen, setIsSetCostOpen] = useState(false);
+  const [patientToDelete, setPatientToDelete] = useState<PatientRecord | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // New Patient Form
   const [newName, setNewName] = useState("");
@@ -116,6 +124,33 @@ export function CuravertoPatientsWorkspace() {
   // Treatment Cost
   const [treatmentCost, setTreatmentCost] = useState("1500");
 
+  const handleDeletePatient = async (patient: PatientRecord) => {
+    try {
+      setIsDeleting(true);
+      const res = await fetch(`/api/patients/${encodeURIComponent(patient.id)}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (data.success) {
+        setPatients((prev) => {
+          const updated = prev.filter((p) => p.id !== patient.id && p.phone !== patient.phone);
+          try {
+            localStorage.setItem("casmile_patients_records_cache", JSON.stringify(updated));
+          } catch {}
+          return updated;
+        });
+        setSelectedPatientId((cur) => (cur === patient.id ? "" : cur));
+        setPatientToDelete(null);
+      } else {
+        alert(data.message || "Failed to delete patient");
+      }
+    } catch (err: any) {
+      alert(err.message || "Error deleting patient");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   // Fetch live patients from /api/patients and merge without data loss
   const fetchLivePatients = useCallback(async (manual = false) => {
     try {
@@ -124,7 +159,17 @@ export function CuravertoPatientsWorkspace() {
       if (!res.ok) return;
       const data = await res.json();
 
-      if (data.success && Array.isArray(data.patients) && data.patients.length > 0) {
+      if (data.success && Array.isArray(data.patients)) {
+        if (data.patients.length === 0) {
+          setPatients([]);
+          setSelectedPatientId("");
+          try {
+            localStorage.removeItem("casmile_patients_records_cache");
+          } catch {}
+          setLastSyncTime(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+          return;
+        }
+
         const mapped: PatientRecord[] = data.patients.map((p: any, idx: number) => {
           const lastApt = p.appointments?.[0];
           const fullName = p.name || `${p.firstName || ""} ${p.lastName || ""}`.trim() || "Patient";
@@ -632,45 +677,61 @@ export function CuravertoPatientsWorkspace() {
                     <div
                       key={patient.id}
                       onClick={() => setSelectedPatientId(patient.id)}
-                      className={`flex items-center gap-3 p-3 rounded-2xl transition-all cursor-pointer ${
+                      className={`group flex items-center justify-between gap-3 p-3 rounded-2xl transition-all cursor-pointer ${
                         isSelected
                           ? "bg-blue-50/70 border border-blue-200 shadow-2xs"
                           : "bg-white hover:bg-slate-50/80 border border-transparent"
                       }`}
                     >
-                      {/* Avatar Circle */}
-                      <div
-                        className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 ${
-                          isSelected
-                            ? "bg-indigo-600 text-white"
-                            : "bg-slate-100 text-slate-600"
-                        }`}
-                      >
-                        {initial}
-                      </div>
-
-                      {/* Info Column */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <h4 className="font-bold text-slate-900 text-xs truncate">
-                            {patient.name}
-                          </h4>
-                          <span className="text-[10px] text-slate-400 font-mono">
-                            {patient.patientNumber}
-                          </span>
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        {/* Avatar Circle */}
+                        <div
+                          className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 ${
+                            isSelected
+                              ? "bg-indigo-600 text-white"
+                              : "bg-slate-100 text-slate-600"
+                          }`}
+                        >
+                          {initial}
                         </div>
 
-                        <div className="flex items-center gap-2 mt-0.5">
-                          {patient.isNew && (
-                            <span className="rounded bg-emerald-50 px-1 py-0.2 text-[9px] font-bold text-emerald-700">
-                              NEW
+                        {/* Info Column */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <h4 className="font-bold text-slate-900 text-xs truncate">
+                              {patient.name}
+                            </h4>
+                            <span className="text-[10px] text-slate-400 font-mono">
+                              {patient.patientNumber}
                             </span>
-                          )}
-                          <span className="text-[11px] text-slate-400 font-mono">
-                            {patient.phone}
-                          </span>
+                          </div>
+
+                          <div className="flex items-center gap-2 mt-0.5">
+                            {patient.isNew && (
+                              <span className="rounded bg-emerald-50 px-1 py-0.2 text-[9px] font-bold text-emerald-700">
+                                NEW
+                              </span>
+                            )}
+                            <span className="text-[11px] text-slate-400 font-mono">
+                              {patient.phone}
+                            </span>
+                          </div>
                         </div>
                       </div>
+
+                      {canDelete && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPatientToDelete(patient);
+                          }}
+                          title="Delete Patient Record"
+                          className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all shrink-0"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                     </div>
                   );
                 })
@@ -742,6 +803,20 @@ export function CuravertoPatientsWorkspace() {
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
+                        {canDelete && (
+                          <>
+                            <span>•</span>
+                            <button
+                              type="button"
+                              onClick={() => setPatientToDelete(selectedPatient)}
+                              className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 transition-colors"
+                              title="Delete Patient Record"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span>Delete</span>
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -1415,6 +1490,52 @@ export function CuravertoPatientsWorkspace() {
       )}
 
       {/* =================================================================== */}
+      {/* MODAL: DELETE PATIENT CONFIRMATION                                  */}
+      {/* =================================================================== */}
+      {patientToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="h-10 w-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                <Trash2 className="h-5 w-5" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-bold text-slate-900">
+                  Delete Patient Record?
+                </h3>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Are you sure you want to permanently delete{" "}
+                  <span className="font-semibold text-slate-800">
+                    {patientToDelete.name}
+                  </span>{" "}
+                  ({patientToDelete.phone})? This will delete all associated appointments, clinical notes, and medical records. This action cannot be undone.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => setPatientToDelete(null)}
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => handleDeletePatient(patientToDelete)}
+                className="rounded-xl bg-rose-600 hover:bg-rose-700 px-4 py-2 text-xs font-semibold text-white shadow-xs transition-colors flex items-center gap-1.5"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                <span>{isDeleting ? "Deleting..." : "Confirm Delete"}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =================================================================== */}
       {/* MODAL: EDIT PATIENT (SAME FORM AS IN APPOINTMENTS SECTION)          */}
       {/* =================================================================== */}
       <CuravertoEditPatientModal
@@ -1426,3 +1547,4 @@ export function CuravertoPatientsWorkspace() {
     </div>
   );
 }
+

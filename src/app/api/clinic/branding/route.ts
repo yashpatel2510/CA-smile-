@@ -56,8 +56,27 @@ async function persistMediaToDatabase(
   }
 }
 
+let lastBrandingFetch = 0;
+const BRANDING_CACHE_TTL_MS = 60000;
+
 export async function GET() {
   try {
+    const now = Date.now();
+    if (global.__clinicBrandingCache && now - lastBrandingFetch < BRANDING_CACHE_TTL_MS) {
+      return NextResponse.json(
+        {
+          success: true,
+          source: "memory-cache",
+          branding: global.__clinicBrandingCache,
+        },
+        {
+          headers: {
+            "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
+          },
+        }
+      );
+    }
+
     // 1. Try loading from Supabase PostgreSQL database (Live across Vercel)
     try {
       const clinic = await prisma.clinic.findFirst();
@@ -86,13 +105,39 @@ export async function GET() {
                 ? dbConfig.gallery.photos
                 : DEFAULT_CLINIC_BRANDING.gallery!.photos,
           },
+          doctorIntroSection: {
+            ...DEFAULT_CLINIC_BRANDING.doctorIntroSection!,
+            ...(dbConfig.doctorIntroSection || {}),
+            specialities:
+              Array.isArray(dbConfig.doctorIntroSection?.specialities) &&
+              dbConfig.doctorIntroSection.specialities.length > 0
+                ? dbConfig.doctorIntroSection.specialities
+                : DEFAULT_CLINIC_BRANDING.doctorIntroSection!.specialities,
+          },
+          whyTrustUsSection: {
+            ...DEFAULT_CLINIC_BRANDING.whyTrustUsSection!,
+            ...(dbConfig.whyTrustUsSection || {}),
+            features:
+              Array.isArray(dbConfig.whyTrustUsSection?.features) &&
+              dbConfig.whyTrustUsSection.features.length > 0
+                ? dbConfig.whyTrustUsSection.features
+                : DEFAULT_CLINIC_BRANDING.whyTrustUsSection!.features,
+          },
         };
         global.__clinicBrandingCache = merged;
-        return NextResponse.json({
-          success: true,
-          source: "database",
-          branding: merged,
-        });
+        lastBrandingFetch = now;
+        return NextResponse.json(
+          {
+            success: true,
+            source: "database",
+            branding: merged,
+          },
+          {
+            headers: {
+              "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
+            },
+          }
+        );
       }
     } catch (dbErr) {
       console.warn("Database branding fetch error, falling back to local file:", dbErr);
@@ -100,11 +145,19 @@ export async function GET() {
 
     // 2. Fallback to local config file
     const branding = getClinicBrandingConfig();
-    return NextResponse.json({
-      success: true,
-      source: "local-file",
-      branding,
-    });
+    lastBrandingFetch = now;
+    return NextResponse.json(
+      {
+        success: true,
+        source: "local-file",
+        branding,
+      },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
+        },
+      }
+    );
   } catch (error) {
     console.error("Error retrieving clinic branding:", error);
     return NextResponse.json(
@@ -133,6 +186,7 @@ export async function PUT(req: NextRequest) {
 
     if (body.action === "reset") {
       const resetConfig = resetClinicBrandingConfig();
+      lastBrandingFetch = 0;
       try {
         const clinic = await prisma.clinic.findFirst();
         if (clinic) {
@@ -204,6 +258,26 @@ export async function PUT(req: NextRequest) {
       incomingGallery.photos = processedPhotos;
     }
 
+    const incomingDoctorIntro = { ...(body.doctorIntroSection || {}) } as Record<string, any>;
+    if (
+      incomingDoctorIntro.photoUrl &&
+      typeof incomingDoctorIntro.photoUrl === "string" &&
+      incomingDoctorIntro.photoUrl.startsWith("data:image/")
+    ) {
+      incomingDoctorIntro.photoUrl =
+        (await persistMediaToDatabase(incomingDoctorIntro.photoUrl, "doctor-intro-portrait")) || "";
+    }
+
+    const incomingWhyTrustUs = { ...(body.whyTrustUsSection || {}) } as Record<string, any>;
+    if (
+      incomingWhyTrustUs.backgroundImageUrl &&
+      typeof incomingWhyTrustUs.backgroundImageUrl === "string" &&
+      incomingWhyTrustUs.backgroundImageUrl.startsWith("data:image/")
+    ) {
+      incomingWhyTrustUs.backgroundImageUrl =
+        (await persistMediaToDatabase(incomingWhyTrustUs.backgroundImageUrl, "why-trust-us-bg")) || "";
+    }
+
     const processedPayload = {
       ...body,
       hero: {
@@ -218,10 +292,19 @@ export async function PUT(req: NextRequest) {
         ...(body.gallery || {}),
         ...incomingGallery,
       },
+      doctorIntroSection: {
+        ...(body.doctorIntroSection || {}),
+        ...incomingDoctorIntro,
+      },
+      whyTrustUsSection: {
+        ...(body.whyTrustUsSection || {}),
+        ...incomingWhyTrustUs,
+      },
     };
 
     // 2. Update local disk/memory cache
     const updated = updateClinicBrandingConfig(processedPayload);
+    lastBrandingFetch = 0;
 
     // 3. Persist permanently to Supabase PostgreSQL Database (ensures live Vercel updates!)
     try {

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useSession } from "next-auth/react";
 import {
   List,
   Calendar as CalendarIcon,
@@ -29,6 +30,7 @@ import {
   AlertCircle,
   RefreshCw,
   X,
+  Trash2,
 } from "lucide-react";
 
 const CANCELLATION_REASONS = [
@@ -198,6 +200,15 @@ export function CuravertoAppointmentsView() {
   // Dropdown menu state
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
+  const { data: session } = useSession();
+  const userRole = (session?.user as any)?.role;
+  const canDelete = !userRole || userRole === "ADMIN" || userRole === "DOCTOR";
+
+  // Deletion State
+  const [deletingRow, setDeletingRow] = useState<AppointmentRow | null>(null);
+  const [isDeletingSingle, setIsDeletingSingle] = useState(false);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+
   // Cancellation Modal State (Matching Image 2)
   const [cancellingRow, setCancellingRow] = useState<AppointmentRow | null>(null);
   const [selectedCancelReason, setSelectedCancelReason] = useState<string>("Patient Request");
@@ -217,6 +228,60 @@ export function CuravertoAppointmentsView() {
   // Checkbox state for rows (Admin view)
   const [selectedRowIds, setSelectedRowIds] = useState<string[]>([]);
   const [selectAll, setSelectAll] = useState(false);
+
+  const handleDeleteAppointment = async (row: AppointmentRow) => {
+    try {
+      setIsDeletingSingle(true);
+      const res = await fetch(`/api/appointments/${encodeURIComponent(row.id)}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (data.success) {
+        setRows((prev) => prev.filter((r) => r.id !== row.id));
+        setSelectedRowIds((prev) => prev.filter((id) => id !== row.id));
+        setDeletingRow(null);
+      } else {
+        alert(data.message || "Failed to delete appointment");
+      }
+    } catch (err: any) {
+      alert(err.message || "Error deleting appointment");
+    } finally {
+      setIsDeletingSingle(false);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedRowIds.length === 0) return;
+    if (
+      !window.confirm(
+        `Are you sure you want to permanently delete ${selectedRowIds.length} selected appointments? This action cannot be undone.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setIsBulkDeleting(true);
+      const res = await fetch("/api/appointments", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: selectedRowIds }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        const deletedSet = new Set(selectedRowIds);
+        setRows((prev) => prev.filter((r) => !deletedSet.has(r.id)));
+        setSelectedRowIds([]);
+        setSelectAll(false);
+      } else {
+        alert(data.message || "Failed to delete selected appointments");
+      }
+    } catch (err: any) {
+      alert(err.message || "Error deleting selected appointments");
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -913,6 +978,19 @@ export function CuravertoAppointmentsView() {
               <Ban className="h-3.5 w-3.5 text-rose-600" />
               <span>Cancel Appointment</span>
             </button>
+            {canDelete && (
+              <button
+                type="button"
+                onClick={() => {
+                  setOpenDropdownId(null);
+                  setDeletingRow(row);
+                }}
+                className="flex w-full items-center gap-2.5 px-3.5 py-1.5 text-left text-xs font-semibold text-rose-700 hover:bg-rose-50 transition-colors border-t border-slate-100"
+              >
+                <Trash2 className="h-3.5 w-3.5 text-rose-600" />
+                <span>Delete Appointment</span>
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -2117,6 +2195,19 @@ export function CuravertoAppointmentsView() {
               <span>Cancel</span>
             </button>
 
+            {canDelete && (
+              <button
+                type="button"
+                disabled={isBulkProcessing || isBulkDeleting}
+                onClick={handleBulkDelete}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-red-600 hover:bg-red-700 px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition-colors disabled:opacity-50"
+                title="Permanently delete selected appointments"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                <span>{isBulkDeleting ? "Deleting..." : "Delete"}</span>
+              </button>
+            )}
+
             <button
               type="button"
               onClick={() => {
@@ -2130,7 +2221,62 @@ export function CuravertoAppointmentsView() {
             </button>
           </div>
         )}
+
+        {/* Delete Appointment Modal */}
+        {deletingRow && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs"
+            onClick={() => setDeletingRow(null)}
+          >
+            <div
+              className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-200 space-y-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-start gap-3">
+                <div className="h-10 w-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                  <Trash2 className="h-5 w-5" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-base font-bold text-slate-900">
+                    Delete Appointment?
+                  </h3>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    Are you sure you want to permanently delete the appointment for{" "}
+                    <span className="font-semibold text-slate-800">
+                      {deletingRow.patientName}
+                    </span>{" "}
+                    on{" "}
+                    <span className="font-semibold text-slate-800">
+                      {deletingRow.rawDate || "scheduled date"} at {deletingRow.time}
+                    </span>
+                    ? This action cannot be undone.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  disabled={isDeletingSingle}
+                  onClick={() => setDeletingRow(null)}
+                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={isDeletingSingle}
+                  onClick={() => handleDeleteAppointment(deletingRow)}
+                  className="rounded-xl bg-rose-600 hover:bg-rose-700 px-4 py-2 text-xs font-semibold text-white shadow-xs transition-colors flex items-center gap-1.5"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  <span>{isDeletingSingle ? "Deleting..." : "Confirm Delete"}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
+

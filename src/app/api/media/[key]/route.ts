@@ -3,6 +3,15 @@ import prisma from "@/lib/prisma";
 import fs from "fs";
 import path from "path";
 
+declare global {
+  // eslint-disable-next-line no-var
+  var __mediaMemoryCache: Map<string, { buffer: Buffer; mimeType: string }> | undefined;
+}
+
+if (!global.__mediaMemoryCache) {
+  global.__mediaMemoryCache = new Map();
+}
+
 export async function GET(
   req: NextRequest,
   { params }: { params: { key: string } }
@@ -23,15 +32,28 @@ export async function GET(
       gif: "image/gif",
     };
 
-    // 1. Try local public/images directory FIRST (instant 0ms response, zero DB overhead)
+    // 0. Try in-memory cache (ultra-fast < 1ms response)
+    const memCached = global.__mediaMemoryCache?.get(key);
+    if (memCached) {
+      return new NextResponse(new Uint8Array(memCached.buffer), {
+        headers: {
+          "Content-Type": memCached.mimeType,
+          "Cache-Control": "public, max-age=31536000, immutable",
+        },
+      });
+    }
+
+    // 1. Try local public/images directory FIRST (instant response, zero DB overhead)
     try {
       const sanitizedKey = path.basename(key);
       const localFilePath = path.join(process.cwd(), "public", "images", sanitizedKey);
       if (fs.existsSync(localFilePath)) {
         const fileBuffer = fs.readFileSync(localFilePath);
+        const resolvedMime = mimeMap[ext] || "image/jpeg";
+        global.__mediaMemoryCache?.set(key, { buffer: fileBuffer, mimeType: resolvedMime });
         return new NextResponse(fileBuffer, {
           headers: {
-            "Content-Type": mimeMap[ext] || "image/jpeg",
+            "Content-Type": resolvedMime,
             "Cache-Control": "public, max-age=31536000, immutable",
           },
         });
@@ -60,9 +82,12 @@ export async function GET(
           }
         } catch {}
 
+        const resolvedMime = media.mimeType || mimeMap[ext] || "image/jpeg";
+        global.__mediaMemoryCache?.set(key, { buffer, mimeType: resolvedMime });
+
         return new NextResponse(buffer, {
           headers: {
-            "Content-Type": media.mimeType || mimeMap[ext] || "image/jpeg",
+            "Content-Type": resolvedMime,
             "Cache-Control": "public, max-age=31536000, immutable",
           },
         });

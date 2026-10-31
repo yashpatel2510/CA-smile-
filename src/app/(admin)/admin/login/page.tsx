@@ -89,10 +89,10 @@ function LoginForm() {
             <ClinicLogo size="lg" />
             <div className="text-left">
               <span className="block font-heading text-xl font-bold text-brand-text">
-                {brandConfig?.logo?.clinicDisplayName || "HealthSphere"}
+                {brandConfig?.logo?.clinicDisplayName || "CA Smile Dental Clinic"}
               </span>
               <span className="-mt-1 block text-xs font-medium text-brand-muted">
-                {brandConfig?.logo?.tagline || `${currentTheme.name} Center`}
+                {brandConfig?.logo?.tagline || "Multispeciality Dental Care"}
               </span>
             </div>
           </Link>
@@ -215,7 +215,7 @@ function LoginForm() {
             <ArrowRight className="h-3 w-3" />
           </Link>
           <p className="text-[11px] text-brand-muted">
-            HealthSphere Clinical Security &amp; Healthcare Management Platform
+            CA Smile Dental Clinic Management Platform
           </p>
         </div>
       </div>
