@@ -57,7 +57,9 @@ export function Footer() {
   const whatsappHref = whatsappPhone.startsWith("http")
     ? whatsappPhone
     : `https://wa.me/${whatsappPhone.replace(/\D/g, "")}`;
-  const instagramUrl = brandConfig?.instagramUrl || "https://instagram.com";
+  const instagramUrl =
+    brandConfig?.instagramUrl ||
+    "https://www.instagram.com/ca_smile_bilimora?psln=c3Rhcmk3aHE4bjBw";
   const googleMapsUrl =
     brandConfig?.googleMapsUrl ||
     "https://www.google.com/maps/place/CA+Smile+Multispeciality+Dental+Clinic/data=!4m2!3m1!1s0x0:0x3a288255f324c8de?sa=X&ved=1t:2428&ictx=111";

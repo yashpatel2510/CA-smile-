@@ -363,8 +363,8 @@ export function QuickBookingForm({
 
             <div className="space-y-2.5 pt-2">
               <a
-                href={`https://wa.me/918590422464?text=${encodeURIComponent(
-                  `Hello VS Dental Clinic, I just submitted an appointment request (Ref: ${successData.id}) for ${successData.treatment} on ${successData.date}. Please confirm my slot.`
+                href={`https://wa.me/917226098074?text=${encodeURIComponent(
+                  `Hello CA Smile Dental Clinic, I just submitted an appointment request (Ref: ${successData.id}) for ${successData.treatment} on ${successData.date}. Please confirm my slot.`
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"

@@ -556,7 +556,7 @@ export function CalendarBookingExperience({
       ? `${brandConfig.address}${brandConfig.city ? `, ${brandConfig.city}` : ""}${brandConfig.postalCode ? ` ${brandConfig.postalCode}` : ""}`
       : "742 Evergreen Medical Way, Suite 400, Springfield 97477";
 
-  const clinicPhone = brandConfig?.phone || "(800) 555-CLINIC";
+  const clinicPhone = brandConfig?.phone || "+91 72260 98074";
   const clinicEmail = brandConfig?.email || "contact@pediodent.example.com";
 
   const googleCalendarUrl = useMemo(() => {
@@ -807,7 +807,10 @@ export function CalendarBookingExperience({
                 </a>
                 <span className={isDark ? "text-zinc-600" : "text-slate-400"}>•</span>
                 <a
-                  href={config.instagramUrl || "https://instagram.com"}
+                  href={
+                    config.instagramUrl ||
+                    "https://www.instagram.com/ca_smile_bilimora?psln=c3Rhcmk3aHE4bjBw"
+                  }
                   target="_blank"
                   rel="noreferrer"
                   className={`transition-colors ${isDark ? "hover:text-white" : "hover:text-black font-semibold"}`}
@@ -1590,7 +1593,7 @@ export function CalendarBookingExperience({
                       </a>
 
                       <a
-                        href={`https://wa.me/${((brandConfig as any)?.whatsappNumber || brandConfig?.phone || "919876543210").replace(/\D/g, "")}?text=${encodeURIComponent(
+                        href={`https://wa.me/${((brandConfig as any)?.whatsappNumber || brandConfig?.whatsappPhone || brandConfig?.phone || "917226098074").replace(/\D/g, "")}?text=${encodeURIComponent(
                           `Hello! I have booked an appointment on your website.\nReference ID: ${confirmedData.id}\nPatient: ${confirmedData.patientName}\nDate: ${confirmedData.dateFormatted}\nSlot: ${confirmedData.slot}`
                         )}`}
                         target="_blank"

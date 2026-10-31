@@ -96,7 +96,7 @@ export function renderBookingRequestReceivedEmail(data: BaseEmailData) {
 
           <tr>
             <td style="background-color: #f1f5f9; padding: 20px 30px; text-align: center; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b;">
-              <p style="margin: 0 0 4px;">Questions? Call our triage desk at <a href="tel:5552345678" style="color: ${primaryColor}; text-decoration: none;">${clinicPhone}</a>.</p>
+              <p style="margin: 0 0 4px;">Questions? Call our triage desk at <a href="tel:+917226098074" style="color: ${primaryColor}; text-decoration: none;">${clinicPhone}</a>.</p>
               <p style="margin: 0;">${clinicAddress}</p>
             </td>
           </tr>
@@ -217,7 +217,7 @@ export function renderBookingConfirmedEmail(data: BaseEmailData) {
           <!-- Footer -->
           <tr>
             <td style="background-color: #f1f5f9; padding: 24px 30px; text-align: center; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; line-height: 1.5;">
-              <p style="margin: 0 0 6px;">Need to reschedule or cancel? Please notify us at least 24 hours in advance at <a href="tel:5552345678" style="color: ${primaryColor}; text-decoration: none;">${clinicPhone}</a>.</p>
+              <p style="margin: 0 0 6px;">Need to reschedule or cancel? Please notify us at least 24 hours in advance at <a href="tel:+917226098074" style="color: ${primaryColor}; text-decoration: none;">${clinicPhone}</a>.</p>
               <p style="margin: 0;">${brandName} • ${clinicAddress}</p>
             </td>
           </tr>
@@ -329,7 +329,7 @@ export function renderBookingDeclinedEmail(
 
           <tr>
             <td style="background-color: #f1f5f9; padding: 20px 30px; text-align: center; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b;">
-              <p style="margin: 0;">Prefer to speak with someone? Call us directly at <a href="tel:5552345678" style="color: ${primaryColor}; text-decoration: none;">${clinicPhone}</a>.</p>
+              <p style="margin: 0;">Prefer to speak with someone? Call us directly at <a href="tel:+917226098074" style="color: ${primaryColor}; text-decoration: none;">${clinicPhone}</a>.</p>
             </td>
           </tr>
 
@@ -439,7 +439,7 @@ export function renderAppointmentReminderEmail(data: BaseEmailData) {
           <!-- Footer -->
           <tr>
             <td style="background-color: #f1f5f9; padding: 20px 30px; text-align: center; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; line-height: 1.5;">
-              <p style="margin: 0;">Questions? Call our front desk at <a href="tel:5552345678" style="color: ${primaryColor}; text-decoration: none;">${clinicPhone}</a>.</p>
+              <p style="margin: 0;">Questions? Call our front desk at <a href="tel:+917226098074" style="color: ${primaryColor}; text-decoration: none;">${clinicPhone}</a>.</p>
             </td>
           </tr>
 
@@ -521,7 +521,7 @@ export function renderBookingCancelledEmail(data: BaseEmailData) {
 
           <tr>
             <td style="background-color: #f1f5f9; padding: 20px 30px; text-align: center; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b;">
-              <p style="margin: 0;">Questions? Call our front desk at <a href="tel:5552345678" style="color: ${primaryColor}; text-decoration: none;">${clinicPhone}</a>.</p>
+              <p style="margin: 0;">Questions? Call our front desk at <a href="tel:+917226098074" style="color: ${primaryColor}; text-decoration: none;">${clinicPhone}</a>.</p>
             </td>
           </tr>
 

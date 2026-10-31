@@ -43,24 +43,24 @@ interface ClinicSetupForm {
 }
 
 const INITIAL_STATE: ClinicSetupForm = {
-  clinicName: "Smile Dental Clinic",
+  clinicName: "CA Smile Dental Clinic",
   tagline: "Dental Clinic & Oral Healthcare",
   description:
     "Specialized Dental Surgery, Oral Restorations & Family Healthcare Center",
-  phone: "+91 9664681536",
-  emergencyPhone: "+91 9664681536",
-  email: "contact@smiledental.example.com",
+  phone: "+91 72260 98074",
+  emergencyPhone: "+91 72260 98074",
+  email: "casmileatbilimora@gmail.com",
   address: "1st Floor, Labdhi Arcade, Above HDFC Bank, Bilimora, Gujarat 396321",
   city: "Bilimora",
   state: "Gujarat",
   postalCode: "396321",
   workingHours: "Mon - Sat: 9:00 AM - 8:00 PM | Sunday: Emergency Only",
-  doctorName: "Dr. Sankar",
+  doctorName: "Dr. DEEP A PATEL",
   doctorTitle: "Chief Dental Surgeon & Clinic Founder",
-  doctorPhone: "+91 98470 12345",
+  doctorPhone: "+91 72260 98074",
   doctorBio:
     "Distinguished clinician with over 15 years of surgical excellence in implantology, painless endodontics, and restorative oral rehabilitation.",
-  ownerName: "Dr. Sankar & Associates",
+  ownerName: "Dr. DEEP A PATEL",
   ownerTitle: "Clinic Owner & Managing Director",
 };
 

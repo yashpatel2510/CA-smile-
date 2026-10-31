@@ -202,10 +202,10 @@ export default function ServiceDetailPage({ params }: ServicePageProps) {
                     <span className="text-[11px] text-brand-muted">
                       Same-day questions? Call{" "}
                       <a
-                        href="tel:8005552546"
+                        href="tel:+917226098074"
                         className="font-medium text-brand-primary hover:underline"
                       >
-                        (800) 555-CLINIC
+                        +91 72260 98074
                       </a>
                     </span>
                   </div>

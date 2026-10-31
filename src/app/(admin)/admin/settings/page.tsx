@@ -423,7 +423,8 @@ export default function AdminSettingsPage() {
     brandConfig.whatsappPhone || brandConfig.phone || "+91 72260 98074"
   );
   const [instagramUrl, setInstagramUrl] = useState(
-    brandConfig.instagramUrl || "https://instagram.com"
+    brandConfig.instagramUrl ||
+      "https://www.instagram.com/ca_smile_bilimora?psln=c3Rhcmk3aHE4bjBw"
   );
   const [googleMapsUrl, setGoogleMapsUrl] = useState(
     brandConfig.googleMapsUrl ||
@@ -484,7 +485,10 @@ export default function AdminSettingsPage() {
       setWhatsappPhone(
         brandConfig.whatsappPhone || brandConfig.phone || "+91 72260 98074"
       );
-      setInstagramUrl(brandConfig.instagramUrl || "https://instagram.com");
+      setInstagramUrl(
+        brandConfig.instagramUrl ||
+          "https://www.instagram.com/ca_smile_bilimora?psln=c3Rhcmk3aHE4bjBw"
+      );
       setAboutVideoUrl(
         brandConfig.aboutSection?.videoUrl || brandConfig.aboutVideoUrl || "https://www.youtube.com/watch?v=mbBugyspbPE"
       );
@@ -858,7 +862,9 @@ export default function AdminSettingsPage() {
     setMapSectionBgColor("#ffffff");
     setMapStyle("dark");
     setWhatsappPhone("+91 72260 98074");
-    setInstagramUrl("https://instagram.com");
+    setInstagramUrl(
+      "https://www.instagram.com/ca_smile_bilimora?psln=c3Rhcmk3aHE4bjBw"
+    );
     setAboutVideoUrl("https://youtu.be/mbBugyspbPE");
     setGoogleMapsUrl(
       "https://www.google.com/maps/place/CA+Smile+Multispeciality+Dental+Clinic/data=!4m2!3m1!1s0x0:0x3a288255f324c8de?sa=X&ved=1t:2428&ictx=111"
@@ -3882,7 +3888,7 @@ export default function AdminSettingsPage() {
                     value={instagramUrl}
                     onChange={(e) => setInstagramUrl(e.target.value)}
                     className="text-xs font-mono"
-                    placeholder="https://instagram.com/casmiledental"
+                    placeholder="https://www.instagram.com/ca_smile_bilimora?psln=c3Rhcmk3aHE4bjBw"
                   />
                   <span className="text-[10px] text-brand-muted">
                     Clicking the Instagram icon button opens this URL in a new tab.

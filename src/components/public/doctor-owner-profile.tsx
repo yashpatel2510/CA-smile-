@@ -32,7 +32,7 @@ export function DoctorOwnerProfile() {
     brandConfig.doctorBio ||
     "Distinguished clinician with over 15 years of surgical excellence in implantology, painless endodontics, and restorative oral rehabilitation.";
   const doctorPhone =
-    brandConfig.doctorPhone || brandConfig.phone || "+91 98470 12345";
+    brandConfig.doctorPhone || brandConfig.phone || "+91 72260 98074";
   const ownerName =
     brandConfig.ownerName || `${doctorName} & Medical Associates`;
   const ownerTitle =

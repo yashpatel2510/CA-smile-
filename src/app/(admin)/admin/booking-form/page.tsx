@@ -1236,14 +1236,17 @@ export default function AdminBookingFormBuilderPage() {
                   </label>
                   <Input
                     type="url"
-                    value={config.instagramUrl ?? "https://instagram.com"}
+                    value={
+                      config.instagramUrl ??
+                      "https://www.instagram.com/ca_smile_bilimora?psln=c3Rhcmk3aHE4bjBw"
+                    }
                     onChange={(e) =>
                       setConfig((prev) => ({
                         ...prev,
                         instagramUrl: e.target.value,
                       }))
                     }
-                    placeholder="https://instagram.com/..."
+                    placeholder="https://www.instagram.com/ca_smile_bilimora?psln=c3Rhcmk3aHE4bjBw"
                     className="h-9 text-xs"
                   />
                 </div>

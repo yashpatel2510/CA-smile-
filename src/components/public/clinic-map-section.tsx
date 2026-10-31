@@ -101,7 +101,9 @@ export function ClinicMapSection({ className = "" }: ClinicMapSectionProps) {
   const pinColor = brandConfig.mapPinColor || "#E53935";
 
   // Social Links
-  const instagramUrl = brandConfig.instagramUrl || "https://instagram.com";
+  const instagramUrl =
+    brandConfig.instagramUrl ||
+    "https://www.instagram.com/ca_smile_bilimora?psln=c3Rhcmk3aHE4bjBw";
   const rawWhatsapp = brandConfig.whatsappPhone || phone;
   const whatsappHref = rawWhatsapp.startsWith("http")
     ? rawWhatsapp

@@ -31,12 +31,12 @@ export async function GET() {
     const phone =
       branding.phone && branding.phone !== "(800) 555-CLINIC"
         ? branding.phone
-        : clinic?.phone || "+91 9664681536";
+        : clinic?.phone || "+91 72260 98074";
 
     const email =
       branding.email && branding.email !== "contact@pediodent.example.com"
         ? branding.email
-        : clinic?.email || "contact@smiledental.example.com";
+        : clinic?.email || "casmileatbilimora@gmail.com";
 
     const address =
       branding.address && !branding.address.includes("Evergreen Medical Way")
@@ -67,14 +67,14 @@ export async function GET() {
         workingHours:
           branding.workingHours ||
           "Mon - Sat: 9:00 AM - 8:00 PM | Sunday: Emergency Only",
-        doctorName: branding.doctorName || "Dr. Sankar",
+        doctorName: branding.doctorName || "Dr. DEEP A PATEL",
         doctorTitle:
           branding.doctorTitle || "Chief Dental Surgeon & Clinic Founder",
-        doctorPhone: branding.doctorPhone || "+91 98470 12345",
+        doctorPhone: branding.doctorPhone || "+91 72260 98074",
         doctorBio:
           branding.doctorBio ||
           "Distinguished clinician with over 15 years of surgical excellence in implantology, painless endodontics, and restorative oral rehabilitation.",
-        ownerName: branding.ownerName || "Dr. Sankar & Associates",
+        ownerName: branding.ownerName || "Dr. DEEP A PATEL",
         ownerTitle:
           branding.ownerTitle || "Clinic Owner & Managing Director",
       },

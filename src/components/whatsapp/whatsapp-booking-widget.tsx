@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, CheckCircle2, ExternalLink } from "lucide-react";
 import { clinicalServices } from "@/data/services-data";
 import { notifyAppointmentUpdate } from "@/lib/client-appointment-sync";
+import { useClinicTheme } from "@/components/theme/clinic-theme-provider";
 
 export function WhatsAppBookingWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -73,11 +74,19 @@ export function WhatsAppBookingWidget() {
       .catch(() => {});
   }, []);
 
-  const clinicWhatsAppNumber = "918590422464";
+  const { brandConfig } = useClinicTheme();
+  const clinicWhatsAppNumber = (
+    brandConfig?.whatsappPhone ||
+    brandConfig?.phone ||
+    "917226098074"
+  ).replace(/\D/g, "");
+  const formattedWhatsAppDisplay =
+    brandConfig?.whatsappPhone || brandConfig?.phone || "+91 72260 98074";
+  const clinicName = brandConfig?.clinicName || "CA Smile Dental Clinic";
 
   const handleDirectChat = () => {
     const msg = encodeURIComponent(
-      "Hello VS Dental Clinic, I would like to inquire about dental treatments and appointments."
+      `Hello ${clinicName}, I would like to inquire about dental treatments and appointments.`
     );
     window.open(`https://wa.me/${clinicWhatsAppNumber}?text=${msg}`, "_blank");
   };
@@ -152,7 +161,7 @@ export function WhatsAppBookingWidget() {
 
       // 2. Build pre-formatted WhatsApp message and launch WhatsApp
       const waMessage = encodeURIComponent(
-        `Hello VS Dental Clinic!\n\nI just submitted an appointment request on your website:\n` +
+        `Hello ${clinicName}!\n\nI just submitted an appointment request on your website:\n` +
           `• *Booking Ref*: ${refId}\n` +
           `• *Patient*: ${patientDisplayName}\n` +
           `• *Mobile*: +91 ${cleanPhone.slice(-10)}\n` +
@@ -320,7 +329,7 @@ export function WhatsAppBookingWidget() {
                     <ExternalLink className="h-4 w-4" />
                   </button>
                   <p className="text-[11px] text-slate-400">
-                    Clinic WhatsApp: +91 85904 22464
+                    Clinic WhatsApp: {formattedWhatsAppDisplay}
                   </p>
                 </div>
               ) : bookingSuccess ? (

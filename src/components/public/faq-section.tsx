@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaqItem, FaqsConfig } from "@/lib/faqs-store";
+import { MessageSquare, Phone } from "lucide-react";
 
 interface FaqSectionProps {
   initialConfig?: FaqsConfig;
@@ -159,6 +160,35 @@ export function FaqSection({
             >
               {subtitle}
             </p>
+
+            {/* Direct Contact Buttons */}
+            <div className="pt-2 flex flex-wrap gap-2.5 max-w-sm">
+              <a
+                href="https://wa.me/917226098074"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold transition-all shadow-xs ${
+                  isDark
+                    ? "bg-[#18181b] hover:bg-[#222226] text-emerald-400 border border-white/10"
+                    : "bg-[#f4f4f6] hover:bg-[#eaeaea] text-emerald-700 border border-neutral-200"
+                }`}
+              >
+                <MessageSquare className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                <span>WhatsApp: +91 72260 98074</span>
+              </a>
+
+              <a
+                href="tel:+917226098074"
+                className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold transition-all shadow-xs ${
+                  isDark
+                    ? "bg-[#18181b] hover:bg-[#222226] text-neutral-200 border border-white/10"
+                    : "bg-[#f4f4f6] hover:bg-[#eaeaea] text-neutral-800 border border-neutral-200"
+                }`}
+              >
+                <Phone className="h-3.5 w-3.5 text-sky-500 shrink-0" />
+                <span>Call: +91 72260 98074</span>
+              </a>
+            </div>
           </div>
 
           {/* RIGHT COLUMN: ACCORDION PILL CARDS WITH PLUS ICON */}

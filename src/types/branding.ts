@@ -416,7 +416,7 @@ export const DEFAULT_CLINIC_BRANDING: ClinicBrandConfig = {
   doctorTitle: "Chief Dental Surgeon & Clinic Founder",
   doctorBio:
     "Distinguished clinician with over 15 years of surgical excellence in implantology, painless endodontics, and restorative oral rehabilitation.",
-  doctorPhone: "+91 98470 12345",
+  doctorPhone: "+91 72260 98074",
   ownerName: "Dr. Sankar & Associates",
   ownerTitle: "Clinic Owner & Managing Director",
   ownerBio:
@@ -428,7 +428,7 @@ export const DEFAULT_CLINIC_BRANDING: ClinicBrandConfig = {
   mapSectionBgColor: "#ffffff",
   mapStyle: "dark",
   whatsappPhone: "+91 72260 98074",
-  instagramUrl: "https://instagram.com",
+  instagramUrl: "https://www.instagram.com/ca_smile_bilimora?psln=c3Rhcmk3aHE4bjBw",
   googleMapsUrl:
     "https://www.google.com/maps/place/CA+Smile+Multispeciality+Dental+Clinic/data=!4m2!3m1!1s0x0:0x3a288255f324c8de?sa=X&ved=1t:2428&ictx=111",
   mapExactAddress:

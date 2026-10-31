@@ -399,11 +399,11 @@ export default function TreatmentDetailPage({ params }: TreatmentPageProps) {
                 </Link>
 
                 <a
-                  href="tel:+919876543210"
+                  href="tel:+917226098074"
                   className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-5 py-3 text-sm font-medium text-zinc-700 hover:border-black hover:text-black transition-colors"
                 >
                   <Clock className="h-4 w-4 text-zinc-400" />
-                  <span>Call Reception</span>
+                  <span>Call Reception (+91 72260 98074)</span>
                 </a>
               </div>
 

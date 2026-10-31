@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, MessageSquare, Calendar, Sparkles } from "lucide-react";
+import { Search, MessageSquare, Calendar, Sparkles, Phone } from "lucide-react";
 import { FaqsConfig, FaqItem } from "@/lib/faqs-store";
 
 interface FaqPageClientProps {
@@ -176,7 +176,7 @@ export function FaqPageClient({ initialConfig }: FaqPageClientProps) {
                   >
                     Our team is here to assist. Connect via WhatsApp or schedule an initial consultation directly.
                   </p>
-                  <div className="flex items-center gap-2 pt-1">
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
                     <Link
                       href="/book"
                       className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-medium transition-colors ${
@@ -189,7 +189,7 @@ export function FaqPageClient({ initialConfig }: FaqPageClientProps) {
                       <span>Book Consultation</span>
                     </Link>
                     <a
-                      href="https://wa.me/918590422464"
+                      href="https://wa.me/917226098074"
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-medium transition-colors border ${
@@ -199,7 +199,18 @@ export function FaqPageClient({ initialConfig }: FaqPageClientProps) {
                       }`}
                     >
                       <MessageSquare className="h-3.5 w-3.5 text-emerald-500" />
-                      <span>WhatsApp Us</span>
+                      <span>WhatsApp: +91 72260 98074</span>
+                    </a>
+                    <a
+                      href="tel:+917226098074"
+                      className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-medium transition-colors border ${
+                        isDark
+                          ? "border-neutral-800 bg-[#18181b] text-neutral-300 hover:bg-[#222226]"
+                          : "border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-100"
+                      }`}
+                    >
+                      <Phone className="h-3.5 w-3.5 text-sky-500" />
+                      <span>Call: +91 72260 98074</span>
                     </a>
                   </div>
                 </div>
