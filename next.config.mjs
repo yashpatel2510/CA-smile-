@@ -210,6 +210,17 @@ const nextConfig = {
         destination: "/treatments/dental-crowns-and-bridges",
         permanent: true,
       },
+      // Legacy Diagnostics Slugs (Redirect to /services hub)
+      {
+        source: "/treatments/:slug(radiological-examination|periodontal-examination|tooth-sensitivity-test|digital-radiography|computed-tomography|occlusal-analysis|fluorescence-diagnostics|bacteriological-analysis|dental-consultation)",
+        destination: "/services",
+        permanent: true,
+      },
+      {
+        source: "/services/:slug(radiological-examination|periodontal-examination|tooth-sensitivity-test|digital-radiography|computed-tomography|occlusal-analysis|fluorescence-diagnostics|bacteriological-analysis|dental-consultation)",
+        destination: "/services",
+        permanent: true,
+      },
     ];
   },
   async headers() {

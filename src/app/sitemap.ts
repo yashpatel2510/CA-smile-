@@ -39,12 +39,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
             : 0.8,
   }));
 
-  // Canonical dental treatment & diagnostic pages (Each treatment = ONE URL only under /treatments/*)
+  // Canonical dental treatment pages (Only genuine clinic treatments with dedicated treatment pages)
   const treatmentsData = getTreatmentsStoreData();
-  const activeTreatments = [
-    ...(treatmentsData.treatments || []),
-    ...(treatmentsData.diagnostics || []),
-  ].filter((t) => t.isActive);
+  const activeTreatments = (treatmentsData.treatments || []).filter((t) => t.isActive);
 
   const treatmentPages = activeTreatments.map((treatment) => ({
     url: `${baseUrl}/treatments/${treatment.id}`,

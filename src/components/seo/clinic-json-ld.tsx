@@ -11,10 +11,7 @@ export function ClinicJsonLd() {
       : "https://www.casmiledentalclinic.com";
 
   const treatmentsData = getTreatmentsStoreData();
-  const allProcedures = [
-    ...(treatmentsData.treatments || []),
-    ...(treatmentsData.diagnostics || []),
-  ].filter((t) => t.isActive);
+  const allProcedures = (treatmentsData.treatments || []).filter((t) => t.isActive);
 
   const schema = {
     "@context": "https://schema.org",

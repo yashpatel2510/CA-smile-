@@ -34,10 +34,7 @@ export default function ServicesPage() {
       ? process.env.NEXT_PUBLIC_APP_URL.replace(/\/+$/, "")
       : "https://www.casmiledentalclinic.com";
 
-  const allActiveItems = [
-    ...(store.treatments || []),
-    ...(store.diagnostics || []),
-  ].filter((t) => t.isActive);
+  const allActiveItems = (store.treatments || []).filter((t) => t.isActive);
 
   const jsonLd = {
     "@context": "https://schema.org",
