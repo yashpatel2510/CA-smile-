@@ -167,7 +167,7 @@ export const DEFAULT_HERO_CONFIG: HeroSectionConfig = {
   imageOverlayOpacity: 0,
   headline: "Best Dental Clinic in Bilimora",
   subtitleText:
-    "Discover advanced care, personalized treatments, and trusted experts in a gentle, modern environment",
+    "Looking for a dentist in Bilimora? Visit CA Smile Dental Clinic for dental implants, root canal treatment, braces, smile designing and comprehensive dental care. Book an appointment today.",
   subtitleTextColor: "#475569",
   subtitleBoxMarginTop: "0px",
   subtitleBoxMarginBottom: "0px",
