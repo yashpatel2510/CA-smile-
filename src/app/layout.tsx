@@ -14,7 +14,9 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "https://www.casmiledentalclinic.com"
+    process.env.NEXT_PUBLIC_APP_URL && !process.env.NEXT_PUBLIC_APP_URL.includes("vercel.app")
+      ? process.env.NEXT_PUBLIC_APP_URL
+      : "https://www.casmiledentalclinic.com"
   ),
   title: {
     default: "CA Smile Dental Clinic",
