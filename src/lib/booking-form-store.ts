@@ -80,7 +80,12 @@ export async function getBookingFormConfigAsync(): Promise<BookingFormConfig> {
     if (clinic?.formConfig && typeof clinic.formConfig === "object") {
       const dbConfig = clinic.formConfig as any;
       if (Array.isArray(dbConfig.fields) || dbConfig.themeMode) {
-        const merged = { ...defaultBookingFormConfig, ...dbConfig };
+        const treatments =
+          Array.isArray(dbConfig.treatments) &&
+          dbConfig.treatments.length >= fallback.treatments.length
+            ? dbConfig.treatments
+            : fallback.treatments;
+        const merged = { ...defaultBookingFormConfig, ...fallback, ...dbConfig, treatments };
         global.__bookingFormConfig = merged;
         lastBookingConfigFetch = now;
         return merged;

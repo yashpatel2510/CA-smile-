@@ -14,10 +14,21 @@ export async function GET() {
     try {
       const clinic = await prisma.clinic.findFirst();
       if (clinic?.formConfig && typeof clinic.formConfig === "object") {
+        const localConfig = getBookingFormConfig();
+        const dbConfig = clinic.formConfig as any;
+        const treatments =
+          Array.isArray(dbConfig.treatments) &&
+          dbConfig.treatments.length >= localConfig.treatments.length
+            ? dbConfig.treatments
+            : localConfig.treatments;
         return NextResponse.json({
           success: true,
           source: "database",
-          config: clinic.formConfig,
+          config: {
+            ...localConfig,
+            ...dbConfig,
+            treatments,
+          },
         });
       }
     } catch (dbErr) {
