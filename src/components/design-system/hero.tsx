@@ -619,7 +619,7 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
                 color: hero.headlineColor || (isDarkBg ? "#ffffff" : "#0f172a"),
               }}
             >
-              {hero.headline || "CA Smile Dental Clinic in Bilimora"}
+              {hero.headline || "Best Dental Clinic in Bilimora"}
             </h1>
 
             {/* Subtitle Description Text */}
