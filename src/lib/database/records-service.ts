@@ -186,9 +186,9 @@ export async function getTableRecords(table: AllowedTable, limit = 50): Promise<
           },
           {
             id: "staff-2",
-            displayTitle: "Dr. Sarah Chen, MD",
-            subtitle: "Role: STAFF | Family & Pediatric Medicine",
-            details: { role: "STAFF", email: "staff@healthsphere.example.com" },
+            displayTitle: "Consultant Orthodontist, MDS",
+            subtitle: "Role: STAFF | Orthodontics & Clear Aligners",
+            details: { role: "STAFF", email: "ortho@casmile.example.com" },
             source: "Auth Roster",
           }
         );

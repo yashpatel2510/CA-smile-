@@ -41,18 +41,15 @@ interface Doctor {
 }
 
 const DEPARTMENTS = [
-  "General Practice",
-  "Gynaecology & OBG",
-  "Paediatrics",
-  "Dentistry",
-  "Physiotherapy",
-  "IVF & Fertility",
-  "Dermatology",
-  "Cardiology",
-  "ENT",
-  "Orthopaedics",
-  "Neurology",
-  "Pulmonology",
+  "General Dentistry",
+  "Endodontics (Root Canal)",
+  "Orthodontics (Aligners & Braces)",
+  "Oral & Maxillofacial Surgery",
+  "Prosthodontics (Crowns & Bridges)",
+  "Periodontics (Gum Health)",
+  "Implantology",
+  "Pediatric Dentistry",
+  "Cosmetic & Aesthetic Dentistry",
 ];
 
 const DAYS_OF_WEEK = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];

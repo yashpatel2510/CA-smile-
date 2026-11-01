@@ -54,7 +54,7 @@
     "imageUrl": "/images/ca-smile-logo-light.png",
     "monogramText": "CA",
     "shape": "rounded",
-    "altText": "CA Smile Dental Clinic Logo",
+    "altText": "CA Smile Dental Clinic Clinic Logo",
     "showClinicName": true,
     "clinicDisplayName": "CA Smile Dental Clinic",
     "tagline": "CA Smile Dental Clinic",
@@ -101,8 +101,9 @@
     "imagePosition": "center",
     "heroMinHeight": "740px",
     "imageOverlayOpacity": 0,
-    "subtitleText": "Discover advanced care, personalized treatments, and trusted experts in a gentle, modern environment",
-    "subtitleTextColor": "#000000",
+    "headline": "CA Smile Dental Clinic in Bilimora",
+    "subtitleText": "Looking for a dentist in Bilimora? Visit CA Smile Dental Clinic for dental implants, root canal treatment, braces, smile designing and comprehensive dental care. Book an appointment today.",
+    "subtitleTextColor": "#ffffff",
     "subtitleBoxMarginTop": "0px",
     "subtitleBoxMarginBottom": "0px",
     "ctaButtonText": "Book Your Appointment",
@@ -209,29 +210,29 @@
     "specialityHeading": "Speciality :",
     "specialities": [
       {
+        "tag": "Endodontics",
         "title": "Root Canal Treatment",
-        "subtitle": "Painless single-visit endodontics & tooth saving",
-        "tag": "Endodontics"
+        "subtitle": "Painless single-visit endodontics & tooth saving"
       },
       {
+        "tag": "Aesthetics",
         "title": "Digital Smile Designing",
-        "subtitle": "3D facial harmony & computer smile planning",
-        "tag": "Aesthetics"
+        "subtitle": "3D facial harmony & computer smile planning"
       },
       {
+        "tag": "Implantology",
         "title": "Dental Implant",
-        "subtitle": "Permanent titanium implants & bone restoration",
-        "tag": "Implantology"
+        "subtitle": "Permanent titanium implants & bone restoration"
       },
       {
+        "tag": "Prosthodontics",
         "title": "Dental Prosthesis (Crown, Bridge Etc.)",
-        "subtitle": "Zirconia crowns, durable bridges & aesthetic caps",
-        "tag": "Prosthodontics"
+        "subtitle": "Zirconia crowns, durable bridges & aesthetic caps"
       },
       {
+        "tag": "Orthodontics",
         "title": "Orthodontics / Aligners",
-        "subtitle": "Invisible clear aligners & gentle tooth straightening",
-        "tag": "Orthodontics"
+        "subtitle": "Invisible clear aligners & gentle tooth straightening"
       }
     ],
     "appointmentButtonText": "Book Your Appointment",
@@ -255,11 +256,11 @@
       },
       {
         "title": "Safety guarantee",
-        "description": "We guarantee the quality of our treatment: If complications arise from procedures in our clinic, we'll fix the issue for free or refund your money. Your health is our top priority."
+        "description": "we guarantee the quality of our tratment. we are using fully advanced Autoclave System with Class B system , along maintain healthy decorum.."
       },
       {
         "title": "Digital technology",
-        "description": "By using high-precision equipment such as a microscope, CT scanner and 3D imaging, we ensure accurate assessments and well-structured treatment plans for every case."
+        "description": "By using high precision equipment with advanced technology that ensure accurate assessment and well structured treatment for every case."
       }
     ]
   }

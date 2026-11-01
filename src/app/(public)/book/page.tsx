@@ -5,16 +5,16 @@ import { getBookingFormConfigAsync } from "@/lib/booking-form-store";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Book Appointment Online | CA Smile Dental Clinic",
+  title: "Book Dentist Appointment Online in Bilimora | CA Smile Dental Clinic",
   description:
-    "Choose your consultation treatment, preferred calendar date, and time slot directly with instant confirmation. CA Smile Dental Clinic, Bilimora.",
+    "Book your dental appointment online at CA Smile Dental Clinic Bilimora. Select your preferred date, morning or evening time slot, and treatment with Dr. Deep Patel.",
   alternates: {
     canonical: "/book",
   },
   openGraph: {
-    title: "Book Your Dental Appointment | CA Smile Dental Clinic",
+    title: "Book Dentist Appointment Online in Bilimora | CA Smile Dental Clinic",
     description:
-      "Select your date & time slot directly online. Instant confirmation for all dental treatments and checkups.",
+      "Select your date & time slot directly online. Instant confirmation for all dental treatments and checkups at CA Smile Bilimora.",
     url: "/book",
     siteName: "CA Smile Dental Clinic",
     type: "website",

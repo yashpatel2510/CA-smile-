@@ -15,225 +15,293 @@ export interface ClinicalService {
 
 export const clinicalServices: ClinicalService[] = [
   {
-    slug: "general-consultation",
-    name: "General Practitioner Consultation",
-    category: "Primary Care",
+    slug: "dental-consultation",
+    name: "Comprehensive Dental Examination & Consultation",
+    category: "General Dentistry",
     summary:
-      "Routine checkups, physicals, preventive diagnostics, and chronic care management.",
+      "Thorough oral health assessment, digital intraoral screening, cavity detection, and custom treatment planning.",
     description:
-      "Our general practitioner consultation offers a thorough, patient-first examination for individuals of all ages. Whether addressing acute illness symptoms, updating prescriptions, or establishing an annual health baseline, our board-certified family physicians provide attentive, evidence-based care.",
+      "Our comprehensive dental consultation provides an in-depth examination of your teeth, gums, and oral structures. Using modern digital radiography and intraoral imaging, Dr. Deep Patel evaluates your oral health, identifies early decay or periodontal concerns, and discusses transparent treatment options tailored to your smile.",
     duration: "30 mins",
-    leadSpecialist: "Dr. Sarah Vance, MD (Chief Medical Officer)",
+    leadSpecialist: "Dr. Deep A Patel, BDS (Chief Dental Surgeon)",
     indications: [
-      "Annual physical exams & health screening",
-      "Acute illnesses (fever, cough, infections, stomach distress)",
-      "Prescription management & lab renewals",
-      "Chronic condition monitoring (hypertension, mild asthma)",
+      "Routine 6-month preventive dental checkup & cleaning",
+      "Tooth pain, sensitivity to hot/cold, or gum bleeding",
+      "Cavity screening and tartar/calculus assessment",
+      "Smile makeover and teeth alignment evaluation",
     ],
     whatToExpect: [
-      "Comprehensive vitals evaluation (blood pressure, oxygen saturation, heart rate)",
-      "Focused medical history and lifestyle review",
-      "Physical examination tailored to your primary concerns",
-      "Digital treatment summary and instant prescription transmission",
+      "Digital intraoral camera examination of all teeth and gums",
+      "Low-radiation digital radiography (X-rays) if clinically indicated",
+      "Detailed periodontal gum pocket depth mapping",
+      "One-on-one consultation and personalized treatment plan with Dr. Deep Patel",
     ],
     preparation: [
-      "Bring a current list of all prescriptions and dietary supplements",
-      "Have previous bloodwork or relevant specialist reports handy if available",
-      "Arrive 10 minutes prior to complete any intake updates",
+      "Brush and floss normally before arriving for your appointment",
+      "Bring any previous dental records or X-rays if available",
+      "List any current medications or systemic health conditions (e.g., diabetes, hypertension)",
     ],
     faqs: [
       {
-        question: "Can I receive lab referrals during this consultation?",
+        question: "How long does the dental consultation take?",
         answer:
-          "Yes, our doctors can write immediate digital orders for our on-site lab or your preferred diagnostic center.",
+          "A standard comprehensive consultation and digital examination typically takes 20 to 30 minutes.",
       },
       {
-        question: "Is this consultation available via telehealth?",
+        question: "Will I need dental X-rays during my checkup?",
         answer:
-          "Yes, follow-up consultations and prescription reviews can be conducted via our secure patient portal.",
+          "Digital X-rays are only taken if needed to detect hidden decay between teeth or assess root structures beneath the gum line.",
       },
     ],
   },
   {
-    slug: "cardiology-diagnostic-panel",
-    name: "Comprehensive Cardiology Diagnostic Panel",
-    category: "Specialty Care",
+    slug: "root-canal-treatment",
+    name: "Single-Visit Painless Root Canal Treatment",
+    category: "Endodontics",
     summary:
-      "Resting 12-lead ECG, cardiovascular risk profiling, and specialist physician review.",
+      "Advanced rotary endodontics to eliminate deep tooth infection, relieve severe toothache, and save natural teeth.",
     description:
-      "Our specialized cardiology assessment evaluates cardiovascular performance, detects early signs of coronary artery disease, and manages hypertensive disorders using gold-standard non-invasive diagnostics.",
+      "Our modern root canal therapy saves severely infected, decayed, or fractured teeth while completely preserving your natural dental structure. Using computer-controlled rotary instruments, digital apex locators, and potent local anesthesia, Dr. Deep Patel performs comfortable, virtually painless single-visit root canal treatments.",
     duration: "45 mins",
-    leadSpecialist: "Dr. Marcus Chen, MD, FACC (Lead Cardiologist)",
+    leadSpecialist: "Dr. Deep A Patel, BDS (Chief Dental Surgeon)",
     indications: [
-      "Chest discomfort, palpitations, or shortness of breath",
-      "Family history of early cardiovascular disease or heart attacks",
-      "Hypertension (high blood pressure) and hyperlipidemia management",
-      "Pre-operative clearance evaluations",
+      "Severe or throbbing tooth pain, especially when chewing or biting",
+      "Prolonged sensitivity to hot or cold food and drinks",
+      "Deep dental decay reaching the internal nerve (pulp)",
+      "Swelling or tenderness in the gums near an infected tooth",
     ],
     whatToExpect: [
-      "High-resolution 12-lead electrocardiogram (ECG)",
-      "Aortic and peripheral vascular blood pressure screening",
-      "Lipid panel review and Framingham 10-year risk index calculation",
-      "Direct consultation with our board-certified cardiologist",
+      "Complete painless local anesthesia for maximum patient comfort",
+      "Gentle removal of infected dental pulp using modern rotary instruments",
+      "Disinfection and hermetic bio-compatible sealing of root canals",
+      "Placement of a protective crown to restore full chewing strength",
     ],
     preparation: [
-      "Wear comfortable, loose two-piece clothing for electrode placement",
-      "Avoid caffeine and energy drinks for 4 hours prior to the ECG",
-      "Continue taking standard blood pressure medications unless instructed otherwise",
+      "Eat a light meal prior to your appointment unless advised otherwise",
+      "Take your routine medications as prescribed",
+      "Inform the doctor about any dental anxiety so we can ensure extra comfort",
     ],
     faqs: [
       {
-        question: "Does the ECG test cause any pain?",
+        question: "Is root canal treatment painful?",
         answer:
-          "No, the resting 12-lead ECG is completely non-invasive, painless, and completed in under 10 minutes.",
+          "No. With modern local anesthetics and rotary endodontic technology, the procedure is as comfortable as getting a routine filling and eliminates existing tooth pain.",
       },
       {
-        question: "When will I receive my diagnostic report?",
+        question: "Can the root canal be completed in a single visit?",
         answer:
-          "Your initial results and physician interpretation are discussed during the same visit, with a detailed PDF uploaded to your patient chart.",
+          "Yes. Most non-complicated cases at CA Smile are successfully completed in a single comfortable visit of approximately 45 minutes.",
       },
     ],
   },
   {
-    slug: "pediatric-wellness-vaccination",
-    name: "Pediatric Wellness & Immunization Clinic",
-    category: "Pediatrics",
+    slug: "dental-implants",
+    name: "Permanent Dental Implants & Tooth Replacement",
+    category: "Implantology",
     summary:
-      "Developmental milestone assessments, CDC-compliant immunizations, and gentle child care.",
+      "Permanent titanium implants that replace missing teeth, restore full chewing power, and protect jawbone health.",
     description:
-      "Our pediatric wellness visits are designed to keep infants, children, and adolescents thriving. We track growth trajectories, administer required immunizations in a comforting environment, and support parents with actionable nutritional and behavioral guidance.",
-    duration: "40 mins",
-    leadSpecialist: "Dr. Elena Rostova, MD (Pediatric Specialist)",
-    indications: [
-      "Well-child checks from newborn to age 18",
-      "State-mandated school, daycare, and sports physicals",
-      "CDC and AAP immunization schedules",
-      "Nutritional, sleep, and early developmental screening",
-    ],
-    whatToExpect: [
-      "Gentle weight, height, and head circumference charting",
-      "Sensory vision and hearing checks for school readiness",
-      "Age-appropriate developmental assessment",
-      "Painless vaccine administration with child-friendly distractions",
-    ],
-    preparation: [
-      "Bring your child's official state yellow immunization card or previous vaccine records",
-      "Write down any feeding, sleep, or developmental questions in advance",
-      "Bring a favorite toy or comfort blanket for younger toddlers",
-    ],
-    faqs: [
-      {
-        question:
-          "Do you sign school and sports participation forms on the same day?",
-        answer:
-          "Yes, our staff will sign and stamp all required school athletic and camp physical forms during the visit.",
-      },
-      {
-        question: "What if my child has a fear of needles?",
-        answer:
-          "Our pediatric nurses use cooling numbing sprays, distraction tools, and compassionate techniques to make the experience stress-free.",
-      },
-    ],
-  },
-  {
-    slug: "neurology-migraine-care",
-    name: "Neurology & Chronic Headache Management",
-    category: "Specialty Care",
-    summary:
-      "Targeted diagnosis and therapeutic plans for chronic migraines, tension headaches, and neuropathy.",
-    description:
-      "Headache disorders and neuropathic symptoms significantly impact quality of life. Our neurology clinic provides detailed neurological exams, triggers analysis, and modern preventive therapeutic regimens tailored to your symptoms.",
+      "Dental implants are the gold standard for replacing missing teeth. A biocompatible medical-grade titanium fixture integrates seamlessly with your jawbone, acting as a permanent artificial tooth root crowned with a natural-looking ceramic or zirconia tooth.",
     duration: "60 mins",
-    leadSpecialist: "Dr. Sarah Vance, MD & Consulting Neurologists",
+    leadSpecialist: "Dr. Deep A Patel, BDS (Chief Dental Surgeon)",
     indications: [
-      "Frequent or debilitating migraines and cluster headaches",
-      "Tension headaches unresponsive to over-the-counter therapy",
-      "Peripheral numbness, tingling, or nerve pain",
-      "Sleep disruptions and cognitive fog",
+      "Single or multiple missing teeth due to extraction or trauma",
+      "Difficulty chewing food or speaking due to gaps in teeth",
+      "Desire for permanent fixed teeth instead of removable dentures",
+      "Prevention of bone loss and drifting of adjacent natural teeth",
     ],
     whatToExpect: [
-      "Comprehensive cranial nerve and reflex examination",
-      "Symptom frequency and lifestyle trigger mapping",
-      "Review of MRI/CT imaging or referrals if indicated",
-      "Customized acute and preventive medication management plan",
+      "High-precision 3D digital implant planning and bone assessment",
+      "Gentle surgical placement of the biocompatible titanium implant fixture",
+      "Healing period for osseointegration (natural bone bonding)",
+      "Attachment of a custom-milled zirconia crown matched to your natural tooth shade",
     ],
     preparation: [
-      "Keep a 2-week headache diary noting frequency, duration, and food/stress triggers",
-      "Bring any previous CT scan or MRI brain imaging reports on a disc or portal link",
+      "Maintain thorough oral hygiene by brushing and flossing before your visit",
+      "Complete any pre-surgical blood investigations if advised",
+      "Wear comfortable clothing for your procedure",
     ],
     faqs: [
       {
-        question: "Do you prescribe modern CGRP migraine medications?",
+        question: "How long do dental implants last?",
         answer:
-          "Yes, our clinical specialists evaluate patients for modern CGRP inhibitors, acute triptans, and preventive protocols.",
+          "With proper oral hygiene and regular 6-month checkups, dental implants can last a lifetime, making them the most cost-effective long-term tooth replacement.",
+      },
+      {
+        question: "Are dental implants noticeable to other people?",
+        answer:
+          "Not at all. The custom zirconia crown emerges naturally from your gum line and matches your surrounding teeth perfectly in color, translucency, and shape.",
       },
     ],
   },
   {
-    slug: "dental-prophylaxis-hygiene",
-    name: "Comprehensive Dental Prophylaxis & Examination",
-    category: "Dental Care",
+    slug: "digital-smile-design",
+    name: "Digital Smile Design & Aesthetic Veneers",
+    category: "Cosmetic Dentistry",
     summary:
-      "Ultrasonic scaling, enamel polishing, digital x-rays, and periodontal gum screening.",
+      "Computerized 3D smile planning and ultra-thin porcelain veneers for a symmetrical, confident, and radiant smile.",
     description:
-      "Oral hygiene is an essential pillar of overall systemic health. Our gentle dental clinic provides advanced ultrasonic cleaning, low-radiation digital radiography, and periodontal charting in a relaxing clinical environment.",
+      "Digital Smile Design (DSD) uses facial photography, digital 3D scans, and cosmetic software to design your ideal smile before treatment even begins. Experience predictable, customized smile makeovers utilizing ultra-thin porcelain veneers, composite laminates, and aesthetic contouring.",
     duration: "45 mins",
-    leadSpecialist: "Dr. David Kim, DDS (Director of Dental Medicine)",
+    leadSpecialist: "Dr. Deep A Patel, BDS (Chief Dental Surgeon)",
     indications: [
-      "Bi-annual dental hygiene and plaque removal",
-      "Bleeding gums, gingivitis, and periodontal prevention",
-      "Enamel staining and surface discoloration",
-      "Routine digital bitewing cavity detection",
+      "Chipped, worn, uneven, or fractured front teeth",
+      "Severe enamel discoloration or stubborn intrinsic stains",
+      "Gaps (diastema) between teeth or minor misalignment",
+      "Desire for a brighter, harmonious, and confident smile",
     ],
     whatToExpect: [
-      "Ultrasonic tartar removal and precision interdental scaling",
-      "Enamel fluoride application and micro-abrasive polishing",
-      "Digital low-radiation dental x-rays",
-      "Periodontal pocket depth mapping and personalized oral hygiene advice",
+      "High-resolution facial and intraoral photographic mapping",
+      "Interactive 3D digital preview of your proposed new smile",
+      "Trial smile mock-up to test aesthetic proportions in real life",
+      "Precision bonding of custom porcelain veneers or cosmetic restorations",
     ],
     preparation: [
-      "Brush and floss normally before arriving",
-      "Inform the hygienist if you experience sensitive teeth or dental anxiety",
+      "Bring reference photographs of smiles you admire if you have specific aesthetic preferences",
+      "Ensure gums are healthy and tartar-free prior to aesthetic veneer placement",
     ],
     faqs: [
       {
-        question: "Is ultrasonic scaling safe for sensitive teeth?",
+        question: "Can I see my new smile before treatment starts?",
         answer:
-          "Yes, ultrasonic water-cooled instruments are gentle and can be adjusted with topical numbing gel if you have tooth sensitivity.",
+          "Yes! Digital Smile Design allows you to preview a 3D digital simulation and physical mock-up directly on your teeth before any permanent changes are made.",
       },
     ],
   },
   {
-    slug: "executive-health-concierge",
-    name: "Executive Whole-Body Health Concierge",
-    category: "Premium Wellness",
+    slug: "teeth-cleaning-scaling",
+    name: "Ultrasonic Scaling & Periodontal Gum Care",
+    category: "Preventive Dentistry",
     summary:
-      "Advanced biomarker profiling, full biometrics, and a 1-on-1 longevity physician review.",
+      "Painless ultrasonic tartar removal, enamel polishing, and deep periodontal cleaning for healthy gums and fresh breath.",
     description:
-      "A comprehensive, proactive health examination designed for executives, athletes, and individuals seeking in-depth biological profiling. Includes extended lab panels, cardiovascular biometrics, metabolic analysis, and direct clinical follow-up.",
-    duration: "90 mins",
-    leadSpecialist: "Multidisciplinary Clinical Board",
+      "Routine brushing cannot remove hardened tartar (calculus) that accumulates below the gum line. Our advanced ultrasonic scaling and airflow polishing gently removes plaque, external tobacco/tea stains, and bacterial deposits, preventing gingivitis and protecting bone support.",
+    duration: "30 mins",
+    leadSpecialist: "Dr. Deep A Patel, BDS (Chief Dental Surgeon)",
     indications: [
-      "Comprehensive baseline biological evaluation",
-      "Metabolic health, insulin resistance, and longevity profiling",
-      "Cardiovascular biomarker screening (ApoB, hs-CRP, Homocysteine)",
-      "Personalized preventive health roadmaps",
+      "Bleeding or swollen gums during brushing or flossing",
+      "Visible yellow, brown, or black tartar buildup behind teeth",
+      "Persistent bad breath (halitosis)",
+      "Routine 6-month preventive hygiene maintenance",
     ],
     whatToExpect: [
-      "Comprehensive 60+ marker diagnostic blood and metabolic panel",
-      "Resting ECG, spirometry lung function, and body composition analysis",
-      "Extended 60-minute physician consultation",
-      "Personalized 25-page Health Longevity Roadmap",
+      "Gentle ultrasonic vibration and water mist to dislodge hard calculus",
+      "Interdental scaling to clean hard-to-reach contact areas",
+      "Prophy-paste micro-abrasive polishing to leave enamel smooth and glossy",
+      "Personalized oral hygiene instructions and brushing technique coaching",
     ],
     preparation: [
-      "Requires a 10-hour overnight fast for accurate fasting glucose and lipid biomarkers",
-      "Water is permitted and encouraged before arrival",
+      "Brush normally before your appointment",
+      "Inform the doctor if you experience tooth sensitivity so we can use warm water and topical numbing gel",
     ],
     faqs: [
       {
-        question: "How long until I receive the executive report?",
+        question: "Does teeth cleaning make teeth loose or create gaps?",
         answer:
-          "Your consolidated Longevity Report is prepared within 48 hours following lab processing.",
+          "No, this is a common myth. Scaling only removes harmful bacterial tartar. Removing tartar helps inflamed gums heal and attach firmly back to your teeth.",
+      },
+    ],
+  },
+  {
+    slug: "clear-aligners",
+    name: "Clear Aligners & Invisible Orthodontics",
+    category: "Orthodontics",
+    summary:
+      "Virtually invisible, removable clear aligners to straighten crooked teeth and correct bite issues comfortably without metal wires.",
+    description:
+      "Achieve straight teeth and a confident smile discreetly. Custom transparent plastic aligners apply gentle, continuous force to move teeth into ideal alignment without unsightly metal brackets, dietary restrictions, or mouth sores.",
+    duration: "40 mins",
+    leadSpecialist: "Dr. Deep A Patel, BDS & Specialist Orthodontic Team",
+    indications: [
+      "Crowded, crooked, or overlapping teeth",
+      "Gaps and spaces between teeth",
+      "Overbite, underbite, or crossbite alignment issues",
+      "Adults and teens seeking discreet orthodontic treatment without metal braces",
+    ],
+    whatToExpect: [
+      "3D digital optical impression — no messy impression putty",
+      "Computerized treatment simulation showing step-by-step tooth movement",
+      "Delivery of custom aligner trays with wearing schedule guidelines",
+      "Quick periodic checkups every 6 to 8 weeks to monitor progress",
+    ],
+    preparation: [
+      "Complete routine scaling/cleaning before starting aligner therapy",
+      "Wear aligners for 20 to 22 hours per day, removing only to eat and brush",
+    ],
+    faqs: [
+      {
+        question: "How long does clear aligner treatment take?",
+        answer:
+          "Treatment typically ranges from 6 to 18 months depending on the complexity of tooth movement required.",
+      },
+    ],
+  },
+  {
+    slug: "teeth-whitening",
+    name: "Professional Laser Teeth Whitening",
+    category: "Cosmetic Dentistry",
+    summary:
+      "Safe, in-office laser teeth bleaching to brighten stained enamel by up to 6–8 shades in a single comfortable session.",
+    description:
+      "Safely eliminate years of stubborn coffee, tea, turmeric, and smoking stains. Our professional in-office laser teeth whitening uses specialized dental-grade bleaching gel activated by cool LED/laser light to deliver immediate, dramatic, and long-lasting brightness without damaging enamel.",
+    duration: "45 mins",
+    leadSpecialist: "Dr. Deep A Patel, BDS (Chief Dental Surgeon)",
+    indications: [
+      "Yellowed or discolored teeth from tea, coffee, or spices",
+      "Smoking or tobacco stain accumulation",
+      "Upcoming wedding, job interview, or special event",
+      "Desire for a noticeably brighter, refreshed smile",
+    ],
+    whatToExpect: [
+      "Shade guide assessment to record your starting tooth shade",
+      "Protective gingival barrier applied to safeguard gums and lips",
+      "Professional whitening gel applied and light-activated in 15-minute cycles",
+      "Post-treatment fluoride desensitizing polish and shade comparison",
+    ],
+    preparation: [
+      "We recommend a routine dental cleaning beforehand for optimal whitening penetration",
+      "Avoid intensely colored foods/drinks (red wine, dark tea, coffee) for 48 hours post-treatment",
+    ],
+    faqs: [
+      {
+        question: "Does teeth whitening damage the enamel?",
+        answer:
+          "No. Professional dental whitening safely lifts microscopic stains from within the enamel pores without altering the structural integrity of your tooth enamel.",
+      },
+    ],
+  },
+  {
+    slug: "pediatric-dentistry",
+    name: "Pediatric Dental Care for Children",
+    category: "Pediatric Dentistry",
+    summary:
+      "Gentle, stress-free dental care for kids, including cavity prevention, dental sealants, and painless fillings.",
+    description:
+      "We believe a child's early dental experiences shape their lifelong oral health. Using our gentle 'Tell-Show-Do' approach, Dr. Deep Patel creates a fun, reassuring environment for children of all ages to ensure positive, cavity-free smiles.",
+    duration: "30 mins",
+    leadSpecialist: "Dr. Deep A Patel, BDS (Chief Dental Surgeon)",
+    indications: [
+      "Child's first dental checkup (recommended by age 1 or first tooth)",
+      "Tooth pain or cavities in milk teeth",
+      "Preventive fluoride application and dental fissure sealants",
+      "Habit counseling (thumb sucking, mouth breathing)",
+    ],
+    whatToExpect: [
+      "Friendly, unhurried introduction to the dental chair and instruments",
+      "Gentle tooth counting and plaque check",
+      "Protective cavity-preventing fluoride varnish application",
+      "Fun oral hygiene guidance and brushing demonstration for child and parents",
+    ],
+    preparation: [
+      "Talk positively to your child about visiting the friendly dentist",
+      "Avoid using words like 'pain', 'shot', or 'needle' at home",
+      "Schedule morning appointments when children are well-rested",
+    ],
+    faqs: [
+      {
+        question: "Why treat cavities in milk teeth if they fall out anyway?",
+        answer:
+          "Milk teeth hold space for permanent adult teeth and are vital for proper chewing, speech, and jaw development. Untreated infections can damage developing permanent teeth underneath.",
       },
     ],
   },

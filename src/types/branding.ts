@@ -84,6 +84,10 @@ export interface HeroSectionConfig {
   mobileContentPlacement?: string;
   imageOverlayOpacity?: number;
 
+  // Primary SEO H1 Headline ("Dental Clinic in Bilimora")
+  headline?: string;
+  headlineColor?: string;
+
   // Subtitle / Description Text & Positioning
   subtitleText: string;
   subtitleTextColor?: string;
@@ -133,7 +137,7 @@ export const DEFAULT_HERO_CONFIG: HeroSectionConfig = {
   blankHeroTextColor: "#18181b",
   topInfoEnabled: true,
   topInfoWorkingHoursLabel: "Working hours",
-  topInfoWorkingHoursValue: "Mon - Sat 8:00-20:00",
+  topInfoWorkingHoursValue: "Mon–Sun: 9:00 AM – 8:00 PM",
   topInfoLocationLabel: "Location",
   topInfoLocationValue: "12 Shevchenko Street, Kyiv",
   topInfoTextColor: "#18181b",
@@ -161,6 +165,7 @@ export const DEFAULT_HERO_CONFIG: HeroSectionConfig = {
   imagePosition: "center",
   heroMinHeight: "580px",
   imageOverlayOpacity: 0,
+  headline: "Best Dental Clinic in Bilimora",
   subtitleText:
     "Discover advanced care, personalized treatments, and trusted experts in a gentle, modern environment",
   subtitleTextColor: "#475569",
@@ -361,8 +366,8 @@ export const DEFAULT_GALLERY_CONFIG: GallerySectionConfig = {
   description:
     "... more than that — it is what builds trust and comfort. A space where we welcome each patient with genuine warmth, deliver painless advanced care, and craft healthy, confident smiles. This sense of togetherness is born and nurtured out of our shared space, the clinic.",
   showAddressCard: true,
-  addressLine1: "1st Floor, Labdhi Arcade, Above HDFC Bank",
-  addressLine2: "Convent Rd, Bilimora, Gujarat 396321",
+  addressLine1: "1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy",
+  addressLine2: "Kutchhi Friends Society, Bilimora, Gujarat 396321",
   phone: "+91 72260 98074",
   showMascot: true,
   showCenterLogo: true,
@@ -528,7 +533,7 @@ export const DEFAULT_CLINIC_BRANDING: ClinicBrandConfig = {
   latitude: 10.01586,
   longitude: 76.34186,
   mapZoom: 15,
-  workingHours: "Mon - Sat: 9:00 AM - 8:00 PM | Sunday: Emergency Only",
+  workingHours: "Mon–Sun: 9:00 AM – 8:00 PM",
   doctorName: "Dr. Sankar",
   doctorTitle: "Chief Dental Surgeon & Clinic Founder",
   doctorBio:

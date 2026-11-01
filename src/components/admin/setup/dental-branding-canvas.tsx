@@ -191,7 +191,7 @@ export function DentalBrandingCanvas({
   const clinicName = master.clinic_name || "Smile Dental Clinic";
   const clinicAddress =
     master.address ||
-    "1st Floor, Labdhi Arcade, Above HDFC Bank, Bilimora, Gujarat 396321";
+    "1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society, Bilimora, Gujarat 396321";
   const clinicPhone = master.phone || "9664681536";
 
   return (

@@ -38,11 +38,7 @@ export function PublicFooter() {
             <ul className="space-y-2 text-sm text-brand-muted">
               <li className="flex items-center gap-2">
                 <Clock className="h-3.5 w-3.5 text-brand-primary shrink-0" />
-                <span>Mon - Sat: 9:00 AM - 8:00 PM</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Clock className="h-3.5 w-3.5 text-brand-primary shrink-0" />
-                <span>Sunday: By Prior Appointment</span>
+                <span>Mon–Sun: 9:00 AM – 8:00 PM</span>
               </li>
             </ul>
           </div>
@@ -52,7 +48,7 @@ export function PublicFooter() {
             <ul className="space-y-2 text-sm text-brand-muted">
               <li className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 text-brand-primary shrink-0 mt-0.5" />
-                <span>1st Floor, Labdhi Arcade, Above HDFC Bank, Convent Rd, Bilimora, Gujarat 396321</span>
+                <span>1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society, Bilimora, Gujarat 396321</span>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="h-3.5 w-3.5 text-brand-primary shrink-0" />

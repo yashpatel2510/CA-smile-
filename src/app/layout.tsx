@@ -13,12 +13,26 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "https://www.casmiledentalclinic.com"
+  ),
   title: {
     default: "CA Smile Dental Clinic",
     template: "%s | CA Smile Dental Clinic",
   },
   description:
     "CA Smile Multispeciality Dental Clinic - Painless single-visit endodontics, digital smile designing, dental implants, and modern family dental care in Bilimora.",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   icons: {
     icon: [
       {

@@ -70,9 +70,9 @@ const MONTH_NAMES = [
 const DAY_NAMES = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
 const DEFAULT_TIME_RANGES = [
-  "Morning (9:30 AM - 1:00 PM)",
+  "Morning (9:00 AM - 1:00 PM)",
   "Afternoon (2:00 PM - 5:00 PM)",
-  "Evening (5:00 PM - 7:30 PM)",
+  "Evening (5:00 PM - 8:00 PM)",
 ];
 
 export function CalendarBookingExperience({
@@ -86,23 +86,27 @@ export function CalendarBookingExperience({
   const { brandConfig } = useClinicTheme();
 
   // Dynamic booking form configuration from admin panel (Booking Form Builder & Field Settings)
-  const [config, setConfig] = useState<BookingFormConfig>(() => {
-    if (initialConfig) return initialConfig;
+  // Deterministic initial state prevents React hydration mismatch during Googlebot SSR crawls
+  const [config, setConfig] = useState<BookingFormConfig>(
+    initialConfig || defaultBookingFormConfig
+  );
+
+  // Synchronously hydrate from localStorage cache after client mount (safe from SSR hydration mismatch)
+  useEffect(() => {
     if (typeof window !== "undefined") {
       try {
         const cached = localStorage.getItem("casmile_booking_form_config_v1");
         if (cached) {
           const parsed = JSON.parse(cached);
           if (parsed && typeof parsed === "object" && parsed.themeMode) {
-            return { ...defaultBookingFormConfig, ...parsed };
+            setConfig((prev) => ({ ...defaultBookingFormConfig, ...parsed }));
           }
         }
       } catch (err) {
         console.warn("Could not read cached booking form theme:", err);
       }
     }
-    return defaultBookingFormConfig;
-  });
+  }, []);
 
   // Anti-spam bot honeypot state (invisible to genuine users)
   const [honeypot, setHoneypot] = useState("");
@@ -228,7 +232,7 @@ export function CalendarBookingExperience({
       .catch((err) => {
         console.warn("Could not load dynamic booking configuration:", err);
       });
-  }, [treatment]);
+  }, []);
 
   useEffect(() => {
     if (selectedSlot) {
@@ -265,9 +269,7 @@ export function CalendarBookingExperience({
     }
     return [
       "Any Available Specialist",
-      "Dr. Vidhyamol (Pediatric Specialist)",
-      "Dr. Sankar (Chief Dental Surgeon)",
-      "Dr. Sarah Vance, MD (Lead Physician)",
+      "Dr. Deep Patel (Chief Dental Surgeon)",
     ];
   }, [config.doctors]);
 
@@ -277,13 +279,19 @@ export function CalendarBookingExperience({
     }
     return [
       "General Dental Consultation & Checkup",
-      "Pediatric Dentistry & Child Care",
-      "Root Canal Treatment (Endodontics)",
-      "Teeth Cleaning & Scaling (Prophylaxis)",
-      "Orthodontics & Invisible Braces",
-      "Dental Implants & Restoration",
-      "Toothache & Emergency Dental Relief",
-      "Cosmetic Dentistry & Smile Makeover",
+      "Digital Smile Design",
+      "Dental Implants",
+      "Full Mouth Rehabilitation",
+      "Dental Crowns & Bridges",
+      "Root Canal Treatment",
+      "Wisdom Tooth Removal",
+      "Gum Treatment",
+      "Orthodontics",
+      "Teeth Whitening",
+      "Restorative Dentistry",
+      "Children Dentistry",
+      "Porcelain Veneers",
+      "Dentures",
     ];
   }, [config.treatments]);
 
@@ -706,7 +714,7 @@ export function CalendarBookingExperience({
                       <CalendarIcon className="h-3.5 w-3.5 text-brand-primary shrink-0" />
                       <div className="min-w-0">
                         <div className="text-[9px] font-bold uppercase tracking-wider text-stone-400">Date</div>
-                        <div className="font-semibold truncate text-[11px] sm:text-xs">{selectedDateShortString}</div>
+                        <div className="font-semibold truncate text-[11px] sm:text-xs" suppressHydrationWarning>{selectedDateShortString}</div>
                       </div>
                     </div>
                   )}
@@ -743,7 +751,7 @@ export function CalendarBookingExperience({
                   </div>
                   <div className={`mt-0.5 flex items-center gap-1.5 text-xs sm:text-sm font-semibold ${isDark ? "text-white" : "text-slate-900"}`}>
                     <CalendarIcon className={`h-3.5 w-3.5 ${isDark ? "text-zinc-300" : "text-slate-500"}`} />
-                    <span>{selectedDateShortString}</span>
+                    <span suppressHydrationWarning>{selectedDateShortString}</span>
                   </div>
                 </div>
 
@@ -788,24 +796,6 @@ export function CalendarBookingExperience({
                 <span className={`font-semibold ${isDark ? "text-zinc-300" : "text-slate-900"}`}>
                   {config.sideFollowText || "Follow Us:"}
                 </span>
-                <a
-                  href={config.facebookUrl || "https://facebook.com"}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={`transition-colors ${isDark ? "hover:text-white" : "hover:text-black font-semibold"}`}
-                >
-                  Facebook
-                </a>
-                <span className={isDark ? "text-zinc-600" : "text-slate-400"}>•</span>
-                <a
-                  href={config.linkedinUrl || "https://linkedin.com"}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={`transition-colors ${isDark ? "hover:text-white" : "hover:text-black font-semibold"}`}
-                >
-                  LinkedIn
-                </a>
-                <span className={isDark ? "text-zinc-600" : "text-slate-400"}>•</span>
                 <a
                   href={
                     config.instagramUrl ||
@@ -1072,7 +1062,7 @@ export function CalendarBookingExperience({
 
                         {selectedDate && (
                           <span className={isDark ? "text-zinc-400" : "text-slate-500"}>
-                            For <strong className={isDark ? "text-white" : "text-slate-900"}>{selectedDateShortString}</strong>
+                            For <strong className={isDark ? "text-white" : "text-slate-900"} suppressHydrationWarning>{selectedDateShortString}</strong>
                           </span>
                         )}
                       </div>
@@ -1130,7 +1120,7 @@ export function CalendarBookingExperience({
                     }`}>
                       <div className={`text-[11px] ${isDark ? "text-zinc-400" : "text-slate-500"}`}>
                         {selectedDate && selectedSlot ? (
-                          <span className="inline-flex items-center gap-1 text-emerald-500 font-semibold">
+                          <span className="inline-flex items-center gap-1 text-emerald-500 font-semibold" suppressHydrationWarning>
                             <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
                             Selected: {selectedDateShortString} ({selectedSlot})
                           </span>
@@ -1169,7 +1159,7 @@ export function CalendarBookingExperience({
                           <h3 className={`font-heading text-lg sm:text-xl font-bold tracking-tight ${isDark ? "text-white" : "text-slate-900"}`}>
                             Patient Information
                           </h3>
-                          <p className={`text-xs ${isDark ? "text-zinc-400" : "text-slate-500"}`}>
+                          <p className={`text-xs ${isDark ? "text-zinc-400" : "text-slate-500"}`} suppressHydrationWarning>
                             Slot reserved: <strong>{selectedDateShortString} ({selectedSlot})</strong>
                           </p>
                         </div>

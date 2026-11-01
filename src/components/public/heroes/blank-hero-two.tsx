@@ -18,7 +18,7 @@ export function BlankHeroTwo({ hero, previewMode }: BlankHeroTwoProps) {
   const minHeight = hero.blankHeroMinHeight || "540px";
   const bgColor = hero.blankHeroBgColor || hero.backgroundColor || "#f8fafc";
   const textColor = hero.blankHeroTextColor || "#0f172a";
-  const title = hero.blankHeroTitle || "";
+  const title = hero.headline || hero.blankHeroTitle || "Best Dental Clinic in Bilimora";
   const subtitle = hero.blankHeroSubtitle || "";
   const ctaText = hero.blankHeroCtaText || "";
   const ctaUrl = hero.blankHeroCtaUrl || "/contact";

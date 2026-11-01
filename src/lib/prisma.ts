@@ -4,6 +4,7 @@ import {
   getTestDatabaseUrl,
   getActiveDatabaseMode,
   saveDatabaseModeConfig,
+  normalizePostgresUrl,
 } from "@/lib/database/test-database-config";
 
 const globalForPrisma = globalThis as unknown as {
@@ -60,9 +61,11 @@ export function getTestPrismaClient(): PrismaClient | null {
     return null;
   }
 
+  const normalizedUrl = normalizePostgresUrl(testUrl);
+
   if (!globalForPrisma.testPrisma) {
     globalForPrisma.testPrisma = new PrismaClient({
-      datasources: { db: { url: testUrl.trim() } },
+      datasources: { db: { url: normalizedUrl } },
       log:
         process.env.NODE_ENV === "development"
           ? ["error", "warn"]

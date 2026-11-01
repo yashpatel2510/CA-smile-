@@ -63,13 +63,20 @@ let lastBookingConfigFetch = 0;
 const CACHE_TTL_MS = 60000; // 60 seconds
 
 export async function getBookingFormConfigAsync(): Promise<BookingFormConfig> {
+  const fallback = getBookingFormConfig();
   const now = Date.now();
   if (global.__bookingFormConfig && now - lastBookingConfigFetch < CACHE_TTL_MS) {
     return global.__bookingFormConfig;
   }
 
   try {
-    const clinic = await prisma.clinic.findFirst();
+    // 500ms timeout guard to prevent database connection delays or cold starts from ever blocking SSR
+    const timeoutPromise = new Promise<null>((_, reject) =>
+      setTimeout(() => reject(new Error("DB_TIMEOUT")), 500)
+    );
+    const dbPromise = prisma.clinic.findFirst();
+    const clinic = (await Promise.race([dbPromise, timeoutPromise])) as any;
+
     if (clinic?.formConfig && typeof clinic.formConfig === "object") {
       const dbConfig = clinic.formConfig as any;
       if (Array.isArray(dbConfig.fields) || dbConfig.themeMode) {
@@ -79,13 +86,11 @@ export async function getBookingFormConfigAsync(): Promise<BookingFormConfig> {
         return merged;
       }
     }
-  } catch (err) {
-    console.warn(
-      "Could not load booking form config from database, falling back to local file:",
-      err
-    );
+  } catch {
+    // Silent fail-safe: immediately fallback to local config without hanging or throwing
   }
-  const fallback = getBookingFormConfig();
+
+  global.__bookingFormConfig = fallback;
   lastBookingConfigFetch = now;
   return fallback;
 }

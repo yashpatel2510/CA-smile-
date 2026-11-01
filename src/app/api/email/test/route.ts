@@ -24,11 +24,11 @@ export async function POST(req: NextRequest) {
     const data = {
       patientName: sampleData?.patientName || "Eleanor Pena",
       serviceName:
-        sampleData?.serviceName || "Comprehensive Cardiology Diagnostic Panel",
+        sampleData?.serviceName || "Comprehensive Dental Examination & Consultation",
       appointmentDate: sampleData?.appointmentDate || "Wednesday, Sep 23, 2026",
       appointmentTime: sampleData?.appointmentTime || "10:30 AM",
-      doctorName: sampleData?.doctorName || "Dr. Evelyn Reed, MD",
-      servicePrice: sampleData?.servicePrice || "160.00",
+      doctorName: sampleData?.doctorName || "Dr. Deep A Patel, BDS",
+      servicePrice: sampleData?.servicePrice || "300.00",
       durationMinutes: sampleData?.durationMinutes || 45,
       reason:
         sampleData?.reason ||

@@ -42,7 +42,7 @@ export async function GET() {
       branding.address && !branding.address.includes("Evergreen Medical Way")
         ? branding.address
         : clinic?.address ||
-          "1st Floor, Labdhi Arcade, Above HDFC Bank, Bilimora, Gujarat 396321";
+          "1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society, Bilimora, Gujarat 396321";
 
     const city = branding.city || clinic?.city || "Bilimora";
     const state = branding.state || clinic?.state || "Gujarat";
@@ -66,7 +66,7 @@ export async function GET() {
         postalCode,
         workingHours:
           branding.workingHours ||
-          "Mon - Sat: 9:00 AM - 8:00 PM | Sunday: Emergency Only",
+          "Mon–Sun: 9:00 AM – 8:00 PM",
         doctorName: branding.doctorName || "Dr. DEEP A PATEL",
         doctorTitle:
           branding.doctorTitle || "Chief Dental Surgeon & Clinic Founder",

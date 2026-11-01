@@ -62,9 +62,9 @@ export function formatDateToYYYYMMDD(date: Date): string {
 /**
  * Parses slot time string to minute range from midnight (0 to 1439).
  * Handles formats like:
- * - "Morning (9:30 AM - 1:00 PM)" -> { start: 570, end: 780 }
+ * - "Morning (9:00 AM - 1:00 PM)" -> { start: 540, end: 780 }
  * - "Afternoon (2:00 PM - 5:00 PM)" -> { start: 840, end: 1020 }
- * - "Evening (5:00 PM - 7:30 PM)" -> { start: 1020, end: 1170 }
+ * - "Evening (5:00 PM - 8:00 PM)" -> { start: 1020, end: 1200 }
  * - "10:45 am" -> { start: 645, end: 675 }
  * - "2:00 PM" -> { start: 840, end: 870 }
  */
@@ -72,7 +72,7 @@ export function parseSlotToMinutes(slotString: string): { startMinutes: number; 
   const s = slotString.trim();
   const lower = s.toLowerCase();
 
-  // Range detection inside parentheses e.g. "Morning (9:30 AM - 1:00 PM)"
+  // Range detection inside parentheses e.g. "Morning (9:00 AM - 1:00 PM)"
   const rangeMatch = s.match(/(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s*-\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)/i);
   if (rangeMatch) {
     const startM = parseSingleTimeToMinutes(rangeMatch[1]);
@@ -85,13 +85,13 @@ export function parseSlotToMinutes(slotString: string): { startMinutes: number; 
 
   // Segment keywords fallback
   if (lower.includes("morning")) {
-    return { startMinutes: 9 * 60 + 30, endMinutes: 13 * 60 }; // 9:30 AM to 1:00 PM
+    return { startMinutes: 9 * 60, endMinutes: 13 * 60 }; // 9:00 AM to 1:00 PM
   }
   if (lower.includes("afternoon")) {
     return { startMinutes: 13 * 60, endMinutes: 17 * 60 }; // 1:00 PM to 5:00 PM
   }
   if (lower.includes("evening")) {
-    return { startMinutes: 17 * 60, endMinutes: 20 * 60 + 30 }; // 5:00 PM to 8:30 PM
+    return { startMinutes: 17 * 60, endMinutes: 20 * 60 }; // 5:00 PM to 8:00 PM
   }
 
   // Single time like "10:45 am", "2:30 pm"
@@ -130,7 +130,7 @@ export function isSlotInPast(slotString: string, dateInput: Date | string | null
 
   const { startMinutes, endMinutes } = parseSlotToMinutes(slotString);
 
-  // If slot is a broad window (e.g. morning ending at 1:00 PM / 780 mins, evening ending at 7:30 PM / 1170 mins),
+  // If slot is a broad window (e.g. morning ending at 1:00 PM / 780 mins, evening ending at 8:00 PM / 1200 mins),
   // once the current time is past or within 5 mins of the end, it cannot be booked.
   // For individual slots (e.g. 10:45 AM / 645 mins), once current time is past startMinutes, it has passed.
   if (endMinutes - startMinutes > 45) {

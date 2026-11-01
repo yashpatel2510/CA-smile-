@@ -9,6 +9,14 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/about",
   },
+  openGraph: {
+    title: "About Us | CA Smile Dental Clinic Bilimora",
+    description:
+      "Learn about CA Smile Multispeciality Dental Clinic in Bilimora. We deliver painless dental care, advanced diagnostics, and gentle treatment.",
+    url: "/about",
+    siteName: "CA Smile Dental Clinic",
+    type: "website",
+  },
 };
 
 export const dynamic = "force-dynamic";

@@ -8,7 +8,7 @@ export default function NotFound() {
   const phone = brandConfig.phone || "+91 72260 98074";
   const address =
     brandConfig.address ||
-    "1ST FLOOR LABDHI ARCADE, ABOVE HDFC BANK, BILIMORA, GUJARAT 396321";
+    "1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society, Bilimora, Gujarat 396321";
   const cleanPhone = phone.replace(/\D/g, "");
   const whatsappUrl = `https://wa.me/${cleanPhone}`;
 

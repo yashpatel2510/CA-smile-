@@ -250,7 +250,7 @@ export default function AdminSettingsPage() {
     initialHero.topInfoWorkingHoursLabel || "Working hours"
   );
   const [heroTopInfoWorkingHoursValue, setHeroTopInfoWorkingHoursValue] = useState(
-    initialHero.topInfoWorkingHoursValue || "Mon - Sat 8:00-20:00"
+    initialHero.topInfoWorkingHoursValue || "Mon–Sun: 9:00 AM – 8:00 PM"
   );
   const [heroTopInfoLocationLabel, setHeroTopInfoLocationLabel] = useState(
     initialHero.topInfoLocationLabel || "Location"
@@ -551,7 +551,7 @@ export default function AdminSettingsPage() {
         setBlankHeroTextColor(h.blankHeroTextColor || "#18181b");
         setHeroTopInfoEnabled(h.topInfoEnabled !== false);
         setHeroTopInfoWorkingHoursLabel(h.topInfoWorkingHoursLabel || "Working hours");
-        setHeroTopInfoWorkingHoursValue(h.topInfoWorkingHoursValue || "Mon - Sat 8:00-20:00");
+        setHeroTopInfoWorkingHoursValue(h.topInfoWorkingHoursValue || "Mon–Sun: 9:00 AM – 8:00 PM");
         setHeroTopInfoLocationLabel(h.topInfoLocationLabel || "Location");
         setHeroTopInfoLocationValue(h.topInfoLocationValue || "12 Shevchenko Street, Kyiv");
         setHeroTopInfoTextColor(h.topInfoTextColor || "#18181b");
@@ -874,7 +874,9 @@ export default function AdminSettingsPage() {
     setHeaderContactBtnBgColor("#8a0000");
     setHeaderContactBtnTextColor("#ffffff");
     setLogoImageUrl("/images/ca-smile-logo-light.png");
-    setClinicAddress("1ST FLOOR LABDHI ARCADE, ABOVE HDFC BANK, BILIMORA");
+    setClinicAddress(
+      "1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society, Bilimora, Gujarat 396321"
+    );
     setClinicPhone("+91 72260 98074");
     setClinicEmail("casmileatbilimora@gmail.com");
     setLatitude(20.7636);
@@ -909,7 +911,7 @@ export default function AdminSettingsPage() {
     setBlankHeroTextColor("#18181b");
     setHeroTopInfoEnabled(true);
     setHeroTopInfoWorkingHoursLabel("Working hours");
-    setHeroTopInfoWorkingHoursValue("Mon - Sat 8:00-20:00");
+    setHeroTopInfoWorkingHoursValue("Mon–Sun: 9:00 AM – 8:00 PM");
     setHeroTopInfoLocationLabel("Location");
     setHeroTopInfoLocationValue("12 Shevchenko Street, Kyiv");
     setHeroTopInfoTextColor("#18181b");
@@ -4037,7 +4039,7 @@ export default function AdminSettingsPage() {
                     value={clinicAddress}
                     onChange={(e) => setClinicAddress(e.target.value)}
                     className="text-xs"
-                    placeholder="1ST FLOOR LABDHI ARCADE, ABOVE HDFC BANK, BILIMORA"
+                    placeholder="1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society, Bilimora, Gujarat 396321"
                   />
                   <span className="text-[10px] text-brand-muted">
                     Shown prominently on the left column and the top floating map pill.
@@ -4208,7 +4210,8 @@ export default function AdminSettingsPage() {
                       <div className="space-y-1.5 text-xs text-[#18181b]/90">
                         <div className="font-medium text-[#27272a]">{clinicEmail || "casmileatbilimora@gmail.com"}</div>
                         <div className="font-bold uppercase tracking-wide text-[#18181b] max-w-sm">
-                          {clinicAddress || "1ST FLOOR LABDHI ARCADE, ABOVE HDFC BANK, BILIMORA"}
+                          {clinicAddress ||
+                            "1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society, Bilimora, Gujarat 396321"}
                         </div>
                         <div className="font-bold text-[#18181b] pt-0.5">{clinicPhone || "+91 72260 98074"}</div>
                       </div>

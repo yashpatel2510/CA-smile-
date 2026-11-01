@@ -44,7 +44,7 @@ export function DoctorOwnerProfile() {
   const email = brandConfig.email || "contact@healthsphere.example.com";
   const workingHours =
     brandConfig.workingHours ||
-    "Mon - Sat: 9:00 AM - 8:00 PM | Sunday: Emergency Only";
+    "Mon–Sun: 9:00 AM – 8:00 PM";
 
   return (
     <div className="space-y-8">

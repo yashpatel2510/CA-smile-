@@ -3,16 +3,16 @@ import { WhiteDentalTreatmentShowcase } from "@/components/public/white-dental-t
 import { getTreatmentsStoreData } from "@/lib/treatments-store";
 
 export const metadata: Metadata = {
-  title: "Diagnostics & Dental Treatments | White Dental Clinic",
+  title: "Diagnostics & Dental Treatments | CA Smile Dental Clinic Bilimora",
   description:
-    "Explore our complete directory of clinical treatments, computed tomography, precision diagnostics, and aesthetic dental medicine. Schedule your appointment online.",
+    "Explore our complete directory of clinical treatments, digital smile design, dental implants, single-visit root canals, and aesthetic dental medicine in Bilimora, Gujarat.",
   alternates: {
     canonical: "/services",
   },
   openGraph: {
-    title: "Diagnostics & Dental Treatments | White Dental Clinic",
+    title: "Diagnostics & Dental Treatments | CA Smile Dental Clinic",
     description:
-      "Explore clinical computed tomography, digital radiography, veneers, and tailored dental treatments.",
+      "Explore digital smile design, dental implants, single-visit root canal, and gentle dental treatments in Bilimora.",
     url: "/services",
   },
 };

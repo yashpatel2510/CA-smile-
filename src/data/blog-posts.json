@@ -10,9 +10,9 @@
       "image": "/images/treatments/children-dentistry.jpg",
       "featured": true,
       "author": {
-        "name": "Dr. Sankar, BDS, MDS",
-        "role": "Chief Dental Surgeon & Pediatric Specialist",
-        "credentials": "Government Dental College • Specialist in Preventive Pediatric Care"
+        "name": "Dr. Deep Patel, BDS",
+        "role": "Dental Surgeon",
+        "credentials": "BDS • Specialist in Gentle Dental Care"
       },
       "tags": [
         "Pediatric Dentistry",
@@ -23,7 +23,7 @@
       "content": [
         "A child's very first visit to the dental clinic sets the emotional blueprint for how they view oral healthcare for the rest of their lives. When approached with patience, playful storytelling, and child-paced comfort, dental visits become an empowering adventure rather than a source of anxiety.",
         "When Should the First Visit Happen? The Indian Dental Association and American Academy of Pediatric Dentistry recommend scheduling a child's first dental checkup by their first birthday, or within six months after their first baby tooth erupts.",
-        "The 'Tell-Show-Do' Technique: At PedioDent Smile Dental Clinic, we utilize the gentle 'Tell-Show-Do' methodology. We show the child our dental instruments (like counting their teeth with a gentle 'tooth counter' mirror and giving their tooth a 'tickle' with our soft polishing brush) before touching their teeth.",
+        "The 'Tell-Show-Do' Technique: At CA Smile Dental Clinic, we utilize the gentle 'Tell-Show-Do' methodology. We show the child our dental instruments (like counting their teeth with a gentle 'tooth counter' mirror and giving their tooth a 'tickle' with our soft polishing brush) before touching their teeth.",
         "Preventing Early Childhood Caries (ECC): Baby teeth are more susceptible to enamel erosion from prolonged exposure to milk bottles or sweetened juices during bedtime. Wiping gums with a soft damp cloth and brushing with a rice-grain amount of age-appropriate toothpaste maintains strong primary enamel.",
         "Fluoride Varnish & Dental Sealants: Simple, painless topical fluoride applications and fissure sealants create a protective shield over the deep chewing grooves of developing molars, reducing cavity risk by up to 80% during formative school years.",
         "Takeaway: Celebrate your child's bravery with positive reinforcement and make brushing an engaging family ritual at home."
@@ -39,9 +39,9 @@
       "image": "/images/treatments/orthodontics.jpg",
       "featured": true,
       "author": {
-        "name": "Dr. Deep, MDS",
-        "role": "Lead Orthodontist & Dentofacial Specialist",
-        "credentials": "MDS Orthodontics • Certified Invisible Aligner Specialist"
+        "name": "Dr. Deep Patel, BDS",
+        "role": "Dental Surgeon",
+        "credentials": "MDS Orthodontics"
       },
       "tags": [
         "Orthodontics",
@@ -67,9 +67,9 @@
       "category": "Preventive Care",
       "image": "/images/treatments/tooth-fillings.jpg",
       "author": {
-        "name": "Dr. Sankar, BDS, MDS",
-        "role": "Chief Dental Surgeon",
-        "credentials": "15+ Years Clinical Dental Experience • Bilimora"
+        "name": "Dr. Deep Patel",
+        "role": "Dental Surgeon",
+        "credentials": "Dental  Clinical • Bilimora"
       },
       "tags": [
         "Preventive Dentistry",
@@ -85,7 +85,8 @@
         "4. Visible Micro-Discoloration or Rough Edges: A tooth edge that feels slightly rough to your tongue or shows dark pinhead-sized spots warrants prompt diagnostic inspection with clinical magnification.",
         "5. Chronic Localized Gum Redness: Mild inflammation around a single tooth often signals trapped plaque beneath the gumline that can progress to root surface decay.",
         "Clinical Protocol: Bi-annual professional ultrasonic cleanings combined with remineralizing fluoride or nano-hydroxyapatite pastes effectively arrest early decay before it reaches the dental pulp."
-      ]
+      ],
+      "featured": false
     },
     {
       "slug": "truth-about-teeth-whitening",
@@ -96,8 +97,8 @@
       "category": "Cosmetic Dentistry",
       "image": "/images/treatments/teeth-whitening.jpg",
       "author": {
-        "name": "Dr. Deep, MDS",
-        "role": "Cosmetic Dental Consultant",
+        "name": "Dr. Deep Patel, BDS",
+        "role": "Dental Surgeon",
         "credentials": "Specialist in Aesthetic Dentistry & Enamel Preservation"
       },
       "tags": [
@@ -112,7 +113,8 @@
         "The In-Office Clinical Difference: Professional dental whitening utilizes pH-balanced carbamide or hydrogen peroxide gel activated by precise LED wavelengths under complete gum barrier protection.",
         "Zero Tooth Structure Damage: The active oxygen molecules safely penetrate the microscopic organic stains within the enamel prisms, neutralizing chromatic compounds without demineralizing the mineral matrix.",
         "Longevity Protocol: With sensible dietary care (moderating black coffee, tea, and turmeric) and routine touch-up protocols, professional in-office whitening results maintain their radiance for 18 to 24 months."
-      ]
+      ],
+      "featured": false
     },
     {
       "slug": "dental-implants-recovery-success",
@@ -123,8 +125,8 @@
       "category": "Restorative Dentistry",
       "image": "/images/treatments/dental-implants.jpg",
       "author": {
-        "name": "Dr. Sankar, BDS, MDS",
-        "role": "Chief Dental Surgeon & Implantologist",
+        "name": "Dr. Deep Patel",
+        "role": "Dental Surgeon",
         "credentials": "Fellow International Congress of Oral Implantologists (ICOI)"
       },
       "tags": [
@@ -139,7 +141,8 @@
         "Digital 3D CBCT Guided Surgery: We utilize computerized 3D Cone Beam CT scans to measure your exact bone density and nerve canals, allowing computer-guided implant placement with sub-millimeter surgical accuracy.",
         "Is the Procedure Painful? With modern local anesthesia and gentle tissue management, patients frequently report that getting a dental implant involves less post-operative discomfort than a standard tooth extraction.",
         "Lifelong Durability: With routine brushing, flossing, and 6-month clinical cleanings, dental implants boast a clinical success rate exceeding 98% and can last for decades."
-      ]
+      ],
+      "featured": false
     },
     {
       "slug": "oral-systemic-health-connection",
@@ -150,9 +153,9 @@
       "category": "Oral-Systemic Health",
       "image": "/images/treatments/periodontal-examination.jpg",
       "author": {
-        "name": "Dr. Sankar & Medical Associates",
-        "role": "Director of Dental Surgery",
-        "credentials": "Chief Dental Surgeon • Multidisciplinary Clinical Care"
+        "name": "Dr. Deep Patel, BDS",
+        "role": "Dental Surgeon",
+        "credentials": "BDS • Specialist in Preventive Dental Care"
       },
       "tags": [
         "Dental Health",
@@ -165,33 +168,35 @@
         "How Oral Bacteria Enter Circulation: Chronic periodontal disease (gum infection) breaks down the delicate epithelial barrier lining your gums. Oral pathogens like Porphyromonas gingivalis can enter the microvasculature, triggering systemic immune cascades.",
         "Diabetes and Gum Disease: The relationship between diabetes and periodontitis is bidirectional. Chronic gum inflammation worsens insulin resistance, while elevated blood sugar impairs the body's ability to heal oral infections.",
         "Preventive Hygiene Protocol: Routine ultrasonic dental cleanings every six months remove biofilm reservoirs that your toothbrush cannot reach, actively reducing inflammatory stress on your entire system."
-      ]
+      ],
+      "featured": false
     },
     {
-      "slug": "preventive-cardiology-guide",
-      "title": "Preventive Cardiology & Systemic Health: Biomarkers & Full-Body Wellness Guidelines",
-      "summary": "Why comprehensive cardiology screenings, blood pressure monitoring, and systemic inflammation management protect vascular and cellular longevity.",
+      "slug": "dental-cardiovascular-health-guide",
+      "title": "Dental Care & Cardiovascular Health: How Healthy Gums Protect the Heart",
+      "summary": "Clinical insights from Dr. Deep Patel on how preventing periodontal gum disease reduces chronic bacterial circulation and promotes vascular wellness.",
       "publishedAt": "August 8, 2026",
-      "readTime": "6 min read",
-      "category": "Preventive Cardiology",
+      "readTime": "5 min read",
+      "category": "Oral-Systemic Health",
       "image": "/images/treatments/computed-tomography.jpg",
       "author": {
-        "name": "Clinical Cardiology Advisory Team",
-        "role": "Cardiovascular Health Consultant",
-        "credentials": "Board-Certified Medical Associates"
+        "name": "Dr. Deep Patel, BDS",
+        "role": "Dental Surgeon",
+        "credentials": "BDS • CA Smile Dental Clinic"
       },
       "tags": [
-        "Preventive Cardiology",
-        "Biomarkers",
-        "Systemic Wellness",
-        "Heart Health"
+        "Dental Health",
+        "Periodontal Care",
+        "Heart Wellness",
+        "Preventive Dentistry"
       ],
       "content": [
-        "Maintaining whole-body vitality requires vigilant preventive care across oral, cardiovascular, and metabolic health.",
-        "Cardiology and vascular health are deeply linked with whole-body inflammation, blood pressure regulation, and metabolic fitness.",
-        "Routine cardiovascular screenings identify subtle arterial markers before symptoms arise, empowering patients to make proactive lifestyle adjustments.",
-        "Takeaway: Schedule regular cardiology and wellness checkups to safeguard your long-term cardiovascular health."
-      ]
+        "Maintaining oral hygiene is an essential pillar in supporting whole-body and cardiovascular wellness.",
+        "Oral bacteria from chronic gum inflammation can enter the bloodstream, elevating systemic inflammatory markers like C-reactive protein (CRP).",
+        "Routine 6-month dental scaling and periodontal screenings at CA Smile Dental Clinic eliminate deep bacterial tartar, relieving systemic stress on your blood vessels.",
+        "Takeaway: Prioritize your twice-yearly dental checkups to protect both your smile and your systemic cardiovascular health."
+      ],
+      "featured": false
     }
   ],
   "categories": [
@@ -201,7 +206,6 @@
     "Cosmetic Dentistry",
     "Restorative Dentistry",
     "Oral-Systemic Health",
-    "Preventive Cardiology",
     "General Dentistry"
   ],
   "config": {

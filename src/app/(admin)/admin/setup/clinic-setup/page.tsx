@@ -50,11 +50,12 @@ const INITIAL_STATE: ClinicSetupForm = {
   phone: "+91 72260 98074",
   emergencyPhone: "+91 72260 98074",
   email: "casmileatbilimora@gmail.com",
-  address: "1st Floor, Labdhi Arcade, Above HDFC Bank, Bilimora, Gujarat 396321",
+  address:
+    "1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society, Bilimora, Gujarat 396321",
   city: "Bilimora",
   state: "Gujarat",
   postalCode: "396321",
-  workingHours: "Mon - Sat: 9:00 AM - 8:00 PM | Sunday: Emergency Only",
+  workingHours: "Mon–Sun: 9:00 AM – 8:00 PM",
   doctorName: "Dr. DEEP A PATEL",
   doctorTitle: "Chief Dental Surgeon & Clinic Founder",
   doctorPhone: "+91 72260 98074",
@@ -360,7 +361,7 @@ export default function ClinicSetupPage() {
                 required
                 value={form.address}
                 onChange={handleChange}
-                placeholder="1st Floor, Labdhi Arcade, Above HDFC Bank, Bilimora, Gujarat 396321"
+                placeholder="1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society, Bilimora, Gujarat 396321"
                 className="w-full resize-none rounded-xl border border-slate-200/90 bg-white px-4 py-3 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/10 dark:border-zinc-700/80 dark:bg-zinc-800/40 dark:text-zinc-100"
               />
             </div>
@@ -551,7 +552,7 @@ export default function ClinicSetupPage() {
                 name="workingHours"
                 value={form.workingHours}
                 onChange={handleChange}
-                placeholder="Mon - Sat: 9:00 AM - 8:00 PM | Sunday: Emergency Only"
+                placeholder="Mon–Sun: 9:00 AM – 8:00 PM"
                 className="w-full rounded-xl border border-slate-200/90 bg-white py-3 pl-10 pr-4 text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/10 dark:border-zinc-700/80 dark:bg-zinc-800/40 dark:text-zinc-100"
               />
             </div>

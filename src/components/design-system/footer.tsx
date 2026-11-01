@@ -139,7 +139,11 @@ export function Footer() {
               {/* Copyright & Location */}
               <div className="pt-1 text-xs sm:text-[13px] text-zinc-400 space-y-1">
                 <p>&copy; {currentYear} {clinicName}. All rights reserved.</p>
-                <p className="text-zinc-500">Station Road, Near Tower, Bilimora, Gujarat 396321</p>
+                <p className="text-zinc-500">
+                  {brandConfig?.mapExactAddress ||
+                    brandConfig?.address ||
+                    "1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society, Bilimora, Gujarat 396321"}
+                </p>
               </div>
             </div>
 

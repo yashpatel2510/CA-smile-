@@ -23,23 +23,29 @@ import {
   setCachedAppointmentsList,
   invalidateAppointmentsCache,
 } from "@/lib/appointments-cache";
+import { getActiveDatabaseMode } from "@/lib/database/test-database-config";
 
 // Concurrency mutex to serialize rapid concurrent bookings for the same patient/phone & date
 const activeBookingPromises = new Map<string, Promise<any>>();
 
-// Global in-memory cache for clinic and services to eliminate roundtrips on every booking
+// Global in-memory cache for clinic and services to eliminate roundtrips on every booking, partitioned by database mode
 const globalClinicCache = globalThis as unknown as {
-  __cachedClinic?: any;
-  __cachedClinicExpiry?: number;
-  __cachedServicesMap?: Map<string, any>;
-  __cachedServicesList?: any[];
-  __cachedServicesExpiry?: number;
+  __cachedClinics?: Record<string, any>;
+  __cachedClinicsExpiry?: Record<string, number>;
+  __cachedServicesMap?: Record<string, Map<string, any>>;
+  __cachedServicesList?: Record<string, any[]>;
+  __cachedServicesExpiry?: Record<string, number>;
 };
 
 async function getCachedClinic(clinicSlug?: string) {
   const now = Date.now();
-  if (globalClinicCache.__cachedClinic && now < (globalClinicCache.__cachedClinicExpiry || 0)) {
-    return globalClinicCache.__cachedClinic;
+  const mode = getActiveDatabaseMode();
+  if (!globalClinicCache.__cachedClinics || !globalClinicCache.__cachedClinicsExpiry) {
+    globalClinicCache.__cachedClinics = {};
+    globalClinicCache.__cachedClinicsExpiry = {};
+  }
+  if (globalClinicCache.__cachedClinics[mode] && now < (globalClinicCache.__cachedClinicsExpiry?.[mode] || 0)) {
+    return globalClinicCache.__cachedClinics[mode];
   }
   let clinic = await prisma.clinic.findFirst();
   if (!clinic) {
@@ -51,35 +57,43 @@ async function getCachedClinic(clinicSlug?: string) {
       },
     });
   }
-  globalClinicCache.__cachedClinic = clinic;
-  globalClinicCache.__cachedClinicExpiry = now + 60 * 60 * 1000; // Cache for 1 hour
+  globalClinicCache.__cachedClinics[mode] = clinic;
+  if (globalClinicCache.__cachedClinicsExpiry) {
+    globalClinicCache.__cachedClinicsExpiry[mode] = now + 60 * 60 * 1000; // Cache for 1 hour
+  }
   return clinic;
 }
 
 async function getCachedService(serviceName?: string, serviceId?: string) {
   const now = Date.now();
-  if (!globalClinicCache.__cachedServicesList || globalClinicCache.__cachedServicesList.length === 0 || now > (globalClinicCache.__cachedServicesExpiry || 0)) {
+  const mode = getActiveDatabaseMode();
+  if (!globalClinicCache.__cachedServicesList || !globalClinicCache.__cachedServicesMap || !globalClinicCache.__cachedServicesExpiry) {
+    globalClinicCache.__cachedServicesList = {};
+    globalClinicCache.__cachedServicesMap = {};
+    globalClinicCache.__cachedServicesExpiry = {};
+  }
+  if (!globalClinicCache.__cachedServicesList[mode] || globalClinicCache.__cachedServicesList[mode].length === 0 || now > (globalClinicCache.__cachedServicesExpiry?.[mode] || 0)) {
     try {
       const allServices = await prisma.service.findMany();
-      globalClinicCache.__cachedServicesList = allServices;
+      globalClinicCache.__cachedServicesList[mode] = allServices;
       const sMap = new Map<string, any>();
       for (const s of allServices) {
         sMap.set(s.id, s);
         sMap.set(s.name.trim().toLowerCase(), s);
       }
-      globalClinicCache.__cachedServicesMap = sMap;
-      globalClinicCache.__cachedServicesExpiry = now + 60 * 60 * 1000; // Cache for 1 hour
+      globalClinicCache.__cachedServicesMap[mode] = sMap;
+      globalClinicCache.__cachedServicesExpiry[mode] = now + 60 * 60 * 1000; // Cache for 1 hour
     } catch {}
   }
 
-  const sMap = globalClinicCache.__cachedServicesMap;
+  const sMap = globalClinicCache.__cachedServicesMap?.[mode];
   if (serviceId && sMap?.has(serviceId)) {
     return sMap.get(serviceId);
   }
   if (serviceName && sMap?.has(serviceName.trim().toLowerCase())) {
     return sMap.get(serviceName.trim().toLowerCase());
   }
-  return globalClinicCache.__cachedServicesList?.[0] || null;
+  return globalClinicCache.__cachedServicesList?.[mode]?.[0] || null;
 }
 
 // Rate limit: 10 requests per 60 seconds per IP
@@ -420,7 +434,7 @@ export async function POST(req: NextRequest) {
 
     // If scheduled date is on today's date (or rawDateStr is today):
     // Check if the requested session is still active/in-progress today.
-    // If the patient is booking during an active session (e.g. Evening 5:00 PM - 7:30 PM at 5:23 PM),
+    // If the patient is booking during an active session (e.g. Evening 5:00 PM - 8:00 PM at 5:23 PM),
     // adjust scheduledDate to upcoming minutes so patients can successfully book today's active session.
     const checkDateRef = rawDateStr || scheduledDate;
     if (isDateToday(checkDateRef) && timeStr) {

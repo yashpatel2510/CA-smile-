@@ -18,10 +18,10 @@ export function WhatsAppBookingWidget() {
   const [guardianName, setGuardianName] = useState("");
   const [phone, setPhone] = useState("");
   const [treatment, setTreatment] = useState(
-    clinicalServices[0]?.name || "General Dental Consultation & Checkup"
+    "General Dental Consultation & Checkup"
   );
   const [preferredDate, setPreferredDate] = useState("");
-  const [timeRange, setTimeRange] = useState("Morning (9:30 AM - 1:00 PM)");
+  const [timeRange, setTimeRange] = useState("Morning (9:00 AM - 1:00 PM)");
   const [notes, setNotes] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
@@ -34,13 +34,26 @@ export function WhatsAppBookingWidget() {
   } | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const [dynamicTreatments, setDynamicTreatments] = useState<string[]>(
-    clinicalServices.map((s) => s.name)
-  );
+  const [dynamicTreatments, setDynamicTreatments] = useState<string[]>([
+    "General Dental Consultation & Checkup",
+    "Digital Smile Design",
+    "Dental Implants",
+    "Full Mouth Rehabilitation",
+    "Dental Crowns & Bridges",
+    "Root Canal Treatment",
+    "Wisdom Tooth Removal",
+    "Gum Treatment",
+    "Orthodontics",
+    "Teeth Whitening",
+    "Restorative Dentistry",
+    "Children Dentistry",
+    "Porcelain Veneers",
+    "Dentures",
+  ]);
   const [dynamicTimeSlots, setDynamicTimeSlots] = useState<string[]>([
-    "Morning (9:30 AM - 1:00 PM)",
+    "Morning (9:00 AM - 1:00 PM)",
     "Afternoon (2:00 PM - 5:00 PM)",
-    "Evening (5:00 PM - 7:30 PM)",
+    "Evening (5:00 PM - 8:00 PM)",
   ]);
 
   // Set default date to tomorrow and fetch live configuration

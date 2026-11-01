@@ -23,10 +23,10 @@ export async function GET(
     } catch {
       service = {
         id: serviceId,
-        name: "Comprehensive Cardiology Diagnostic Panel",
-        price: "160.00",
-        durationMinutes: 45,
-        category: "Specialty Care",
+        name: "Comprehensive Dental Examination & Consultation",
+        price: "300.00",
+        durationMinutes: 30,
+        category: "General Dentistry",
       };
     }
 

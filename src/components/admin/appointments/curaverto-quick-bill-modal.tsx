@@ -246,7 +246,7 @@ export function CuravertoQuickBillModal({
             <div>
               <h2 className="text-base font-bold text-white">Smile Dental Clinic</h2>
               <p className="text-[9px] text-slate-300">
-                1st Floor, Labdhi Arcade, Above HDFC Bank, Bilimora, Gujarat 396321
+                1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society, Bilimora, Gujarat 396321
               </p>
               <p className="text-[9px] text-slate-300">Tel: 9664681536</p>
             </div>

@@ -57,8 +57,10 @@ export const createAppointmentSchema = z.object({
   preferredDate: z.string().optional(),
   timeRange: z
     .enum([
+      "Morning (9:00 AM - 1:00 PM)",
       "Morning (9:30 AM - 1:00 PM)",
       "Afternoon (2:00 PM - 5:00 PM)",
+      "Evening (5:00 PM - 8:00 PM)",
       "Evening (5:00 PM - 7:30 PM)",
     ])
     .or(z.string())

@@ -91,7 +91,8 @@ export function ClinicMapSection({ className = "" }: ClinicMapSectionProps) {
   const mapStyle = brandConfig.mapStyle || "dark";
   const clinicName = brandConfig.mapCardTitle || brandConfig.clinicName || "CA Smile Dental Clinic";
   const displayAddress =
-    brandConfig.address || "1ST FLOOR LABDHI ARCADE, ABOVE HDFC BANK, BILIMORA";
+    brandConfig.address ||
+    "1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society, Bilimora, Gujarat 396321";
   const exactAddress = brandConfig.mapExactAddress || STUCK_LOCATION_ADDRESS;
   const email = brandConfig.email || "casmileatbilimora@gmail.com";
   const phone = brandConfig.phone || "+91 72260 98074";
@@ -293,6 +294,7 @@ export function ClinicMapSection({ className = "" }: ClinicMapSectionProps) {
                           src={cardImage}
                           alt={`${clinicName} Entrance`}
                           fill
+                          sizes="(max-width: 640px) 64px, 80px"
                           className="object-cover transition-transform duration-300 group-hover:scale-105"
                         />
                       </div>

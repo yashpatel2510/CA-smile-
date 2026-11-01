@@ -47,7 +47,7 @@ export function TreatmentReviewsShowcase({
       <Testimonials
         testimonialsList={testimonialsList}
         title={title}
-        googleMapsUrl={googleConfig.googleMapsUrl}
+        googleMapsUrl={googleConfig?.googleMapsUrl}
         defaultDark={isDarkMode}
         showToggle={false}
         showEmptyCard={showEmptyCard}

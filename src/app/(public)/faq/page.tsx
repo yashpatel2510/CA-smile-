@@ -3,14 +3,14 @@ import { getFaqsConfig } from "@/lib/faqs-store";
 import { FaqPageClient } from "./faq-page-client";
 
 export const metadata: Metadata = {
-  title: "Frequently Asked Questions | Questions, Answered",
+  title: "Frequently Asked Questions | CA Smile Dental Clinic Bilimora",
   description:
-    "Explore commonly asked questions about our clinical specialties, painless treatments, appointment booking, pricing, and ongoing care.",
+    "Explore commonly asked questions about our clinical specialties, painless root canals, dental implants, appointment booking, pricing, and ongoing dental care in Bilimora, Gujarat.",
   alternates: {
     canonical: "/faq",
   },
   openGraph: {
-    title: "Frequently Asked Questions | PedioDent & Smile Dental Clinic",
+    title: "Frequently Asked Questions | CA Smile Dental Clinic Bilimora",
     description:
       "Clear, transparent answers to the most common questions before starting your dental care or treatment.",
     url: "/faq",

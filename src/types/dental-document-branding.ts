@@ -62,9 +62,9 @@ export const DEFAULT_DENTAL_BRANDING_MASTER: DentalClinicBrandingMaster = {
   primary_color: "#0b192c",
   secondary_color: "#1e293b",
   header_text:
-    "1st Floor, Labdhi Arcade, Above HDFC Bank, Bilimora, Gujarat 396321",
+    "1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society, Bilimora, Gujarat 396321",
   footer_text:
-    "Clinic Timings: Mon - Sat 9:00 AM - 8:00 PM | Emergency Contact: 9664681536",
+    "Clinic Timings: Mon–Sun: 9:00 AM – 8:00 PM | Emergency Contact: +91 72260 98074",
   dot_matrix_mode: false,
   doctor_name: "Dr. Sample Doctor",
   doctor_qualification: "MBBS, MD (General Medicine), Diploma in Diabetology",
@@ -72,7 +72,8 @@ export const DEFAULT_DENTAL_BRANDING_MASTER: DentalClinicBrandingMaster = {
   phone: "9664681536",
   emergency_phone: "9664681536",
   email: "casmileatbilimora@gmail.com",
-  address: "1st Floor, Labdhi Arcade, Above HDFC Bank, Bilimora",
+  address:
+    "1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society, Bilimora, Gujarat 396321",
   city: "Bilimora",
   state: "Gujarat",
   postal_code: "396321",

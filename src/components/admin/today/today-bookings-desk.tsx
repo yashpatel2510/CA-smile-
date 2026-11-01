@@ -86,21 +86,26 @@ interface TodayMetrics {
 
 const COMMON_SERVICES = [
   "General Dental Consultation & Checkup",
-  "Root Canal Treatment (Endodontics)",
-  "Teeth Cleaning & Scaling (Prophylaxis)",
-  "Orthodontics & Invisible Braces",
-  "Pediatric Dentistry & Child Care",
-  "Teeth Whitening & Bleaching",
-  "Dental Implants & Prosthetics",
-  "Emergency Toothache Relief",
-  "Periodontal Gum Treatment & Scaling",
+  "Digital Smile Design",
+  "Dental Implants",
+  "Full Mouth Rehabilitation",
+  "Dental Crowns & Bridges",
+  "Root Canal Treatment",
+  "Wisdom Tooth Removal",
+  "Gum Treatment",
+  "Orthodontics",
+  "Teeth Whitening",
+  "Restorative Dentistry",
+  "Children Dentistry",
+  "Porcelain Veneers",
+  "Dentures",
 ];
 
 const DOCTORS_LIST = [
-  "Dr. Sankar (Chief Dental Surgeon)",
-  "Dr. Evelyn Reed (Endodontic Specialist)",
-  "Dr. Sarah Chen (Pediatric Dentist)",
-  "Dr. Marcus Vance (Orthodontist & Implantologist)",
+  "Dr. Deep A Patel (Chief Dental Surgeon)",
+  "Consultant Orthodontist (Aligners & Braces)",
+  "Consultant Oral & Maxillofacial Surgeon",
+  "Consultant Periodontist",
   "Any Available Specialist",
 ];
 

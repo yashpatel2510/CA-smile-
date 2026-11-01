@@ -18,30 +18,30 @@ import { DoctorIntroSection } from "@/components/public/doctor-intro-section";
 
 export const metadata: Metadata = {
   title: {
-    absolute: "CA Smile Dental Clinic",
+    absolute: "CA Smile Dental Clinic in Bilimora | Dr. Deep Patel",
   },
   description:
-    "Experience comprehensive dental care, painless single-visit endodontics, digital smile designing, dental implants, and clear aligners at CA Smile Multispeciality Dental Clinic Bilimora.",
+    "Looking for a dentist in Bilimora? Visit CA Smile Dental Clinic for dental implants, root canal treatment, braces, smile designing and comprehensive dental care. Book an appointment today.",
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "CA Smile Dental Clinic - Modern Multispeciality Dental Care",
+    title: "CA Smile Dental Clinic in Bilimora | Dr. Deep Patel",
     description:
-      "Modern clinical diagnostics, trusted specialists, and seamless online scheduling. Serving families with compassionate care in Bilimora.",
+      "Looking for a dentist in Bilimora? Visit CA Smile Dental Clinic for dental implants, root canal treatment, braces, smile designing and comprehensive dental care. Book an appointment today.",
     url: "/",
     siteName: "CA Smile Dental Clinic",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "CA Smile Dental Clinic | Modern Dental Care Centered Around You",
+    title: "CA Smile Dental Clinic in Bilimora | Dr. Deep Patel",
     description:
-      "Book an appointment with Dr. Deep Patel at CA Smile Multispeciality Dental Clinic Bilimora.",
+      "Looking for a dentist in Bilimora? Visit CA Smile Dental Clinic for dental implants, root canal treatment, braces, smile designing and comprehensive dental care. Book an appointment today.",
   },
 };
 
-export const revalidate = 10;
+export const revalidate = 60;
 
 export default function HomePage() {
   const blogConfig = getBlogSectionConfig();

@@ -693,7 +693,7 @@
         "date": "01 Nov 2026",
         "doctor": "Any Available Specialist",
         "reason": "General Patient Inquiry",
-        "notes": "Inquiry Message: Could you please confirm if a GP referral is required for cardiology tests?",
+        "notes": "Inquiry Message: Could you please confirm appointment availability for root canal consultation?",
         "dotColor": "blue"
       },
       {
@@ -702,7 +702,7 @@
         "date": "01 Nov 2026",
         "doctor": "Any Available Specialist",
         "reason": "General Patient Inquiry",
-        "notes": "Inquiry Message: Could you please confirm if a GP referral is required for cardiology tests?",
+        "notes": "Inquiry Message: Could you please confirm appointment availability for root canal consultation?",
         "dotColor": "blue"
       },
       {
@@ -711,7 +711,7 @@
         "date": "01 Nov 2026",
         "doctor": "Any Available Specialist",
         "reason": "General Patient Inquiry",
-        "notes": "Inquiry Message: Could you please confirm if a GP referral is required for cardiology tests?",
+        "notes": "Inquiry Message: Could you please confirm appointment availability for root canal consultation?",
         "dotColor": "blue"
       },
       {
@@ -720,7 +720,7 @@
         "date": "01 Nov 2026",
         "doctor": "Any Available Specialist",
         "reason": "General Patient Inquiry",
-        "notes": "Inquiry Message: Could you please confirm if a GP referral is required for cardiology tests?",
+        "notes": "Inquiry Message: Could you please confirm appointment availability for root canal consultation?",
         "dotColor": "blue"
       },
       {
@@ -729,7 +729,7 @@
         "date": "01 Nov 2026",
         "doctor": "Any Available Specialist",
         "reason": "General Patient Inquiry",
-        "notes": "Inquiry Message: Could you please confirm if a GP referral is required for cardiology tests?",
+        "notes": "Inquiry Message: Could you please confirm appointment availability for root canal consultation?",
         "dotColor": "blue"
       },
       {
@@ -738,7 +738,7 @@
         "date": "01 Nov 2026",
         "doctor": "Any Available Specialist",
         "reason": "General Patient Inquiry",
-        "notes": "Inquiry Message: Could you please confirm if a GP referral is required for cardiology tests?",
+        "notes": "Inquiry Message: Could you please confirm appointment availability for root canal consultation?",
         "dotColor": "blue"
       },
       {
@@ -747,7 +747,7 @@
         "date": "01 Nov 2026",
         "doctor": "Any Available Specialist",
         "reason": "General Patient Inquiry",
-        "notes": "Inquiry Message: Could you please confirm if a GP referral is required for cardiology tests?",
+        "notes": "Inquiry Message: Could you please confirm appointment availability for root canal consultation?",
         "dotColor": "blue"
       },
       {
@@ -756,7 +756,7 @@
         "date": "01 Nov 2026",
         "doctor": "Any Available Specialist",
         "reason": "General Patient Inquiry",
-        "notes": "Inquiry Message: Could you please confirm if a GP referral is required for cardiology tests?",
+        "notes": "Inquiry Message: Could you please confirm appointment availability for root canal consultation?",
         "dotColor": "blue"
       },
       {
@@ -765,7 +765,7 @@
         "date": "01 Nov 2026",
         "doctor": "Any Available Specialist",
         "reason": "General Patient Inquiry",
-        "notes": "Inquiry Message: Could you please confirm if a GP referral is required for cardiology tests?",
+        "notes": "Inquiry Message: Could you please confirm appointment availability for root canal consultation?",
         "dotColor": "blue"
       },
       {
@@ -774,7 +774,7 @@
         "date": "01 Nov 2026",
         "doctor": "Any Available Specialist",
         "reason": "General Patient Inquiry",
-        "notes": "Inquiry Message: Could you please confirm if a GP referral is required for cardiology tests?",
+        "notes": "Inquiry Message: Could you please confirm appointment availability for root canal consultation?",
         "dotColor": "blue"
       },
       {
@@ -783,7 +783,7 @@
         "date": "01 Nov 2026",
         "doctor": "Any Available Specialist",
         "reason": "General Patient Inquiry",
-        "notes": "Inquiry Message: Could you please confirm if a GP referral is required for cardiology tests?",
+        "notes": "Inquiry Message: Could you please confirm appointment availability for root canal consultation?",
         "dotColor": "blue"
       }
     ],
@@ -796,7 +796,7 @@
     "state": "Gujarat",
     "pin": "396321",
     "allergies": "No drug allergies recorded (NKDA).",
-    "medicalConditions": "Could you please confirm if a GP referral is required for cardiology tests?",
+    "medicalConditions": "Could you please confirm appointment availability for root canal consultation?",
     "emergencyContact": "",
     "treatmentCost": "1500"
   },

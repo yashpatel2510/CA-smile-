@@ -55,7 +55,7 @@ function ToothIcon({ className = "h-5 w-5" }: { className?: string }) {
 }
 
 export function Navbar({
-  clinicName = "PedioDent",
+  clinicName = "CA Smile Dental Clinic",
   navItems = defaultNavItems,
   initialThemeMode = "light",
   hideBlogNav = false,
@@ -153,7 +153,7 @@ export function Navbar({
     brandConfig?.logo?.clinicDisplayName ||
     brandConfig?.clinicName ||
     clinicName ||
-    "PedioDent";
+    "CA Smile Dental Clinic";
 
   const mobileDisplayName =
     brandConfig?.logo?.mobileClinicDisplayName ||

@@ -2,6 +2,7 @@ import { MetadataRoute } from "next";
 import { env } from "@/lib/env";
 import { clinicalServices } from "@/data/services-data";
 import { blogPosts } from "@/data/blog-posts";
+import { getTreatmentsStoreData } from "@/lib/treatments-store";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl =
@@ -36,7 +37,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
           : 0.8,
   }));
 
-  // Dynamic clinical service pages
+  // Active dental treatment pages
+  const treatmentsData = getTreatmentsStoreData();
+  const activeTreatments = [
+    ...(treatmentsData.treatments || []),
+    ...(treatmentsData.diagnostics || []),
+  ].filter((t) => t.isActive);
+
+  const treatmentPages = activeTreatments.map((treatment) => ({
+    url: `${baseUrl}/treatments/${treatment.id}`,
+    lastModified,
+    changeFrequency: "weekly" as const,
+    priority: 0.85,
+  }));
+
+  // Dynamic clinical dental service pages
   const servicePages = clinicalServices.map((service) => ({
     url: `${baseUrl}/services/${service.slug}`,
     lastModified,
@@ -52,5 +67,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...servicePages, ...blogPages];
+  return [...staticPages, ...treatmentPages, ...servicePages, ...blogPages];
 }
+

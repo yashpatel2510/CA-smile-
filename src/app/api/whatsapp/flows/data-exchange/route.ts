@@ -50,9 +50,9 @@ export async function POST(req: NextRequest) {
         ],
         doctors: [
           { id: "Any Available Doctor", title: "Any Available Doctor" },
-          { id: "Dr. Sarah Jenkins", title: "Dr. Sarah Jenkins (Lead Dentist)" },
-          { id: "Dr. Rajesh Sharma", title: "Dr. Rajesh Sharma (Orthodontist)" },
-          { id: "Dr. Priya Patel", title: "Dr. Priya Patel (Endodontist)" },
+          { id: "Dr. Deep A Patel", title: "Dr. Deep A Patel (Chief Dental Surgeon)" },
+          { id: "Consultant Orthodontist", title: "Consultant Orthodontist (Aligners & Braces)" },
+          { id: "Consultant Oral Surgeon", title: "Consultant Oral & Maxillofacial Surgeon" },
         ],
         min_date: today,
         max_date: maxDate,

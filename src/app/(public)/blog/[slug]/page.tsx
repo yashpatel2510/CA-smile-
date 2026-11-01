@@ -83,7 +83,7 @@ export default function BlogPostDetailPage({ params }: BlogPostPageProps) {
     publisher: {
       "@type": "DentalClinic",
       name: "CA Smile Dental Clinic",
-      url: "https://casmiledental.com",
+      url: "https://www.casmiledentalclinic.com",
     },
     about: {
       "@type": "MedicalCondition",

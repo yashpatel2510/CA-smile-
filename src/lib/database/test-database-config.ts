@@ -61,7 +61,20 @@ export function saveDatabaseModeConfig(partial: Partial<DatabaseModeConfig>): Da
   }
 }
 
+export function isLocalEnvironment(): boolean {
+  if (process.env.NODE_ENV === "development") return true;
+  if (!process.env.VERCEL && !process.env.VERCEL_ENV) return true;
+  return false;
+}
+
 export function getActiveDatabaseMode(): DatabaseMode {
+  const testUrl = getTestDatabaseUrl();
+
+  // User requirement: When running locally, ALWAYS use the test database to test features
+  if (isLocalEnvironment() && testUrl) {
+    return "test";
+  }
+
   const config = getDatabaseModeConfig();
   // Safety check: if test mode is selected but no test URL is connected, fall back to production
   if (config.activeMode === "test" && (!config.testDatabaseUrl || !config.testDatabaseConnected)) {
@@ -76,7 +89,8 @@ export function isTestModeActive(): boolean {
 
 export function getTestDatabaseUrl(): string | undefined {
   const config = getDatabaseModeConfig();
-  return config.testDatabaseUrl || process.env.TEST_DATABASE_URL || undefined;
+  const raw = config.testDatabaseUrl || process.env.TEST_DATABASE_URL || undefined;
+  return raw ? normalizePostgresUrl(raw) : undefined;
 }
 
 export function normalizePostgresUrl(raw: string): string {
@@ -97,6 +111,14 @@ export function normalizePostgresUrl(raw: string): string {
   // Ensure sslmode=require for Supabase / remote cloud databases
   if (!url.includes("sslmode=")) {
     url += (url.includes("?") ? "&" : "?") + "sslmode=require";
+  }
+
+  // Normalize Supabase pooler: convert 5432 to 6543 and add pgbouncer=true for reliable pooler connection
+  if (url.includes(".pooler.supabase.com:5432")) {
+    url = url.replace(":5432", ":6543");
+    if (!url.includes("pgbouncer=true")) {
+      url += (url.includes("?") ? "&" : "?") + "pgbouncer=true";
+    }
   }
 
   return url;

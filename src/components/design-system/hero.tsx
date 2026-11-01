@@ -87,9 +87,12 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
     hero.topInfoTextColor || defaultTopInfoTextColor;
 
   const workingHoursLabel = hero.topInfoWorkingHoursLabel || "Working hours";
-  const workingHoursValue = hero.topInfoWorkingHoursValue || "Mon - Sat 8:00-20:00";
+  const workingHoursValue =
+    hero.topInfoWorkingHoursValue || "Mon–Sun: 9:00 AM – 8:00 PM";
   const locationLabel = hero.topInfoLocationLabel || "Location";
-  const locationValue = hero.topInfoLocationValue || "12 Shevchenko Street, Kyiv";
+  const locationValue =
+    hero.topInfoLocationValue ||
+    "1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society, Bilimora, Gujarat 396321";
 
   // =========================================================================
   // 1. MOBILE VIEW LAYOUT (Full Hero Image Canvas Spanning Behind Navbar)
@@ -125,7 +128,7 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
       >
         {/* 1. TOP GRAND TITLE: "DENTAL CARE" (if explicitly enabled) */}
         {hero.showUpperText && (
-          <motion.h1
+          <motion.p
             initial={{ opacity: 0, y: shouldReduceMotion ? 0 : -8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
@@ -136,7 +139,7 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
             }}
           >
             {hero.upperText || "DENTAL CARE"}
-          </motion.h1>
+          </motion.p>
         )}
 
         {/* 2. MOBILE HERO IMAGE (CUSTOMIZABLE FIT & SIZE: COVER / CONTAIN / FILL) */}
@@ -267,6 +270,21 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
 
         {/* 3. CONTENT SECTION: RENDERED AFTER (BELOW) THE IMAGE */}
         <div className="w-full px-4 pt-3 flex flex-col items-center text-center max-w-sm mx-auto space-y-3">
+          {/* Primary SEO & Clinic H1 Headline */}
+          <motion.h1
+            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.05 }}
+            className="font-heading font-extrabold text-2xl sm:text-3xl text-center leading-tight tracking-tight text-[#18181b] dark:text-white"
+            style={{
+              color:
+                hero.headlineColor ||
+                (mobileSubtitleColor === "#ffffff" ? "#ffffff" : "#0f172a"),
+            }}
+          >
+            {hero.headline || "Best Dental Clinic in Bilimora"}
+          </motion.h1>
+
           {/* A. Subtitle Description Text */}
           {hero.subtitleText && (
             <motion.p
@@ -590,6 +608,20 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
               marginBottom: hero.subtitleBoxMarginBottom || "0px",
             }}
           >
+            {/* Primary SEO & Clinic H1 Headline */}
+            <h1
+              className={`font-heading font-extrabold tracking-tight leading-[1.14] text-[#18181b] dark:text-white ${
+                isTabletPreview
+                  ? "text-2xl sm:text-3xl text-left"
+                  : "text-2xl sm:text-3xl lg:text-[34px] text-center md:text-left"
+              }`}
+              style={{
+                color: hero.headlineColor || (isDarkBg ? "#ffffff" : "#0f172a"),
+              }}
+            >
+              {hero.headline || "CA Smile Dental Clinic in Bilimora"}
+            </h1>
+
             {/* Subtitle Description Text */}
             <p
               className={`leading-relaxed font-normal ${

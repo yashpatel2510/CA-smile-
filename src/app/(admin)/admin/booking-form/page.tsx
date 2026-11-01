@@ -1200,7 +1200,7 @@ export default function AdminBookingFormBuilderPage() {
                   </label>
                   <Input
                     type="url"
-                    value={config.facebookUrl ?? "https://facebook.com"}
+                    value={config.facebookUrl ?? ""}
                     onChange={(e) =>
                       setConfig((prev) => ({
                         ...prev,
@@ -1218,7 +1218,7 @@ export default function AdminBookingFormBuilderPage() {
                   </label>
                   <Input
                     type="url"
-                    value={config.linkedinUrl ?? "https://linkedin.com"}
+                    value={config.linkedinUrl ?? ""}
                     onChange={(e) =>
                       setConfig((prev) => ({
                         ...prev,
@@ -2241,7 +2241,7 @@ export default function AdminBookingFormBuilderPage() {
                             TIME SLOT
                           </div>
                           <div className="font-semibold truncate">
-                            {config.timeSlots[0] || "Morning (9:30 AM - 1:00 PM)"}
+                            {config.timeSlots[0] || "Morning (9:00 AM - 1:00 PM)"}
                           </div>
                         </div>
                       </div>
@@ -2271,10 +2271,6 @@ export default function AdminBookingFormBuilderPage() {
                         <span className="font-semibold">
                           {config.sideFollowText || "Follow Us:"}
                         </span>
-                        <span>Facebook</span>
-                        <span>•</span>
-                        <span>LinkedIn</span>
-                        <span>•</span>
                         <span>Instagram</span>
                       </div>
                     </div>

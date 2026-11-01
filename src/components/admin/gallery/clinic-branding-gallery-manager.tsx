@@ -869,7 +869,7 @@ export function ClinicBrandingGalleryManager() {
                 type="text"
                 value={config.addressLine1 ?? ""}
                 onChange={(e) => setConfig((prev) => ({ ...prev, addressLine1: e.target.value }))}
-                placeholder="1st Floor, Labdhi Arcade, Above HDFC Bank"
+                placeholder="1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy"
                 className="w-full rounded-xl border border-zinc-200 px-3.5 py-2.5 text-sm text-zinc-900 focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
               />
             </div>
@@ -882,7 +882,7 @@ export function ClinicBrandingGalleryManager() {
                 type="text"
                 value={config.addressLine2 ?? ""}
                 onChange={(e) => setConfig((prev) => ({ ...prev, addressLine2: e.target.value }))}
-                placeholder="Convent Rd, Bilimora, Gujarat 396321"
+                placeholder="Kutchhi Friends Society, Bilimora, Gujarat 396321"
                 className="w-full rounded-xl border border-zinc-200 px-3.5 py-2.5 text-sm text-zinc-900 focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
               />
             </div>

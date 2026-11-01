@@ -220,11 +220,10 @@ export function FooterPolaroidsShowcase({
   const showAddressCard = galleryConfig.showAddressCard !== false;
   const addressLine1 =
     galleryConfig.addressLine1 ||
-    brandConfig?.address ||
-    "1st Floor, Labdhi Arcade, Above HDFC Bank";
+    "1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy";
   const addressLine2 =
     galleryConfig.addressLine2 ||
-    `${brandConfig?.city || "Bilimora"}, ${brandConfig?.state || "Gujarat"} ${brandConfig?.postalCode || "396321"}`;
+    "Kutchhi Friends Society, Bilimora, Gujarat 396321";
   const clinicPhone =
     galleryConfig.phone || brandConfig?.phone || "+91 72260 98074";
   const showMascot = galleryConfig.showMascot !== false;
@@ -467,6 +466,8 @@ export function FooterPolaroidsShowcase({
                         <img
                           src={photo.src}
                           alt={photo.alt}
+                          width={215}
+                          height={161}
                           loading="lazy"
                           decoding="async"
                           className="h-full w-full object-cover object-center transition-transform duration-500 ease-out hover:scale-105"

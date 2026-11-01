@@ -38,7 +38,7 @@ export async function generateMetadata({
   const treatment = getTreatmentById(params.slug);
   if (treatment) {
     return {
-      title: `${treatment.title} | White Dental Clinic`,
+      title: `${treatment.title} | CA Smile Dental Clinic`,
       description: treatment.whatItIs || treatment.paragraphs[0],
     };
   }
@@ -47,6 +47,19 @@ export async function generateMetadata({
   if (!service) {
     return {
       title: "Service Not Found | CA Smile Dental Clinic",
+      robots: {
+        index: false,
+        follow: false,
+        noarchive: true,
+        nosnippet: true,
+        nocache: true,
+        googleBot: {
+          index: false,
+          follow: false,
+          noarchive: true,
+          nosnippet: true,
+        },
+      },
     };
   }
 
@@ -77,8 +90,84 @@ export default function ServiceDetailPage({ params }: ServicePageProps) {
     notFound();
   }
 
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL && !process.env.NEXT_PUBLIC_APP_URL.includes("vercel.app")
+      ? process.env.NEXT_PUBLIC_APP_URL.replace(/\/+$/, "")
+      : "https://www.casmiledentalclinic.com";
+
+  const jsonLdGraph: any[] = [
+    {
+      "@type": "MedicalProcedure",
+      "@id": `${baseUrl}/services/${service.slug}#procedure`,
+      name: `${service.name} in Bilimora`,
+      description: service.description || service.summary,
+      bodyLocation: "Mouth",
+      medicalSpecialty: "https://schema.org/Dentistry",
+      howPerformed: service.whatToExpect?.join(". ") || service.summary,
+      provider: {
+        "@type": "DentalClinic",
+        name: "CA Smile Dental Clinic",
+        telephone: "+91 72260 98074",
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: "1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society",
+          addressLocality: "Bilimora",
+          addressRegion: "Gujarat",
+          postalCode: "396321",
+          addressCountry: "IN",
+        },
+      },
+    },
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Home",
+          item: `${baseUrl}/`,
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Services",
+          item: `${baseUrl}/services`,
+        },
+        {
+          "@type": "ListItem",
+          position: 3,
+          name: service.name,
+          item: `${baseUrl}/services/${service.slug}`,
+        },
+      ],
+    },
+  ];
+
+  if (service.faqs && service.faqs.length > 0) {
+    jsonLdGraph.push({
+      "@type": "FAQPage",
+      mainEntity: service.faqs.map((faq) => ({
+        "@type": "Question",
+        name: faq.question,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: faq.answer,
+        },
+      })),
+    });
+  }
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": jsonLdGraph,
+  };
+
   return (
     <main className="py-12 sm:py-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <SectionWrapper containerSize="default" className="py-0 sm:py-0 lg:py-0">
         <div className="space-y-10">
           {/* Breadcrumbs */}
@@ -182,10 +271,10 @@ export default function ServiceDetailPage({ params }: ServicePageProps) {
                       />
                       <div>
                         <span className="block font-semibold text-brand-text">
-                          HSA / FSA Eligible
+                          Itemized Dental Invoice
                         </span>
                         <span className="text-brand-muted">
-                          Eligible for instant reimbursement receipts
+                          Official receipts provided for dental reimbursement
                         </span>
                       </div>
                     </div>

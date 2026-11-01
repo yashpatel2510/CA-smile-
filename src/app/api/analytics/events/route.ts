@@ -26,10 +26,10 @@ const analyticsStore: AnalyticsStore = {
     5: 88, // Step 5: Booking Confirmed (47.8%)
   },
   serviceInterests: {
-    "Comprehensive Cardiology Diagnostic Panel": 48,
-    "General Practitioner Consultation": 54,
-    "Pediatric Wellness & Immunization Check": 28,
-    "Preventive Dental Cleaning & Examination": 22,
+    "Single-Visit Painless Root Canal": 64,
+    "Comprehensive Dental Examination & Consultation": 58,
+    "Dental Implants & Restoration": 42,
+    "Digital Smile Design & Clear Aligners": 36,
   },
   directInquiries: 54,
   totalEvents: 1227,

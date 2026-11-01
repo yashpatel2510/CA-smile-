@@ -1,64 +1,122 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
-  Stethoscope,
   Award,
   Calendar,
   GraduationCap,
   CheckCircle2,
+  Sparkles,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { BookNowButton } from "@/components/ui/book-now-button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
+export const metadata: Metadata = {
+  title: "Our Dental Doctors & Specialists | CA Smile Dental Clinic Bilimora",
+  description:
+    "Meet Dr. Deep A Patel (BDS, Chief Dental Surgeon) and our specialist dental team at CA Smile Dental Clinic in Bilimora, Gujarat.",
+  alternates: {
+    canonical: "/doctors",
+  },
+  openGraph: {
+    title: "Our Dental Doctors & Specialists | CA Smile Dental Clinic",
+    description:
+      "Meet Dr. Deep A Patel (BDS, Chief Dental Surgeon) and our team in Bilimora, Gujarat.",
+    url: "/doctors",
+  },
+};
+
 export default function DoctorsPage() {
   const doctors = [
     {
-      name: "Dr. Sarah Vance, MD",
-      role: "Chief Medical Officer & Family Medicine",
-      credentials: "Harvard Medical School • 14 Years Exp",
-      specialty: "Primary Care, Chronic Disease Management",
-      availability: "Monday, Wednesday, Friday",
-      bio: "Specializing in proactive preventative care, family health, and holistic diagnostic assessment.",
+      name: "Dr. Deep A Patel, BDS",
+      role: "Chief Dental Surgeon & Founder",
+      credentials: "BDS (Bachelor of Dental Surgery)",
+      specialty:
+        "Single-Visit Painless Root Canal, Dental Implants, Digital Smile Design",
+      availability: "Mon–Sun: 9:00 AM – 8:00 PM",
+      bio: "Founder and Chief Dental Surgeon at CA Smile Dental Clinic. Dr. Deep Patel is dedicated to gentle, high-precision dental healthcare using low-radiation digital radiography, rotary endodontics, and computer smile planning.",
     },
     {
-      name: "Dr. Marcus Chen, MD, FACC",
-      role: "Lead Cardiologist",
-      credentials: "Johns Hopkins University • 18 Years Exp",
-      specialty: "Cardiology & Vascular Medicine",
-      availability: "Tuesday, Thursday, Saturday",
-      bio: "Pioneer in non-invasive cardiovascular diagnostics and hypertensive disease management.",
+      name: "Consultant Orthodontist",
+      role: "Visiting Specialist in Invisible Aligners & Braces",
+      credentials: "MDS (Orthodontics & Dentofacial Orthopedics)",
+      specialty:
+        "Clear Aligners, Ceramic Braces & Bite Correction for Teens & Adults",
+      availability: "By Prior Appointment / Weekly Aligner Clinics",
+      bio: "Focuses on digital orthodontic smile alignment, invisible clear aligners, and comprehensive bite harmony using 3D treatment planning.",
     },
     {
-      name: "Dr. Elena Rostova, MD",
-      role: "Pediatric Specialist",
-      credentials: "Stanford University School of Medicine • 10 Years Exp",
-      specialty: "Pediatrics & Adolescent Care",
-      availability: "Monday through Friday",
-      bio: "Dedicated to gentle, stress-free clinical care for infants, children, and teenagers.",
+      name: "Consultant Oral & Maxillofacial Surgeon",
+      role: "Visiting Specialist in Surgical Dentistry",
+      credentials: "MDS (Oral & Maxillofacial Surgery)",
+      specialty:
+        "Impacted Wisdom Tooth Removal, Bone Grafting & Surgical Implantology",
+      availability: "By Prior Appointment / Scheduled Surgical Sessions",
+      bio: "Specializes in painless surgical extraction of difficult impacted third molars, bone regeneration, and advanced pre-implant procedures.",
     },
     {
-      name: "Dr. David Kim, DDS",
-      role: "Director of Dental Surgery",
-      credentials: "Columbia University Dental Medicine • 12 Years Exp",
-      specialty: "Restorative Dentistry & Orthodontics",
-      availability: "Tuesday, Wednesday, Saturday",
-      bio: "Expert in gentle dental procedures, modern restorative implants, and aesthetic smiles.",
+      name: "Consultant Periodontist",
+      role: "Visiting Specialist in Gum Health & Implantology",
+      credentials: "MDS (Periodontics & Oral Implantology)",
+      specialty:
+        "Laser Gum Treatments, Periodontal Flap Surgery & Cosmetic Gum Contouring",
+      availability: "By Prior Appointment",
+      bio: "Expert in treating advanced gum disease, stabilizing loose teeth, and performing aesthetic gum depigmentation and contouring.",
     },
   ];
 
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL && !process.env.NEXT_PUBLIC_APP_URL.includes("vercel.app")
+      ? process.env.NEXT_PUBLIC_APP_URL.replace(/\/+$/, "")
+      : "https://www.casmiledentalclinic.com";
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Dentist",
+    name: "Dr. Deep A Patel",
+    jobTitle: "Chief Dental Surgeon & Founder",
+    alumniOf: "BDS (Bachelor of Dental Surgery)",
+    worksFor: {
+      "@type": "DentalClinic",
+      name: "CA Smile Dental Clinic",
+      url: baseUrl,
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: "1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society",
+        addressLocality: "Bilimora",
+        addressRegion: "Gujarat",
+        postalCode: "396321",
+        addressCountry: "IN",
+      },
+    },
+    knowsAbout: [
+      "Single-Visit Painless Root Canal",
+      "Dental Implants",
+      "Digital Smile Design",
+      "Preventive Dentistry",
+    ],
+  };
+
   return (
     <div className="py-12 lg:py-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="mx-auto max-w-7xl space-y-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl space-y-4">
-          <Badge variant="default">Clinical Faculty</Badge>
+          <Badge variant="default" className="flex w-fit items-center gap-1.5">
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>Dental Clinical Faculty</span>
+          </Badge>
           <h1 className="font-heading text-3xl font-extrabold tracking-tight text-brand-text sm:text-4xl">
-            Meet Our Medical Specialists
+            Meet Our Dental Specialists
           </h1>
           <p className="text-base text-brand-muted">
-            Our multidisciplinary team of board-certified physicians,
-            specialists, and clinical staff are committed to evidence-based
-            healthcare.
+            Led by Dr. Deep A Patel, our clinical dental team brings advanced
+            diagnostic expertise, gentle chairside care, and specialized dental
+            medicine to patients in Bilimora, Gujarat.
           </p>
         </div>
 
@@ -71,12 +129,14 @@ export default function DoctorsPage() {
               <CardContent className="space-y-6 p-6 sm:p-8">
                 <div className="flex items-start gap-4">
                   <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-clinic bg-brand-primary font-heading text-xl font-bold text-brand-primary-foreground shadow-sm">
-                    {doctor.name.split(" ")[1]?.charAt(0) || "D"}
+                    {doctor.name.includes("Dr. Deep")
+                      ? "DP"
+                      : doctor.name.charAt(0) || "D"}
                   </div>
                   <div className="space-y-1">
-                    <h3 className="font-heading text-xl font-bold text-brand-text">
+                    <h2 className="font-heading text-xl font-bold text-brand-text">
                       {doctor.name}
-                    </h3>
+                    </h2>
                     <p className="text-sm font-medium text-brand-primary">
                       {doctor.role}
                     </p>
@@ -101,7 +161,7 @@ export default function DoctorsPage() {
                   </div>
                   <div className="flex items-center gap-1.5 font-semibold text-brand-text">
                     <Calendar className="h-3.5 w-3.5 text-brand-primary" />
-                    <span>In-Clinic Days:</span>
+                    <span>In-Clinic Schedule:</span>
                     <span className="font-normal text-brand-muted">
                       {doctor.availability}
                     </span>
@@ -111,11 +171,11 @@ export default function DoctorsPage() {
                 <div className="border-brand-border/60 flex items-center justify-between border-t pt-2">
                   <div className="flex items-center gap-1.5 text-xs text-brand-muted">
                     <CheckCircle2 className="h-4 w-4 text-brand-primary" />
-                    <span>Accepting New Patients</span>
+                    <span>Accepting Appointments</span>
                   </div>
                   <BookNowButton
                     href={`/contact?doctor=${encodeURIComponent(doctor.name)}`}
-                    text="Book Now"
+                    text="Book Consultation"
                     size="sm"
                   />
                 </div>

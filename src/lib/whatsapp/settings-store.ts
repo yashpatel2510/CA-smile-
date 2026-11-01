@@ -60,9 +60,9 @@ export const DEFAULT_WHATSAPP_SETTINGS: Omit<ClinicWhatsAppSettings, "clinicId">
   rescheduleMessage:
     "Your appointment {APPOINTMENT_ID} has been rescheduled to {DATE} at {TIME}.",
   businessHours: {
-    days: [1, 2, 3, 4, 5, 6], // Mon-Sat
+    days: [0, 1, 2, 3, 4, 5, 6], // Mon-Sun
     startHour: 9,
-    endHour: 18,
+    endHour: 20,
     slotDurationMinutes: 30,
     lunchBreakStartHour: 13,
     lunchBreakEndHour: 14,

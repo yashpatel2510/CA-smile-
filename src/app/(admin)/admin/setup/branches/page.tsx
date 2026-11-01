@@ -35,7 +35,8 @@ const INITIAL_BRANCH: BranchData = {
   isMain: true,
   sharedWa: true,
   quality: "—",
-  address: "1st Floor, Labdhi Arcade, Above HDFC Bank, Bilimora, Gujarat 396321",
+  address:
+    "1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society, Bilimora, Gujarat 396321",
   city: "Bilimora",
   state: "Gujarat",
   pinCode: "396321",

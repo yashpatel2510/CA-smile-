@@ -5,16 +5,16 @@ import { getBookingFormConfigAsync } from "@/lib/booking-form-store";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Book Appointment & Contact | CA Smile Dental Clinic",
+  title: "Book Appointment & Contact | CA Smile Dental Clinic Bilimora",
   description:
-    "Schedule your dental consultation online with our modern dental booking experience or get in touch with our clinical coordinators. Let's make that smile shine!",
+    "Contact CA Smile Dental Clinic in Bilimora or book your appointment online. Located at 1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank, Bilimora. Call +91 72260 98074.",
   alternates: {
     canonical: "/contact",
   },
   openGraph: {
-    title: "Book Appointment & Contact - CA Smile Dental Clinic",
+    title: "Book Appointment & Contact | CA Smile Dental Clinic Bilimora",
     description:
-      "Modern dental consultation booking and clinical coordinator contacts. Let's make that smile shine!",
+      "Contact CA Smile Dental Clinic in Bilimora or book your appointment online. Located at 1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank, Bilimora. Call +91 72260 98074.",
     url: "/contact",
   },
 };

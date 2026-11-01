@@ -130,38 +130,46 @@ async function runComprehensiveVerification() {
   });
 
   await testEndpoint(
-    "Service Detail Dynamic Route",
-    "/services/general-consultation",
+    "Service Detail Dynamic Route (Dental Consultation)",
+    "/services/dental-consultation",
     {},
     (res, text) => {
       return (
         res.status === 200 &&
-        (text.includes("General Consultation") || text.includes("HealthSphere"))
+        text.includes("Dental")
       );
+    }
+  );
+
+  await testEndpoint(
+    "Removed Template Route Verification (404 Not Found)",
+    "/services/general-consultation",
+    {},
+    (res) => {
+      return res.status === 404;
     }
   );
 
   await testEndpoint("About Clinic Page", "/about", {}, (res, text) => {
     return (
       res.status === 200 &&
-      (text.includes("HealthSphere") ||
-        text.includes("CA Smile") ||
+      (text.includes("CA Smile") ||
         text.includes("Clinic"))
     );
   });
 
-  await testEndpoint("Medical Blog Index", "/blog", {}, (res, text) => {
+  await testEndpoint("Dental Blog Index", "/blog", {}, (res, text) => {
     return (
       res.status === 200 && (text.includes("Blog") || text.includes("Articles"))
     );
   });
 
   await testEndpoint(
-    "Blog Post Dynamic Route",
-    "/blog/preventive-cardiology-guide",
+    "Blog Post Dynamic Route (Dental Wellness)",
+    "/blog/dental-cardiovascular-health-guide",
     {},
     (res, text) => {
-      return res.status === 200 && text.includes("Cardiology");
+      return res.status === 200 && text.includes("Dental Care");
     }
   );
 

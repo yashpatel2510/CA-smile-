@@ -4,14 +4,14 @@ import { ChevronRight, Home, Sparkles } from "lucide-react";
 import { TreatmentReviewsShowcase } from "@/components/public/treatment-reviews-showcase";
 
 export const metadata: Metadata = {
-  title: "Patient Reviews & Testimonials | White Dental Clinic",
+  title: "Patient Reviews & Testimonials | CA Smile Dental Clinic Bilimora",
   description:
-    "Read genuine reviews and success stories from patients who experienced our gentle root canal therapies, dental implants, pediatric care, and smile transformations.",
+    "Read genuine reviews and success stories from patients who experienced our gentle root canal therapies, dental implants, pediatric care, and smile transformations at CA Smile Dental Clinic, Bilimora.",
   alternates: {
     canonical: "/treatments/review",
   },
   openGraph: {
-    title: "Patient Reviews & Testimonials | White Dental Clinic",
+    title: "Patient Reviews & Testimonials | CA Smile Dental Clinic Bilimora",
     description:
       "Verified patient experiences and ratings from Google Reviews and clinic consultations.",
     url: "/treatments/review",

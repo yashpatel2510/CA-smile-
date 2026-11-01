@@ -296,7 +296,7 @@ export function CuravertoEditRxModal({
             <div className="col-span-4 text-left space-y-0.5">
               <h3 className="text-xs font-bold text-white">Smile Dental Clinic</h3>
               <p className="text-[8.5px] text-slate-300">
-                1st Floor, Labdhi Arcade, Above HDFC Bank, Bilimora, Gujarat 396321
+                1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society, Bilimora, Gujarat 396321
               </p>
             </div>
             <div className="col-span-3 text-right">

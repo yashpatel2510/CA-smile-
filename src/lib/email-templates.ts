@@ -8,7 +8,7 @@ const primaryColor = theme.colors.primary; // e.g. #0d9488
 const accentColor = theme.colors.accent; // e.g. #ccfbf1
 const brandName = "CA Smile Dental Clinic";
 const clinicAddress =
-  "1ST FLOOR LABDHI ARCADE, ABOVE HDFC BANK, BILIMORA, GUJARAT 396321";
+  "1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society, Bilimora, Gujarat 396321";
 const clinicPhone = "+91 72260 98074";
 const appUrl = env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 

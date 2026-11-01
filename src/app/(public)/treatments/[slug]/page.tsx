@@ -41,18 +41,18 @@ export async function generateMetadata({
   const treatment = getTreatmentById(params.slug);
   if (!treatment) {
     return {
-      title: "Treatment Not Found | White Dental Clinic",
+      title: "Treatment Not Found | CA Smile Dental Clinic",
     };
   }
 
   return {
-    title: `${treatment.title} ${treatment.subtitle ? `(${treatment.subtitle})` : ""} | White Dental Clinic`,
-    description: treatment.whatItIs || treatment.paragraphs[0] || "Advanced dental treatment.",
+    title: `${treatment.title} ${treatment.subtitle ? `(${treatment.subtitle})` : ""} | CA Smile Dental Clinic`,
+    description: treatment.whatItIs || treatment.paragraphs[0] || "Advanced dental treatment in Bilimora, Gujarat.",
     alternates: {
       canonical: `/treatments/${treatment.id}`,
     },
     openGraph: {
-      title: `${treatment.title} | White Dental Clinic`,
+      title: `${treatment.title} | CA Smile Dental Clinic`,
       description: treatment.whatItIs || treatment.paragraphs[0],
       images: treatment.image ? [{ url: treatment.image }] : undefined,
     },
@@ -86,8 +86,68 @@ export default function TreatmentDetailPage({ params }: TreatmentPageProps) {
         "Final polish, bite check, and longevity care guide.",
       ];
 
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL && !process.env.NEXT_PUBLIC_APP_URL.includes("vercel.app")
+      ? process.env.NEXT_PUBLIC_APP_URL.replace(/\/+$/, "")
+      : "https://www.casmiledentalclinic.com";
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "MedicalProcedure",
+        "@id": `${baseUrl}/treatments/${treatment.id}#procedure`,
+        name: `${treatment.title} in Bilimora`,
+        description: treatment.whatItIs || treatment.paragraphs[0],
+        bodyLocation: "Mouth",
+        medicalSpecialty: "https://schema.org/Dentistry",
+        howPerformed: steps.join(". "),
+        provider: {
+          "@type": "DentalClinic",
+          name: "CA Smile Dental Clinic",
+          telephone: "+91 72260 98074",
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: "1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society",
+            addressLocality: "Bilimora",
+            addressRegion: "Gujarat",
+            postalCode: "396321",
+            addressCountry: "IN",
+          },
+        },
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Home",
+            item: baseUrl,
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Treatments",
+            item: `${baseUrl}/services`,
+          },
+          {
+            "@type": "ListItem",
+            position: 3,
+            name: treatment.title,
+            item: `${baseUrl}/treatments/${treatment.id}`,
+          },
+        ],
+      },
+    ],
+  };
+
   return (
     <main className="min-h-screen bg-zinc-50/50 pb-20 pt-8 sm:pt-12 font-sans selection:bg-black selection:text-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Top Breadcrumb Navigation */}
       <div className="mx-auto max-w-7xl px-4 sm:px-8 lg:px-12">
         <nav
