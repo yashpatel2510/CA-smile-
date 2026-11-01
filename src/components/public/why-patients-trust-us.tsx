@@ -41,7 +41,7 @@ export function WhyPatientsTrustUs() {
   const headingLine1 = trustConfig?.headingLine1 || "Why patients";
   const headingLine2 = trustConfig?.headingLine2 || "trust us?";
   const backgroundImageUrl =
-    trustConfig?.backgroundImageUrl || "/images/why-patients-trust-us-bg.jpg";
+    trustConfig?.backgroundImageUrl || "/images/why-patients-trust-us-bg.webp";
   const features: TrustFeature[] =
     Array.isArray(trustConfig?.features) && trustConfig.features.length > 0
       ? trustConfig.features

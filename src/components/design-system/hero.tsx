@@ -48,11 +48,11 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
   }
 
   const bgColor = hero.backgroundColor || "#ffffff";
-  const doctorImg = hero.imageUrl || "/images/hero-doctor-dental-care.png";
+  const doctorImg = hero.imageUrl || "/images/hero-doctor-dental-care.webp";
   const mobileDoctorImg =
-    hero.mobileImageUrl || hero.imageUrl || "/images/hero-doctor-mobile.png";
+    hero.mobileImageUrl || hero.imageUrl || "/images/hero-doctor-mobile.webp";
   const doctorAvatar =
-    hero.doctorBoxPhotoUrl || hero.imageUrl || "/images/hero-doctor-dental-care.png";
+    hero.doctorBoxPhotoUrl || hero.imageUrl || "/images/hero-doctor-dental-care.webp";
 
   const isMobilePreview = previewMode === "mobile";
   const isTabletPreview = previewMode === "tablet";
@@ -129,7 +129,7 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
         {/* 1. TOP GRAND TITLE: "DENTAL CARE" (if explicitly enabled) */}
         {hero.showUpperText && (
           <motion.p
-            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : -8 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
             className="font-heading font-light tracking-[0.24em] text-2xl uppercase select-none mt-2 mb-2 px-4"
@@ -155,35 +155,52 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
               maxHeight: mobileImageHeight === "auto" ? "none" : mobileImageHeight,
             }}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={mobileDoctorImg}
-              alt={hero.imageAltText || "Dental Care Specialist Doctor"}
-              width={750}
-              height={880}
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
-              onError={(e) => {
-                const target = e.currentTarget;
-                if (!target.dataset.fallbackApplied) {
-                  target.dataset.fallbackApplied = "true";
-                  target.src = "/images/hero-mobile.jpg";
+            {/* Responsive picture element: Only loads on mobile, serves modern WebP first */}
+            <picture className="w-full flex justify-center items-center">
+              <source
+                media="(max-width: 767px)"
+                type="image/webp"
+                srcSet={
+                  mobileDoctorImg.endsWith(".jpeg")
+                    ? mobileDoctorImg.replace(".jpeg", ".webp")
+                    : mobileDoctorImg.endsWith(".jpg")
+                    ? mobileDoctorImg.replace(".jpg", ".webp")
+                    : mobileDoctorImg.endsWith(".png")
+                    ? mobileDoctorImg.replace(".png", ".webp")
+                    : mobileDoctorImg
                 }
-              }}
-              className={`w-full select-none transition-all duration-300 drop-shadow-xs ${
-                isMobileCover
-                  ? "h-full object-cover object-center"
-                  : isMobileFill
-                  ? "h-full object-fill"
-                  : "h-auto object-contain"
-              }`}
-              style={{
-                borderRadius: mobileBorderRadius,
-                maxWidth: mobileMaxWidth,
-                maxHeight: mobileImageHeight === "auto" ? "none" : mobileImageHeight,
-              }}
-            />
+              />
+              <source media="(max-width: 767px)" srcSet={mobileDoctorImg} />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={isContainerPreview ? mobileDoctorImg : "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"}
+                alt={hero.imageAltText || "Dental Care Specialist Doctor"}
+                width={750}
+                height={880}
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  if (!target.dataset.fallbackApplied) {
+                    target.dataset.fallbackApplied = "true";
+                    target.src = "/images/hero-mobile.jpg";
+                  }
+                }}
+                className={`w-full select-none transition-all duration-300 drop-shadow-xs ${
+                  isMobileCover
+                    ? "h-full object-cover object-center"
+                    : isMobileFill
+                    ? "h-full object-fill"
+                    : "h-auto object-contain"
+                }`}
+                style={{
+                  borderRadius: mobileBorderRadius,
+                  maxWidth: mobileMaxWidth,
+                  maxHeight: mobileImageHeight === "auto" ? "none" : mobileImageHeight,
+                }}
+              />
+            </picture>
 
             {/* Contrast overlay / dimming if configured */}
             {(hero.imageOverlayOpacity ?? 0) > 0 && (
@@ -211,7 +228,7 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
         {/* TOP INFO ROW: Rendered after image is completed in mobile view */}
         {hero.topInfoEnabled !== false && (
           <motion.div
-            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 6 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.05 }}
             className="w-full max-w-[340px] sm:max-w-[380px] px-4 flex items-start justify-between gap-4 mt-3 mb-1"
@@ -272,7 +289,7 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
         <div className="w-full px-4 pt-3 flex flex-col items-center text-center max-w-sm mx-auto space-y-3">
           {/* Primary SEO & Clinic H1 Headline */}
           <motion.h1
-            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 8 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.05 }}
             className="font-heading font-extrabold text-2xl sm:text-3xl text-center leading-tight tracking-tight text-[#18181b] dark:text-white"
@@ -288,7 +305,7 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
           {/* A. Subtitle Description Text */}
           {hero.subtitleText && (
             <motion.p
-              initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 8 }}
+              initial={false}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.08 }}
               className="text-xs sm:text-sm text-center leading-relaxed font-normal max-w-[320px] mx-auto px-2"
@@ -304,7 +321,7 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
 
           {/* B. Appointment CTA Button */}
           <motion.div
-            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 8 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.14 }}
             className="w-full flex justify-center mb-1"
@@ -360,7 +377,7 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
           {/* C. Floating Doctor Information Card */}
           {hero.doctorBoxEnabled !== false && (
             <motion.div
-              initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
+              initial={false}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.2 }}
               className="w-full max-w-[360px] mx-auto mt-5 sm:mt-6"
@@ -389,6 +406,8 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
                         <img
                           src={doctorAvatar}
                           alt={hero.doctorBoxName || "Dr. DEEP A PATEL"}
+                          loading="lazy"
+                          decoding="async"
                           onError={(e) => {
                             const target = e.currentTarget;
                             if (!target.dataset.fallbackApplied) {
@@ -465,31 +484,47 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
       {/* 1. FULL HERO IMAGE (FILLS/CONTAINS ENTIRE HERO SECTION + BEHIND NAVBAR) */}
       {doctorImg && (
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={doctorImg}
-            alt={hero.imageAltText || "Dental Care Specialist"}
-            width={1920}
-            height={1080}
-            loading="eager"
-            fetchPriority="high"
-            decoding="async"
-            onError={(e) => {
-              const target = e.currentTarget;
-              if (!target.dataset.fallbackApplied) {
-                target.dataset.fallbackApplied = "true";
-                target.src = "/images/hero-desktop.jpg";
+          {/* Responsive picture element: ONLY loads on screens >= 768px, blocks mobile download */}
+          <picture className="w-full h-full">
+            <source
+              media="(min-width: 768px)"
+              type="image/webp"
+              srcSet={
+                doctorImg.endsWith(".jpeg")
+                  ? doctorImg.replace(".jpeg", ".webp")
+                  : doctorImg.endsWith(".jpg")
+                  ? doctorImg.replace(".jpg", ".webp")
+                  : doctorImg.endsWith(".png")
+                  ? doctorImg.replace(".png", ".webp")
+                  : doctorImg
               }
-            }}
-            className={`w-full h-full select-none transition-all duration-300 ${
-              hero.imageFit === "contain"
-                ? "object-contain object-bottom sm:object-center"
-                : "object-cover object-center"
-            }`}
-            style={{
-              borderRadius: hero.imageBorderRadius || "0px",
-            }}
-          />
+            />
+            <source media="(min-width: 768px)" srcSet={doctorImg} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={isContainerPreview ? doctorImg : "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"}
+              alt={hero.imageAltText || "Dental Care Specialist"}
+              width={1920}
+              height={1080}
+              loading={isContainerPreview ? "eager" : "lazy"}
+              decoding="async"
+              onError={(e) => {
+                const target = e.currentTarget;
+                if (!target.dataset.fallbackApplied) {
+                  target.dataset.fallbackApplied = "true";
+                  target.src = "/images/hero-desktop.jpg";
+                }
+              }}
+              className={`w-full h-full select-none transition-all duration-300 ${
+                hero.imageFit === "contain"
+                  ? "object-contain object-bottom sm:object-center"
+                  : "object-cover object-center"
+              }`}
+              style={{
+                borderRadius: hero.imageBorderRadius || "0px",
+              }}
+            />
+          </picture>
 
           {/* Contrast overlay / dimming if configured */}
           {(hero.imageOverlayOpacity ?? 0) > 0 && (
@@ -523,7 +558,7 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
         {/* --- TOP ROW: WORKING HOURS (LEFT) & LOCATION (RIGHT) ON TOP OF HERO IMAGE --- */}
         {hero.topInfoEnabled !== false && (
           <motion.div
-            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : -8 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.05 }}
             className="w-full flex items-start justify-between gap-6 pt-2 sm:pt-4 mb-auto"
@@ -595,7 +630,7 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
         >
           {/* --- LEFT SECTION: SUBTITLE & APPOINTMENT CTA BUTTON ON THE IMAGE --- */}
           <motion.div
-            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 12 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
             className={`${
@@ -696,7 +731,7 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
           {/* --- RIGHT SECTION: FLOATING DOCTOR BADGE BOX ON THE IMAGE --- */}
           {hero.doctorBoxEnabled !== false && (
             <motion.div
-              initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 14 }}
+              initial={false}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
               className={`${
@@ -726,6 +761,8 @@ export function Hero({ customConfig, previewMode }: HeroProps) {
                         <img
                           src={doctorAvatar}
                           alt={hero.doctorBoxName || "Dr. DEEP A PATEL"}
+                          loading="lazy"
+                          decoding="async"
                           onError={(e) => {
                             const target = e.currentTarget;
                             if (!target.dataset.fallbackApplied) {

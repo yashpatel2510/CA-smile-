@@ -784,8 +784,8 @@ export function CalendarBookingExperience({
                 <img
                   src={
                     isDark
-                      ? (config.logoDarkUrl || "/images/ca-smile-logo-dark.png")
-                      : (config.logoLightUrl || "/images/ca-smile-logo-light.png")
+                      ? (config.logoDarkUrl || "/images/ca-smile-logo-dark.webp")
+                      : (config.logoLightUrl || "/images/ca-smile-logo-light.webp")
                   }
                   alt={config.clinicName || "CA Smile Dental Clinic"}
                   className="h-16 sm:h-20 lg:h-24 w-auto max-w-[280px] sm:max-w-[340px] object-contain select-none transition-all duration-200"

@@ -24,10 +24,10 @@ export function ClinicVideoShowcaseSection({
 
   const customLogo = brandConfig?.logo?.imageUrl;
   const isDefaultLight =
-    !customLogo || customLogo === "/images/ca-smile-logo-light.png";
-  const logoLightUrl = customLogo || "/images/ca-smile-logo-light.png";
+    !customLogo || customLogo === "/images/ca-smile-logo-light.webp" || customLogo === "/images/ca-smile-logo-light.png";
+  const logoLightUrl = customLogo || "/images/ca-smile-logo-light.webp";
   const logoDarkUrl = isDefaultLight
-    ? "/images/ca-smile-logo-dark.png"
+    ? "/images/ca-smile-logo-dark.webp"
     : logoLightUrl;
 
   const displayTitle =
@@ -53,7 +53,8 @@ export function ClinicVideoShowcaseSection({
         {/* Section Header */}
         <div className="flex flex-col items-center justify-center text-center px-2 space-y-3 sm:space-y-4">
           {/* Clinic Logo */}
-          <div className="inline-flex items-center justify-center pt-1 transition-transform duration-300 hover:scale-105">
+          <picture className="inline-flex items-center justify-center pt-1 transition-transform duration-300 hover:scale-105">
+            <source media="(prefers-color-scheme: dark)" srcSet={logoDarkUrl} />
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={logoLightUrl}
@@ -66,23 +67,9 @@ export function ClinicVideoShowcaseSection({
               height={40}
               loading="lazy"
               decoding="async"
-              className="h-9 sm:h-11 md:h-12 w-auto object-contain dark:hidden"
+              className="h-9 sm:h-11 md:h-12 w-auto object-contain"
             />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={logoDarkUrl}
-              alt={
-                brandConfig?.logo?.altText ||
-                brandConfig?.clinicName ||
-                "CA Smile Dental Clinic"
-              }
-              width={60}
-              height={40}
-              loading="lazy"
-              decoding="async"
-              className="h-9 sm:h-11 md:h-12 w-auto object-contain hidden dark:block"
-            />
-          </div>
+          </picture>
 
           {/* Badge Pill */}
           {displayBadge && (

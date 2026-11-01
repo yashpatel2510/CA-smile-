@@ -49,17 +49,17 @@ import { BlogPost } from "@/data/blog-posts";
 import { BlogSectionConfig } from "@/lib/blog-store";
 
 const PRESET_IMAGES = [
-  { label: "Pediatric Care", url: "/images/treatments/children-dentistry.jpg" },
-  { label: "Orthodontics & Aligners", url: "/images/treatments/orthodontics.jpg" },
-  { label: "Preventive Care & Fillings", url: "/images/treatments/tooth-fillings.jpg" },
-  { label: "Teeth Whitening", url: "/images/treatments/teeth-whitening.jpg" },
-  { label: "Dental Implants", url: "/images/treatments/dental-implants.jpg" },
-  { label: "Periodontal Examination", url: "/images/treatments/periodontal-examination.jpg" },
-  { label: "Porcelain Veneers", url: "/images/treatments/porcelain-veneers.jpg" },
-  { label: "Root Canal Therapy", url: "/images/treatments/root-canal.jpg" },
-  { label: "Wisdom Tooth Surgery", url: "/images/treatments/wisdom-tooth.jpg" },
-  { label: "Digital Smile Design", url: "/images/treatments/digital-smile-design.jpg" },
-  { label: "Computed Tomography (3D CT)", url: "/images/treatments/computed-tomography.jpg" },
+  { label: "Pediatric Care", url: "/images/treatments/children-dentistry.webp" },
+  { label: "Orthodontics & Aligners", url: "/images/treatments/orthodontics.webp" },
+  { label: "Preventive Care & Fillings", url: "/images/treatments/tooth-fillings.webp" },
+  { label: "Teeth Whitening", url: "/images/treatments/teeth-whitening.webp" },
+  { label: "Dental Implants", url: "/images/treatments/dental-implants.webp" },
+  { label: "Periodontal Examination", url: "/images/treatments/periodontal-examination.webp" },
+  { label: "Porcelain Veneers", url: "/images/treatments/porcelain-veneers.webp" },
+  { label: "Root Canal Therapy", url: "/images/treatments/root-canal.webp" },
+  { label: "Wisdom Tooth Surgery", url: "/images/treatments/wisdom-tooth.webp" },
+  { label: "Digital Smile Design", url: "/images/treatments/digital-smile-design.webp" },
+  { label: "Computed Tomography (3D CT)", url: "/images/treatments/computed-tomography.webp" },
 ];
 
 export function ClinicBrandingBlogManager() {

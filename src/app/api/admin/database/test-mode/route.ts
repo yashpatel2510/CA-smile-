@@ -137,18 +137,22 @@ export async function POST(req: NextRequest) {
     if (action === "switch-mode") {
       const targetMode = body.mode === "test" ? "test" : "production";
       const config = getDatabaseModeConfig();
+      const testUrl = config.testDatabaseUrl || process.env.TEST_DATABASE_URL;
 
-      if (targetMode === "test" && (!config.testDatabaseUrl || !config.testDatabaseConnected)) {
+      if (targetMode === "test" && !testUrl) {
         return NextResponse.json(
           {
             success: false,
-            message: "Cannot switch to Test Mode: Test Database is not configured or not connected. Please connect a valid Test Database first.",
+            message: "Cannot switch to Test Mode: Test Database is not configured. Please enter a valid Test Database URL first.",
           },
           { status: 400 }
         );
       }
 
-      saveDatabaseModeConfig({ activeMode: targetMode });
+      saveDatabaseModeConfig({
+        activeMode: targetMode,
+        testDatabaseConnected: targetMode === "test" ? true : config.testDatabaseConnected,
+      });
       reloadPrismaClients();
 
       return NextResponse.json({

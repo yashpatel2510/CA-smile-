@@ -27,7 +27,7 @@ export const DIAGNOSTIC_ITEMS: ShowcaseItem[] = [
   {
     id: "radiological-examination",
     title: "Radiological examination",
-    image: "/images/treatments/radiological-examination.jpg",
+    image: "/images/treatments/radiological-examination.webp",
     paragraphs: [
       "High-precision panoramic and cephalometric digital radiology delivering complete structural insights into tooth roots, bone density, and anatomical canals.",
       "Our ultra-low dose diagnostic units minimize radiation exposure by up to 90% while providing immediate high-resolution digital clarity for accurate clinical evaluation.",
@@ -36,7 +36,7 @@ export const DIAGNOSTIC_ITEMS: ShowcaseItem[] = [
   {
     id: "periodontal-examination",
     title: "Periodontal examination",
-    image: "/images/treatments/periodontal-examination.jpg",
+    image: "/images/treatments/periodontal-examination.webp",
     paragraphs: [
       "Detailed clinical assessment of gum tissues, measuring periodontal pocket depths with calibrated titanium micro-probes to identify micro-inflammation before bone recession begins.",
       "Essential for safeguarding the foundational biological support of your teeth and planning individualized preventative or regenerative therapy.",
@@ -45,7 +45,7 @@ export const DIAGNOSTIC_ITEMS: ShowcaseItem[] = [
   {
     id: "tooth-sensitivity-test",
     title: "Tooth sensitivity test",
-    image: "/images/treatments/tooth-sensitivity.jpg",
+    image: "/images/treatments/tooth-sensitivity.webp",
     paragraphs: [
       "Precise thermal and electrical pulp vitality diagnostics used to evaluate sensory response, detect micro-fractures, and pinpoint concealed nerve inflammation.",
       "Provides immediate clarity to determine whether gentle remineralization, bonding, or targeted endodontic care is required.",
@@ -54,7 +54,7 @@ export const DIAGNOSTIC_ITEMS: ShowcaseItem[] = [
   {
     id: "digital-radiography",
     title: "Digital radiography",
-    image: "/images/treatments/digital-radiography.jpg",
+    image: "/images/treatments/digital-radiography.webp",
     paragraphs: [
       "Next-generation chairside digital intraoral sensors transmitting instant crystal-clear radiographs directly to high-definition screens.",
       "Enables instant diagnosis during consultation with unmatched diagnostic precision and minimal patient wait time.",
@@ -63,7 +63,7 @@ export const DIAGNOSTIC_ITEMS: ShowcaseItem[] = [
   {
     id: "computed-tomography",
     title: "Computed tomography",
-    image: "/images/treatments/computed-tomography.jpg",
+    image: "/images/treatments/computed-tomography.webp",
     paragraphs: [
       "Computed tomography is a fast, painless, and precise procedure that creates a 3D image of the teeth, jaw, and tissues.",
       "It helps assess bone structures, detect hidden pathologies, and plan treatment with accuracy. With minimal radiation, it is safe even for frequent use.",
@@ -72,7 +72,7 @@ export const DIAGNOSTIC_ITEMS: ShowcaseItem[] = [
   {
     id: "occlusal-analysis",
     title: "Occlusal analysis",
-    image: "/images/treatments/occlusal-analysis.jpg",
+    image: "/images/treatments/occlusal-analysis.webp",
     paragraphs: [
       "Digital computerized evaluation of bite forces, tooth contact dynamics, and jaw joint movement using high-precision sensor wands.",
       "Identifies destructive chewing imbalances, relieves TMJ strain, and guarantees the lasting stability of veneers, crowns, and implants.",
@@ -81,7 +81,7 @@ export const DIAGNOSTIC_ITEMS: ShowcaseItem[] = [
   {
     id: "fluorescence-diagnostics",
     title: "Fluorescence diagnostics",
-    image: "/images/treatments/fluorescence-diagnostics.jpg",
+    image: "/images/treatments/fluorescence-diagnostics.webp",
     paragraphs: [
       "Optical fluorescence wavelength diagnostics illuminating dental enamel to expose hidden subsurface caries and early demineralization.",
       "Allows for biological tooth preservation and non-invasive micro-interventions long before traditional drilling would be required.",
@@ -90,7 +90,7 @@ export const DIAGNOSTIC_ITEMS: ShowcaseItem[] = [
   {
     id: "bacteriological-analysis",
     title: "Bacteriological analysis",
-    image: "/images/treatments/digital-radiography.jpg",
+    image: "/images/treatments/digital-radiography.webp",
     paragraphs: [
       "Specialized laboratory testing of the oral microbiome to detect specific anaerobic periodontal pathogens and establish biological susceptibility profiles.",
       "Guides targeted, biocompatible antibacterial treatments to eliminate persistent infection and safeguard long-term implant integration.",
@@ -104,7 +104,7 @@ export const TREATMENT_ITEMS: ShowcaseItem[] = [
     title: "Digital Smile Design",
     subtitle: "Computer Smile Planning",
     category: "Aesthetic Dentistry",
-    image: "/images/treatments/digital-smile-design.jpg",
+    image: "/images/treatments/digital-smile-design.webp",
     whatItIs: "A modern computerized method that uses computer photos and scans to show you how your new smile will look before any treatment begins.",
     howItWorks: "Advanced imaging software maps your face and tooth shape to create a virtual 3D preview of your final smile.",
     benefits: "Gives you total clarity and lets you preview your results beforehand so you feel confident.",
@@ -126,7 +126,7 @@ export const TREATMENT_ITEMS: ShowcaseItem[] = [
     title: "Dental Implants",
     subtitle: "Permanent Artificial Teeth",
     category: "Implantology",
-    image: "/images/treatments/dental-implants.jpg",
+    image: "/images/treatments/dental-implants.webp",
     whatItIs: "The best way to replace missing teeth by placing a strong titanium post into the jawbone as a permanent artificial root.",
     howItWorks: "The titanium root bonds naturally with your jawbone over time, providing a sturdy foundation that looks and chews like a real tooth.",
     benefits: "Stops your jawbone from getting weak, restores full chewing power, and protects neighboring healthy teeth.",
@@ -148,7 +148,7 @@ export const TREATMENT_ITEMS: ShowcaseItem[] = [
     title: "Full Mouth Rehabilitation",
     subtitle: "Complete Smile Makeover",
     category: "Restorative Dentistry",
-    image: "/images/treatments/full-mouth-rehab.jpg",
+    image: "/images/treatments/full-mouth-rehab.webp",
     whatItIs: "A complete treatment plan to repair and rebuild all your upper and lower teeth together.",
     howItWorks: "Combines restorative treatments to fix severe tooth wear, broken teeth, bite problems, or constant jaw pain.",
     benefits: "Restores full mouth health, improves chewing, and gives you back a healthy mouth step by step.",
@@ -170,7 +170,7 @@ export const TREATMENT_ITEMS: ShowcaseItem[] = [
     title: "Dental Crowns & Bridges",
     subtitle: "Caps and Fixed Teeth",
     category: "Prosthodontics",
-    image: "/images/treatments/dental-crowns.jpg",
+    image: "/images/treatments/dental-crowns.webp",
     whatItIs: "Strong protective covers (crowns) for weak or broken teeth, and artificial teeth (bridges) used to fill empty spaces.",
     howItWorks: "Crowns fit securely over a weak tooth like a helmet to protect it, while bridges use artificial teeth to span across empty gaps.",
     benefits: "Crowns save weak teeth from breaking, while bridges fill gaps so you can smile and chew without worry.",
@@ -192,7 +192,7 @@ export const TREATMENT_ITEMS: ShowcaseItem[] = [
     title: "Root Canal Treatment",
     subtitle: "Nerve Treatment to Save the Tooth",
     category: "Endodontics",
-    image: "/images/treatments/root-canal.jpg",
+    image: "/images/treatments/root-canal.webp",
     whatItIs: "A procedure to clean out a badly infected or aching tooth instead of pulling it out.",
     howItWorks: "The infected, painful nerve tissue inside the root is safely removed, and the inner space is cleaned and sealed.",
     benefits: "Takes away your toothache, stops infection from spreading, and lets you keep your natural tooth.",
@@ -214,7 +214,7 @@ export const TREATMENT_ITEMS: ShowcaseItem[] = [
     title: "Wisdom Tooth Removal",
     subtitle: "Painful Back Tooth Surgery",
     category: "Oral Surgery",
-    image: "/images/treatments/wisdom-tooth.jpg",
+    image: "/images/treatments/wisdom-tooth.webp",
     whatItIs: "A safe minor surgery to take out back molar teeth that are stuck, causing pain, or crowding other teeth.",
     howItWorks: "Using local anesthesia, the dentist gently loosens and removes the troublesome wisdom tooth to relieve pressure.",
     benefits: "Stops severe pain, prevents gum infections, and keeps your other teeth straight.",
@@ -236,7 +236,7 @@ export const TREATMENT_ITEMS: ShowcaseItem[] = [
     title: "Gum Treatment",
     subtitle: "Care for Bleeding and Weak Gums",
     category: "Periodontics",
-    image: "/images/treatments/gum-treatment.jpg",
+    image: "/images/treatments/gum-treatment.webp",
     whatItIs: "Special care to clean and heal your gums when they bleed, swell, or feel sore.",
     howItWorks: "Involves deep cleanings below the gumline to remove hardened tartar and bacteria that cause inflammation.",
     benefits: "Stops your gums from bleeding, removes bad breath, and keeps your teeth firmly anchored.",
@@ -258,7 +258,7 @@ export const TREATMENT_ITEMS: ShowcaseItem[] = [
     title: "Orthodontics",
     subtitle: "Braces and Clear Aligners for Crooked Teeth",
     category: "Orthodontics",
-    image: "/images/treatments/orthodontics.jpg",
+    image: "/images/treatments/orthodontics.webp",
     whatItIs: "Treatments to straighten crooked teeth and fix bite problems using traditional braces or invisible trays.",
     howItWorks: "Applies gentle, steady pressure over time to guide your teeth into their correct positions.",
     benefits: "Gives you a straight smile and makes it much easier to clean your teeth properly.",
@@ -280,7 +280,7 @@ export const TREATMENT_ITEMS: ShowcaseItem[] = [
     title: "Teeth Whitening",
     subtitle: "Making Yellow Teeth Bright and Clean",
     category: "Cosmetic Care",
-    image: "/images/treatments/teeth-whitening.jpg",
+    image: "/images/treatments/teeth-whitening.webp",
     whatItIs: "A safe cosmetic treatment to clean away deep stains and make your yellow or dull teeth sparkling white.",
     howItWorks: "Uses safe clinical-grade whitening gel that gently breaks down and removes stains caused by tea, coffee, or aging.",
     benefits: "Removes deep stains and gives you a bright, confident smile instantly.",
@@ -302,7 +302,7 @@ export const TREATMENT_ITEMS: ShowcaseItem[] = [
     title: "Restorative Dentistry",
     subtitle: "Tooth Fillings and Repairs",
     category: "General Dentistry",
-    image: "/images/treatments/tooth-fillings.jpg",
+    image: "/images/treatments/tooth-fillings.webp",
     whatItIs: "Simple treatments using tooth-colored materials to fill cavities and repair broken or decayed teeth.",
     howItWorks: "The decayed portion of the tooth is cleaned out and filled with a strong composite material that bonds directly to the tooth.",
     benefits: "Stops tooth decay from getting bigger and brings back your normal chewing strength.",
@@ -324,7 +324,7 @@ export const TREATMENT_ITEMS: ShowcaseItem[] = [
     title: "Children Dentistry",
     subtitle: "Special Dental Care for Kids",
     category: "Pediatric Dentistry",
-    image: "/images/treatments/children-dentistry.jpg",
+    image: "/images/treatments/children-dentistry.webp",
     whatItIs: "Gentle and friendly dental care specially designed for children and teenagers.",
     howItWorks: "Focuses on preventive education, stopping tooth worms (cavities) early, and making visits fun and fear-free.",
     benefits: "Teaches kids how to brush properly, prevents early decay, and ensures a lifetime of healthy smiles.",
@@ -346,7 +346,7 @@ export const TREATMENT_ITEMS: ShowcaseItem[] = [
     title: "Porcelain Veneers",
     subtitle: "Thin White Shells for Front Teeth",
     category: "Cosmetic & Aesthetics",
-    image: "/images/treatments/porcelain-veneers.jpg",
+    image: "/images/treatments/porcelain-veneers.webp",
     whatItIs: "Very thin, tooth-colored custom shells attached to the front of your teeth to hide flaws.",
     howItWorks: "A tiny fraction of enamel is gently shaped from the front of the tooth, and the custom porcelain shell is bonded on top.",
     benefits: "Instantly fixes chipped, stained, cracked, or gapped front teeth for a clean, attractive smile.",
@@ -368,7 +368,7 @@ export const TREATMENT_ITEMS: ShowcaseItem[] = [
     title: "Dentures",
     subtitle: "Removable Artificial Teeth",
     category: "Prosthodontics",
-    image: "/images/treatments/dentures.jpg",
+    image: "/images/treatments/dentures.webp",
     whatItIs: "Removable artificial teeth and gums (available as full or partial sets) designed to replace missing teeth.",
     howItWorks: "Custom-crafted to fit comfortably over your gums, supporting your facial structure and enabling you to eat and speak normally.",
     benefits: "Restores a full smile, improves speech clarity, helps you chew food easily, and supports facial muscles.",

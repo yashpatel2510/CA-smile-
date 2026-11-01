@@ -65,7 +65,7 @@ export function DoctorIntroSection({
   const doctorName = introConfig?.doctorName || initialDoctorName || "Dr. DEEP A PATEL";
   const degree = introConfig?.degree || initialDegree || "BDS (DENTAL SURGEON)";
   const clinicTagline = introConfig?.clinicTagline ?? "CA Smile Bilimora";
-  const photoUrl = introConfig?.photoUrl || initialPhotoUrl || "/images/dr-deep-patel-portrait.jpg";
+  const photoUrl = introConfig?.photoUrl || initialPhotoUrl || "/images/dr-deep-patel-portrait.webp";
   const specialityHeading = introConfig?.specialityHeading || "Speciality :";
   const specialities =
     Array.isArray(introConfig?.specialities) && introConfig.specialities.length > 0

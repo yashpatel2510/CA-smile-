@@ -97,7 +97,7 @@ export function ClinicMapSection({ className = "" }: ClinicMapSectionProps) {
   const email = brandConfig.email || "casmileatbilimora@gmail.com";
   const phone = brandConfig.phone || "+91 72260 98074";
   const sectionTitle = brandConfig.mapSectionTitle || "ADDRESS";
-  const cardImage = brandConfig.mapCardImage || "/images/ca-smile-clinic-building.jpg";
+  const cardImage = brandConfig.mapCardImage || "/images/ca-smile-clinic-building.webp";
   const pinPulse = brandConfig.mapPinPulse !== false;
   const pinColor = brandConfig.mapPinColor || "#E53935";
 
@@ -203,8 +203,8 @@ export function ClinicMapSection({ className = "" }: ClinicMapSectionProps) {
               <img
                 src={
                   sectionBgColor === "#18181b" || sectionBgColor === "#000000"
-                    ? "/images/ca-smile-logo-dark.png"
-                    : (brandConfig.logo?.imageUrl || "/images/ca-smile-logo-light.png")
+                    ? "/images/ca-smile-logo-dark.webp"
+                    : (brandConfig.logo?.imageUrl || "/images/ca-smile-logo-light.webp")
                 }
                 alt={clinicName}
                 width={54}

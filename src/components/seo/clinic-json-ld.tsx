@@ -38,7 +38,7 @@ export function ClinicJsonLd() {
         alternateName: "CA Smile Multispeciality Dental Clinic",
         url: baseUrl,
         logo: `${baseUrl}/favicon.svg`,
-        image: `${baseUrl}/images/ca-smile-clinic-building.jpg`,
+        image: `${baseUrl}/images/ca-smile-clinic-building.webp`,
         priceRange: "₹₹",
         hasMap:
           "https://www.google.com/maps/place/CA+Smile+Multispeciality+Dental+Clinic/data=!4m2!3m1!1s0x0:0x3a288255f324c8de?sa=X&ved=1t:2428&ictx=111",

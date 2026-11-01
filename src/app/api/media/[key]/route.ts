@@ -32,13 +32,17 @@ export async function GET(
       gif: "image/gif",
     };
 
+    const acceptsWebp = Boolean(req.headers.get("accept")?.includes("image/webp"));
+    const cacheKey = acceptsWebp ? `${key}:webp` : key;
+
     // 0. Try in-memory cache (ultra-fast < 1ms response)
-    const memCached = global.__mediaMemoryCache?.get(key);
+    const memCached = global.__mediaMemoryCache?.get(cacheKey);
     if (memCached) {
       return new NextResponse(new Uint8Array(memCached.buffer), {
         headers: {
           "Content-Type": memCached.mimeType,
           "Cache-Control": "public, max-age=31536000, immutable",
+          "Vary": "Accept",
         },
       });
     }
@@ -46,6 +50,24 @@ export async function GET(
     // 1. Try local public/images directory FIRST (instant response, zero DB overhead)
     try {
       const sanitizedKey = path.basename(key);
+
+      // Auto-WebP negotiation: If client accepts webp and a webp version exists, serve it
+      if (acceptsWebp && ext !== "webp" && ext !== "svg") {
+        const baseName = sanitizedKey.replace(/\.[^/.]+$/, "");
+        const localWebpPath = path.join(process.cwd(), "public", "images", `${baseName}.webp`);
+        if (fs.existsSync(localWebpPath)) {
+          const webpBuffer = fs.readFileSync(localWebpPath);
+          global.__mediaMemoryCache?.set(cacheKey, { buffer: webpBuffer, mimeType: "image/webp" });
+          return new NextResponse(webpBuffer, {
+            headers: {
+              "Content-Type": "image/webp",
+              "Cache-Control": "public, max-age=31536000, immutable",
+              "Vary": "Accept",
+            },
+          });
+        }
+      }
+
       const localFilePath = path.join(process.cwd(), "public", "images", sanitizedKey);
       if (fs.existsSync(localFilePath)) {
         const fileBuffer = fs.readFileSync(localFilePath);
@@ -55,6 +77,7 @@ export async function GET(
           headers: {
             "Content-Type": resolvedMime,
             "Cache-Control": "public, max-age=31536000, immutable",
+            "Vary": "Accept",
           },
         });
       }

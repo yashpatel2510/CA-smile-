@@ -27,7 +27,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "October 8, 2026",
     readTime: "5 min read",
     category: "Pediatric Dentistry",
-    image: "/images/treatments/children-dentistry.jpg",
+    image: "/images/treatments/children-dentistry.webp",
     featured: true,
     author: {
       name: "Dr. Deep Patel, BDS",
@@ -53,7 +53,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "October 2, 2026",
     readTime: "6 min read",
     category: "Orthodontics",
-    image: "/images/treatments/orthodontics.jpg",
+    image: "/images/treatments/orthodontics.webp",
     featured: true,
     author: {
       name: "Dr. Deep Patel, BDS",
@@ -79,7 +79,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "September 24, 2026",
     readTime: "4 min read",
     category: "Preventive Care",
-    image: "/images/treatments/tooth-fillings.jpg",
+    image: "/images/treatments/tooth-fillings.webp",
     author: {
       name: "Dr. Sankar, BDS, MDS",
       role: "Chief Dental Surgeon",
@@ -105,7 +105,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "September 16, 2026",
     readTime: "5 min read",
     category: "Cosmetic Dentistry",
-    image: "/images/treatments/teeth-whitening.jpg",
+    image: "/images/treatments/teeth-whitening.webp",
     author: {
       name: "Dr. Deep Patel, BDS",
       role: "Chief Dental Surgeon & Cosmetic Consultant",
@@ -129,7 +129,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "September 10, 2026",
     readTime: "7 min read",
     category: "Restorative Dentistry",
-    image: "/images/treatments/dental-implants.jpg",
+    image: "/images/treatments/dental-implants.webp",
     author: {
       name: "Dr. Sankar, BDS, MDS",
       role: "Chief Dental Surgeon & Implantologist",
@@ -153,7 +153,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "August 20, 2026",
     readTime: "5 min read",
     category: "Oral-Systemic Health",
-    image: "/images/treatments/periodontal-examination.jpg",
+    image: "/images/treatments/periodontal-examination.webp",
     author: {
       name: "Dr. Deep Patel, BDS",
       role: "Chief Dental Surgeon & Founder",
@@ -181,7 +181,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "August 8, 2026",
     readTime: "5 min read",
     category: "Oral-Systemic Health",
-    image: "/images/treatments/computed-tomography.jpg",
+    image: "/images/treatments/computed-tomography.webp",
     author: {
       name: "Dr. Deep Patel, BDS",
       role: "Chief Dental Surgeon & Founder",

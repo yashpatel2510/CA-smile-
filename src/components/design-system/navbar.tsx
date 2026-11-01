@@ -181,8 +181,8 @@ export function Navbar({
     headerBgColor.startsWith("#2");
 
   const effectiveLogoUrl = isPillDark
-    ? "/images/ca-smile-logo-dark.png"
-    : (brandConfig?.logo?.imageUrl || "/images/ca-smile-logo-light.png");
+    ? "/images/ca-smile-logo-dark.webp"
+    : (brandConfig?.logo?.imageUrl || "/images/ca-smile-logo-light.webp");
 
   const showClinicName = brandConfig?.logo?.showClinicName !== false;
   const logoHeight = brandConfig?.logo?.logoHeight || brandConfig?.logo?.logoSize || 36;

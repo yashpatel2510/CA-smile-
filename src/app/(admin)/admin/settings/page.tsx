@@ -284,7 +284,7 @@ export default function AdminSettingsPage() {
 
   // 2b. Hero Doctor Cutout & Canvas
   const [heroImageUrl, setHeroImageUrl] = useState(
-    initialHero.imageUrl || "/images/hero-doctor-dental-care.png"
+    initialHero.imageUrl || "/images/hero-doctor-dental-care.webp"
   );
   const [heroMobileImageUrl, setHeroMobileImageUrl] = useState(
     initialHero.mobileImageUrl || "/images/hero-doctor-mobile.png"
@@ -402,7 +402,7 @@ export default function AdminSettingsPage() {
   const [heroDoctorBoxPhotoUrl, setHeroDoctorBoxPhotoUrl] = useState(
     initialHero.doctorBoxPhotoUrl ||
       initialHero.imageUrl ||
-      "/images/hero-doctor-dental-care.png"
+      "/images/hero-doctor-dental-care.webp"
   );
   const [heroDoctorBoxShowPhoto, setHeroDoctorBoxShowPhoto] = useState(
     initialHero.doctorBoxShowPhoto !== false
@@ -561,7 +561,7 @@ export default function AdminSettingsPage() {
         setHeroUpperTextColor(h.upperTextColor || "#000000");
         setHeroUpperTextLetterSpacing(h.upperTextLetterSpacing || "0.14em");
         setHeroShowUpperText(h.showUpperText !== false);
-        setHeroImageUrl(h.imageUrl || "/images/hero-doctor-dental-care.png");
+        setHeroImageUrl(h.imageUrl || "/images/hero-doctor-dental-care.webp");
         setHeroMobileImageUrl(
           h.mobileImageUrl || "/images/hero-doctor-mobile.png"
         );
@@ -608,7 +608,7 @@ export default function AdminSettingsPage() {
         setHeroDoctorBoxPhotoUrl(
           h.doctorBoxPhotoUrl ||
             h.imageUrl ||
-            "/images/hero-doctor-dental-care.png"
+            "/images/hero-doctor-dental-care.webp"
         );
         setHeroDoctorBoxShowPhoto(h.doctorBoxShowPhoto !== false);
         setHeroDoctorBoxBgColor(
@@ -921,7 +921,7 @@ export default function AdminSettingsPage() {
     setHeroUpperTextColor("#000000");
     setHeroUpperTextLetterSpacing("0.14em");
     setHeroShowUpperText(true);
-    setHeroImageUrl("/images/hero-doctor-dental-care.png");
+    setHeroImageUrl("/images/hero-doctor-dental-care.webp");
     setHeroMobileImageUrl("/images/hero-doctor-mobile.png");
     setHeroMobileImageFit("cover");
     setHeroMobileImageHeight("440px");
@@ -959,7 +959,7 @@ export default function AdminSettingsPage() {
     setHeroDoctorBoxShowRole(true);
     setHeroDoctorBoxExperience("8+ Years of Experience (4.9 ★ Rating)");
     setHeroDoctorBoxShowExperience(true);
-    setHeroDoctorBoxPhotoUrl("/images/hero-doctor-dental-care.png");
+    setHeroDoctorBoxPhotoUrl("/images/hero-doctor-dental-care.webp");
     setHeroDoctorBoxShowPhoto(true);
     setHeroDoctorBoxBgColor("rgba(15, 23, 42, 0.88)");
     setHeroDoctorBoxTextColor("#ffffff");
@@ -1580,7 +1580,7 @@ export default function AdminSettingsPage() {
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    setHeroImageUrl("/images/hero-doctor-dental-care.png");
+                    setHeroImageUrl("/images/hero-doctor-dental-care.webp");
                     setHeroMobileImageUrl("/images/hero-doctor-mobile.png");
                     setHeroImageFit("cover");
                     setHeroHeroMinHeight("620px");
@@ -1626,7 +1626,7 @@ export default function AdminSettingsPage() {
                     <Input
                       value={heroImageUrl}
                       onChange={(e) => setHeroImageUrl(e.target.value)}
-                      placeholder="/images/hero-doctor-dental-care.png or https://..."
+                      placeholder="/images/hero-doctor-dental-care.webp or https://..."
                       className="font-mono text-xs"
                     />
                   </div>
@@ -2506,7 +2506,7 @@ export default function AdminSettingsPage() {
                       <Input
                         value={heroDoctorBoxPhotoUrl}
                         onChange={(e) => setHeroDoctorBoxPhotoUrl(e.target.value)}
-                        placeholder="/images/hero-doctor-dental-care.png"
+                        placeholder="/images/hero-doctor-dental-care.webp"
                         className="font-mono text-xs"
                       />
                       <Button

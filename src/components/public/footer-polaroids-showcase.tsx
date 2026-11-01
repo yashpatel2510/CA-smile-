@@ -110,7 +110,7 @@ function LetterBirdMascotSticker({ className = "h-11 sm:h-13 w-auto" }: { classN
 const SIX_POLAROIDS: PolaroidPhoto[] = [
   {
     id: "p1",
-    src: "/images/ca-smile-clinic-building.jpg",
+    src: "/images/ca-smile-clinic-building.webp",
     alt: "CA Smile Dental Clinic Exterior Space",
     caption: "The Clinic Space",
     date: "Bilimora",
@@ -122,7 +122,7 @@ const SIX_POLAROIDS: PolaroidPhoto[] = [
   },
   {
     id: "p2",
-    src: "/images/why-trust-us-chair.jpg",
+    src: "/images/why-trust-us-chair.webp",
     alt: "Precision Treatment Suite with Illumination",
     caption: "Treatment Suite",
     date: "Operatory 01",
@@ -134,7 +134,7 @@ const SIX_POLAROIDS: PolaroidPhoto[] = [
   },
   {
     id: "p3",
-    src: "/images/treatments/digital-smile-design.jpg",
+    src: "/images/treatments/digital-smile-design.webp",
     alt: "Digital Smile Design Consultation and Diagnostics",
     caption: "Smile Design Lab",
     date: "3D Digital Scan",
@@ -146,7 +146,7 @@ const SIX_POLAROIDS: PolaroidPhoto[] = [
   },
   {
     id: "p4",
-    src: "/images/dr-deep-patel.jpg",
+    src: "/images/dr-deep-patel.webp",
     alt: "Dr. Deep Patel - Chief Dental Surgeon",
     caption: "Dr. Deep Patel",
     date: "Chief Surgeon",
@@ -158,7 +158,7 @@ const SIX_POLAROIDS: PolaroidPhoto[] = [
   },
   {
     id: "p5",
-    src: "/images/hero-desktop.jpg",
+    src: "/images/hero-desktop.webp",
     alt: "CA Smile Clinical Specialists & Team",
     caption: "Dedicated Team",
     date: "Together",
@@ -170,7 +170,7 @@ const SIX_POLAROIDS: PolaroidPhoto[] = [
   },
   {
     id: "p6",
-    src: "/images/hero-doctor-dental-care.png",
+    src: "/images/hero-doctor-dental-care.webp",
     alt: "Gentle and Painless Dental Treatment",
     caption: "Painless Dental Care",
     date: "Gentle Touch",
@@ -230,7 +230,7 @@ export function FooterPolaroidsShowcase({
 
   const showCenterLogo = galleryConfig.showCenterLogo !== false;
   const centerLogoUrl =
-    galleryConfig.centerLogoUrl || "/images/ca-smile-logo-white-solid.png";
+    galleryConfig.centerLogoUrl || "/images/ca-smile-logo-white-solid.webp";
   const centerLogoAlt =
     galleryConfig.centerLogoAlt || "CA Smile Multispeciality Dental Clinic";
   const centerLogoHeight = galleryConfig.centerLogoHeight || 60;

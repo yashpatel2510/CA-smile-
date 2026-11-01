@@ -68,16 +68,11 @@ export function isLocalEnvironment(): boolean {
 }
 
 export function getActiveDatabaseMode(): DatabaseMode {
+  const config = getDatabaseModeConfig();
   const testUrl = getTestDatabaseUrl();
 
-  // User requirement: When running locally, ALWAYS use the test database to test features
-  if (isLocalEnvironment() && testUrl) {
-    return "test";
-  }
-
-  const config = getDatabaseModeConfig();
-  // Safety check: if test mode is selected but no test URL is connected, fall back to production
-  if (config.activeMode === "test" && (!config.testDatabaseUrl || !config.testDatabaseConnected)) {
+  // Safety check: if test mode is selected but no test URL is available, fall back to production
+  if (config.activeMode === "test" && !testUrl) {
     return "production";
   }
   return config.activeMode;

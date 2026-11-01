@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     : {}),
   title: {
     default: "Best Dental Clinic in Bilimora | CA Smile Dental Clinic",
-    template: "%s | CA Smile Dental Clinic Bilimora",
+    template: "%s",
   },
   description:
     "Looking for the best dentist in Bilimora? Visit CA Smile Dental Clinic by Dr. Deep Patel for painless root canal treatment, dental implants, teeth whitening, invisible braces & smile designing. Book an appointment today.",
@@ -145,17 +145,41 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const initialBranding = getClinicBrandingConfig();
-  const heroImg = initialBranding?.hero?.imageUrl;
+  const heroDesktop = initialBranding?.hero?.imageUrl;
+  const heroMobile = initialBranding?.hero?.mobileImageUrl || heroDesktop;
+
+  const toWebpUrl = (url?: string) => {
+    if (!url) return "";
+    if (url.endsWith(".jpeg")) return url.replace(".jpeg", ".webp");
+    if (url.endsWith(".jpg")) return url.replace(".jpg", ".webp");
+    if (url.endsWith(".png")) return url.replace(".png", ".webp");
+    return url;
+  };
+
+  const desktopWebp = toWebpUrl(heroDesktop);
+  const mobileWebp = toWebpUrl(heroMobile);
 
   return (
     <html lang="en" className={inter.variable}>
       <head>
-        {/* Preload critical hero image for instant LCP render */}
-        {heroImg && (
+        {/* Responsive hero image preloading: mobile devices NEVER download desktop hero */}
+        {mobileWebp && (
           <link
             rel="preload"
             as="image"
-            href={heroImg}
+            type="image/webp"
+            href={mobileWebp}
+            media="(max-width: 767px)"
+            fetchPriority="high"
+          />
+        )}
+        {desktopWebp && (
+          <link
+            rel="preload"
+            as="image"
+            type="image/webp"
+            href={desktopWebp}
+            media="(min-width: 768px)"
             fetchPriority="high"
           />
         )}

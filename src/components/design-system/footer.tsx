@@ -96,10 +96,12 @@ export function Footer() {
                 {/* Clean Large CA Smile Official Logo (White on Dark) */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="/images/ca-smile-logo-white-solid.png"
+                  src="/images/ca-smile-logo-white-solid.webp"
                   alt={displayName}
                   width={240}
                   height={64}
+                  loading="lazy"
+                  decoding="async"
                   className="h-12 sm:h-14 md:h-16 w-auto max-w-[260px] sm:max-w-[320px] object-contain object-left"
                 />
               </Link>

@@ -45,13 +45,13 @@
   "mapExactAddress": "1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society, Bilimora, Gujarat 396321",
   "mapSectionTitle": "ADDRESS",
   "mapCardTitle": "CA Smile Dental Clinic",
-  "mapCardImage": "/images/ca-smile-clinic-building.jpg",
+  "mapCardImage": "/images/ca-smile-clinic-building.webp",
   "mapPinPulse": true,
   "mapPinColor": "#E53935",
   "logo": {
     "type": "IMAGE",
     "iconName": "Smile",
-    "imageUrl": "/images/ca-smile-logo-light.png",
+    "imageUrl": "/images/ca-smile-logo-light.webp",
     "monogramText": "CA",
     "shape": "rounded",
     "altText": "CA Smile Dental Clinic Clinic Logo",
@@ -83,8 +83,8 @@
     "upperTextColor": "#000000",
     "upperTextLetterSpacing": "0.14em",
     "showUpperText": false,
-    "imageUrl": "/api/media/hero-desktop-1793445708152.jpeg",
-    "mobileImageUrl": "/api/media/hero-mobile-1793451312109.jpeg",
+    "imageUrl": "/api/media/hero-desktop-1793445708152.webp",
+    "mobileImageUrl": "/api/media/hero-mobile-1793451312109.webp",
     "mobileImageFit": "cover",
     "mobileImageHeight": "320px",
     "mobileImageWidth": "100%",
@@ -120,7 +120,7 @@
     "doctorBoxShowRole": true,
     "doctorBoxExperience": "5.0 ★ (500+ Happy Smiles)",
     "doctorBoxShowExperience": false,
-    "doctorBoxPhotoUrl": "/api/media/doctor-avatar-1793349491299.jpeg",
+    "doctorBoxPhotoUrl": "/api/media/doctor-avatar-1793349491299.webp",
     "doctorBoxShowPhoto": true,
     "doctorBoxBgColor": "rgba(15, 23, 42, 0.88)",
     "doctorBoxTextColor": "#ffffff",
@@ -144,7 +144,7 @@
     "phone": "+91 72260 98074",
     "showMascot": true,
     "showCenterLogo": true,
-    "centerLogoUrl": "/images/ca-smile-logo-white-solid.png",
+    "centerLogoUrl": "/images/ca-smile-logo-white-solid.webp",
     "centerLogoAlt": "CA Smile Multispeciality Dental Clinic",
     "centerLogoHeight": 60,
     "centerLogoGlow": true,
@@ -154,7 +154,7 @@
       {
         "id": "p1",
         "alt": "CA Smile Dental Clinic Exterior Space",
-        "src": "/images/ca-smile-clinic-building.jpg",
+        "src": "/images/ca-smile-clinic-building.webp",
         "date": "Bilimora",
         "hoverY": -80,
         "zIndex": 11,
@@ -166,7 +166,7 @@
       {
         "id": "p2",
         "alt": "Precision Treatment Suite with Illumination",
-        "src": "/images/why-trust-us-chair.jpg",
+        "src": "/images/why-trust-us-chair.webp",
         "date": "Operatory 01",
         "hoverY": -86,
         "zIndex": 12,
@@ -178,7 +178,7 @@
       {
         "id": "p3",
         "alt": "Digital Smile Design Consultation and Diagnostics",
-        "src": "/images/treatments/digital-smile-design.jpg",
+        "src": "/images/treatments/digital-smile-design.webp",
         "date": "3D Digital Scan",
         "hoverY": -82,
         "zIndex": 13,
@@ -190,7 +190,7 @@
       {
         "id": "p4",
         "alt": "Dr. Deep Patel - Chief Dental Surgeon",
-        "src": "/images/dr-deep-patel.jpg",
+        "src": "/images/dr-deep-patel.webp",
         "date": "Chief Surgeon",
         "hoverY": -88,
         "zIndex": 14,
@@ -206,7 +206,7 @@
     "doctorName": "Dr. DEEP A PATEL",
     "degree": "BDS (DENTAL SURGEON)",
     "clinicTagline": "CA SMILE BILIMORA",
-    "photoUrl": "/images/dr-deep-patel-portrait.jpg",
+    "photoUrl": "/images/dr-deep-patel-portrait.webp",
     "specialityHeading": "Speciality :",
     "specialities": [
       {
@@ -248,7 +248,7 @@
     "enabled": true,
     "headingLine1": "Why patients",
     "headingLine2": "trust us?",
-    "backgroundImageUrl": "/images/why-patients-trust-us-bg.jpg",
+    "backgroundImageUrl": "/images/why-patients-trust-us-bg.webp",
     "features": [
       {
         "title": "Treatment cycle",

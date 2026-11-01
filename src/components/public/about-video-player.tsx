@@ -46,6 +46,7 @@ export function AboutVideoPlayer({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(activeConfig.startMuted !== false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [hasEnteredView, setHasEnteredView] = useState(false);
 
   // Playback quality is configured and controlled directly via the Admin Panel
   const activeQuality = activeConfig.defaultQuality || "hd1080";
@@ -204,6 +205,10 @@ export function AboutVideoPlayer({
         const inView = entry.isIntersecting;
         inViewRef.current = inView;
 
+        if (inView) {
+          setHasEnteredView(true);
+        }
+
         if (inView && !document.hidden) {
           if (!userPausedRef.current) {
             playVideo();
@@ -267,7 +272,7 @@ export function AboutVideoPlayer({
             <video
               ref={videoElemRef}
               src={effectiveDirectSrc}
-              poster="/videos/clinic-tour-poster.jpg"
+              poster={hasEnteredView ? "/videos/clinic-tour-poster.webp" : undefined}
               muted={isMuted}
               playsInline
               loop
