@@ -45,15 +45,28 @@ export async function generateMetadata({
     };
   }
 
+  const geoTitle = treatment.title.toLowerCase().includes("bilimora")
+    ? treatment.title
+    : `${treatment.title} in Bilimora`;
+
+  const metaTitle = treatment.subtitle
+    ? `${geoTitle} (${treatment.subtitle}) | CA Smile Dental Clinic`
+    : `${geoTitle} | Best Dentist in Bilimora | CA Smile Dental Clinic`;
+
+  const metaDescription =
+    treatment.whatItIs ||
+    treatment.paragraphs[0] ||
+    `Expert ${treatment.title.toLowerCase()} in Bilimora by Dr. Deep Patel at CA Smile Dental Clinic. Painless clinical procedure, state-of-the-art equipment, and transparent pricing. Book your visit today.`;
+
   return {
-    title: `${treatment.title} ${treatment.subtitle ? `(${treatment.subtitle})` : ""} | CA Smile Dental Clinic`,
-    description: treatment.whatItIs || treatment.paragraphs[0] || "Advanced dental treatment in Bilimora, Gujarat.",
+    title: metaTitle,
+    description: metaDescription,
     alternates: {
       canonical: `/treatments/${treatment.id}`,
     },
     openGraph: {
-      title: `${treatment.title} | CA Smile Dental Clinic`,
-      description: treatment.whatItIs || treatment.paragraphs[0],
+      title: `${geoTitle} | CA Smile Dental Clinic Bilimora`,
+      description: metaDescription,
       images: treatment.image ? [{ url: treatment.image }] : undefined,
     },
   };
@@ -87,7 +100,10 @@ export default function TreatmentDetailPage({ params }: TreatmentPageProps) {
       ];
 
   const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL && !process.env.NEXT_PUBLIC_APP_URL.includes("vercel.app")
+    process.env.NEXT_PUBLIC_APP_URL &&
+    !process.env.NEXT_PUBLIC_APP_URL.includes("localhost") &&
+    !process.env.NEXT_PUBLIC_APP_URL.includes("127.0.0.1") &&
+    !process.env.NEXT_PUBLIC_APP_URL.includes("vercel.app")
       ? process.env.NEXT_PUBLIC_APP_URL.replace(/\/+$/, "")
       : "https://www.casmiledentalclinic.com";
 
@@ -95,17 +111,24 @@ export default function TreatmentDetailPage({ params }: TreatmentPageProps) {
     "@context": "https://schema.org",
     "@graph": [
       {
-        "@type": "MedicalProcedure",
-        "@id": `${baseUrl}/treatments/${treatment.id}#procedure`,
+        "@type": ["Service", "MedicalProcedure"],
+        "@id": `${baseUrl}/treatments/${treatment.id}#service`,
         name: `${treatment.title} in Bilimora`,
+        serviceType: treatment.title,
+        category: "Dentistry",
         description: treatment.whatItIs || treatment.paragraphs[0],
+        url: `${baseUrl}/treatments/${treatment.id}`,
         bodyLocation: "Mouth",
         medicalSpecialty: "https://schema.org/Dentistry",
         howPerformed: steps.join(". "),
         provider: {
-          "@type": "DentalClinic",
+          "@type": ["Dentist", "DentalClinic", "LocalBusiness"],
+          "@id": `${baseUrl}/#clinic`,
           name: "CA Smile Dental Clinic",
+          alternateName: "CA Smile Multispeciality Dental Clinic",
           telephone: "+91 72260 98074",
+          url: baseUrl,
+          priceRange: "₹₹",
           address: {
             "@type": "PostalAddress",
             streetAddress: "1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society",
@@ -115,9 +138,29 @@ export default function TreatmentDetailPage({ params }: TreatmentPageProps) {
             addressCountry: "IN",
           },
         },
+        performer: {
+          "@type": ["Person", "Dentist"],
+          "@id": `${baseUrl}/#dr-deep-patel`,
+          name: "Dr. Deep Patel",
+          jobTitle: "Chief Dental Surgeon & Founder",
+          alumniOf: "BDS (Bachelor of Dental Surgery)",
+        },
+        areaServed: [
+          { "@type": "City", name: "Bilimora" },
+          { "@type": "City", name: "Navsari" },
+          { "@type": "AdministrativeArea", name: "Gujarat" },
+        ],
+        offers: {
+          "@type": "Offer",
+          priceCurrency: "INR",
+          price: treatment.price ? treatment.price.replace(/[^0-9]/g, "") || "500" : "500",
+          availability: "https://schema.org/InStock",
+          url: `${baseUrl}/book`,
+        },
       },
       {
         "@type": "BreadcrumbList",
+        "@id": `${baseUrl}/treatments/${treatment.id}#breadcrumbs`,
         itemListElement: [
           {
             "@type": "ListItem",

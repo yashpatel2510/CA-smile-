@@ -177,26 +177,26 @@ function populateSheetNow() {
     [90,"#46","Second Patient 03:30 PM","9876543211","General Dental Consultation & Checkup","Oct 24, 2026 • 9:00 PM","Dr. Rohan Shah (Orthodontics)","PENDING"],
     [91,"#54","Ananya Desai","+91 98980 55123","General Consultation","Oct 23, 2026 • 9:30 PM","Dr. Sankar (Chief Dental Surgeon)","CONFIRMED"],
     [92,"#55","Rohan Patel","+91 99042 11985","Teeth Cleaning & Scaling (Prophylaxis)","Oct 23, 2026 • 7:30 PM","Dr. Marcus Vance (Orthodontist & Implantologist)","CHECKED_IN"],
-    [93,"#56","Priya Sharma","+91 97123 88412","Orthodontics & Invisible Braces","Oct 23, 2026 • 4:30 PM","Dr. Sarah Chen (Pediatric Dentist)","CONFIRMED"],
-    [94,"#50","anandi patel","9909221670","Periodontal Gum Treatment & Scaling","Oct 23, 2026 • 4:00 PM","Dr. Sankar (Chief Dental Surgeon)","COMPLETED"],
-    [95,"#57","Aarav Mehta","+91 98251 44210","Root Canal Treatment (Endodontics)","Oct 23, 2026 • 3:45 PM","Dr. Marcus Vance (Orthodontist & Implantologist)","CONFIRMED"],
-    [96,"#48","anandi 5","9664681536","General Dental Consultation & Checkup","Oct 23, 2026 • 3:30 PM","Any Available Specialist","NO_SHOW"],
-    [97,"#49","Sneha Vora","+91 98980 99887","General Consultation","Oct 23, 2026 • 3:30 PM","Dr. Sarah Chen (Pediatric Dentist)","COMPLETED"]
+    [93,"#56","Priya Sharma","+91 97123 88412","Orthodontics & Invisible Braces","Oct 23, 2026 • 4:30 PM","Dr. Deep Patel (Chief Dental Surgeon)","CONFIRMED"],
+    [94,"#50","Anandi Patel","9909221670","Periodontal Gum Treatment & Scaling","Oct 23, 2026 • 4:00 PM","Dr. Deep Patel (Chief Dental Surgeon)","COMPLETED"],
+    [95,"#57","Aarav Mehta","+91 98251 44210","Root Canal Treatment (Endodontics)","Oct 23, 2026 • 3:45 PM","Dr. Deep Patel (Chief Dental Surgeon)","CONFIRMED"],
+    [96,"#48","Anandi V","9664681536","Comprehensive Dental Consultation & Checkup","Oct 23, 2026 • 3:30 PM","Dr. Deep Patel (Chief Dental Surgeon)","NO_SHOW"],
+    [97,"#49","Sneha Vora","+91 98980 99887","Dental Consultation & OPG Digital X-Ray","Oct 23, 2026 • 3:30 PM","Dr. Deep Patel (Chief Dental Surgeon)","COMPLETED"]
   ];
   writeRawDataToSheet(ss, "Bookings", bookings);
 
   // 3. Feedback Data
   var feedback = [
     ["#", "Feedback ID", "Patient / Author", "Rating", "Review", "Treatment", "Source", "Date", "Status"],
-    [1,"REV-G0611014","Ananya Deshmukh","5 ★","Best dental clinic in the area. Friendly environment for kids, advanced tools, and very reasonable treatment plans without unnecessary procedures.","Pediatric Dental Checkup","GOOGLE","Just now (Synced)","APPROVED"],
-    [2,"REV-G0611017","Jonathan Miller","5 ★","Outstanding patient experience. The front desk was courteous, appointment was right on time, and Dr. Evelyn was remarkably thorough with my cardiac stress test explanation.","Cardiology Stress Test","GOOGLE","Just now (Synced)","APPROVED"],
+    [1,"REV-G0611014","Ananya Deshmukh","5 ★","Best dental clinic in Bilimora. Friendly environment for kids, advanced tools, and very reasonable treatment plans without unnecessary procedures.","Pediatric Dental Checkup","GOOGLE","Just now (Synced)","APPROVED"],
+    [2,"REV-G0611017","Ketan Desai","5 ★","Outstanding patient experience. The front desk was courteous, appointment was right on time, and Dr. Deep Patel was remarkably thorough with explaining my dental implant procedure.","Dental Implants","GOOGLE","Just now (Synced)","APPROVED"],
     [3,"REV-G0611065","Kavita R. Nair","5 ★","Visited for severe toothache on a Sunday morning. The clinic was immaculate and the dentist solved the problem with precision and zero pain. Google reviews were 100% accurate!","Emergency Dental Care","GOOGLE","Just now (Synced)","APPROVED"],
-    [4,"REV-101","Margaret Sullivan","5 ★","The doctors here caught an arrhythmia that three other clinics brushed off as anxiety. The state-of-the-art diagnostics and warm staff made all the difference. I've never felt so thoroughly cared for.","Cardiovascular Screen & ECG","GOOGLE","2 days ago","APPROVED"],
-    [5,"REV-102","David K. Thornton","5 ★","Brought my 4-year-old in for sudden ear pain. We were seen in under 15 minutes, and the pediatrician was exceptionally gentle. The WhatsApp booking and instant follow-up was top tier.","Pediatric Emergency Triage","GOOGLE","1 week ago","APPROVED"],
-    [6,"REV-103","Priya N. Ramaswamy","5 ★","Exceptional dental hygiene and laser whitening treatment. Dr. Sankar took the time to explain the entire procedure and there was zero discomfort. The clinic cleanliness is spotless!","Dental Scaling & Aesthetics","GOOGLE","2 weeks ago","APPROVED"],
-    [7,"REV-104","Arthur B. Chen","5 ★","Transparent communication and pristine modern facilities. Booking directly through their online portal was seamless, and the doctor was attentive to every detail of my metabolic test results.","Comprehensive Health Checkup","WEBSITE","3 weeks ago","APPROVED"],
-    [8,"REV-105","Samantha Jenkins","4 ★","Very competent clinical staff and modern diagnostic equipment. Waited about 10 minutes past my appointment time, but the doctor spent plenty of time answering all my questions.","Cardiology Consultation","GOOGLE","Yesterday","APPROVED"],
-    [9,"REV-106","Robert Martinez","5 ★","Had a root canal done here and couldn't believe how painless it was. Staff followed up the next day via WhatsApp to check how I was feeling. 10/10 service!","Root Canal Treatment","WEBSITE","3 days ago","APPROVED"]
+    [4,"REV-101","Mayur Parekh","5 ★","Got my full mouth rehabilitation done here. The state-of-the-art 3D digital smile design and warm staff made all the difference. My chewing and smile are completely restored.","Full Mouth Rehabilitation","GOOGLE","2 days ago","APPROVED"],
+    [5,"REV-102","Bhavna Solanki","5 ★","Brought my 6-year-old in for cavity checkup. We were seen in under 10 minutes, and Dr. Deep Patel was exceptionally gentle using the tell-show-do method. Zero tears!","Children Dentistry","GOOGLE","1 week ago","APPROVED"],
+    [6,"REV-103","Priya N. Ramaswamy","5 ★","Exceptional dental hygiene and laser whitening treatment. Dr. Deep Patel took the time to explain the entire procedure and there was zero discomfort. The clinic cleanliness is spotless!","Teeth Whitening","GOOGLE","2 weeks ago","APPROVED"],
+    [7,"REV-104","Jignesh Shah","5 ★","Transparent communication and pristine modern facilities. Booking directly through their online portal was seamless, and the doctor was attentive to every detail of my clear aligner scan.","Orthodontics & Aligners","WEBSITE","3 weeks ago","APPROVED"],
+    [8,"REV-105","Dharmesh Mistry","5 ★","Very competent clinical staff and modern digital X-ray equipment. Waited about 5 minutes past appointment time, but the doctor spent plenty of time answering all my questions about root canal therapy.","Root Canal Treatment","GOOGLE","Yesterday","APPROVED"],
+    [9,"REV-106","Robert Martinez","5 ★","Had a single-visit root canal done here and couldn't believe how painless it was. Staff followed up the next day via WhatsApp to check how I was feeling. 10/10 service!","Single-Visit Root Canal","WEBSITE","3 days ago","APPROVED"]
   ];
   writeRawDataToSheet(ss, "Feedback", feedback);
 

@@ -241,7 +241,7 @@ export default function ClinicSetupPage() {
                 Clinic Identity &amp; Name
               </h2>
               <p className="text-xs text-slate-500 dark:text-zinc-400">
-                Primary name and branding displayed across patient portal, header, and receipts.
+                Primary name and branding displayed across website header, patient communications, and receipts.
               </p>
             </div>
           </div>

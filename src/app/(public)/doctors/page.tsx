@@ -67,34 +67,66 @@ export default function DoctorsPage() {
   ];
 
   const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL && !process.env.NEXT_PUBLIC_APP_URL.includes("vercel.app")
+    process.env.NEXT_PUBLIC_APP_URL &&
+    !process.env.NEXT_PUBLIC_APP_URL.includes("localhost") &&
+    !process.env.NEXT_PUBLIC_APP_URL.includes("127.0.0.1") &&
+    !process.env.NEXT_PUBLIC_APP_URL.includes("vercel.app")
       ? process.env.NEXT_PUBLIC_APP_URL.replace(/\/+$/, "")
       : "https://www.casmiledentalclinic.com";
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "Dentist",
-    name: "Dr. Deep A Patel",
-    jobTitle: "Chief Dental Surgeon & Founder",
-    alumniOf: "BDS (Bachelor of Dental Surgery)",
-    worksFor: {
-      "@type": "DentalClinic",
-      name: "CA Smile Dental Clinic",
-      url: baseUrl,
-      address: {
-        "@type": "PostalAddress",
-        streetAddress: "1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society",
-        addressLocality: "Bilimora",
-        addressRegion: "Gujarat",
-        postalCode: "396321",
-        addressCountry: "IN",
+    "@graph": [
+      {
+        "@type": ["Person", "Dentist"],
+        "@id": `${baseUrl}/#dr-deep-patel`,
+        name: "Dr. Deep A Patel",
+        jobTitle: "Chief Dental Surgeon & Founder",
+        alumniOf: "BDS (Bachelor of Dental Surgery)",
+        medicalSpecialty: "https://schema.org/Dentistry",
+        url: `${baseUrl}/doctors`,
+        telephone: "+91 72260 98074",
+        worksFor: {
+          "@type": ["Dentist", "DentalClinic", "LocalBusiness"],
+          "@id": `${baseUrl}/#clinic`,
+          name: "CA Smile Dental Clinic",
+          url: baseUrl,
+          telephone: "+91 72260 98074",
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: "1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society",
+            addressLocality: "Bilimora",
+            addressRegion: "Gujarat",
+            postalCode: "396321",
+            addressCountry: "IN",
+          },
+        },
+        knowsAbout: [
+          "Single-Visit Painless Root Canal",
+          "Dental Implants",
+          "Digital Smile Design",
+          "Preventive Dentistry",
+          "Cosmetic Dentistry",
+        ],
       },
-    },
-    knowsAbout: [
-      "Single-Visit Painless Root Canal",
-      "Dental Implants",
-      "Digital Smile Design",
-      "Preventive Dentistry",
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${baseUrl}/doctors#breadcrumbs`,
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Home",
+            item: baseUrl,
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Doctors & Clinical Specialists",
+            item: `${baseUrl}/doctors`,
+          },
+        ],
+      },
     ],
   };
 

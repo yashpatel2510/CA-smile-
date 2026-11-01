@@ -256,7 +256,7 @@ export default function AdminSettingsPage() {
     initialHero.topInfoLocationLabel || "Location"
   );
   const [heroTopInfoLocationValue, setHeroTopInfoLocationValue] = useState(
-    initialHero.topInfoLocationValue || "12 Shevchenko Street, Kyiv"
+    initialHero.topInfoLocationValue || "Convent Rd, Bilimora, Gujarat 396321"
   );
   const [heroTopInfoTextColor, setHeroTopInfoTextColor] = useState(
     initialHero.topInfoTextColor || "#18181b"
@@ -553,7 +553,7 @@ export default function AdminSettingsPage() {
         setHeroTopInfoWorkingHoursLabel(h.topInfoWorkingHoursLabel || "Working hours");
         setHeroTopInfoWorkingHoursValue(h.topInfoWorkingHoursValue || "Mon–Sun: 9:00 AM – 8:00 PM");
         setHeroTopInfoLocationLabel(h.topInfoLocationLabel || "Location");
-        setHeroTopInfoLocationValue(h.topInfoLocationValue || "12 Shevchenko Street, Kyiv");
+        setHeroTopInfoLocationValue(h.topInfoLocationValue || "Convent Rd, Bilimora, Gujarat 396321");
         setHeroTopInfoTextColor(h.topInfoTextColor || "#18181b");
         setHeroTopInfoLabelColor(h.topInfoLabelColor || "#64748b");
         setHeroTopInfoMarginTop(h.topInfoMarginTop || "0px");
@@ -913,7 +913,7 @@ export default function AdminSettingsPage() {
     setHeroTopInfoWorkingHoursLabel("Working hours");
     setHeroTopInfoWorkingHoursValue("Mon–Sun: 9:00 AM – 8:00 PM");
     setHeroTopInfoLocationLabel("Location");
-    setHeroTopInfoLocationValue("12 Shevchenko Street, Kyiv");
+    setHeroTopInfoLocationValue("Convent Rd, Bilimora, Gujarat 396321");
     setHeroTopInfoTextColor("#18181b");
     setHeroTopInfoLabelColor("#64748b");
     setHeroTopInfoMarginTop("0px");
@@ -2725,7 +2725,7 @@ export default function AdminSettingsPage() {
                       <Input
                         value={heroTopInfoLocationValue}
                         onChange={(e) => setHeroTopInfoLocationValue(e.target.value)}
-                        placeholder="12 Shevchenko Street, Kyiv"
+                        placeholder="Convent Rd, Bilimora, Gujarat 396321"
                         className="text-xs"
                       />
                     </div>

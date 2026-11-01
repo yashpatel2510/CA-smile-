@@ -117,7 +117,7 @@ async function runComprehensiveVerification() {
   );
 
   await testEndpoint("Public Home Page", "/", {}, (res, text) => {
-    return res.status === 200 && text.includes("HealthSphere");
+    return res.status === 200 && (text.includes("CA Smile") || text.includes("HealthSphere"));
   });
 
   await testEndpoint("Services Directory", "/services", {}, (res, text) => {
@@ -130,23 +130,138 @@ async function runComprehensiveVerification() {
   });
 
   await testEndpoint(
-    "Service Detail Dynamic Route (Dental Consultation)",
-    "/services/dental-consultation",
-    {},
-    (res, text) => {
+    "Duplicate Service Route 301/308 Redirect (/services/root-canal-treatment -> /treatments/root-canal-treatment)",
+    "/services/root-canal-treatment",
+    { redirect: "manual" },
+    (res) => {
+      const location = res.headers.get("location") || "";
       return (
-        res.status === 200 &&
-        text.includes("Dental")
+        (res.status === 301 || res.status === 308) &&
+        location.includes("/treatments/root-canal-treatment")
       );
     }
   );
 
   await testEndpoint(
-    "Removed Template Route Verification (404 Not Found)",
+    "Canonical Treatment Detail Route (Root Canal Treatment)",
+    "/treatments/root-canal-treatment",
+    {},
+    (res, text) => {
+      return (
+        res.status === 200 &&
+        text.includes("Root Canal")
+      );
+    }
+  );
+
+  await testEndpoint(
+    "Suggested Geo-URL 301 Redirect (/dental-implants-bilimora -> /treatments/dental-implants)",
+    "/dental-implants-bilimora",
+    { redirect: "manual" },
+    (res) => {
+      const location = res.headers.get("location") || "";
+      return (
+        (res.status === 301 || res.status === 308) &&
+        location.includes("/treatments/dental-implants")
+      );
+    }
+  );
+
+  await testEndpoint(
+    "Suggested Geo-URL 301 Redirect (/root-canal-treatment-bilimora -> /treatments/root-canal-treatment)",
+    "/root-canal-treatment-bilimora",
+    { redirect: "manual" },
+    (res) => {
+      const location = res.headers.get("location") || "";
+      return (
+        (res.status === 301 || res.status === 308) &&
+        location.includes("/treatments/root-canal-treatment")
+      );
+    }
+  );
+
+  await testEndpoint(
+    "Suggested Geo-URL 301 Redirect (/braces-treatment-bilimora -> /treatments/orthodontics)",
+    "/braces-treatment-bilimora",
+    { redirect: "manual" },
+    (res) => {
+      const location = res.headers.get("location") || "";
+      return (
+        (res.status === 301 || res.status === 308) &&
+        location.includes("/treatments/orthodontics")
+      );
+    }
+  );
+
+  await testEndpoint(
+    "Suggested Geo-URL 301 Redirect (/teeth-whitening-bilimora -> /treatments/teeth-whitening)",
+    "/teeth-whitening-bilimora",
+    { redirect: "manual" },
+    (res) => {
+      const location = res.headers.get("location") || "";
+      return (
+        (res.status === 301 || res.status === 308) &&
+        location.includes("/treatments/teeth-whitening")
+      );
+    }
+  );
+
+  await testEndpoint(
+    "Suggested Geo-URL 301 Redirect (/smile-designing-bilimora -> /treatments/digital-smile-design)",
+    "/smile-designing-bilimora",
+    { redirect: "manual" },
+    (res) => {
+      const location = res.headers.get("location") || "";
+      return (
+        (res.status === 301 || res.status === 308) &&
+        location.includes("/treatments/digital-smile-design")
+      );
+    }
+  );
+
+  await testEndpoint(
+    "Suggested Geo-URL 301 Redirect (/wisdom-tooth-removal-bilimora -> /treatments/wisdom-tooth-removal)",
+    "/wisdom-tooth-removal-bilimora",
+    { redirect: "manual" },
+    (res) => {
+      const location = res.headers.get("location") || "";
+      return (
+        (res.status === 301 || res.status === 308) &&
+        location.includes("/treatments/wisdom-tooth-removal")
+      );
+    }
+  );
+
+  await testEndpoint(
+    "Suggested Geo-URL 301 Redirect (/dental-crowns-bilimora -> /treatments/dental-crowns-and-bridges)",
+    "/dental-crowns-bilimora",
+    { redirect: "manual" },
+    (res) => {
+      const location = res.headers.get("location") || "";
+      return (
+        (res.status === 301 || res.status === 308) &&
+        location.includes("/treatments/dental-crowns-and-bridges")
+      );
+    }
+  );
+
+  await testEndpoint(
+    "Purged Dummy Medical Page 410 Gone (/services/cardiology-diagnostic-panel)",
+    "/services/cardiology-diagnostic-panel",
+    {},
+    (res, text) => {
+      const robots = res.headers.get("x-robots-tag") || "";
+      return res.status === 410 && robots.includes("noindex");
+    }
+  );
+
+  await testEndpoint(
+    "Purged Dummy Medical Page 410 Gone (/services/general-consultation)",
     "/services/general-consultation",
     {},
-    (res) => {
-      return res.status === 404;
+    (res, text) => {
+      const robots = res.headers.get("x-robots-tag") || "";
+      return res.status === 410 && robots.includes("noindex");
     }
   );
 
@@ -191,6 +306,14 @@ async function runComprehensiveVerification() {
     return res.status === 200;
   });
 
+  await testEndpoint("Privacy Policy Page", "/privacy", {}, (res, text) => {
+    return res.status === 200 && text.includes("Privacy Policy");
+  });
+
+  await testEndpoint("Terms of Service Page", "/terms", {}, (res, text) => {
+    return res.status === 200 && text.includes("Terms of Service");
+  });
+
   await testEndpoint("SEO Sitemap (XML)", "/sitemap.xml", {}, (res, text) => {
     return res.status === 200 && text.includes("<urlset");
   });
@@ -198,6 +321,35 @@ async function runComprehensiveVerification() {
   await testEndpoint("SEO Robots File", "/robots.txt", {}, (res, text) => {
     return res.status === 200 && text.toLowerCase().includes("user-agent");
   });
+
+  await testEndpoint(
+    "Google Structured Data (Dentist, LocalBusiness, Person, WebSite)",
+    "/",
+    {},
+    (res, text) => {
+      return (
+        res.status === 200 &&
+        text.includes('"@type":["Dentist","DentalClinic","LocalBusiness"]') &&
+        text.includes('"@type":["Person","Dentist"]') &&
+        text.includes('"@type":"WebSite"') &&
+        text.includes('"@type":"BreadcrumbList"')
+      );
+    }
+  );
+
+  await testEndpoint(
+    "Google Structured Data (Service, MedicalProcedure, Breadcrumbs)",
+    "/treatments/root-canal-treatment",
+    {},
+    (res, text) => {
+      return (
+        res.status === 200 &&
+        text.includes('"@type":["Service","MedicalProcedure"]') &&
+        text.includes('"@type":"BreadcrumbList"') &&
+        text.includes("Dr. Deep Patel")
+      );
+    }
+  );
 
   // -------------------------------------------------------------
   // SECTION 2: API Endpoints & Clinical Logic
@@ -405,7 +557,7 @@ async function runComprehensiveVerification() {
   );
 
   await testEndpoint("Admin Login Screen", "/admin/login", {}, (res, text) => {
-    return res.status === 200 && text.includes("HealthSphere");
+    return res.status === 200 && (text.includes("CA Smile") || text.includes("Admin") || text.includes("HealthSphere"));
   });
 
   // Protected Admin Routes should redirect unauthenticated requests (HTTP 307 to /admin/login)

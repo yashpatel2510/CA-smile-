@@ -67,29 +67,66 @@ export default function BlogPostDetailPage({ params }: BlogPostPageProps) {
   const related = getRelatedPosts(post.slug, 3);
   const { prev: prevPost, next: nextPost } = getAdjacentPosts(post.slug);
 
-  // Article JSON-LD Schema for rich search indexing
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL &&
+    !process.env.NEXT_PUBLIC_APP_URL.includes("localhost") &&
+    !process.env.NEXT_PUBLIC_APP_URL.includes("127.0.0.1") &&
+    !process.env.NEXT_PUBLIC_APP_URL.includes("vercel.app")
+      ? process.env.NEXT_PUBLIC_APP_URL.replace(/\/+$/, "")
+      : "https://www.casmiledentalclinic.com";
+
+  // Article JSON-LD Schema for rich search indexing with BreadcrumbList
   const articleJsonLd = {
     "@context": "https://schema.org",
-    "@type": "MedicalWebPage",
-    headline: post.title,
-    description: post.summary,
-    image: post.image,
-    datePublished: post.publishedAt,
-    author: {
-      "@type": "Person",
-      name: post.author.name,
-      jobTitle: post.author.role,
-    },
-    publisher: {
-      "@type": "DentalClinic",
-      name: "CA Smile Dental Clinic",
-      url: "https://www.casmiledentalclinic.com",
-    },
-    about: {
-      "@type": "MedicalCondition",
-      name: post.category,
-    },
-    keywords: post.tags.join(", "),
+    "@graph": [
+      {
+        "@type": "MedicalWebPage",
+        "@id": `${baseUrl}/blog/${post.slug}#article`,
+        headline: post.title,
+        description: post.summary,
+        image: post.image,
+        datePublished: post.publishedAt,
+        author: {
+          "@type": "Person",
+          name: post.author.name,
+          jobTitle: post.author.role,
+        },
+        publisher: {
+          "@type": ["Dentist", "DentalClinic", "LocalBusiness"],
+          name: "CA Smile Dental Clinic",
+          url: baseUrl,
+        },
+        about: {
+          "@type": "MedicalCondition",
+          name: post.category,
+        },
+        keywords: post.tags.join(", "),
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${baseUrl}/blog/${post.slug}#breadcrumbs`,
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Home",
+            item: baseUrl,
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Dental Blog",
+            item: `${baseUrl}/blog`,
+          },
+          {
+            "@type": "ListItem",
+            position: 3,
+            name: post.title,
+            item: `${baseUrl}/blog/${post.slug}`,
+          },
+        ],
+      },
+    ],
   };
 
   return (

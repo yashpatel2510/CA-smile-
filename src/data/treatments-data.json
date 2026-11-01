@@ -418,6 +418,30 @@
       ],
       "isActive": true,
       "order": 8
+    },
+    {
+      "id": "dental-consultation",
+      "title": "Comprehensive Dental Consultation",
+      "subtitle": "Digital Intraoral Screening & Examination",
+      "category": "Clinical Diagnostics",
+      "image": "/images/treatments/periodontal-examination.jpg",
+      "paragraphs": [
+        "Thorough oral health assessment, digital intraoral screening, cavity detection, and custom treatment planning by Dr. Deep Patel.",
+        "Using modern digital radiography and intraoral imaging, we evaluate your oral health, identify early decay or periodontal concerns, and discuss transparent treatment options tailored to your smile."
+      ],
+      "whatItIs": "Our comprehensive dental consultation provides an in-depth examination of your teeth, gums, and oral structures using digital radiography and intraoral cameras.",
+      "howItWorks": "Dr. Deep Patel performs a complete oral cavity inspection, visualizes hidden decay with digital sensors, and explains all findings with crystal-clear digital displays.",
+      "benefits": "Detect dental issues early before they cause pain, save money on extensive treatments, and receive transparent guidance.",
+      "procedure": [
+        "Digital intraoral camera examination of all teeth and gums.",
+        "Low-radiation digital radiography (X-rays) if clinically indicated.",
+        "Detailed periodontal gum pocket depth mapping.",
+        "One-on-one consultation and personalized treatment plan with Dr. Deep Patel."
+      ],
+      "result": "Complete clarity on your oral health status with a clear, honest, and itemized roadmap.",
+      "whatIfNotDone": "Minor unnoticed cavities and early gum inflammation can progress into severe tooth decay, painful infections, and tooth loss.",
+      "isActive": true,
+      "order": 9
     }
   ]
 }

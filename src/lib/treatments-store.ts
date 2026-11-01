@@ -320,11 +320,34 @@ export function deleteTreatmentItem(
   return false;
 }
 
+const TREATMENT_GEO_ALIASES: Record<string, string> = {
+  "dental-implants-bilimora": "dental-implants",
+  "root-canal-treatment-bilimora": "root-canal-treatment",
+  "root-canal-bilimora": "root-canal-treatment",
+  "braces-treatment-bilimora": "orthodontics",
+  "braces-bilimora": "orthodontics",
+  "teeth-whitening-bilimora": "teeth-whitening",
+  "smile-designing-bilimora": "digital-smile-design",
+  "smile-design-bilimora": "digital-smile-design",
+  "wisdom-tooth-removal-bilimora": "wisdom-tooth-removal",
+  "dental-crowns-bilimora": "dental-crowns-and-bridges",
+  "clear-aligners": "orthodontics",
+  "teeth-cleaning-scaling": "gum-treatment",
+  "pediatric-dentistry": "children-dentistry",
+};
+
 export function getTreatmentById(id: string): TreatmentItem | null {
   const store = getTreatmentsStoreData();
-  const item = store.treatments.find((t) => t.id === id || t.id.toLowerCase() === id.toLowerCase());
+  const normalizedId = (id || "").toLowerCase().trim();
+  const canonicalId = TREATMENT_GEO_ALIASES[normalizedId] || normalizedId;
+
+  const item = store.treatments.find(
+    (t) => t.id === canonicalId || t.id.toLowerCase() === canonicalId
+  );
   if (item) return item;
   // Fallback to check diagnostics as well if queried
-  const diag = store.diagnostics.find((d) => d.id === id || d.id.toLowerCase() === id.toLowerCase());
+  const diag = store.diagnostics.find(
+    (d) => d.id === canonicalId || d.id.toLowerCase() === canonicalId
+  );
   return diag || null;
 }

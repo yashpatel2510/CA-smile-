@@ -1,23 +1,21 @@
 import { MetadataRoute } from "next";
-import { env } from "@/lib/env";
-import { clinicalServices } from "@/data/services-data";
 import { blogPosts } from "@/data/blog-posts";
 import { getTreatmentsStoreData } from "@/lib/treatments-store";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL && !process.env.NEXT_PUBLIC_APP_URL.includes("vercel.app")
+    process.env.NEXT_PUBLIC_APP_URL &&
+    !process.env.NEXT_PUBLIC_APP_URL.includes("localhost") &&
+    !process.env.NEXT_PUBLIC_APP_URL.includes("127.0.0.1") &&
+    !process.env.NEXT_PUBLIC_APP_URL.includes("vercel.app")
       ? process.env.NEXT_PUBLIC_APP_URL.replace(/\/+$/, "")
-      : process.env.NODE_ENV === "production"
-        ? "https://www.casmiledentalclinic.com"
-        : (env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/+$/, "");
+      : "https://www.casmiledentalclinic.com";
   const lastModified = new Date();
 
-  // Static public pages
+  // Static public pages (each page has unique, non-cannibalizing content)
   const staticPages = [
     "",
     "/services",
-    "/treatments",
     "/about",
     "/doctors",
     "/blog",
@@ -25,6 +23,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/contact",
     "/book",
     "/review",
+    "/privacy",
+    "/terms",
   ].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified,
@@ -32,12 +32,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority:
       route === ""
         ? 1.0
-        : route === "/services" || route === "/treatments" || route === "/book"
+        : route === "/services" || route === "/book"
           ? 0.9
-          : 0.8,
+          : route === "/privacy" || route === "/terms"
+            ? 0.5
+            : 0.8,
   }));
 
-  // Active dental treatment pages
+  // Canonical dental treatment & diagnostic pages (Each treatment = ONE URL only under /treatments/*)
   const treatmentsData = getTreatmentsStoreData();
   const activeTreatments = [
     ...(treatmentsData.treatments || []),
@@ -51,14 +53,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.85,
   }));
 
-  // Dynamic clinical dental service pages
-  const servicePages = clinicalServices.map((service) => ({
-    url: `${baseUrl}/services/${service.slug}`,
-    lastModified,
-    changeFrequency: "weekly" as const,
-    priority: 0.85,
-  }));
-
   // Dynamic health blog articles
   const blogPages = blogPosts.map((post) => ({
     url: `${baseUrl}/blog/${post.slug}`,
@@ -67,6 +61,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...treatmentPages, ...servicePages, ...blogPages];
+  return [...staticPages, ...treatmentPages, ...blogPages];
 }
-

@@ -73,7 +73,7 @@
     "blankHeroTextColor": "#18181b",
     "topInfoEnabled": true,
     "topInfoWorkingHoursLabel": "Working hours",
-    "topInfoWorkingHoursValue": "Mon - Sat: 9:00 AM - 8:00 PM ",
+    "topInfoWorkingHoursValue": "Mon - Sun: 9:00 AM - 8:00 PM ",
     "topInfoLocationLabel": "Location",
     "topInfoLocationValue": "ABOVE HDFC BANK, BILIMORA",
     "topInfoTextColor": "#18181b",

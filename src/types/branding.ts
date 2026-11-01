@@ -139,7 +139,7 @@ export const DEFAULT_HERO_CONFIG: HeroSectionConfig = {
   topInfoWorkingHoursLabel: "Working hours",
   topInfoWorkingHoursValue: "Mon–Sun: 9:00 AM – 8:00 PM",
   topInfoLocationLabel: "Location",
-  topInfoLocationValue: "12 Shevchenko Street, Kyiv",
+  topInfoLocationValue: "Convent Rd, Bilimora, Gujarat 396321",
   topInfoTextColor: "#18181b",
   topInfoLabelColor: "#64748b",
   topInfoMarginTop: "0px",

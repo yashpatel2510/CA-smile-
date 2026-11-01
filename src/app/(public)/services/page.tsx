@@ -26,8 +26,60 @@ export default function ServicesPage() {
   const showDiagnostics = store.settings?.showDiagnostics !== false;
   const showTreatments = store.settings?.showTreatments !== false;
 
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL &&
+    !process.env.NEXT_PUBLIC_APP_URL.includes("localhost") &&
+    !process.env.NEXT_PUBLIC_APP_URL.includes("127.0.0.1") &&
+    !process.env.NEXT_PUBLIC_APP_URL.includes("vercel.app")
+      ? process.env.NEXT_PUBLIC_APP_URL.replace(/\/+$/, "")
+      : "https://www.casmiledentalclinic.com";
+
+  const allActiveItems = [
+    ...(store.treatments || []),
+    ...(store.diagnostics || []),
+  ].filter((t) => t.isActive);
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${baseUrl}/services#breadcrumbs`,
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Home",
+            item: baseUrl,
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Services & Diagnostics",
+            item: `${baseUrl}/services`,
+          },
+        ],
+      },
+      {
+        "@type": "ItemList",
+        "@id": `${baseUrl}/services#itemlist`,
+        name: "CA Smile Dental Treatments & Diagnostic Services",
+        itemListElement: allActiveItems.map((item, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          name: item.title,
+          url: `${baseUrl}/treatments/${item.id}`,
+        })),
+      },
+    ],
+  };
+
   return (
     <main className="min-h-screen bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Top Breadcrumb Navigation */}
       <div className="mx-auto max-w-7xl px-4 sm:px-8 lg:px-12 pt-8 sm:pt-10">
         <nav

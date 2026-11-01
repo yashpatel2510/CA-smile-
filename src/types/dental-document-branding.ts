@@ -66,11 +66,11 @@ export const DEFAULT_DENTAL_BRANDING_MASTER: DentalClinicBrandingMaster = {
   footer_text:
     "Clinic Timings: Mon–Sun: 9:00 AM – 8:00 PM | Emergency Contact: +91 72260 98074",
   dot_matrix_mode: false,
-  doctor_name: "Dr. Sample Doctor",
-  doctor_qualification: "MBBS, MD (General Medicine), Diploma in Diabetology",
-  doctor_reg_no: "SAMPLE-REG-0000",
-  phone: "9664681536",
-  emergency_phone: "9664681536",
+  doctor_name: "Dr. Deep Patel",
+  doctor_qualification: "BDS (Dental Surgeon)",
+  doctor_reg_no: "DENTAL-SURG-001",
+  phone: "+91 72260 98074",
+  emergency_phone: "+91 72260 98074",
   email: "casmileatbilimora@gmail.com",
   address:
     "1st Floor, Labdhi Arcade, Convent Rd, above HDFC Bank/ Krishna Dairy, Kutchhi Friends Society, Bilimora, Gujarat 396321",
