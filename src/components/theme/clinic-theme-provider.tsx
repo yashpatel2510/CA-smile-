@@ -24,7 +24,7 @@ const ClinicThemeContext = createContext<ClinicThemeContextValue | undefined>(
   undefined
 );
 
-const LOCAL_STORAGE_KEY = "healthsphere_clinic_branding_v1";
+const LOCAL_STORAGE_KEY = "healthsphere_clinic_branding_v3";
 
 export function ClinicThemeProvider({
   children,
@@ -47,12 +47,16 @@ export function ClinicThemeProvider({
   // 1. Initial Load: LocalStorage Cache first (instant), then API sync
   useEffect(() => {
     try {
+      localStorage.removeItem("healthsphere_clinic_branding_v1");
+      localStorage.removeItem("healthsphere_clinic_branding_v2");
       const cached = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (cached) {
         const parsed = JSON.parse(cached);
-        setBrandConfig(parsed);
-        if (parsed.themeKey && clinicThemes[parsed.themeKey]) {
-          setThemeKey(parsed.themeKey);
+        if (!parsed?.hero?.subtitleText?.includes("Discover advanced care")) {
+          setBrandConfig(parsed);
+          if (parsed.themeKey && clinicThemes[parsed.themeKey]) {
+            setThemeKey(parsed.themeKey);
+          }
         }
       }
     } catch {

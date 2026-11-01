@@ -81,20 +81,61 @@ export async function GET() {
     try {
       const clinic = await prisma.clinic.findFirst();
       if (clinic?.brandingConfig && typeof clinic.brandingConfig === "object") {
+        const localBranding = getClinicBrandingConfig();
         const dbConfig = clinic.brandingConfig as any;
+        const heroSubtitle =
+          dbConfig.hero?.subtitleText &&
+          !dbConfig.hero.subtitleText.includes("Discover advanced care")
+            ? dbConfig.hero.subtitleText
+            : localBranding.hero?.subtitleText || DEFAULT_CLINIC_BRANDING.hero!.subtitleText;
+        const heroHeadline =
+          dbConfig.hero?.headline &&
+          dbConfig.hero.headline !== "CA Smile Dental Clinic" &&
+          dbConfig.hero.headline !== "Dental Care"
+            ? dbConfig.hero.headline
+            : localBranding.hero?.headline || DEFAULT_CLINIC_BRANDING.hero!.headline;
+
+        if (
+          (dbConfig.hero?.subtitleText?.includes("Discover advanced care") ||
+            dbConfig.hero?.headline !== heroHeadline) &&
+          clinic.id
+        ) {
+          prisma.clinic
+            .update({
+              where: { id: clinic.id },
+              data: {
+                brandingConfig: {
+                  ...dbConfig,
+                  hero: {
+                    ...(dbConfig.hero || {}),
+                    headline: heroHeadline,
+                    subtitleText: heroSubtitle,
+                  },
+                },
+              },
+            })
+            .catch(() => {});
+        }
+
         const merged: ClinicBrandConfig = {
           ...DEFAULT_CLINIC_BRANDING,
+          ...localBranding,
           ...dbConfig,
           logo: {
             ...DEFAULT_CLINIC_BRANDING.logo,
+            ...(localBranding.logo || {}),
             ...(dbConfig.logo || {}),
           },
           hero: {
             ...DEFAULT_CLINIC_BRANDING.hero!,
+            ...(localBranding.hero || {}),
             ...(dbConfig.hero || {}),
+            headline: heroHeadline,
+            subtitleText: heroSubtitle,
           },
           aboutSection: {
             ...DEFAULT_CLINIC_BRANDING.aboutSection!,
+            ...(localBranding.aboutSection || {}),
             ...(dbConfig.aboutSection || {}),
           },
           gallery: {
