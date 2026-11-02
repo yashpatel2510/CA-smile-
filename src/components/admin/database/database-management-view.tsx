@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Database,
   CheckCircle2,
@@ -43,6 +44,7 @@ import { DatabaseBackupConfig } from "@/lib/database/database-backup-store";
 
 export function DatabaseManagementView() {
   const { data: session } = useSession();
+  const router = useRouter();
   const isAdmin = session?.user?.role === "ADMIN";
 
   const [loading, setLoading] = useState(true);
@@ -187,8 +189,12 @@ export function DatabaseManagementView() {
       if (resData.success) {
         setActiveMode(targetMode);
         window.dispatchEvent(new Event("database-mode-changed"));
+        try {
+          localStorage.setItem("ca-smile-db-mode", targetMode);
+        } catch {}
         showToast(resData.message, "success");
-        fetchOverview();
+        await fetchOverview(true);
+        router.refresh();
       } else {
         showToast(resData.message || "Failed to switch database mode", "error");
       }
@@ -212,8 +218,12 @@ export function DatabaseManagementView() {
       const resData = await res.json();
       if (resData.success) {
         window.dispatchEvent(new Event("database-mode-changed"));
+        try {
+          localStorage.setItem("ca-smile-db-mode", resData.activeMode || "production");
+        } catch {}
         showToast(resData.message, "success");
-        fetchOverview();
+        await fetchOverview(true);
+        router.refresh();
       } else {
         showToast(resData.message || "Failed to toggle test database connection", "error");
       }
@@ -939,22 +949,47 @@ export function DatabaseManagementView() {
           </CardContent>
         </div>
 
-        <div className="border-t border-brand-border/60 p-4 flex items-center justify-between bg-brand-surface/50">
-          <div className="flex items-center gap-2 text-xs text-brand-muted">
-            <ShieldCheck className="h-4 w-4 text-emerald-600" />
-            <span className="font-medium">Production Database Managed &amp; Protected</span>
+        <div className="border-t border-brand-border/60 p-4 flex flex-wrap items-center justify-between gap-3 bg-brand-surface/50">
+          <div className="flex items-center gap-2 text-xs">
+            {currentActiveMode === "production" ? (
+              <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-700 dark:text-emerald-400">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                <span>Active Production (Genuine Clinic Data)</span>
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 font-medium text-amber-800 dark:text-amber-300">
+                <Shield className="h-4 w-4 text-amber-600" />
+                <span>Standby — Clinic records protected</span>
+              </span>
+            )}
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleTestPrimary}
-            disabled={testingPrimary}
-            className="h-8 text-xs gap-1.5 border-blue-500/40 text-blue-700 hover:bg-blue-500/10 dark:text-blue-300 font-semibold"
-          >
-            <RefreshCw className={`h-3 w-3 ${testingPrimary ? "animate-spin" : ""}`} />
-            <span>{testingPrimary ? "Testing connection..." : "Test Database Connection"}</span>
-          </Button>
+          <div className="flex items-center gap-2">
+            {currentActiveMode === "test" && (
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                onClick={() => setConfirmSwitchModeModalOpen("production")}
+                disabled={switchingMode}
+                className="h-8 text-xs gap-1.5 font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs"
+              >
+                <ShieldCheck className="h-3.5 w-3.5" />
+                <span>Switch Back to Live Production</span>
+              </Button>
+            )}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleTestPrimary}
+              disabled={testingPrimary}
+              className="h-8 text-xs gap-1.5 border-blue-500/40 text-blue-700 hover:bg-blue-500/10 dark:text-blue-300 font-semibold"
+            >
+              <RefreshCw className={`h-3 w-3 ${testingPrimary ? "animate-spin" : ""}`} />
+              <span>{testingPrimary ? "Testing connection..." : "Test Database Connection"}</span>
+            </Button>
+          </div>
         </div>
       </Card>
 
@@ -1117,6 +1152,20 @@ export function DatabaseManagementView() {
                   <span>{syncingTestTables ? "Syncing..." : "Sync Tables (Schema)"}</span>
                 </Button>
               </>
+            )}
+
+            {currentActiveMode === "production" && testDb.hasUrl && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setConfirmSwitchModeModalOpen("test")}
+                disabled={switchingMode}
+                className="h-8 text-xs gap-1.5 font-semibold border-amber-500/50 bg-amber-500/15 text-amber-900 hover:bg-amber-500/25 dark:text-amber-200"
+              >
+                <FlaskConical className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                <span>Switch to Test Database</span>
+              </Button>
             )}
           </div>
 

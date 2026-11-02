@@ -65,7 +65,7 @@ export default function HomePage() {
         {/* Why Patients Trust Us (Cinematic Studio Section) */}
         <WhyPatientsTrustUs />
 
-        {/* White Dental Treatment Showcase Section */}
+        {/* CA Smile Treatment Showcase Section */}
         <div id="services-preview">
           <WhiteDentalTreatmentShowcase
             mode="both"

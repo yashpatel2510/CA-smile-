@@ -1,9 +1,12 @@
 import {
   prisma as primaryClient,
   authPrisma as secondaryClient,
+  getLivePrismaClient,
+  getTestPrismaClient,
   getPrimaryDatabaseUrl,
   getSecondaryDatabaseUrl,
 } from "@/lib/prisma";
+import { getTestDatabaseUrl } from "@/lib/database/test-database-config";
 import { appendHealthLog } from "@/lib/database/health-logger";
 
 export type DatabaseConnectionStatus =
@@ -252,7 +255,8 @@ export async function checkPrimaryDatabase(options?: {
     attemptsUsed = attempt;
     try {
       const startTime = Date.now();
-      await withTimeout(primaryClient.$queryRawUnsafe("SELECT 1 as ping;"), timeoutMs);
+      const liveClient = getLivePrismaClient();
+      await withTimeout(liveClient.$queryRawUnsafe("SELECT 1 as ping;"), timeoutMs);
       const latency = Date.now() - startTime;
 
       const successRes: DatabaseTargetHealthResult = {
@@ -323,14 +327,119 @@ export async function checkPrimaryDatabase(options?: {
 }
 
 /**
- * Checks the Secondary Database connection using a lightweight SELECT 1 query.
- * Retries once on temporary failure (max 2 attempts).
+ * Checks the Secondary Database connection (aliases primary unified DB).
  */
 export async function checkSecondaryDatabase(options?: {
   timeoutMs?: number;
   maxAttempts?: number;
 }): Promise<DatabaseTargetHealthResult> {
   return checkPrimaryDatabase(options);
+}
+
+/**
+ * Checks the isolated Test / Sandbox Database connection.
+ */
+export async function checkTestDatabase(options?: {
+  timeoutMs?: number;
+  maxAttempts?: number;
+}): Promise<DatabaseTargetHealthResult> {
+  const timeoutMs = options?.timeoutMs || 6000;
+  const maxAttempts = options?.maxAttempts || 2;
+  const rawUrl = getTestDatabaseUrl();
+  const hostInfo = parseMaskedHost(rawUrl);
+  const now = new Date().toISOString();
+
+  if (!rawUrl) {
+    return {
+      id: "primary",
+      name: "Test & Sandbox Database",
+      purpose: "Isolated testing database for website bookings",
+      provider: "Supabase / PostgreSQL",
+      maskedHost: "Not configured",
+      status: "CONNECTION_ERROR",
+      isReachable: false,
+      isAuthSucceeded: false,
+      isTimedOut: false,
+      responseTimeMs: null,
+      checkedAt: now,
+      attemptsUsed: 0,
+      errorType: "CONFIG_MISSING",
+      message: "TEST_DATABASE_URL is not configured.",
+    };
+  }
+
+  const testClient = getTestPrismaClient();
+  if (!testClient) {
+    return {
+      id: "primary",
+      name: "Test & Sandbox Database",
+      purpose: "Isolated testing database for website bookings",
+      provider: hostInfo.provider,
+      maskedHost: hostInfo.maskedHost,
+      status: "CONNECTION_ERROR",
+      isReachable: false,
+      isAuthSucceeded: false,
+      isTimedOut: false,
+      responseTimeMs: null,
+      checkedAt: now,
+      attemptsUsed: 0,
+      errorType: "CLIENT_ERROR",
+      message: "Could not initialize test database client.",
+    };
+  }
+
+  let attemptsUsed = 0;
+  let lastError: any = null;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    attemptsUsed = attempt;
+    try {
+      const startTime = Date.now();
+      await withTimeout(testClient.$queryRawUnsafe("SELECT 1 as ping;"), timeoutMs);
+      const latency = Date.now() - startTime;
+
+      return {
+        id: "primary",
+        name: "Test & Sandbox Database",
+        purpose: "Isolated testing database for website bookings",
+        provider: hostInfo.provider,
+        maskedHost: hostInfo.maskedHost,
+        status: "CONNECTED",
+        isReachable: true,
+        isAuthSucceeded: true,
+        isTimedOut: false,
+        responseTimeMs: latency,
+        checkedAt: now,
+        attemptsUsed,
+        errorType: null,
+        message: `Connected successfully (${latency} ms)`,
+      };
+    } catch (err: any) {
+      lastError = err;
+      if (attempt < maxAttempts) {
+        await new Promise((r) => setTimeout(r, 300));
+      }
+    }
+  }
+
+  const classified = classifyDatabaseError(lastError);
+  return {
+    id: "primary",
+    name: "Test & Sandbox Database",
+    purpose: "Isolated testing database for website bookings",
+    provider: hostInfo.provider,
+    maskedHost: hostInfo.maskedHost,
+    status: classified.status,
+    isReachable: classified.isReachable,
+    isAuthSucceeded: classified.isAuthSucceeded,
+    isTimedOut: classified.isTimedOut,
+    responseTimeMs: null,
+    checkedAt: now,
+    attemptsUsed,
+    errorType: classified.errorType,
+    message: classified.message,
+    diagnosticAdvice: classified.diagnosticAdvice,
+  };
 }
 
 /**

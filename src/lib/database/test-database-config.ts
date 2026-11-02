@@ -19,25 +19,71 @@ const DEFAULT_CONFIG: DatabaseModeConfig = {
   lastPurgedAt: null,
 };
 
+// Fast in-memory cache to eliminate repetitive synchronous disk reads across requests
+let memoryConfigCache: DatabaseModeConfig | null = null;
+let memoryConfigTimestamp = 0;
+const CACHE_TTL_MS = 1000;
+
+export function invalidateDatabaseModeCache(): void {
+  memoryConfigCache = null;
+  memoryConfigTimestamp = 0;
+}
+
+/**
+ * Safely extracts a database URL from process.env or falls back to reading .env directly
+ */
+export function readEnvDatabaseUrl(key: string): string {
+  if (process.env[key] && process.env[key]!.trim()) {
+    return process.env[key]!.trim();
+  }
+  try {
+    const envPath = path.resolve(process.cwd(), ".env");
+    if (fs.existsSync(envPath)) {
+      const content = fs.readFileSync(envPath, "utf-8");
+      const match = content.match(new RegExp(`^${key}=["']?([^"'\r\n]+)["']?`, "m"));
+      if (match && match[1]) {
+        const val = match[1].trim();
+        process.env[key] = val;
+        return val;
+      }
+    }
+  } catch {}
+  return "";
+}
+
 export function getDatabaseModeConfig(): DatabaseModeConfig {
+  const now = Date.now();
+  if (memoryConfigCache && now - memoryConfigTimestamp < CACHE_TTL_MS) {
+    return memoryConfigCache;
+  }
+
+  const envTestUrl = readEnvDatabaseUrl("TEST_DATABASE_URL");
+
   try {
     if (fs.existsSync(CONFIG_PATH)) {
       const raw = fs.readFileSync(CONFIG_PATH, "utf-8");
       const parsed = JSON.parse(raw);
-      const testUrl = parsed.testDatabaseUrl || process.env.TEST_DATABASE_URL || "";
-      return {
+      const testUrl = parsed.testDatabaseUrl || envTestUrl || process.env.TEST_DATABASE_URL || "";
+      const result: DatabaseModeConfig = {
         ...DEFAULT_CONFIG,
         ...parsed,
         testDatabaseUrl: testUrl,
       };
+      memoryConfigCache = result;
+      memoryConfigTimestamp = now;
+      return result;
     }
   } catch (err) {
     console.error("Error reading database mode config:", err);
   }
-  return {
+
+  const fallback: DatabaseModeConfig = {
     ...DEFAULT_CONFIG,
-    testDatabaseUrl: process.env.TEST_DATABASE_URL || "",
+    testDatabaseUrl: envTestUrl || process.env.TEST_DATABASE_URL || "",
   };
+  memoryConfigCache = fallback;
+  memoryConfigTimestamp = now;
+  return fallback;
 }
 
 export function saveDatabaseModeConfig(partial: Partial<DatabaseModeConfig>): DatabaseModeConfig {
@@ -47,13 +93,20 @@ export function saveDatabaseModeConfig(partial: Partial<DatabaseModeConfig>): Da
       ...current,
       ...partial,
     };
-    // Security: Keep database passwords out of tracked JSON file;
-    // TEST_DATABASE_URL is persisted in .env (which is gitignored).
-    const safeForDisk = {
+
+    // If a new testDatabaseUrl is provided or currently present, keep it accessible
+    const finalTestUrl = updated.testDatabaseUrl || current.testDatabaseUrl || readEnvDatabaseUrl("TEST_DATABASE_URL");
+    updated.testDatabaseUrl = finalTestUrl;
+
+    // Security & tracking: Persist activeMode and state to disk
+    const diskPayload: DatabaseModeConfig = {
       ...updated,
-      testDatabaseUrl: "",
+      testDatabaseUrl: finalTestUrl,
     };
-    fs.writeFileSync(CONFIG_PATH, JSON.stringify(safeForDisk, null, 2), "utf-8");
+    fs.writeFileSync(CONFIG_PATH, JSON.stringify(diskPayload, null, 2), "utf-8");
+
+    memoryConfigCache = updated;
+    memoryConfigTimestamp = Date.now();
     return updated;
   } catch (err) {
     console.error("Error saving database mode config:", err);
@@ -84,7 +137,7 @@ export function isTestModeActive(): boolean {
 
 export function getTestDatabaseUrl(): string | undefined {
   const config = getDatabaseModeConfig();
-  const raw = config.testDatabaseUrl || process.env.TEST_DATABASE_URL || undefined;
+  const raw = config.testDatabaseUrl || process.env.TEST_DATABASE_URL || readEnvDatabaseUrl("TEST_DATABASE_URL") || undefined;
   return raw ? normalizePostgresUrl(raw) : undefined;
 }
 
@@ -108,12 +161,14 @@ export function normalizePostgresUrl(raw: string): string {
     url += (url.includes("?") ? "&" : "?") + "sslmode=require";
   }
 
-  // Normalize Supabase pooler: convert 5432 to 6543 and add pgbouncer=true for reliable pooler connection
+  // Normalize Supabase pooler: convert 5432 to 6543
   if (url.includes(".pooler.supabase.com:5432")) {
     url = url.replace(":5432", ":6543");
-    if (!url.includes("pgbouncer=true")) {
-      url += (url.includes("?") ? "&" : "?") + "pgbouncer=true";
-    }
+  }
+
+  // Transaction mode pooler on port 6543 requires pgbouncer=true for Prisma prepared statements
+  if (url.includes(":6543") && !url.includes("pgbouncer=true")) {
+    url += (url.includes("?") ? "&" : "?") + "pgbouncer=true";
   }
 
   return url;
@@ -131,4 +186,3 @@ export function maskDatabaseUrl(url: string | undefined): string {
     return "postgresql://***@configured";
   }
 }
-

@@ -44,6 +44,8 @@ next-env.d.ts
 # archives & backups
 *.zip
 src/data/backups/
+src/data/database-mode-config.json
+src/data/database-health-logs.json
 *.log
 dev.log
 

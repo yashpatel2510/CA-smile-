@@ -6,6 +6,7 @@ import {
   getDatabaseModeConfig,
   saveDatabaseModeConfig,
   getActiveDatabaseMode,
+  getTestDatabaseUrl,
   maskDatabaseUrl,
   normalizePostgresUrl,
 } from "@/lib/database/test-database-config";
@@ -17,7 +18,7 @@ import {
 import fs from "fs";
 import path from "path";
 
-async function pingDatabase(url: string, timeoutMs = 4500): Promise<{ ok: boolean; latencyMs: number | null; error: string | null; diagnostic: string | null }> {
+async function pingDatabase(url: string, timeoutMs = 8000): Promise<{ ok: boolean; latencyMs: number | null; error: string | null; diagnostic: string | null }> {
   let cleanUrl = normalizePostgresUrl(url);
   if (!cleanUrl.includes("connection_limit=")) {
     cleanUrl += (cleanUrl.includes("?") ? "&" : "?") + "connection_limit=1";
@@ -32,7 +33,7 @@ async function pingDatabase(url: string, timeoutMs = 4500): Promise<{ ok: boolea
     const start = Date.now();
     const queryPromise = client.$queryRawUnsafe("SELECT 1 as connected;");
     const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error("Connection timed out after 4500ms")), timeoutMs)
+      setTimeout(() => reject(new Error(`Connection timed out after ${timeoutMs}ms`)), timeoutMs)
     );
     await Promise.race([queryPromise, timeoutPromise]);
     const duration = Date.now() - start;
@@ -137,7 +138,7 @@ export async function POST(req: NextRequest) {
     if (action === "switch-mode") {
       const targetMode = body.mode === "test" ? "test" : "production";
       const config = getDatabaseModeConfig();
-      const testUrl = config.testDatabaseUrl || process.env.TEST_DATABASE_URL;
+      const testUrl = config.testDatabaseUrl || process.env.TEST_DATABASE_URL || getTestDatabaseUrl();
 
       if (targetMode === "test" && !testUrl) {
         return NextResponse.json(
@@ -147,6 +148,20 @@ export async function POST(req: NextRequest) {
           },
           { status: 400 }
         );
+      }
+
+      // Pre-flight check: Verify test database is reachable before switching
+      if (targetMode === "test" && testUrl) {
+        const ping = await pingDatabase(testUrl, 8000);
+        if (!ping.ok) {
+          return NextResponse.json(
+            {
+              success: false,
+              message: `Cannot switch to Test Mode: Unable to connect to Test Database (${ping.diagnostic || ping.error}). Please verify the database URL and ensure the project is active.`,
+            },
+            { status: 400 }
+          );
+        }
       }
 
       saveDatabaseModeConfig({
@@ -160,8 +175,8 @@ export async function POST(req: NextRequest) {
         activeMode: targetMode,
         message:
           targetMode === "test"
-            ? "Switched to Test Database (Sandbox Mode). All new bookings will be stored in the Test Database."
-            : "Switched back to Live Clinic Database (Production Mode). Clinic operations are live.",
+            ? "Switched to Test Database (Sandbox Mode). All new bookings and form tests are now stored in the Test Database."
+            : "Switched back to Live Clinic Database (Production Mode). Clinic operations are now live.",
       });
     }
 
@@ -176,8 +191,8 @@ export async function POST(req: NextRequest) {
       }
       const newUrl = normalizePostgresUrl(rawUrl);
 
-      // Test connection first
-      const ping = await pingDatabase(newUrl, 4500);
+      // Test connection first with 8000ms timeout
+      const ping = await pingDatabase(newUrl, 8000);
       if (!ping.ok) {
         return NextResponse.json(
           {
@@ -260,7 +275,7 @@ export async function POST(req: NextRequest) {
     // 4. TEST CONNECTION
     if (action === "test-connection") {
       const config = getDatabaseModeConfig();
-      const rawTarget = (body.url || config.testDatabaseUrl || "").trim();
+      const rawTarget = (body.url || config.testDatabaseUrl || getTestDatabaseUrl() || "").trim();
       const targetUrl = rawTarget ? normalizePostgresUrl(rawTarget) : "";
 
       if (!targetUrl) {
@@ -270,7 +285,7 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const ping = await pingDatabase(targetUrl, 4500);
+      const ping = await pingDatabase(targetUrl, 8000);
       return NextResponse.json({
         success: ping.ok,
         latencyMs: ping.latencyMs,
@@ -285,13 +300,23 @@ export async function POST(req: NextRequest) {
     // 5. SYNC / INITIALIZE TABLES IN TEST DATABASE
     if (action === "sync-tables") {
       const config = getDatabaseModeConfig();
-      const targetUrl = (body.url || config.testDatabaseUrl || "").trim();
+      const rawTarget = (body.url || config.testDatabaseUrl || getTestDatabaseUrl() || "").trim();
 
-      if (!targetUrl) {
+      if (!rawTarget) {
         return NextResponse.json(
           { success: false, message: "No Test Database URL configured to sync tables." },
           { status: 400 }
         );
+      }
+
+      // For prisma db push, port 5432 (Session mode) is required instead of 6543 (PgBouncer Transaction mode)
+      let migrationUrl = rawTarget;
+      if (migrationUrl.includes(":6543")) {
+        migrationUrl = migrationUrl
+          .replace(":6543", ":5432")
+          .replace("?pgbouncer=true&", "?")
+          .replace("&pgbouncer=true", "")
+          .replace("?pgbouncer=true", "");
       }
 
       try {
@@ -299,14 +324,16 @@ export async function POST(req: NextRequest) {
         execSync(`npx prisma db push --skip-generate --accept-data-loss`, {
           env: {
             ...process.env,
-            DATABASE_URL: targetUrl,
+            DATABASE_URL: migrationUrl,
           },
           timeout: 45000,
         });
 
+        reloadPrismaClients();
+
         return NextResponse.json({
           success: true,
-          message: "Test Database tables successfully synchronized with clinic schema (8 tables initialized)!",
+          message: "Test Database tables successfully synchronized with clinic schema (15 tables initialized)!",
         });
       } catch (err: any) {
         return NextResponse.json(

@@ -50,6 +50,10 @@ export async function GET(req: NextRequest) {
     const backupStorage = getExcelBackupStorageStats();
     const recentLogs = getRecentHealthLogs(15);
 
+    const modeConfig = getDatabaseModeConfig();
+    const activeMode = getActiveDatabaseMode();
+    const testStats = await getTestDatabaseStats();
+
     // Unified Database data object
     const databaseObj = {
       id: "primary",
@@ -59,7 +63,7 @@ export async function GET(req: NextRequest) {
       databaseService: primaryDb.maskedHost,
       databaseName: "postgres",
       status: primaryDb.status,
-      activity: primaryDb.status === "CONNECTED" ? "ACTIVE" : "INACTIVE",
+      activity: activeMode === "test" ? "STANDBY" : (primaryDb.status === "CONNECTED" ? "ACTIVE" : "INACTIVE"),
       responseTime: primaryDb.responseTimeMs,
       lastChecked: lastCheckedFormatted,
       tableCount: 8,
@@ -68,10 +72,6 @@ export async function GET(req: NextRequest) {
       message: primaryDb.message,
       diagnosticTip: primaryDb.diagnosticAdvice,
     };
-
-    const modeConfig = getDatabaseModeConfig();
-    const activeMode = getActiveDatabaseMode();
-    const testStats = await getTestDatabaseStats();
 
     const testDbObj = {
       id: "test",

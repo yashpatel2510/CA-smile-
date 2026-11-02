@@ -1,33 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveDatabaseMode, isTestModeActive } from "@/lib/database/test-database-config";
 import { prisma } from "@/lib/prisma";
-
-// Lightweight 5-second in-memory ping cache to avoid exhausting Supabase pool connections
-let lastPingTime = 0;
-let lastPingSuccess = true;
-let lastPingLatency: number | null = 50;
+import { getStatusPingCache, setStatusPingCache } from "@/lib/database/status-cache";
 
 export async function GET(req: NextRequest) {
   try {
     const activeMode = getActiveDatabaseMode();
     const now = Date.now();
+    const isFreshRequested = req.nextUrl.searchParams.get("fresh") === "true";
 
-    // Re-check database reachability at most once every 5 seconds
-    if (now - lastPingTime > 5000) {
-      lastPingTime = now;
+    const { lastPingTime, lastPingSuccess, lastPingLatency } = getStatusPingCache();
+    let currentSuccess = lastPingSuccess;
+    let currentLatency = lastPingLatency;
+
+    // Re-check database reachability at most once every 5 seconds (or immediately if fresh requested)
+    if (isFreshRequested || now - lastPingTime > 5000) {
       try {
         const start = Date.now();
         const pingPromise = prisma.$queryRawUnsafe("SELECT 1 as connected;");
         const timeoutPromise = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error("Database connection timeout")), 3500)
+          setTimeout(() => reject(new Error("Database connection timeout")), 4500)
         );
         await Promise.race([pingPromise, timeoutPromise]);
-        lastPingLatency = Date.now() - start;
-        lastPingSuccess = true;
+        currentLatency = Date.now() - start;
+        currentSuccess = true;
+        setStatusPingCache(true, currentLatency);
       } catch (pingErr) {
         console.warn("Database status ping error:", pingErr);
-        lastPingSuccess = false;
-        lastPingLatency = null;
+        currentSuccess = false;
+        currentLatency = null;
+        setStatusPingCache(false, null);
       }
     }
 
@@ -36,7 +38,7 @@ export async function GET(req: NextRequest) {
     // 2. If in Production Mode and connected -> "ONLINE"
     // 3. If disconnected or unreachable -> "OFFLINE"
     let status: "ONLINE" | "OFFLINE" | "TEST" = "ONLINE";
-    if (!lastPingSuccess) {
+    if (!currentSuccess) {
       status = "OFFLINE";
     } else if (activeMode === "test") {
       status = "TEST";
@@ -48,9 +50,9 @@ export async function GET(req: NextRequest) {
       success: true,
       status, // "ONLINE" | "OFFLINE" | "TEST"
       mode: activeMode, // "production" | "test"
-      isOnline: lastPingSuccess,
+      isOnline: currentSuccess,
       isTestMode: activeMode === "test",
-      latencyMs: lastPingLatency,
+      latencyMs: currentLatency,
       timestamp: new Date().toISOString(),
     });
   } catch (err: any) {

@@ -15,24 +15,14 @@ const globalForPrisma = globalThis as unknown as {
 
 export function getPrimaryDatabaseUrl(): string | undefined {
   let url = process.env.PRIMARY_DATABASE_URL || process.env.DATABASE_URL;
-  if (url && url.includes(".pooler.supabase.com:5432")) {
-    url = url.replace(":5432", ":6543");
-    if (!url.includes("pgbouncer=true")) {
-      url += (url.includes("?") ? "&" : "?") + "pgbouncer=true";
-    }
-  }
-  return url;
+  if (!url || !url.trim()) return undefined;
+  return normalizePostgresUrl(url);
 }
 
 export function getSecondaryDatabaseUrl(): string | undefined {
   let url = process.env.SECONDARY_DATABASE_URL || process.env.AUTH_DATABASE_URL;
-  if (url && url.includes(".pooler.supabase.com:5432")) {
-    url = url.replace(":5432", ":6543");
-    if (!url.includes("pgbouncer=true")) {
-      url += (url.includes("?") ? "&" : "?") + "pgbouncer=true";
-    }
-  }
-  return url;
+  if (!url || !url.trim()) return undefined;
+  return normalizePostgresUrl(url);
 }
 
 /**
@@ -142,6 +132,24 @@ export function reloadPrismaClients() {
 
   globalForPrisma.livePrisma = undefined;
   globalForPrisma.testPrisma = undefined;
+
+  // Invalidate in-memory appointment caches so stale records from previous mode do not leak
+  try {
+    const { invalidateAppointmentsCache } = require("@/lib/appointments-cache");
+    invalidateAppointmentsCache();
+  } catch {}
+
+  // Invalidate database mode config cache
+  try {
+    const { invalidateDatabaseModeCache } = require("@/lib/database/test-database-config");
+    invalidateDatabaseModeCache();
+  } catch {}
+
+  // Reset database status ping cache so status endpoint reflects new mode immediately
+  try {
+    const { resetStatusPingCache } = require("@/lib/database/status-cache");
+    resetStatusPingCache();
+  } catch {}
 
   return {
     live: getLivePrismaClient(),

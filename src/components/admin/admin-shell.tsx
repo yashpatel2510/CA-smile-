@@ -17,19 +17,29 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     let mounted = true;
     const checkMode = async () => {
       try {
-        const res = await fetch("/api/admin/database/test-mode");
+        const res = await fetch("/api/admin/database/status?fresh=true");
         if (res.ok) {
           const data = await res.json();
-          if (mounted && data.success) {
-            setIsTestMode(data.activeMode === "test");
+          if (mounted) {
+            setIsTestMode(data.mode === "test" || data.isTestMode === true);
           }
         }
       } catch {}
     };
+
     checkMode();
-    const interval = setInterval(checkMode, 30000);
+
+    const handleModeSwitch = () => checkMode();
+    window.addEventListener("database-mode-changed", handleModeSwitch);
+    window.addEventListener("focus", handleModeSwitch);
+    window.addEventListener("storage", handleModeSwitch);
+
+    const interval = setInterval(checkMode, 15000);
     return () => {
       mounted = false;
+      window.removeEventListener("database-mode-changed", handleModeSwitch);
+      window.removeEventListener("focus", handleModeSwitch);
+      window.removeEventListener("storage", handleModeSwitch);
       clearInterval(interval);
     };
   }, [pathname]);

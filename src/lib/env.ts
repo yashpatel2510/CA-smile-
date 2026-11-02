@@ -22,6 +22,7 @@ export const env = {
   OWNER_EMAILS: process.env.OWNER_EMAILS || "",
   ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || "",
   AUTH_DATABASE_URL: process.env.AUTH_DATABASE_URL || "",
+  TEST_DATABASE_URL: process.env.TEST_DATABASE_URL || "",
   ENCRYPTION_SECRET: process.env.ENCRYPTION_SECRET || "",
   isProduction: process.env.NODE_ENV === "production",
   isDevelopment: process.env.NODE_ENV === "development",
